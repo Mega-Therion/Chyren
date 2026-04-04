@@ -15,9 +15,10 @@ pub mod state;
 
 pub use executor::TaskExecutor;
 pub use planner::TaskPlanner;
-pub use state::{ExecutionState, ExecutionStep, StepStatus, TaskPlan};
+pub use state::{ExecutionState, ExecutionStatus, ExecutionStep, StepStatus, TaskPlan};
 
-use omega_core::{RunEnvelope, EvidenceRecord};
+use omega_core::RunEnvelope;
+use omega_integration::{tool_router::ToolRouter, Service as IntegrationService};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
@@ -28,11 +29,21 @@ pub struct Conductor {
 }
 
 impl Conductor {
-    /// Create a new conductor instance
+    /// Create a new conductor instance from components
     pub fn new(
         planner: Arc<TaskPlanner>,
         executor: Arc<TaskExecutor>,
     ) -> Self {
+        Conductor { planner, executor }
+    }
+
+    /// Create a conductor from tool router and integration service
+    pub fn from_components(
+        tool_router: Arc<ToolRouter>,
+        integration: Arc<IntegrationService>,
+    ) -> Self {
+        let planner = Arc::new(TaskPlanner::new(tool_router));
+        let executor = Arc::new(TaskExecutor::new(integration));
         Conductor { planner, executor }
     }
 
