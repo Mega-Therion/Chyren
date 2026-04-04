@@ -1184,6 +1184,7 @@ name = "omega-aegis"
 version = "0.1.0"
 dependencies = [
  "omega-core",
+ "omega-myelin",
  "omega-telemetry",
  "serde",
  "serde_json",

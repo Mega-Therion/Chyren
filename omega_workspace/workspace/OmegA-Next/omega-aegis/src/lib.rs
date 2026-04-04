@@ -1,22 +1,11 @@
 //! omega-aegis: Envelope compilation, risk gating, and provider adapters.
-//! This crate acts as the primary shield for the system.
-//! Every request must pass the Aegis policy gate before reaching the Hub.
+//! Now integrated with Threat Fabric for autonomous defensive gating.
 
 #![warn(missing_docs)]
 
 use omega_core::{EvidenceRecord, RunEnvelope, RunStatus, now};
+use omega_myelin::MemoryGraph;
 use serde::{Deserialize, Serialize};
-
-/// Policy types supported by the Aegis Gate
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub enum AegisPolicy {
-    /// Allow if matches constitutional principles
-    Constitutional,
-    /// Block based on threat fabric pattern
-    ThreatFabric,
-    /// Custom constraint
-    Custom(String),
-}
 
 /// The Aegis Gate: Primary policy enforcement engine
 pub struct AegisGate {
@@ -30,13 +19,20 @@ impl AegisGate {
         Self { principles }
     }
 
-    /// Process an envelope through the gate.
-    /// Returns the updated envelope if admitted, or a rejected envelope if blocked.
-    pub fn admit(&self, mut envelope: RunEnvelope) -> RunEnvelope {
-        // 1. Constitutional Alignment Check
+    /// Process an envelope through the gate, checking against Threat Fabric.
+    pub fn admit(&self, mut envelope: RunEnvelope, memory: &MemoryGraph) -> RunEnvelope {
+        // 1. Threat Fabric Check
+        let threats = memory.check_threats(&envelope.task);
+        if !threats.is_empty() {
+            envelope.status = RunStatus::Rejected(format!("Threat detected: {}", threats[0].entry_id));
+            envelope.risk_score = 1.0;
+            return envelope;
+        }
+
+        // 2. Constitutional Alignment Check
         let (passed, score, explanation) = self.check_alignment(&envelope.task);
 
-        // 2. Record Evidence
+        // 3. Record Evidence
         let record = EvidenceRecord {
             claim: "constitutional_alignment".to_string(),
             claim_class: "computed".to_string(),
@@ -58,7 +54,6 @@ impl AegisGate {
     }
 
     fn check_alignment(&self, task: &str) -> (bool, f64, String) {
-        // Strict deterministic alignment check against principles
         let mut score = 1.0;
         let mut explanation = "Task aligns with constitutional principles.".to_string();
 
