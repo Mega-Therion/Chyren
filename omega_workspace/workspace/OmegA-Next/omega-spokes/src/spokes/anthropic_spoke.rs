@@ -110,6 +110,23 @@ impl Spoke for AnthropicSpoke {
         })
     }
 
+    async fn health_check(&self) -> Result<SpokeStatus, String> {
+        // In real implementation, would ping Anthropic API
+        Ok(SpokeStatus {
+            name: self.config.name.clone(),
+            health: "healthy".to_string(),
+            last_success: crate::now(),
+            recent_errors: 0,
+            available_tools: 2,
+        })
+    }
+
+    fn config(&self) -> &SpokeConfig {
+        &self.config
+    }
+}
+
+impl AnthropicSpoke {
     /// Invoke Claude model via Anthropic API
     async fn invoke_claude(&self, input: &Value) -> Result<Value, String> {
         let api_key = env::var("ANTHROPIC_API_KEY")
@@ -159,20 +176,5 @@ impl Spoke for AnthropicSpoke {
             .map_err(|e| format!("Failed to parse response: {}", e))?;
 
         Ok(api_response)
-    }
-
-    async fn health_check(&self) -> Result<SpokeStatus, String> {
-        // In real implementation, would ping Anthropic API
-        Ok(SpokeStatus {
-            name: self.config.name.clone(),
-            health: "healthy".to_string(),
-            last_success: crate::now(),
-            recent_errors: 0,
-            available_tools: 2,
-        })
-    }
-
-    fn config(&self) -> &SpokeConfig {
-        &self.config
     }
 }
