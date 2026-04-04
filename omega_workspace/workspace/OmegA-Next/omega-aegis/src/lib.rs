@@ -5,7 +5,6 @@
 
 use omega_core::{EvidenceRecord, RunEnvelope, RunStatus, now};
 use omega_myelin::MemoryGraph;
-use serde::{Deserialize, Serialize};
 
 /// The Aegis Gate: Primary policy enforcement engine
 pub struct AegisGate {

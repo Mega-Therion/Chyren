@@ -1,6 +1,5 @@
 //! Unified telemetry and event emission
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Event {

@@ -3,7 +3,6 @@
 use sqlx::{postgres::PgPoolOptions, PgPool, FromRow};
 use omega_core::{MemoryNode, MemoryStratum, now};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
 /// Represents a row from public.omega_memory_entries
 #[derive(Debug, FromRow, Serialize, Deserialize)]

@@ -1,6 +1,5 @@
 //! Ingestion test runner for the Sovereign Hub.
 use omega_myelin::db::MemoryStore;
-use std::env;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
