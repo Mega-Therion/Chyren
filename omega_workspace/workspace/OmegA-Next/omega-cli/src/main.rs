@@ -10,6 +10,7 @@ use omega_myelin::phylactery::bootstrap_phylactery_kernel;
 use omega_spokes::{SpokeRegistry, AnthropicSpoke, NeonSpoke, SearchSpoke, SpokeConfig};
 use omega_integration::Service as IntegrationService;
 use omega_integration::tool_router::ToolRouter;
+use omega_aegis::Service as AEGISService;
 use omega_conductor::Conductor;
 use std::sync::Arc;
 
@@ -137,11 +138,16 @@ async fn main() -> Result<()> {
         available_tools.len()
     );
 
+    // Initialize AEGIS service for policy enforcement
+    let aegis = Arc::new(AEGISService::new());
+    tracing::info!("✓ AEGIS service initialized for policy enforcement");
+
     // Initialize conductor for orchestrating complex task execution
     let integration = Arc::new(integration);
     let tool_router = Arc::new(tool_router);
-    let conductor = Conductor::from_components(tool_router.clone(), integration.clone());
-    tracing::info!("✓ Conductor initialized for multi-step task orchestration");
+    let memory = Arc::new(memory);
+    let conductor = Conductor::from_components(tool_router.clone(), integration.clone(), aegis, memory);
+    tracing::info!("✓ Conductor initialized for multi-step task orchestration with identity-aware policy enforcement");
 
     if let Some(task) = args.task {
         tracing::info!("Executing task: {}", task);
