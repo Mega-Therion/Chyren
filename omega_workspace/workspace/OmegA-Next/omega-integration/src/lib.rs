@@ -3,8 +3,13 @@
 //! Integration layer coordinates all subsystems into a unified cognitive system.
 #![warn(missing_docs)]
 
+pub mod tool_router;
+
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::sync::Arc;
+use omega_spokes::{SpokeRegistry, SpokeCapability, ToolInvocation};
+use tokio::sync::RwLock;
 
 /// Integration coordinator
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -22,10 +27,11 @@ pub struct IntegrationMessage {
 }
 
 /// gAIng coordination service
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct Service {
     message_queue: Vec<IntegrationMessage>,
     system_registry: HashMap<String, SystemStatus>,
+    spoke_registry: Arc<RwLock<Option<Arc<SpokeRegistry>>>>,
 }
 
 /// Status of an integrated system
@@ -47,6 +53,59 @@ impl Service {
         Service {
             message_queue: Vec::new(),
             system_registry: HashMap::new(),
+            spoke_registry: Arc::new(RwLock::new(None)),
+        }
+    }
+
+    /// Set the spoke registry for this integration service
+    pub async fn set_spoke_registry(&self, registry: Arc<SpokeRegistry>) {
+        let mut reg = self.spoke_registry.write().await;
+        *reg = Some(registry);
+    }
+
+    /// Find the provider spoke for a given tool
+    pub async fn find_tool_provider(&self, tool_name: &str) -> Option<String> {
+        let reg = self.spoke_registry.read().await;
+        if let Some(registry) = reg.as_ref() {
+            registry.find_tool_provider(tool_name)
+        } else {
+            None
+        }
+    }
+
+    /// Get spokes that have a specific capability
+    pub async fn spokes_with_capability(&self, capability: &SpokeCapability) -> Vec<String> {
+        let reg = self.spoke_registry.read().await;
+        if let Some(registry) = reg.as_ref() {
+            registry.spokes_with_capability(capability)
+        } else {
+            Vec::new()
+        }
+    }
+
+    /// Invoke a tool on a specific spoke
+    pub async fn invoke_spoke_tool(
+        &self,
+        spoke_name: &str,
+        tool_name: &str,
+        input: serde_json::Value,
+    ) -> Result<serde_json::Value, String> {
+        let reg = self.spoke_registry.read().await;
+        if let Some(registry) = reg.as_ref() {
+            let spoke = registry.get(spoke_name)?;
+            let invocation = ToolInvocation {
+                tool: tool_name.to_string(),
+                input,
+                request_id: uuid::Uuid::new_v4().to_string(),
+            };
+            let result = spoke.invoke_tool(invocation).await?;
+            if result.success {
+                Ok(result.output)
+            } else {
+                Err(result.error.unwrap_or_else(|| "Tool invocation failed".to_string()))
+            }
+        } else {
+            Err("Spoke registry not initialized".to_string())
         }
     }
 
