@@ -7,6 +7,10 @@ use clap::Parser;
 use anyhow::Result;
 use omega_myelin::Service as MemoryService;
 use omega_myelin::phylactery::bootstrap_phylactery_kernel;
+use omega_spokes::{SpokeRegistry, AnthropicSpoke, NeonSpoke, SearchSpoke, SpokeConfig};
+use omega_integration::Service as IntegrationService;
+use omega_integration::tool_router::ToolRouter;
+use std::sync::Arc;
 
 #[derive(Parser, Debug)]
 #[command(name = "chyren")]
@@ -66,6 +70,70 @@ async fn main() -> Result<()> {
             tracing::warn!("⚠ Phylactery kernel load failed (non-fatal): {}", e);
         }
     }
+
+    // Initialize spoke registry and integration layer
+    let mut spoke_registry = SpokeRegistry::new();
+
+    // Register Anthropic spoke
+    let anthropic_config = SpokeConfig {
+        name: "anthropic".to_string(),
+        spoke_type: "anthropic".to_string(),
+        endpoint: "https://api.anthropic.com".to_string(),
+        credentials_ref: "ANTHROPIC_API_KEY".to_string(),
+        enabled: true,
+        max_concurrent: 10,
+        timeout_seconds: 60,
+    };
+    if let Err(e) = spoke_registry.register(Box::new(AnthropicSpoke::new(anthropic_config))) {
+        tracing::warn!("⚠ Failed to register Anthropic spoke: {}", e);
+    }
+
+    // Register Neon spoke
+    let neon_config = SpokeConfig {
+        name: "neon".to_string(),
+        spoke_type: "neon".to_string(),
+        endpoint: "neon.tech".to_string(),
+        credentials_ref: "DATABASE_URL".to_string(),
+        enabled: true,
+        max_concurrent: 20,
+        timeout_seconds: 30,
+    };
+    if let Err(e) = spoke_registry.register(Box::new(NeonSpoke::new(neon_config))) {
+        tracing::warn!("⚠ Failed to register Neon spoke: {}", e);
+    }
+
+    // Register Search spoke
+    let search_config = SpokeConfig {
+        name: "search".to_string(),
+        spoke_type: "search".to_string(),
+        endpoint: "search.api".to_string(),
+        credentials_ref: "SEARCH_API_KEY".to_string(),
+        enabled: true,
+        max_concurrent: 15,
+        timeout_seconds: 45,
+    };
+    if let Err(e) = spoke_registry.register(Box::new(SearchSpoke::new(search_config))) {
+        tracing::warn!("⚠ Failed to register Search spoke: {}", e);
+    }
+
+    let spoke_registry = Arc::new(spoke_registry);
+    tracing::info!(
+        "✓ Spoke registry initialized with {} spokes",
+        spoke_registry.list_spokes().len()
+    );
+
+    // Initialize integration service and wire spokes
+    let integration = IntegrationService::new();
+    integration.set_spoke_registry(spoke_registry.clone()).await;
+    tracing::info!("✓ Integration service wired with spoke registry");
+
+    // Create tool router for task planning
+    let tool_router = ToolRouter::new(spoke_registry.clone());
+    let available_tools = tool_router.list_all_tools().await;
+    tracing::info!("✓ Tool router ready with {} tools across {} spokes",
+        available_tools.iter().map(|(_, tools)| tools.len()).sum::<usize>(),
+        available_tools.len()
+    );
 
     if let Some(task) = args.task {
         tracing::info!("Executing task: {}", task);
