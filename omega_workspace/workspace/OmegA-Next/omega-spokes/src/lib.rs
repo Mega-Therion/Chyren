@@ -8,10 +8,21 @@
 //! - Error handling and retry logic
 #![warn(missing_docs)]
 
+pub mod spokes;
+
+pub use spokes::{AnthropicSpoke, NeonSpoke, SearchSpoke};
+
 use async_trait::async_trait;
-use omega_core::{ProviderResponse, now};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+
+/// Get current Unix timestamp
+pub fn now() -> f64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs_f64()
+}
 
 /// Tool available from a spoke
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -72,7 +83,7 @@ pub struct SpokeConfig {
 }
 
 /// Spoke base capabilities
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Hash, Eq, PartialEq)]
 pub enum SpokeCapability {
     /// LLM inference
     Inference,
@@ -132,7 +143,7 @@ pub trait Spoke: Send + Sync {
 }
 
 /// Spoke registry and manager
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct SpokeRegistry {
     spokes: HashMap<String, std::sync::Arc<dyn Spoke>>,
     tool_index: HashMap<String, String>, // tool_name -> spoke_name

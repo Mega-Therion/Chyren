@@ -55,7 +55,7 @@ impl ToolRouter {
             let spokes = self.spoke_registry.spokes_with_capability(capability);
 
             for spoke_name in spokes {
-                if let Ok(spoke) = self.spoke_registry.get(&spoke_name) {
+                if let Some(spoke) = self.spoke_registry.get(&spoke_name) {
                     // Discover tools from this spoke
                     if let Ok(tools) = spoke.discover_tools().await {
                         for tool in tools {
@@ -114,7 +114,7 @@ impl ToolRouter {
         let mut result = Vec::new();
 
         for spoke in self.spoke_registry.list_spokes() {
-            if let Ok(s) = self.spoke_registry.get(&spoke) {
+            if let Some(s) = self.spoke_registry.get(&spoke) {
                 if let Ok(tools) = s.discover_tools().await {
                     let tool_names: Vec<String> = tools.iter().map(|t| t.name.clone()).collect();
                     result.push((spoke, tool_names));

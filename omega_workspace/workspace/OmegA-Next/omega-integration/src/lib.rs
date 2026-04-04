@@ -92,7 +92,8 @@ impl Service {
     ) -> Result<serde_json::Value, String> {
         let reg = self.spoke_registry.read().await;
         if let Some(registry) = reg.as_ref() {
-            let spoke = registry.get(spoke_name)?;
+            let spoke = registry.get(spoke_name)
+                .ok_or_else(|| format!("Spoke not found: {}", spoke_name))?;
             let invocation = ToolInvocation {
                 tool: tool_name.to_string(),
                 input,
