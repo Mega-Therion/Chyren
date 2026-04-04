@@ -1,7 +1,7 @@
 //! omega-myelin: Graph memory overlay and threat fabric integration.
 //! This update integrates the Threat Fabric into the memory graph topology.
 
-use omega_core::{EvidenceRecord, MemoryEdge, MemoryNode, RetrievalEpisode, now};
+use omega_core::{MemoryEdge, MemoryNode, RetrievalEpisode};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 

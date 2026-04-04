@@ -5,8 +5,7 @@
 
 #![warn(missing_docs)]
 
-use omega_core::{EvidenceRecord, EvidencePacket, VerificationReport, Repair, now, gen_id};
-use serde::{Deserialize, Serialize};
+use omega_core::{VerificationReport, Repair, gen_id};
 use regex::Regex;
 
 /// ADCCL Configuration
@@ -45,9 +44,9 @@ impl AdcclGate {
     }
 
     /// Verify a provider response against mechanical tolerances
-    pub fn verify(&self, response_text: &str, task: &str) -> VerificationReport {
+    pub fn verify(&self, response_text: &str, _task: &str) -> VerificationReport {
         let mut flags = Vec::new();
-        let mut evidence = Vec::new();
+        let evidence = Vec::new();
         let mut score = 1.0;
         let checks_total = 4.0;
 
