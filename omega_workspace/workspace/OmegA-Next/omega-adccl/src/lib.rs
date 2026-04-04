@@ -66,19 +66,19 @@ impl Service {
         let response_lower = response_text.to_lowercase();
 
         // Check task relevance (basic keyword matching)
-        let task_words: Vec<&str> = task.split_whitespace()
+        let task_words: Vec<String> = task.split_whitespace()
+            .map(|w| w.trim_matches(|c: char| !c.is_alphanumeric()).to_lowercase())
             .filter(|w| w.len() > 2)
             .collect();
 
-        let mut relevance_score = 0.0;
-        if !task_words.is_empty() {
+        let relevance_score = if !task_words.is_empty() {
             let matched = task_words.iter()
-                .filter(|word| response_lower.contains(**word))
+                .filter(|word| response_lower.contains(word.as_str()))
                 .count();
-            relevance_score = (matched as f64) / (task_words.len() as f64);
+            (matched as f64) / (task_words.len() as f64)
         } else {
-            relevance_score = 0.5;
-        }
+            0.5
+        };
 
         let relevance_evidence = EvidenceRecord {
             claim: "task_relevance_check".to_string(),
