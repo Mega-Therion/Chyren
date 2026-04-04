@@ -1,0 +1,1 @@
+/home/mega/Chyren/omega_workspace/workspace/OmegA-Next/target/debug/libomega_integration.rlib: /home/mega/Chyren/omega_workspace/workspace/OmegA-Next/omega-core/src/lib.rs /home/mega/Chyren/omega_workspace/workspace/OmegA-Next/omega-integration/src/lib.rs /home/mega/Chyren/omega_workspace/workspace/OmegA-Next/omega-telemetry/src/lib.rs
