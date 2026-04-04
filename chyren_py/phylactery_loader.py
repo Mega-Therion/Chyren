@@ -182,17 +182,19 @@ class PhylacteryLoader:
         if not output_path:
             output_path = str(self.foundation_path.parent / "phylactery_bootstrap.rs")
 
-        kernel_json = self.generate_kernel_json()
-
         rust_code = f'''//! Phylactery Kernel Bootstrap (L6)
 //! Auto-generated from identity_synthesis output
 //! Loads RY's identity foundation into Chyren's memory system
 
-use omega_myelin::Service as MemoryService;
+use crate::Service;
 use omega_core::MemoryStratum;
+use std::fs;
 
-pub fn bootstrap_phylactery_kernel(memory: &mut MemoryService) -> Result<(), String> {{
-    let kernel_data = r#"{kernel_json}"#;
+/// Bootstrap phylactery kernel from JSON file.
+pub fn bootstrap_phylactery_kernel(memory: &mut Service, kernel_path: &str) -> Result<(), String> {{
+    // Load kernel JSON from file
+    let kernel_data = fs::read_to_string(kernel_path)
+        .map_err(|e| format!("Failed to read phylactery kernel file: {{}}", e))?;
 
     // Parse kernel JSON
     let kernel: serde_json::Value = serde_json::from_str(kernel_data)
