@@ -1,26 +1,24 @@
-//! Module description here
+//! omega-aeon: Cognitive OS and task state reasoning
 #![warn(missing_docs)]
 
-pub mod types;
-pub mod service;
+pub mod types {
+    //! Types for AEON task state management
+    use serde::{Deserialize, Serialize};
 
-pub use types::*;
-pub use service::*;
-
-mod types {
-    // Placeholder types
-    #[derive(Clone, Debug)]
+    /// Placeholder for AEON types
+    #[derive(Clone, Debug, Serialize, Deserialize)]
     pub struct Placeholder;
 }
 
-mod service {
+pub mod service {
+    //! AEON cognitive OS service
     use crate::types::*;
 
-    /// Placeholder service
+    /// AEON cognitive OS service
     pub struct Service;
 
     impl Service {
-        /// Initialize service
+        /// Create a new AEON service
         pub fn new() -> Self {
             Service
         }
