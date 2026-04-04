@@ -10,6 +10,7 @@ members = [
     "omega-metacog",
     "omega-worldmodel",
     "omega-integration",
+    "omega-spokes",
     "omega-telemetry",
     "omega-cli",
 ]
