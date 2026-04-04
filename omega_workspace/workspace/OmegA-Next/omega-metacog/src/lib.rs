@@ -1,26 +1,24 @@
-//! Module description here
+//! omega-metacog: Meta-Cognitive loop
 #![warn(missing_docs)]
 
-pub mod types;
-pub mod service;
+pub mod types {
+    //! Types for meta-cognitive reasoning
+    use serde::{Deserialize, Serialize};
 
-pub use types::*;
-pub use service::*;
-
-mod types {
-    // Placeholder types
-    #[derive(Clone, Debug)]
+    /// Placeholder for metacog types
+    #[derive(Clone, Debug, Serialize, Deserialize)]
     pub struct Placeholder;
 }
 
-mod service {
+pub mod service {
+    //! Meta-cognitive service
     use crate::types::*;
 
-    /// Placeholder service
+    /// Meta-cognitive service
     pub struct Service;
 
     impl Service {
-        /// Initialize service
+        /// Create a new metacog service
         pub fn new() -> Self {
             Service
         }

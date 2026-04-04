@@ -1,26 +1,24 @@
-//! Module description here
+//! omega-dream: Dream-to-Waking feedback loop
 #![warn(missing_docs)]
 
-pub mod types;
-pub mod service;
+pub mod types {
+    //! Types for dream feedback
+    use serde::{Deserialize, Serialize};
 
-pub use types::*;
-pub use service::*;
-
-mod types {
-    // Placeholder types
-    #[derive(Clone, Debug)]
+    /// Placeholder for dream types
+    #[derive(Clone, Debug, Serialize, Deserialize)]
     pub struct Placeholder;
 }
 
-mod service {
+pub mod service {
+    //! Dream feedback service
     use crate::types::*;
 
-    /// Placeholder service
+    /// Dream feedback service
     pub struct Service;
 
     impl Service {
-        /// Initialize service
+        /// Create a new dream service
         pub fn new() -> Self {
             Service
         }

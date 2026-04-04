@@ -1,26 +1,24 @@
-//! Module description here
+//! omega-worldmodel: World model reasoning
 #![warn(missing_docs)]
 
-pub mod types;
-pub mod service;
+pub mod types {
+    //! Types for world model
+    use serde::{Deserialize, Serialize};
 
-pub use types::*;
-pub use service::*;
-
-mod types {
-    // Placeholder types
-    #[derive(Clone, Debug)]
+    /// Placeholder for world model types
+    #[derive(Clone, Debug, Serialize, Deserialize)]
     pub struct Placeholder;
 }
 
-mod service {
+pub mod service {
+    //! World model service
     use crate::types::*;
 
-    /// Placeholder service
+    /// World model service
     pub struct Service;
 
     impl Service {
-        /// Initialize service
+        /// Create a new world model service
         pub fn new() -> Self {
             Service
         }

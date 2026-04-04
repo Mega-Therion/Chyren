@@ -1,26 +1,24 @@
-//! Module description here
+//! omega-integration: gAIng coordination and integration
 #![warn(missing_docs)]
 
-pub mod types;
-pub mod service;
+pub mod types {
+    //! Types for integration coordination
+    use serde::{Deserialize, Serialize};
 
-pub use types::*;
-pub use service::*;
-
-mod types {
-    // Placeholder types
-    #[derive(Clone, Debug)]
+    /// Placeholder for integration types
+    #[derive(Clone, Debug, Serialize, Deserialize)]
     pub struct Placeholder;
 }
 
-mod service {
+pub mod service {
+    //! Integration coordination service
     use crate::types::*;
 
-    /// Placeholder service
+    /// Integration service
     pub struct Service;
 
     impl Service {
-        /// Initialize service
+        /// Create a new integration service
         pub fn new() -> Self {
             Service
         }
