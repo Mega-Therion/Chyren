@@ -7,6 +7,8 @@
 //! - Speculative: Hypotheticals and plans
 #![warn(missing_docs)]
 
+pub mod phylactery;
+
 use omega_core::{
     MemoryNode, MemoryEdge, MemoryStratum, RetrievalEpisode, now, gen_id,
 };
