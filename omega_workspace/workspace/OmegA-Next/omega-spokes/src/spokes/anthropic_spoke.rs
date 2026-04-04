@@ -2,7 +2,8 @@
 
 use crate::{Spoke, SpokeCapability, SpokeConfig, ToolDefinition, ToolInvocation, ToolResult, SpokeStatus};
 use async_trait::async_trait;
-use serde_json::json;
+use serde_json::{json, Value};
+use std::env;
 
 /// Anthropic spoke for Claude model access
 pub struct AnthropicSpoke {
@@ -72,16 +73,17 @@ impl Spoke for AnthropicSpoke {
 
         let result = match invocation.tool.as_str() {
             "invoke_claude" => {
-                // Mock Claude response
-                json!({
-                    "model": "claude-opus-4-6",
-                    "content": "Mock response from Claude. Integration with actual Anthropic API would go here.",
-                    "stop_reason": "end_turn",
-                    "usage": {
-                        "input_tokens": 10,
-                        "output_tokens": 15
+                match self.invoke_claude(&invocation.input).await {
+                    Ok(response) => response,
+                    Err(e) => {
+                        return Ok(ToolResult {
+                            success: false,
+                            output: json!({}),
+                            error: Some(e),
+                            execution_time_ms: start.elapsed().as_millis() as u32,
+                        })
                     }
-                })
+                }
             }
             "batch_process" => {
                 json!({
@@ -106,6 +108,57 @@ impl Spoke for AnthropicSpoke {
             error: None,
             execution_time_ms: start.elapsed().as_millis() as u32,
         })
+    }
+
+    /// Invoke Claude model via Anthropic API
+    async fn invoke_claude(&self, input: &Value) -> Result<Value, String> {
+        let api_key = env::var("ANTHROPIC_API_KEY")
+            .map_err(|_| "ANTHROPIC_API_KEY environment variable not set".to_string())?;
+
+        let prompt = input.get("prompt")
+            .and_then(|p| p.as_str())
+            .ok_or("Missing 'prompt' in input")?;
+
+        let max_tokens = input.get("max_tokens")
+            .and_then(|t| t.as_u64())
+            .unwrap_or(1024) as i32;
+
+        let model = input.get("model")
+            .and_then(|m| m.as_str())
+            .unwrap_or("claude-opus-4-6");
+
+        // Make HTTP request to Anthropic API
+        let client = reqwest::Client::new();
+        let request_body = json!({
+            "model": model,
+            "max_tokens": max_tokens,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        });
+
+        let response = client
+            .post("https://api.anthropic.com/v1/messages")
+            .header("x-api-key", &api_key)
+            .header("anthropic-version", "2023-06-01")
+            .header("content-type", "application/json")
+            .json(&request_body)
+            .send()
+            .await
+            .map_err(|e| format!("API request failed: {}", e))?;
+
+        if !response.status().is_success() {
+            let error_text = response.text().await.unwrap_or_default();
+            return Err(format!("API error: {}", error_text));
+        }
+
+        let api_response: Value = response.json().await
+            .map_err(|e| format!("Failed to parse response: {}", e))?;
+
+        Ok(api_response)
     }
 
     async fn health_check(&self) -> Result<SpokeStatus, String> {
