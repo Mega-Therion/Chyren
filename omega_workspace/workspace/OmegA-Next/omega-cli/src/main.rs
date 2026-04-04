@@ -10,6 +10,7 @@ use omega_myelin::phylactery::bootstrap_phylactery_kernel;
 use omega_spokes::{SpokeRegistry, AnthropicSpoke, NeonSpoke, SearchSpoke, SpokeConfig};
 use omega_integration::Service as IntegrationService;
 use omega_integration::tool_router::ToolRouter;
+use omega_conductor::Conductor;
 use std::sync::Arc;
 
 #[derive(Parser, Debug)]
@@ -136,9 +137,63 @@ async fn main() -> Result<()> {
         available_tools.len()
     );
 
+    // Initialize conductor for orchestrating complex task execution
+    let integration = Arc::new(integration);
+    let tool_router = Arc::new(tool_router);
+    let conductor = Conductor::from_components(tool_router.clone(), integration.clone());
+    tracing::info!("✓ Conductor initialized for multi-step task orchestration");
+
     if let Some(task) = args.task {
         tracing::info!("Executing task: {}", task);
-        // Core execution logic will be implemented in omega-aegis
+
+        // Use conductor to plan and execute the task
+        match conductor.plan_task(&task).await {
+            Ok(plan) => {
+                tracing::info!("✓ Task plan created with {} steps, estimated cost: {} tokens",
+                    plan.steps.len(),
+                    plan.total_estimated_cost
+                );
+
+                // Create a run envelope for execution context
+                let mut envelope = omega_core::RunEnvelope {
+                    run_id: format!("run-{}", uuid::Uuid::new_v4()),
+                    task: task.clone(),
+                    status: omega_core::RunStatus::Routed,
+                    risk_score: 0.0,
+                    verified_payload: None,
+                    evidence_packet: omega_core::EvidencePacket::new(),
+                    created_at: omega_core::now(),
+                };
+
+                match conductor.execute_plan(plan, &mut envelope).await {
+                    Ok(execution) => {
+                        tracing::info!("✓ Task execution completed");
+                        tracing::info!("  Status: {:?}", execution.status);
+                        tracing::info!("  Total cost: {} tokens", execution.total_cost);
+                        if let Some(duration) = execution.duration() {
+                            tracing::info!("  Duration: {:.2}s", duration);
+                        }
+
+                        // Extract execution insights for reporting
+                        let insights = conductor.get_execution_insights(&execution);
+                        for insight in insights {
+                            tracing::debug!("  Step {}: {} ({} tokens) - {} ",
+                                insight.step_id,
+                                insight.description,
+                                insight.cost,
+                                if insight.success { "✓" } else { "✗" }
+                            );
+                        }
+                    }
+                    Err(e) => {
+                        tracing::error!("✗ Task execution failed: {}", e);
+                    }
+                }
+            }
+            Err(e) => {
+                tracing::error!("✗ Task planning failed: {}", e);
+            }
+        }
     } else if args.status {
         tracing::info!("Fetching system status...");
         // Status retrieval logic
