@@ -358,12 +358,53 @@ def main() -> None:
         "--interactive", "-i", action="store_true",
         help="Run Constitutional Convention on first boot if no constitution exists",
     )
+    parser.add_argument(
+        "--view-constitution", action="store_true",
+        help="Display the active constitution and exit",
+    )
+    parser.add_argument(
+        "--view-threats", action="store_true",
+        help="Display threat fabric entries and exit",
+    )
+    parser.add_argument(
+        "--threats-limit", type=int, default=20,
+        help="Number of threat entries to display (default: 20)",
+    )
     args = parser.parse_args()
 
     hub = Chyren(interactive=args.interactive)
 
     if args.status:
         print(json.dumps(hub.status(), indent=2, ensure_ascii=False))
+        return
+
+    if args.view_constitution:
+        constitution = hub._alignment.constitution
+        print(f"\n{'='*60}")
+        print(f"CONSTITUTION (Version {constitution.version})")
+        print(f"{'='*60}\n")
+        print(f"Principles ({len(constitution.principles)}):")
+        for i, principle in enumerate(constitution.principles, 1):
+            print(f"  {i}. {principle}")
+        print(f"\nForbidden Keywords ({len(constitution.forbidden_keywords)}):")
+        for keyword in constitution.forbidden_keywords:
+            print(f"  - {keyword}")
+        print(f"{'='*60}\n")
+        return
+
+    if args.view_threats:
+        entries = hub._threat_fabric.recent(n=args.threats_limit)
+        print(f"\n{'='*60}")
+        print(f"THREAT FABRIC ({len(entries)} of {len(hub._threat_fabric.all_entries())} total)")
+        print(f"{'='*60}\n")
+        for i, entry in enumerate(entries, 1):
+            labels = entry.get("labels", [])
+            severity = entry.get("severity", "unknown").upper()
+            pattern_id = entry.get("pattern_id", "")[:8]
+            print(f"{i}. [{severity}] {', '.join(labels) if labels else 'UNKNOWN'}")
+            print(f"   Pattern: {pattern_id}… | Entry: {entry.get('entry_id', '')[:16]}…")
+            print()
+        print(f"{'='*60}\n")
         return
 
     if not args.task:

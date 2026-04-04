@@ -3,6 +3,9 @@ providers/gemini.py — Google Gemini connector.
 Environment variable: GEMINI_API_KEY
 Provider initializes safely without a key — is_available() returns False
 until the key is set.
+
+Current implementation: Direct REST API (proven stable).
+Future: Official google-genai SDK available in venv (requires API adjustment).
 """
 
 import json
