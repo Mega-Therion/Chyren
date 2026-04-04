@@ -12,13 +12,17 @@
 pub mod executor;
 pub mod planner;
 pub mod state;
+pub mod aegis_policy;
 
 pub use executor::TaskExecutor;
 pub use planner::TaskPlanner;
 pub use state::{ExecutionState, ExecutionStatus, ExecutionStep, StepStatus, TaskPlan};
+pub use aegis_policy::PolicyGatekeeper;
 
 use omega_core::RunEnvelope;
 use omega_integration::{tool_router::ToolRouter, Service as IntegrationService};
+use omega_aegis::Service as AEGISService;
+use omega_myelin::Service as MemoryService;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
@@ -26,6 +30,7 @@ use std::sync::Arc;
 pub struct Conductor {
     planner: Arc<TaskPlanner>,
     executor: Arc<TaskExecutor>,
+    policy_gatekeeper: Arc<PolicyGatekeeper>,
 }
 
 impl Conductor {
@@ -33,18 +38,30 @@ impl Conductor {
     pub fn new(
         planner: Arc<TaskPlanner>,
         executor: Arc<TaskExecutor>,
+        policy_gatekeeper: Arc<PolicyGatekeeper>,
     ) -> Self {
-        Conductor { planner, executor }
+        Conductor {
+            planner,
+            executor,
+            policy_gatekeeper,
+        }
     }
 
-    /// Create a conductor from tool router and integration service
+    /// Create a conductor from tool router, integration service, AEGIS, and Memory services
     pub fn from_components(
         tool_router: Arc<ToolRouter>,
         integration: Arc<IntegrationService>,
+        aegis: Arc<AEGISService>,
+        memory: Arc<MemoryService>,
     ) -> Self {
         let planner = Arc::new(TaskPlanner::new(tool_router));
         let executor = Arc::new(TaskExecutor::new(integration));
-        Conductor { planner, executor }
+        let policy_gatekeeper = Arc::new(PolicyGatekeeper::new(aegis, memory));
+        Conductor {
+            planner,
+            executor,
+            policy_gatekeeper,
+        }
     }
 
     /// Plan a task execution with multiple steps
@@ -58,6 +75,20 @@ impl Conductor {
         plan: TaskPlan,
         envelope: &mut RunEnvelope,
     ) -> Result<ExecutionState, String> {
+        // Validate envelope against policies before executing steps
+        let validation = self.policy_gatekeeper.validate_task(envelope);
+
+        if !validation.passed {
+            tracing::warn!(
+                "Task failed policy validation: {}",
+                validation.reasoning
+            );
+            return Err(format!("Policy validation failed: {}", validation.reasoning));
+        }
+
+        tracing::info!("✓ Task passed policy validation: {}", validation.reasoning);
+
+        // Execute the plan
         self.executor.execute(plan, envelope).await
     }
 
@@ -67,8 +98,30 @@ impl Conductor {
         task: &str,
         envelope: &mut RunEnvelope,
     ) -> Result<ExecutionState, String> {
+        // Validate task at entry point
+        let entry_validation = self.policy_gatekeeper.validate_task(envelope);
+
+        if !entry_validation.passed {
+            tracing::warn!(
+                "Task rejected at entry: {}",
+                entry_validation.reasoning
+            );
+            return Err(format!(
+                "Entry policy validation failed: {}",
+                entry_validation.reasoning
+            ));
+        }
+
+        // Plan the task
         let plan = self.plan_task(task).await?;
+
+        // Execute with validation
         self.execute_plan(plan, envelope).await
+    }
+
+    /// Get the policy gatekeeper for step-level validation
+    pub fn policy_gatekeeper(&self) -> &PolicyGatekeeper {
+        &self.policy_gatekeeper
     }
 
     /// Get execution insights for identity-driven decision making
