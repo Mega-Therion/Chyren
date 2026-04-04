@@ -4,9 +4,8 @@
 use omega_core::{RunEnvelope, RunStatus, EvidencePacket, now};
 use omega_aeon::AeonRuntime;
 use omega_aegis::AegisGate;
-use omega_myelin::MyelinManager;
+use omega_myelin::MemoryGraph;
 use omega_adccl::{AdcclGate, AdcclConfig};
-use omega_spokes::{AnthropicSpoke, ProviderSpoke};
 
 #[tokio::main]
 async fn main() {
@@ -15,7 +14,7 @@ async fn main() {
     // 1. Initialize System Components
     let mut runtime = AeonRuntime::new();
     let aegis = AegisGate::new(vec!["unethical".to_string(), "illegal".to_string()]);
-    let myelin = MyelinManager::new();
+    let memory = MemoryGraph::new();
     let adccl = AdcclGate::new(AdcclConfig { min_score: 0.7 });
     
     // 2. Mock a task envelope
@@ -31,7 +30,7 @@ async fn main() {
 
     // 3. Execution Pipeline
     println!("Step 1: Aegis Gate...");
-    envelope = aegis.admit(envelope);
+    envelope = aegis.admit(envelope, &memory);
     if envelope.status == RunStatus::Rejected("Constitutional misalignment".to_string()) {
         println!("Task Rejected by Aegis!");
         return;
@@ -51,4 +50,3 @@ async fn main() {
 
     println!("System Pipeline Operational.");
 }
-EOF
