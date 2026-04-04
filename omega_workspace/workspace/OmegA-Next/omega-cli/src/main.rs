@@ -5,6 +5,8 @@
 
 use clap::Parser;
 use anyhow::Result;
+use omega_myelin::Service as MemoryService;
+use omega_myelin::phylactery::bootstrap_phylactery_kernel;
 
 #[derive(Parser, Debug)]
 #[command(name = "chyren")]
@@ -51,6 +53,19 @@ async fn main() -> Result<()> {
     tracing_subscriber::fmt()
         .with_max_level(tracing::Level::INFO)
         .init();
+
+    // Initialize phylactery kernel (L6 identity foundation)
+    let kernel_path = "data/phylactery_kernel.json";
+    let mut memory = MemoryService::new();
+
+    match bootstrap_phylactery_kernel(&mut memory, kernel_path) {
+        Ok(_) => {
+            tracing::info!("✓ Phylactery kernel loaded: identity foundation initialized");
+        }
+        Err(e) => {
+            tracing::warn!("⚠ Phylactery kernel load failed (non-fatal): {}", e);
+        }
+    }
 
     if let Some(task) = args.task {
         tracing::info!("Executing task: {}", task);
