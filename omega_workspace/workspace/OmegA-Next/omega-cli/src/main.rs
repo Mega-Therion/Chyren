@@ -84,7 +84,7 @@ async fn main() -> Result<()> {
         max_concurrent: 10,
         timeout_seconds: 60,
     };
-    if let Err(e) = spoke_registry.register(Box::new(AnthropicSpoke::new(anthropic_config))) {
+    if let Err(e) = spoke_registry.register(Arc::new(AnthropicSpoke::new(anthropic_config))) {
         tracing::warn!("⚠ Failed to register Anthropic spoke: {}", e);
     }
 
@@ -98,7 +98,7 @@ async fn main() -> Result<()> {
         max_concurrent: 20,
         timeout_seconds: 30,
     };
-    if let Err(e) = spoke_registry.register(Box::new(NeonSpoke::new(neon_config))) {
+    if let Err(e) = spoke_registry.register(Arc::new(NeonSpoke::new(neon_config))) {
         tracing::warn!("⚠ Failed to register Neon spoke: {}", e);
     }
 
@@ -112,7 +112,7 @@ async fn main() -> Result<()> {
         max_concurrent: 15,
         timeout_seconds: 45,
     };
-    if let Err(e) = spoke_registry.register(Box::new(SearchSpoke::new(search_config))) {
+    if let Err(e) = spoke_registry.register(Arc::new(SearchSpoke::new(search_config))) {
         tracing::warn!("⚠ Failed to register Search spoke: {}", e);
     }
 
@@ -121,6 +121,7 @@ async fn main() -> Result<()> {
         "✓ Spoke registry initialized with {} spokes",
         spoke_registry.list_spokes().len()
     );
+
 
     // Initialize integration service and wire spokes
     let integration = IntegrationService::new();
