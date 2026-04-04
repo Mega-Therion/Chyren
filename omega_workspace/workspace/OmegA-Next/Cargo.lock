@@ -1315,6 +1315,7 @@ dependencies = [
  "anyhow",
  "async-trait",
  "omega-core",
+ "reqwest",
  "serde",
  "serde_json",
  "thiserror",
