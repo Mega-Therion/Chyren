@@ -5,6 +5,8 @@ use omega_core::{EvidenceRecord, MemoryEdge, MemoryNode, RetrievalEpisode, now};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+pub mod db;
+
 /// ThreatEntry: Representation of a threat fabric pattern
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ThreatEntry {
