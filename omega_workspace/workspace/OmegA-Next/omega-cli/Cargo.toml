@@ -17,7 +17,6 @@ omega-adccl = { path = "../omega-adccl" }
 omega-myelin = { path = "../omega-myelin" }
 omega-integration = { path = "../omega-integration" }
 omega-spokes = { path = "../omega-spokes" }
-omega-conductor = { path = "../omega-conductor" }
 omega-telemetry = { path = "../omega-telemetry" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

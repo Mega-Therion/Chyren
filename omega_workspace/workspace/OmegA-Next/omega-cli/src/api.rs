@@ -6,7 +6,6 @@
 use actix_web::{web, App, HttpServer, HttpResponse, post, get};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use omega_conductor::Conductor;
 use omega_core::RunEnvelope;
 use uuid::Uuid;
 
