@@ -3,6 +3,8 @@
 //! Provides interactive access to the OmegA protocol layers (AEGIS, AEON, ADCCL, MYELIN)
 //! and integrates with all provider spokes for unified task execution.
 
+mod api;
+
 use clap::Parser;
 use anyhow::Result;
 use omega_myelin::Service as MemoryService;
@@ -49,6 +51,18 @@ struct Args {
     /// Number of threat entries to display
     #[arg(long, default_value = "20")]
     threats_limit: usize,
+
+    /// Start as HTTP API server (enables Vercel app integration)
+    #[arg(long)]
+    api_server: bool,
+
+    /// API server host (default: 127.0.0.1)
+    #[arg(long, default_value = "127.0.0.1")]
+    api_host: String,
+
+    /// API server port (default: 8080)
+    #[arg(long, default_value = "8080")]
+    api_port: u16,
 }
 
 #[tokio::main]
@@ -146,8 +160,15 @@ async fn main() -> Result<()> {
     let integration = Arc::new(integration);
     let tool_router = Arc::new(tool_router);
     let memory = Arc::new(memory);
-    let conductor = Conductor::from_components(tool_router.clone(), integration.clone(), aegis, memory);
+    let conductor = Arc::new(Conductor::from_components(tool_router.clone(), integration.clone(), aegis, memory));
     tracing::info!("✓ Conductor initialized for multi-step task orchestration with identity-aware policy enforcement");
+
+    // If API server mode is enabled, start the server
+    if args.api_server {
+        tracing::info!("Starting Chyren API server mode");
+        api::start_api_server(conductor, &args.api_host, args.api_port).await?;
+        return Ok(());
+    }
 
     if let Some(task) = args.task {
         tracing::info!("Executing task: {}", task);
