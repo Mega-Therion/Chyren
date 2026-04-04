@@ -1,0 +1,5 @@
+# Chyren dependencies
+# Core uses Python stdlib only (json, hmac, hashlib, urllib, threading)
+# python-dotenv is optional — Chyren loads one-true.env directly in main.py
+# Add provider SDKs here only if switching from urllib to official client libraries
+python-dotenv>=1.0.0

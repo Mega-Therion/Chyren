@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+state/master_ledger.json
+*.log
+.DS_Store
