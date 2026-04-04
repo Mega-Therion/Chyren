@@ -1802,7 +1802,6 @@ dependencies = [
  "omega-adccl",
  "omega-aegis",
  "omega-aeon",
- "omega-conductor",
  "omega-core",
  "omega-integration",
  "omega-myelin",
@@ -1815,23 +1814,6 @@ dependencies = [
  "tokio",
  "tracing",
  "tracing-subscriber",
- "uuid",
-]
-
-[[package]]
-name = "omega-conductor"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "omega-aegis",
- "omega-core",
- "omega-integration",
- "omega-myelin",
- "omega-spokes",
- "serde",
- "serde_json",
- "tokio",
- "tracing",
  "uuid",
 ]
 
