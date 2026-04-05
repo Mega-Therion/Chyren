@@ -1858,11 +1858,10 @@ name = "omega-metacog"
 version = "0.1.0"
 dependencies = [
  "omega-core",
- "omega-telemetry",
+ "omega-myelin",
  "serde",
  "serde_json",
  "thiserror 1.0.69",
- "tokio",
 ]
 
 [[package]]
