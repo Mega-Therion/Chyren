@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 
 interface ChatMessageProps {
   role: 'user' | 'assistant'
@@ -15,20 +15,6 @@ export function ChatMessage({
   timestamp,
   isStreaming = false,
 }: ChatMessageProps) {
-  const [displayedContent, setDisplayedContent] = useState('')
-  const [isRendered, setIsRendered] = useState(false)
-
-  useEffect(() => {
-    setIsRendered(true)
-  }, [])
-
-  useEffect(() => {
-    if (isStreaming) {
-      setDisplayedContent(content)
-    } else {
-      setDisplayedContent(content)
-    }
-  }, [content, isStreaming])
 
   const isUser = role === 'user'
 
@@ -54,18 +40,18 @@ export function ChatMessage({
 
         {/* Message bubble */}
         <div
-          className={`px-4 py-3 rounded-2xl ${
+          className={`px-4 py-3 rounded-2xl animate-fade-in ${
             isUser
               ? 'bg-gradient-to-r from-cyan-600 to-teal-600 text-white rounded-br-none'
               : 'glass-darker text-slate-100 rounded-bl-none'
-          } ${isRendered ? 'animate-fade-in' : ''}`}
+          }`}
         >
           <div
             className={`message-content text-sm leading-relaxed ${
               isStreaming ? 'font-medium' : ''
             }`}
           >
-            {displayedContent}
+            {content}
             {isStreaming && (
               <span className="inline-flex ml-1 items-center gap-1">
                 <span className="typing-indicator">
