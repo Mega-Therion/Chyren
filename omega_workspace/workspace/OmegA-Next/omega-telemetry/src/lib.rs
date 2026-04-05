@@ -3,7 +3,6 @@
 
 #![warn(missing_docs)]
 
-use omega_core::{EvidenceRecord, now};
 use serde::{Deserialize, Serialize};
 
 /// Event severity levels
@@ -42,11 +41,7 @@ impl TelemetryBus {
         // For our Sovereign Hub, we log to stdout for real-time observability.
         println!(
             "[{:.3}] [{:?}] [{}] {}: {}",
-            event.timestamp,
-            event.level,
-            event.component,
-            event.event_type,
-            event.payload
+            event.timestamp, event.level, event.component, event.event_type, event.payload
         );
     }
 }

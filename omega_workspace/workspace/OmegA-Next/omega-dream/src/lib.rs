@@ -4,7 +4,7 @@
 //! converting "dreams" (failed attempts) into "waking" knowledge via feedback loops.
 #![warn(missing_docs)]
 
-use omega_core::{VerificationReport, EvidenceRecord, now};
+use omega_core::{now, VerificationReport};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -70,11 +70,7 @@ impl Service {
     }
 
     /// Record a verification failure as a dream episode
-    pub fn record_failure(
-        &mut self,
-        response: &str,
-        report: &VerificationReport,
-    ) -> DreamEpisode {
+    pub fn record_failure(&mut self, response: &str, report: &VerificationReport) -> DreamEpisode {
         if !self.config.recording_enabled {
             return DreamEpisode {
                 episode_id: String::new(),
@@ -187,7 +183,8 @@ impl Service {
             total_episodes,
             lessons_learned,
             avg_lessons_per_episode,
-            most_common_failures: self.get_failure_patterns()[0..std::cmp::min(5, self.pattern_cache.len())]
+            most_common_failures: self.get_failure_patterns()
+                [0..std::cmp::min(5, self.pattern_cache.len())]
                 .to_vec(),
         }
     }

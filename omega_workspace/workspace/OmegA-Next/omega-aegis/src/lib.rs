@@ -3,7 +3,7 @@
 
 #![warn(missing_docs)]
 
-use omega_core::{EvidenceRecord, RunEnvelope, RunStatus, now};
+use omega_core::{now, EvidenceRecord, RunEnvelope, RunStatus};
 use omega_myelin::MemoryGraph;
 
 /// The Aegis Gate: Primary policy enforcement engine
@@ -23,7 +23,8 @@ impl AegisGate {
         // 1. Threat Fabric Check
         let threats = memory.check_threats(&envelope.task);
         if !threats.is_empty() {
-            envelope.status = RunStatus::Rejected(format!("Threat detected: {}", threats[0].entry_id));
+            envelope.status =
+                RunStatus::Rejected(format!("Threat detected: {}", threats[0].entry_id));
             envelope.risk_score = 1.0;
             return envelope;
         }

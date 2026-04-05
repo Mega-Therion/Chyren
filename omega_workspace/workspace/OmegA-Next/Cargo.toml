@@ -12,8 +12,11 @@ members = [
     "omega-integration",
     "omega-spokes",
     "omega-telemetry",
+    "omega-conductor",
+    "omega-eval",
     "omega-cli",
 ]
+
 [workspace.package]
 version = "0.1.0"
 edition = "2021"

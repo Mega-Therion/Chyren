@@ -1,14 +1,15 @@
 //! omega-integration: gAIng coordination and integration
 //!
 //! Integration layer coordinates all subsystems into a unified cognitive system.
-#[warn(missing_docs)]
+
+#![warn(missing_docs)]
 
 pub mod tool_router;
 
+use omega_spokes::{SpokeCapability, SpokeRegistry};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
-use omega_spokes::{SpokeRegistry, SpokeCapability};
 use tokio::sync::RwLock;
 
 /// Integration coordinator
@@ -77,7 +78,11 @@ impl Service {
     pub async fn spokes_with_capability(&self, capability: SpokeCapability) -> Vec<String> {
         let reg = self.spoke_registry.read().await;
         if let Some(registry) = reg.as_ref() {
-            registry.spokes_with_capability(capability).iter().map(|s| s.name()).collect()
+            registry
+                .spokes_with_capability(capability)
+                .iter()
+                .map(|s| s.name())
+                .collect()
         } else {
             Vec::new()
         }

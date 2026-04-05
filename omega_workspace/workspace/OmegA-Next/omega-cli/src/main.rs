@@ -1,11 +1,11 @@
 //! omega-cli: Entry point for the Chyren Sovereign Hub.
 //! This module ties together AEGIS, MYELIN, ADCCL, and AEON to execute tasks.
 
-use omega_core::{RunEnvelope, RunStatus, EvidencePacket, now};
-use omega_aeon::AeonRuntime;
+use omega_adccl::{AdcclConfig, AdcclGate};
 use omega_aegis::AegisGate;
+use omega_aeon::AeonRuntime;
+use omega_core::{now, EvidencePacket, RunEnvelope, RunStatus};
 use omega_myelin::MemoryGraph;
-use omega_adccl::{AdcclGate, AdcclConfig};
 
 #[tokio::main]
 async fn main() {
@@ -15,8 +15,8 @@ async fn main() {
     let mut runtime = AeonRuntime::new();
     let aegis = AegisGate::new(vec!["unethical".to_string(), "illegal".to_string()]);
     let memory = MemoryGraph::new();
-    let adccl = AdcclGate::new(AdcclConfig { min_score: 0.7 });
-    
+    let _adccl = AdcclGate::new(AdcclConfig { min_score: 0.7 });
+
     // 2. Mock a task envelope
     let mut envelope = RunEnvelope {
         run_id: "run-1234".to_string(),

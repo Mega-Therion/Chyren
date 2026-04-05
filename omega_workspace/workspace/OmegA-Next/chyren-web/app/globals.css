@@ -21,28 +21,223 @@ body {
 }
 
 code {
-  font-family: 'Courier New', monospace;
-  background-color: rgba(0, 0, 0, 0.3);
-  padding: 0.2em 0.4em;
-  border-radius: 0.25em;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
 }
 
-pre {
-  background-color: rgba(0, 0, 0, 0.5);
-  padding: 1em;
-  border-radius: 0.5em;
-  overflow-x: auto;
+/* Glassmorphic effects */
+.glass {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(148, 163, 184, 0.1);
 }
 
-@keyframes pulse {
+.glass-darker {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+/* Gradient accents */
+.gradient-accent {
+  background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 50%, #14b8a6 100%);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Animations */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes pulse-subtle {
   0%, 100% {
     opacity: 1;
   }
   50% {
-    opacity: 0.5;
+    opacity: 0.6;
   }
 }
 
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+@keyframes typing {
+  0%, 20%, 50%, 80%, 100% {
+    content: '';
+  }
+  40% {
+    content: '.';
+  }
+  60% {
+    content: '..';
+  }
+}
+
+.animate-slide-in {
+  animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.typing-indicator {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: currentColor;
+  animation: pulse-subtle 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
+}
+
+/* Focus states */
+input:focus,
+textarea:focus,
+button:focus {
+  outline: none;
+}
+
+/* Markdown-like styling for messages */
+.message-content h1 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin: 0.5em 0;
+}
+
+.message-content h2 {
+  font-size: 1.25em;
+  font-weight: bold;
+  margin: 0.4em 0;
+}
+
+.message-content p {
+  margin: 0.5em 0;
+  line-height: 1.6;
+}
+
+.message-content ul,
+.message-content ol {
+  margin: 0.5em 0 0.5em 1.5em;
+  line-height: 1.6;
+}
+
+.message-content li {
+  margin: 0.25em 0;
+}
+
+.message-content code {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 0.2em 0.4em;
+  border-radius: 0.25em;
+  font-size: 0.9em;
+}
+
+.message-content pre {
+  background: rgba(0, 0, 0, 0.5);
+  padding: 1em;
+  border-radius: 0.5em;
+  overflow-x: auto;
+  margin: 0.5em 0;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.message-content blockquote {
+  border-left: 3px solid #0ea5e9;
+  padding-left: 1em;
+  margin: 0.5em 0;
+  color: rgba(226, 232, 240, 0.7);
+}
+
+/* Voice button animation */
+.voice-recording {
+  animation: pulse-subtle 0.6s ease-in-out infinite;
+}
+
+.voice-wave {
+  display: inline-flex;
+  gap: 3px;
+  align-items: flex-end;
+}
+
+.voice-bar {
+  width: 3px;
+  background: #0ea5e9;
+  border-radius: 2px;
+  animation: pulse-subtle 0.6s ease-in-out infinite;
+}
+
+.voice-bar:nth-child(2) {
+  height: 16px;
+  animation-delay: 0.1s;
+}
+
+.voice-bar:nth-child(3) {
+  height: 12px;
+  animation-delay: 0.2s;
 }

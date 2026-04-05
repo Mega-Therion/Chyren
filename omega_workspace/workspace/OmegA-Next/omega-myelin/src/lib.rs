@@ -62,3 +62,9 @@ impl MemoryGraph {
 
     // ... existing MemoryGraph implementation methods ...
 }
+
+impl Default for MemoryGraph {
+    fn default() -> Self {
+        Self::new()
+    }
+}

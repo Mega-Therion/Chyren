@@ -2,7 +2,7 @@
 #![warn(missing_docs)]
 
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
+use serde_json::Value;
 use std::collections::HashMap;
 
 /// World state snapshot
@@ -77,8 +77,7 @@ impl Service {
     pub fn compute_delta(&self, from: usize, to: usize) -> HashMap<String, (Value, Value)> {
         let mut delta = HashMap::new();
 
-        if let (Some(from_state), Some(to_state)) =
-            (self.get_snapshot(from), self.get_snapshot(to))
+        if let (Some(from_state), Some(to_state)) = (self.get_snapshot(from), self.get_snapshot(to))
         {
             for (key, to_value) in &to_state.variables {
                 if let Some(from_value) = from_state.variables.get(key) {
@@ -118,6 +117,7 @@ impl Default for Service {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde_json::json;
 
     #[test]
     fn test_variable_update() {

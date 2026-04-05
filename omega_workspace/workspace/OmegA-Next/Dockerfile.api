@@ -1,0 +1,15 @@
+# Chyren HTTP API (chyren-api)
+FROM rust:1-bookworm AS builder
+WORKDIR /app
+COPY . .
+RUN cargo build --release -p omega-cli --bin chyren-api
+
+FROM debian:bookworm-slim
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /app/target/release/chyren-api /usr/local/bin/chyren-api
+EXPOSE 8080
+ENV CHYREN_API_HOST=0.0.0.0
+ENV CHYREN_API_PORT=8080
+CMD ["chyren-api"]
