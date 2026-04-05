@@ -1,13 +1,14 @@
 //! omega-integration: gAIng coordination and integration
 //!
 //! Integration layer coordinates all subsystems into a unified cognitive system.
-#![warn(missing_docs)]
+#[warn(missing_docs)]
 
+pub mod tool_router;
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
-use omega_spokes::{ProviderSpoke, SpokeRegistry, SpokeCapability};
+use omega_spokes::{SpokeRegistry, SpokeCapability};
 use tokio::sync::RwLock;
 
 /// Integration coordinator
