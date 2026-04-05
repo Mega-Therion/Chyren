@@ -1,0 +1,49 @@
+name: Chyren CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: omega_workspace/workspace/OmegA-Next
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - name: Build
+        run: cargo build --workspace --verbose
+      - name: Test
+        run: cargo test --workspace --verbose
+      - name: Clippy
+        run: cargo clippy --workspace -- -D warnings
+      - name: Format
+        run: cargo fmt --all -- --check
+
+  chyren-web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: omega_workspace/workspace/OmegA-Next/chyren-web
+    env:
+      # CI build (no secrets). Override in Vercel project env / ~/.omega/one-true.env for real API URL.
+      NEXT_PUBLIC_API_BASE_URL: https://placeholder.local
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: omega_workspace/workspace/OmegA-Next/chyren-web/package-lock.json
+      - name: Install and build
+        run: npm ci && npm run build
