@@ -6,8 +6,7 @@
 #![warn(missing_docs)]
 
 use omega_core::{
-    gen_id, now, GoalContract, RunEnvelope, 
-    TaskStage, TaskStateObject, YETTRAGRAMMATON,
+    gen_id, now, GoalContract, RunEnvelope, TaskStage, TaskStateObject, YETTRAGRAMMATON,
 };
 use std::collections::HashMap;
 
@@ -47,7 +46,9 @@ impl AeonRuntime {
 
     /// Advance a task through its lifecycle stages
     pub fn advance_task(&mut self, task_id: &str, stage: TaskStage) -> Result<(), String> {
-        let task = self.active_tasks.get_mut(task_id)
+        let task = self
+            .active_tasks
+            .get_mut(task_id)
             .ok_or_else(|| format!("Task {} not found", task_id))?;
 
         task.stage = stage;
@@ -57,7 +58,9 @@ impl AeonRuntime {
 
     /// Bind a goal contract to a task
     pub fn bind_goal(&mut self, task_id: &str, contract: GoalContract) -> Result<(), String> {
-        let task = self.active_tasks.get_mut(task_id)
+        let task = self
+            .active_tasks
+            .get_mut(task_id)
             .ok_or_else(|| format!("Task {} not found", task_id))?;
 
         task.goal_contract = Some(contract);
@@ -77,5 +80,11 @@ impl AeonRuntime {
 
         // Simplified integrity check: verify the task ID generation logic aligns with seed
         task.task_id.starts_with("task-") && !YETTRAGRAMMATON.is_empty()
+    }
+}
+
+impl Default for AeonRuntime {
+    fn default() -> Self {
+        Self::new()
     }
 }

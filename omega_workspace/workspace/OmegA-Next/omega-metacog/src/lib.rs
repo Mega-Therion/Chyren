@@ -1,8 +1,10 @@
-//! omega-metacog: Reflective agent for autonomous insight generation.
-//! The metacog layer analyzes the MemoryGraph to identify patterns, 
-//! drifts, and opportunities for cognitive optimization.
+// omega-metacog: Reflective agent for autonomous insight generation.
+// The metacog layer analyzes the MemoryGraph to identify patterns, 
+// drifts, and opportunities for cognitive optimization.
 
 #![warn(missing_docs)]
+
+pub mod dream;
 
 use omega_core::now;
 use omega_myelin::MemoryGraph;

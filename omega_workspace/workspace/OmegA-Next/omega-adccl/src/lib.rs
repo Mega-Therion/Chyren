@@ -5,7 +5,7 @@
 
 #![warn(missing_docs)]
 
-use omega_core::{VerificationReport, Repair, gen_id};
+use omega_core::{gen_id, Repair, VerificationReport};
 use regex::Regex;
 
 /// ADCCL Configuration
@@ -16,6 +16,7 @@ pub struct AdcclConfig {
 
 /// The ADCCL Gatekeeper
 pub struct AdcclGate {
+    /// Thresholds and pattern lists used by verification
     pub config: AdcclConfig,
     stub_patterns: Vec<Regex>,
     hallucination_anchors: Vec<Regex>,
@@ -34,12 +35,14 @@ impl AdcclGate {
                 Regex::new(r"(?i)\[INSERT[^\]]*\]").unwrap(),
             ],
             hallucination_anchors: vec![
-                Regex::new(r"(?i)as of my (last|latest) (training|knowledge) (update|cutoff)").unwrap(),
-                Regex::new(r"(?i)I (don't|do not) have (access|the ability) to (browse|access|search)").unwrap(),
+                Regex::new(r"(?i)as of my (last|latest) (training|knowledge) (update|cutoff)")
+                    .unwrap(),
+                Regex::new(
+                    r"(?i)I (don't|do not) have (access|the ability) to (browse|access|search)",
+                )
+                .unwrap(),
             ],
-            refusal_patterns: vec![
-                Regex::new(r"(?i)^I('m| am) (sorry|unable|not able)").unwrap(),
-            ],
+            refusal_patterns: vec![Regex::new(r"(?i)^I('m| am) (sorry|unable|not able)").unwrap()],
         }
     }
 
@@ -63,13 +66,21 @@ impl AdcclGate {
         }
 
         // 3. Hallucination check
-        if self.hallucination_anchors.iter().any(|p| p.is_match(response_text)) {
+        if self
+            .hallucination_anchors
+            .iter()
+            .any(|p| p.is_match(response_text))
+        {
             score -= 1.0 / checks_total;
             flags.push("HALLUCINATION_ANCHOR_DETECTED".to_string());
         }
 
         // 4. Refusal check
-        if self.refusal_patterns.iter().any(|p| p.is_match(response_text)) {
+        if self
+            .refusal_patterns
+            .iter()
+            .any(|p| p.is_match(response_text))
+        {
             score -= 1.0 / checks_total;
             flags.push("REFUSAL_DETECTED".to_string());
         }
@@ -82,7 +93,7 @@ impl AdcclGate {
             score,
             flags,
             evidence,
-            repairs: if !passed { 
+            repairs: if !passed {
                 vec![Repair {
                     issue: "Mechanical failure".to_string(),
                     fix: "Re-route to alternative provider".to_string(),

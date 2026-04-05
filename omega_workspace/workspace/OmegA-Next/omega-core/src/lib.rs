@@ -183,6 +183,7 @@ pub struct TaskStateObject {
 pub enum TaskStage {
     /// Just received
     Received,
+    Planning,
     /// Parsed and understood
     Interpreted,
     /// Goal and plan drafted

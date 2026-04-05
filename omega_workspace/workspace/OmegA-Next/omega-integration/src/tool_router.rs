@@ -21,10 +21,13 @@ pub struct ToolRouter {
 impl ToolRouter {
     /// Register a new capability
     pub fn register_tool(&mut self, name: &str, executor: &str) {
-        self.tools.insert(name.to_string(), Tool {
-            name: name.to_string(),
-            executor: executor.to_string(),
-        });
+        self.tools.insert(
+            name.to_string(),
+            Tool {
+                name: name.to_string(),
+                executor: executor.to_string(),
+            },
+        );
     }
 
     /// List all tools

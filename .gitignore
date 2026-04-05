@@ -8,3 +8,6 @@ state/master_ledger.json
 target/
 target/
 venv/
+node_modules/
+.next/
+.vercel/

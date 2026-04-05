@@ -4,10 +4,10 @@
 
 #![warn(missing_docs)]
 
-use omega_core::{ProviderRequest, ProviderResponse};
 use async_trait::async_trait;
-use serde_json::json;
+use omega_core::{ProviderRequest, ProviderResponse};
 use reqwest::Client;
+use serde_json::json;
 
 /// Capability supported by a provider (used for integration routing)
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -48,22 +48,31 @@ pub struct AnthropicSpoke {
 impl AnthropicSpoke {
     /// Create new Anthropic spoke
     pub fn new(api_key: String) -> Self {
-        Self { api_key, client: Client::new() }
+        Self {
+            api_key,
+            client: Client::new(),
+        }
     }
 }
 
 #[async_trait]
 impl ProviderSpoke for AnthropicSpoke {
-    fn name(&self) -> String { "anthropic".to_string() }
-    
+    fn name(&self) -> String {
+        "anthropic".to_string()
+    }
+
     async fn discover_tools(&self) -> Result<Vec<ToolInvocation>, String> {
         Ok(Vec::new())
     }
 
     async fn send(&self, request: ProviderRequest) -> ProviderResponse {
         let url = "https://api.anthropic.com/v1/messages";
-        let model = request.model.as_ref().cloned().unwrap_or_else(|| "claude-3-5-sonnet-20241022".to_string());
-        
+        let model = request
+            .model
+            .as_ref()
+            .cloned()
+            .unwrap_or_else(|| "claude-3-5-sonnet-20241022".to_string());
+
         let body = json!({
             "model": model,
             "max_tokens": request.max_tokens,
@@ -71,7 +80,9 @@ impl ProviderSpoke for AnthropicSpoke {
             "messages": [{"role": "user", "content": request.prompt}]
         });
 
-        let resp = self.client.post(url)
+        let resp = self
+            .client
+            .post(url)
             .header("x-api-key", &self.api_key)
             .header("anthropic-version", "2023-06-01")
             .json(&body)
@@ -82,7 +93,10 @@ impl ProviderSpoke for AnthropicSpoke {
             Ok(r) => {
                 let data: serde_json::Value = r.json().await.unwrap_or_else(|_| json!({}));
                 ProviderResponse {
-                    text: data["content"][0]["text"].as_str().unwrap_or("Error: No text in response").to_string(),
+                    text: data["content"][0]["text"]
+                        .as_str()
+                        .unwrap_or("Error: No text in response")
+                        .to_string(),
                     provider: self.name(),
                     model,
                     tokens: 0,
@@ -90,7 +104,7 @@ impl ProviderSpoke for AnthropicSpoke {
                     status: "success".to_string(),
                     error: None,
                 }
-            },
+            }
             Err(e) => ProviderResponse {
                 text: "".to_string(),
                 provider: self.name(),
@@ -99,7 +113,7 @@ impl ProviderSpoke for AnthropicSpoke {
                 latency_ms: 0.0,
                 status: "error".to_string(),
                 error: Some(e.to_string()),
-            }
+            },
         }
     }
 }
@@ -114,21 +128,30 @@ pub struct OpenAiSpoke {
 impl OpenAiSpoke {
     /// Create new OpenAI spoke
     pub fn new(api_key: String) -> Self {
-        Self { api_key, client: Client::new() }
+        Self {
+            api_key,
+            client: Client::new(),
+        }
     }
 }
 
 #[async_trait]
 impl ProviderSpoke for OpenAiSpoke {
-    fn name(&self) -> String { "openai".to_string() }
+    fn name(&self) -> String {
+        "openai".to_string()
+    }
 
     async fn discover_tools(&self) -> Result<Vec<ToolInvocation>, String> {
         Ok(Vec::new())
     }
-    
+
     async fn send(&self, request: ProviderRequest) -> ProviderResponse {
         let url = "https://api.openai.com/v1/chat/completions";
-        let model = request.model.as_ref().cloned().unwrap_or_else(|| "gpt-4o".to_string());
+        let model = request
+            .model
+            .as_ref()
+            .cloned()
+            .unwrap_or_else(|| "gpt-4o".to_string());
 
         let body = json!({
             "model": model,
@@ -136,7 +159,9 @@ impl ProviderSpoke for OpenAiSpoke {
             "max_completion_tokens": request.max_tokens
         });
 
-        let resp = self.client.post(url)
+        let resp = self
+            .client
+            .post(url)
             .bearer_auth(&self.api_key)
             .json(&body)
             .send()
@@ -146,7 +171,10 @@ impl ProviderSpoke for OpenAiSpoke {
             Ok(r) => {
                 let data: serde_json::Value = r.json().await.unwrap_or_else(|_| json!({}));
                 ProviderResponse {
-                    text: data["choices"][0]["message"]["content"].as_str().unwrap_or("Error: No text").to_string(),
+                    text: data["choices"][0]["message"]["content"]
+                        .as_str()
+                        .unwrap_or("Error: No text")
+                        .to_string(),
                     provider: self.name(),
                     model,
                     tokens: 0,
@@ -154,7 +182,7 @@ impl ProviderSpoke for OpenAiSpoke {
                     status: "success".to_string(),
                     error: None,
                 }
-            },
+            }
             Err(e) => ProviderResponse {
                 text: "".to_string(),
                 provider: self.name(),
@@ -163,7 +191,7 @@ impl ProviderSpoke for OpenAiSpoke {
                 latency_ms: 0.0,
                 status: "error".to_string(),
                 error: Some(e.to_string()),
-            }
+            },
         }
     }
 }
@@ -177,14 +205,16 @@ pub struct SpokeRegistry {
 impl SpokeRegistry {
     /// Create new registry
     pub fn new() -> Self {
-        Self { spokes: std::collections::HashMap::new() }
+        Self {
+            spokes: std::collections::HashMap::new(),
+        }
     }
-    
+
     /// Get spoke by name
     pub fn get(&self, name: &str) -> Option<&dyn ProviderSpoke> {
         self.spokes.get(name).map(|s| s.as_ref())
     }
-    
+
     /// Find provider by tool capability
     pub fn find_tool_provider(&self, _tool_name: &str) -> Option<&dyn ProviderSpoke> {
         // Simple search: first available
@@ -194,5 +224,11 @@ impl SpokeRegistry {
     /// List spokes with a specific capability
     pub fn spokes_with_capability(&self, _capability: SpokeCapability) -> Vec<&dyn ProviderSpoke> {
         self.spokes.values().map(|s| s.as_ref()).collect()
+    }
+}
+
+impl Default for SpokeRegistry {
+    fn default() -> Self {
+        Self::new()
     }
 }
