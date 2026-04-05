@@ -5,3 +5,4 @@ __pycache__/
 state/master_ledger.json
 *.log
 .DS_Store
+target/
