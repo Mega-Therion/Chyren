@@ -1,46 +1,52 @@
-//! Unified telemetry and event emission
+//! omega-telemetry: Structured event bus for cross-layer visibility.
+//! Every state transition, gate decision, and metacog insight is logged here.
+
+#![warn(missing_docs)]
+
+use omega_core::{EvidenceRecord, now};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Event {
-    pub event_id: String,
-    pub timestamp: f64,
-    pub request_id: String,
-    pub task_id: String,
-    pub layer: String,
+/// Event severity levels
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+pub enum EventLevel {
+    /// Informational event
+    Info,
+    /// System warning
+    Warn,
+    /// Critical security or integrity event
+    Critical,
+}
+
+/// A structured telemetry event
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct SystemEvent {
+    /// Component generating the event
     pub component: String,
+    /// Event type
     pub event_type: String,
-    pub status: String,
-    pub latency_ms: f64,
-    pub provider: String,
-    pub risk_score: f64,
-    pub bridge_outcome: Option<String>,
-    pub verification_score: f64,
-    pub retrieval_success: bool,
-    pub contradiction_count: usize,
-    pub memory_write_class: String,
-    pub continuity_action: String,
-    pub artifact_refs: Vec<String>,
-    pub trace_refs: Vec<String>,
+    /// Severity
+    pub level: EventLevel,
+    /// Metadata
+    pub payload: serde_json::Value,
+    /// Timestamp
+    pub timestamp: f64,
 }
 
-pub trait EventSink: Send + Sync {
-    fn emit(&self, event: Event);
-}
+/// The TelemetryBus: Broadcaster for system signals.
+pub struct TelemetryBus;
 
-pub struct StdoutSink;
-
-impl EventSink for StdoutSink {
-    fn emit(&self, event: Event) {
-        if let Ok(json) = serde_json::to_string(&event) {
-            println!("{}", json);
-        }
+impl TelemetryBus {
+    /// Broadcast an event to the system
+    pub fn broadcast(event: SystemEvent) {
+        // In a production system, this would pipe to a ring buffer or external sink.
+        // For our Sovereign Hub, we log to stdout for real-time observability.
+        println!(
+            "[{:.3}] [{:?}] [{}] {}: {}",
+            event.timestamp,
+            event.level,
+            event.component,
+            event.event_type,
+            event.payload
+        );
     }
-}
-
-#[macro_export]
-macro_rules! emit_event {
-    ($sink:expr, $event:expr) => {
-        $sink.emit($event)
-    };
 }
