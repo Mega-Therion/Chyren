@@ -6,3 +6,5 @@ state/master_ledger.json
 *.log
 .DS_Store
 target/
+target/
+venv/
