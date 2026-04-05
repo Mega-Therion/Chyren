@@ -3,39 +3,30 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { message, context } = body
+    const { message } = body
 
     if (!message) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 })
     }
 
-    // Create a readable stream for the response
     const encoder = new TextEncoder()
-    let responseText = ''
 
-    // Simulate streaming response from Chyren backend
-    // In production, this would call your actual Rust/Python backend
-    const mockResponses: { [key: string]: string } = {
-      hello: 'Hello! I\'m Chyren, the Sovereign Intelligence Orchestrator. I\'m ready to route your tasks through verified AI providers with integrity checks.',
-      help: 'I can help you with:\n\n• **Task Routing**: Send tasks to multiple AI providers (Anthropic, OpenAI, DeepSeek, Gemini)\n• **Integrity Verification**: Every response is checked for accuracy and drift\n• **Multi-provider**: Get the best response by comparing across providers\n• **Threat Detection**: Built-in safety checks and policy enforcement\n\nWhat would you like to do?',
-      default: `I received your message: "${message}". In production, this would be routed through the Sovereign Hub with verified provider execution. For now, I'm in demo mode. Try asking me about my capabilities or how I work!`,
-    }
-
-    const lowerMessage = message.toLowerCase()
+    const lowerMessage = (message as string).toLowerCase()
+    let responseText: string
     if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
-      responseText = mockResponses.hello
+      responseText = "Hello! I'm Chyren, the Sovereign Intelligence Orchestrator. I'm ready to route your tasks through verified AI providers with integrity checks."
     } else if (lowerMessage.includes('help') || lowerMessage.includes('what can')) {
-      responseText = mockResponses.help
+      responseText = 'I can help you with:\n\n• **Task Routing**: Send tasks to multiple AI providers (Anthropic, OpenAI, DeepSeek, Gemini)\n• **Integrity Verification**: Every response is checked for accuracy and drift\n• **Multi-provider**: Get the best response by comparing across providers\n• **Threat Detection**: Built-in safety checks and policy enforcement\n\nWhat would you like to do?'
     } else {
-      responseText = mockResponses.default
+      responseText = `I received your message: "${message}". In production, this would be routed through the Sovereign Hub with verified provider execution. For now, I'm in demo mode. Try asking me about my capabilities or how I work!`
     }
 
-    // Stream the response character by character
+    const words = responseText.split(' ')
     const stream = new ReadableStream({
       async start(controller) {
-        for (const char of responseText) {
-          controller.enqueue(encoder.encode(char))
-          await new Promise((resolve) => setTimeout(resolve, 10))
+        for (let i = 0; i < words.length; i++) {
+          controller.enqueue(encoder.encode((i === 0 ? '' : ' ') + words[i]))
+          await new Promise((resolve) => setTimeout(resolve, 40))
         }
         controller.close()
       },
@@ -43,7 +34,7 @@ export async function POST(req: NextRequest) {
 
     return new NextResponse(stream, {
       headers: {
-        'Content-Type': 'text/event-stream',
+        'Content-Type': 'text/plain; charset=utf-8',
         'Cache-Control': 'no-cache',
         'Connection': 'keep-alive',
       },

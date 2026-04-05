@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback, useRef, lazy, Suspense } from 'react'
+import React, { useState, useCallback, lazy, Suspense } from 'react'
 import { ChatInput } from '@/components/ChatInput'
 import { MessageList, type Message } from '@/components/MessageList'
 import { useBrainState } from '@/hooks/useBrainState'
@@ -20,7 +20,6 @@ const STAGE_LABELS: Record<string, string> = {
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const messagesRef = useRef<Message[]>([])
   const { brainState, activeStage, activate } = useBrainState()
 
   const addMessage = useCallback(
@@ -33,7 +32,6 @@ export default function ChatPage() {
         isStreaming,
       }
       setMessages((prev) => [...prev, message])
-      messagesRef.current = [...messagesRef.current, message]
       return message.id
     },
     []

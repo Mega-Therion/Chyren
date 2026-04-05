@@ -139,6 +139,7 @@ export default function ChyrenBrain({ state = IDLE_BRAIN }: { state?: BrainState
     // Slow rotation
     let frameId: number
     let t = 0
+    const scratchColor = new THREE.Color()
 
     function animate() {
       frameId = requestAnimationFrame(animate)
@@ -154,17 +155,11 @@ export default function ChyrenBrain({ state = IDLE_BRAIN }: { state?: BrainState
         const pulse = 0.7 + 0.3 * Math.sin(t * (2 + i * 0.4) + i)
         const intensity = activity * pulse
 
-        // Brightness
-        const bright = new THREE.Color()
-        bright.copy(node.baseColor).multiplyScalar(0.3 + intensity * 2.5)
-        node.mat.color = bright
+        scratchColor.copy(node.baseColor).multiplyScalar(0.3 + intensity * 2.5)
+        node.mat.color.copy(scratchColor)
 
-        // Glow opacity
         node.glowMat.opacity = intensity * 0.5
-
-        // Scale glow with activity
-        const scale = 1 + activity * 1.5
-        node.glow.scale.setScalar(scale)
+        node.glow.scale.setScalar(1 + activity * 1.5)
       })
 
       // Pulse rings
@@ -173,10 +168,8 @@ export default function ChyrenBrain({ state = IDLE_BRAIN }: { state?: BrainState
         if (activity > 0.15) {
           r.phase += 0.04
           const p = (r.phase % (Math.PI * 2)) / (Math.PI * 2)
-          const ringScale = 1 + p * 3
-          r.mesh.scale.setScalar(ringScale)
+          r.mesh.scale.setScalar(1 + p * 3)
           r.mat.opacity = (1 - p) * activity * 0.6
-          r.mesh.lookAt(camera.position)
         } else {
           r.mat.opacity = 0
         }
