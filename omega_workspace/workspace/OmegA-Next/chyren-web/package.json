@@ -7,6 +7,7 @@
   },
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/generate-context.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -19,6 +20,7 @@
     "@ai-sdk/react": "^3.0.148",
     "@firebase/ai": "^2.10.0",
     "@firebase/vertexai": "^1.2.4",
+    "@neondatabase/serverless": "^1.0.2",
     "@types/three": "^0.183.1",
     "@vercel/functions": "^3.4.3",
     "@vercel/speed-insights": "^2.0.0",

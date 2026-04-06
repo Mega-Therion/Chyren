@@ -459,3 +459,10 @@ mod tests {
         assert_ne!(id1, id2); // Should be unique
     }
 }
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct UserContext {
+    pub name: String,
+    pub family_members: Vec<String>,
+    pub bio: String,
+}

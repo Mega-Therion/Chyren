@@ -57,7 +57,7 @@ impl EvalSuite {
             level: EventLevel::Info,
             payload: serde_json::json!({
                 "prompt": prompt,
-                "passed": matches!(result.status, RunStatus::Admitted),
+                "passed": matches!(result, RunStatus::Admitted),
                 "latency_ms": duration
             }),
             timestamp: now(),
@@ -65,7 +65,7 @@ impl EvalSuite {
 
         EvalResult {
             case_id: "reg-001".to_string(),
-            passed: matches!(result.status, RunStatus::Admitted),
+            passed: matches!(result, RunStatus::Admitted),
             latency_ms: duration,
             failure_reason: None,
         }

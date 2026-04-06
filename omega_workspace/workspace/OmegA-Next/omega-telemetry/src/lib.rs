@@ -4,6 +4,9 @@
 #![warn(missing_docs)]
 
 use serde::{Deserialize, Serialize};
+use std::fs::OpenOptions;
+use std::io::Write;
+
 
 /// Event severity levels
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
@@ -37,11 +40,21 @@ pub struct TelemetryBus;
 impl TelemetryBus {
     /// Broadcast an event to the system
     pub fn broadcast(event: SystemEvent) {
-        // In a production system, this would pipe to a ring buffer or external sink.
-        // For our Sovereign Hub, we log to stdout for real-time observability.
+        // Log to stdout
         println!(
             "[{:.3}] [{:?}] [{}] {}: {}",
             event.timestamp, event.level, event.component, event.event_type, event.payload
         );
+        
+        // Log to file
+        if let Ok(mut file) = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open("telemetry.log")
+        {
+            if let Ok(serialized) = serde_json::to_string(&event) {
+                let _ = writeln!(file, "{}", serialized);
+            }
+        }
     }
 }
