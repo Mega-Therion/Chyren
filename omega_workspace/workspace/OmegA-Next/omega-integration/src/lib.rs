@@ -64,28 +64,32 @@ impl Service {
         *reg = Some(registry);
     }
 
-    /// Find the provider spoke for a given tool
-    pub async fn find_tool_provider(&self, tool_name: &str) -> Option<String> {
+    /// Find the first spoke registered that supports the given capability.
+    /// Returns the spoke's name, or None if no registered spoke has that capability.
+    pub async fn find_tool_provider(&self, capability: &SpokeCapability) -> Option<String> {
         let reg = self.spoke_registry.read().await;
-        if let Some(registry) = reg.as_ref() {
-            registry.find_tool_provider(tool_name).map(|s| s.name())
-        } else {
-            None
-        }
+        reg.as_ref()
+            .and_then(|r| r.find_tool_provider(capability))
+            .map(|s| s.name())
     }
 
-    /// Get spokes that have a specific capability
+    /// Return names of all spokes that support a specific capability, in preference order.
     pub async fn spokes_with_capability(&self, capability: SpokeCapability) -> Vec<String> {
         let reg = self.spoke_registry.read().await;
-        if let Some(registry) = reg.as_ref() {
-            registry
+        match reg.as_ref() {
+            Some(registry) => registry
                 .spokes_with_capability(capability)
                 .iter()
                 .map(|s| s.name())
-                .collect()
-        } else {
-            Vec::new()
+                .collect(),
+            None => Vec::new(),
         }
+    }
+
+    /// Return the name of the primary (highest-preference) available spoke.
+    pub async fn primary_spoke(&self) -> Option<String> {
+        let reg = self.spoke_registry.read().await;
+        reg.as_ref().and_then(|r| r.primary()).map(|s| s.name())
     }
 
     /// Register a system

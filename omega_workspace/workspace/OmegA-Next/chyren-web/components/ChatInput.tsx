@@ -21,8 +21,8 @@ export function ChatInput({ onSend, disabled = false, isLoading = false }: ChatI
 
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = '44px'
-      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 140) + 'px'
+      textareaRef.current.style.height = '22px'
+      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px'
     }
   }, [input])
 
@@ -30,9 +30,7 @@ export function ChatInput({ onSend, disabled = false, isLoading = false }: ChatI
     if (input.trim() && !disabled && !isLoading) {
       onSend(input.trim())
       setInput('')
-      if (textareaRef.current) {
-        textareaRef.current.style.height = '44px'
-      }
+      if (textareaRef.current) textareaRef.current.style.height = '22px'
     }
   }, [input, disabled, isLoading, onSend])
 
@@ -44,54 +42,71 @@ export function ChatInput({ onSend, disabled = false, isLoading = false }: ChatI
   }
 
   return (
-    <div className="glass-darker rounded-3xl p-3 flex items-end gap-2 transition-all duration-200 focus-within:border-cyan-400/50">
+    <div className="input-area rounded-lg px-4 py-3 flex items-end gap-3">
+      {/* Prompt glyph */}
+      <span
+        className="font-mono text-sm flex-shrink-0 pb-0.5 select-none"
+        style={{ color: '#6366f1' }}
+      >
+        ▸
+      </span>
+
       <textarea
         ref={textareaRef}
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Ask Chyren anything..."
+        placeholder="Enter command or query…"
         disabled={disabled || isLoading}
-        className="flex-1 bg-transparent text-white placeholder-slate-500 text-sm resize-none focus:outline-none disabled:opacity-50"
+        className="flex-1 bg-transparent font-mono text-sm text-slate-200 placeholder-slate-700 resize-none focus:outline-none disabled:opacity-40 leading-relaxed"
         rows={1}
+        style={{ minHeight: '22px' }}
       />
 
+      {/* Voice */}
       <button
         onClick={isRecording ? stopRecording : startRecording}
         disabled={disabled || isLoading}
-        className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ${
-          isRecording
-            ? 'bg-red-500/80 text-white animate-pulse-subtle'
-            : 'bg-slate-700 hover:bg-slate-600 text-cyan-400'
-        } disabled:opacity-50 disabled:cursor-not-allowed`}
-        title={isRecording ? 'Stop recording' : 'Start recording'}
+        className="flex-shrink-0 w-7 h-7 rounded flex items-center justify-center transition-all duration-150 disabled:opacity-30"
+        style={{
+          background: isRecording ? 'rgba(248,113,113,0.15)' : 'rgba(99,102,241,0.1)',
+          border: `1px solid ${isRecording ? 'rgba(248,113,113,0.4)' : 'rgba(99,102,241,0.2)'}`,
+          color: isRecording ? '#f87171' : '#818cf8',
+        }}
+        title={isRecording ? 'Stop recording' : 'Voice input'}
       >
         {isRecording ? (
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <rect x="6" y="5" width="3" height="10" />
-            <rect x="11" y="5" width="3" height="10" />
+          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <rect x="5" y="5" width="3.5" height="10" rx="1"/>
+            <rect x="11.5" y="5" width="3.5" height="10" rx="1"/>
           </svg>
         ) : (
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M10 2a4 4 0 0 0-4 4v4a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4zM7 10a3 3 0 0 1 6 0v3a3 3 0 1 1-6 0v-3z" />
+          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 2a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3zM7 14.5A5 5 0 0 0 15 10h-1.5a3.5 3.5 0 0 1-7 0H5a5 5 0 0 0 5 4.5V16H8v1.5h4V16h-2v-1.5z"/>
           </svg>
         )}
       </button>
 
+      {/* Send */}
       <button
         onClick={handleSend}
         disabled={!input.trim() || disabled || isLoading}
-        className="flex-shrink-0 w-9 h-9 rounded-full bg-gradient-accent hover:opacity-90 text-white flex items-center justify-center transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed hover:scale-105"
-        title="Send message (Enter)"
+        className="flex-shrink-0 w-7 h-7 rounded flex items-center justify-center transition-all duration-150 disabled:opacity-20"
+        style={{
+          background: 'rgba(99,102,241,0.15)',
+          border: '1px solid rgba(99,102,241,0.35)',
+          color: '#818cf8',
+        }}
+        title="Send (Enter)"
       >
         {isLoading ? (
-          <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"/>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
           </svg>
         ) : (
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5.951-1.488 5.951 1.488a1 1 0 001.169-1.409l-7-14z" />
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M12 5l7 7-7 7"/>
           </svg>
         )}
       </button>

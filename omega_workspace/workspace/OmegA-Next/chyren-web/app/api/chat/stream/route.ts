@@ -3,6 +3,8 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { createGroq } from '@ai-sdk/groq'
 import { streamText } from 'ai'
 import { NextRequest } from 'next/server'
+import { checkRateLimit, checkPromptInjection } from '@/lib/hardening'
+import { setBrainState } from '@/lib/brain-state-store'
 
 export const runtime = 'nodejs'
 
@@ -110,6 +112,14 @@ async function* firebaseStream(messages: { role: string; content: string }[]): A
 }
 
 export async function POST(req: NextRequest) {
+  // Hardening: rate limit
+  const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
+  if (!checkRateLimit(ip)) {
+    return new Response('Too Many Requests', { status: 429 })
+  }
+
+  const session = req.nextUrl.searchParams.get('session') ?? 'global'
+
   const { messages = [], message } = await req.json().catch(() => ({}))
 
   const chatMessages: { role: string; content: string }[] = messages.length
@@ -118,6 +128,15 @@ export async function POST(req: NextRequest) {
 
   if (!chatMessages.length || !chatMessages[chatMessages.length - 1]?.content) {
     return new Response(JSON.stringify({ error: 'Message is required' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
+  // Hardening: prompt injection check on last user message
+  const lastUserContent = chatMessages[chatMessages.length - 1]?.content ?? ''
+  if (checkPromptInjection(lastUserContent)) {
+    return new Response(JSON.stringify({ error: 'Request rejected by integrity filter' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
     })
@@ -132,6 +151,15 @@ export async function POST(req: NextRequest) {
   const providerLabel = useOllama ? 'ollama/gemma4' : useGateway ? 'gateway/groq' : useGroq ? 'groq/gemma2' : useFirebase ? 'firebase-ai' : 'gemini'
   console.log(`[chat/stream] provider=${providerLabel}`)
 
+  // Signal provider call starting
+  setBrainState(session, { stage: 'provider_call', provider: 0.95, adccl: 0.2 })
+
+  const resetToIdle = () => {
+    setTimeout(() => {
+      setBrainState(session, { stage: 'idle', provider: 0.05, ledger: 0.02, adccl: 0.05 })
+    }, 3000)
+  }
+
   // Firebase AI Logic path — streams directly via Vertex AI REST
   if (useFirebase) {
     const encoder = new TextEncoder()
@@ -141,10 +169,12 @@ export async function POST(req: NextRequest) {
           for await (const chunk of firebaseStream(chatMessages)) {
             controller.enqueue(encoder.encode(chunk))
           }
+          setBrainState(session, { stage: 'ledger_commit', ledger: 0.95, adccl: 0.5 })
         } catch (err) {
           console.error('[chat/stream] Firebase AI error:', err)
         } finally {
           controller.close()
+          resetToIdle()
         }
       },
     })
@@ -173,6 +203,10 @@ export async function POST(req: NextRequest) {
     system: SYSTEM_PROMPT,
     messages: typedMessages,
     onError: ({ error }) => console.error('[chat/stream] streamText error:', error),
+    onFinish: () => {
+      setBrainState(session, { stage: 'ledger_commit', ledger: 0.95, adccl: 0.5 })
+      resetToIdle()
+    },
   })
   return result.toTextStreamResponse()
 }

@@ -7,8 +7,24 @@ export async function validateChatRequest(req: NextRequest) {
     return true;
 }
 
-export function checkRateLimit(_ip: string): boolean {
-    // Basic sliding window mock implementation
+// Sliding window rate limiter: 20 requests per 60 seconds per IP
+const RATE_LIMIT_MAX = 20;
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const rateLimitStore = new Map<string, number[]>();
+
+export function checkRateLimit(ip: string): boolean {
+    const now = Date.now();
+    const windowStart = now - RATE_LIMIT_WINDOW_MS;
+
+    const timestamps = (rateLimitStore.get(ip) ?? []).filter(t => t > windowStart);
+
+    if (timestamps.length >= RATE_LIMIT_MAX) {
+        rateLimitStore.set(ip, timestamps);
+        return false;
+    }
+
+    timestamps.push(now);
+    rateLimitStore.set(ip, timestamps);
     return true;
 }
 
