@@ -20,6 +20,7 @@
     "@firebase/ai": "^2.10.0",
     "@firebase/vertexai": "^1.2.4",
     "@types/three": "^0.183.1",
+    "@vercel/functions": "^3.4.3",
     "@vercel/speed-insights": "^2.0.0",
     "ai": "^6.0.146",
     "axios": "^1.7.0",

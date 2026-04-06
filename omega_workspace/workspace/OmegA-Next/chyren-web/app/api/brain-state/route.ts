@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { getBrainState } from '@/lib/brain-state-store'
 
-export const runtime = 'edge'
+export const runtime = 'nodejs'
 
 export async function GET(req: NextRequest) {
   const session = req.nextUrl.searchParams.get('session') ?? 'global'
@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
       let tick = 0
 
       while (tick < maxTicks) {
-        const state = getBrainState(session)
+        const state = await getBrainState(session)
         const json = JSON.stringify(state)
 
         if (json !== lastJson) {

@@ -1,3 +1,5 @@
+import { getCache } from '@vercel/functions'
+
 export interface BrainState {
   adccl: number
   provider: number
@@ -18,15 +20,25 @@ export const IDLE_STATE: BrainState = {
   stage: 'idle',
 }
 
-// Module-level shared state store keyed by session ID.
-// Note: does not persist across edge/serverless cold starts.
-const stateStore = new Map<string, BrainState>()
+// Local fallback for dev environments where Runtime Cache is unavailable
+const localStore = new Map<string, BrainState>()
 
-export function setBrainState(session: string, state: Partial<BrainState>): void {
-  const current = stateStore.get(session) ?? { ...IDLE_STATE }
-  stateStore.set(session, { ...current, ...state })
+export async function setBrainState(session: string, state: Partial<BrainState>): Promise<void> {
+  try {
+    const cache = getCache({ namespace: 'brain' })
+    const current = (await cache.get(session) as BrainState | undefined) ?? { ...IDLE_STATE }
+    await cache.set(session, { ...current, ...state }, { ttl: 60, tags: ['brain-state'] })
+  } catch {
+    const current = localStore.get(session) ?? { ...IDLE_STATE }
+    localStore.set(session, { ...current, ...state })
+  }
 }
 
-export function getBrainState(session: string): BrainState {
-  return stateStore.get(session) ?? { ...IDLE_STATE }
+export async function getBrainState(session: string): Promise<BrainState> {
+  try {
+    const cache = getCache({ namespace: 'brain' })
+    return (await cache.get(session) as BrainState | undefined) ?? { ...IDLE_STATE }
+  } catch {
+    return localStore.get(session) ?? { ...IDLE_STATE }
+  }
 }
