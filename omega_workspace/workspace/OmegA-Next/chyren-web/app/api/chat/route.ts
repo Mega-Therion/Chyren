@@ -1,5 +1,4 @@
-import { createAnthropic } from '@ai-sdk/anthropic'
-import { createGoogleGenerativeAI } from '@ai-sdk/google'
+import { createGroq } from '@ai-sdk/groq'
 import { generateText } from 'ai'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -21,21 +20,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 })
     }
 
-    const useAnthropic = Boolean(process.env.ANTHROPIC_API_KEY)
+    const groq = createGroq({ apiKey: process.env.GROQ_API_KEY ?? '' })
+    const model = groq(process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile')
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const typedMessages = chatMessages as any
-
-    let model
-    if (useAnthropic) {
-      const anthropic = createAnthropic({ apiKey: process.env.ANTHROPIC_API_KEY ?? '' })
-      model = anthropic(process.env.ANTHROPIC_MODEL ?? 'claude-haiku-4-5-20251001')
-    } else {
-      const google = createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY ?? '' })
-      model = google(process.env.GEMINI_MODEL ?? 'gemini-2.0-flash')
-    }
-
-    const result = await generateText({ model, system: SYSTEM_PROMPT, messages: typedMessages })
+    const result = await generateText({ model, system: SYSTEM_PROMPT, messages: chatMessages as any })
     return NextResponse.json({ response: result.text })
   } catch (error) {
     console.error('[chat] error:', error)

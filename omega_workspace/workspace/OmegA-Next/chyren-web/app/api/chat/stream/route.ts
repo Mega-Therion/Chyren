@@ -1,5 +1,4 @@
-import { createAnthropic } from '@ai-sdk/anthropic'
-import { createGoogleGenerativeAI } from '@ai-sdk/google'
+import { createGroq } from '@ai-sdk/groq'
 import { streamText } from 'ai'
 import { NextRequest } from 'next/server'
 import { checkRateLimit, checkPromptInjection } from '@/lib/hardening'
@@ -12,14 +11,9 @@ You operate with precision, no stubs, and no hallucinations. \
 You route tasks through verified AI providers with integrity checks. \
 Be concise, direct, and authoritative.`
 
-function getAnthropicModel() {
-  const anthropic = createAnthropic({ apiKey: process.env.ANTHROPIC_API_KEY ?? '' })
-  return anthropic(process.env.ANTHROPIC_MODEL ?? 'claude-haiku-4-5-20251001')
-}
-
-function getGeminiModel() {
-  const google = createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY ?? '' })
-  return google(process.env.GEMINI_MODEL ?? 'gemini-2.0-flash')
+function getModel() {
+  const groq = createGroq({ apiKey: process.env.GROQ_API_KEY ?? '' })
+  return groq(process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile')
 }
 
 export async function POST(req: NextRequest) {
@@ -50,13 +44,8 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  // Provider: Anthropic Haiku primary → Gemini fallback
-  const useAnthropic = Boolean(process.env.ANTHROPIC_API_KEY)
-  const model = useAnthropic ? getAnthropicModel() : getGeminiModel()
-  const providerLabel = useAnthropic
-    ? `anthropic/${process.env.ANTHROPIC_MODEL ?? 'claude-haiku-4-5-20251001'}`
-    : `gemini/${process.env.GEMINI_MODEL ?? 'gemini-2.0-flash'}`
-  console.log(`[chat/stream] provider=${providerLabel}`)
+  const model = getModel()
+  console.log(`[chat/stream] provider=groq/${process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile'}`)
 
   setBrainState(session, { stage: 'provider_call', provider: 0.95, adccl: 0.2 })
 
