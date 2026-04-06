@@ -1,7 +1,8 @@
 import { createGroq } from '@ai-sdk/groq'
+import { createAnthropic } from '@ai-sdk/anthropic'
 import { streamText } from 'ai'
 import { NextRequest } from 'next/server'
-import { checkRateLimit, checkPromptInjection } from '@/lib/hardening'
+import { checkRateLimit } from '@/lib/hardening'
 import { setBrainState } from '@/lib/brain-state-store'
 
 export const runtime = 'nodejs'
