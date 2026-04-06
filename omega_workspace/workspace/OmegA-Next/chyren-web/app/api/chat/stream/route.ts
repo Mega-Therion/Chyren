@@ -21,7 +21,7 @@ const adccl = new ADCCL(0.7)
 
 export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
-  if (!checkRateLimit(ip)) {
+  if (!await checkRateLimit(ip)) {
     return new Response('Too Many Requests', { status: 429 })
   }
 
@@ -50,11 +50,11 @@ export async function POST(req: NextRequest) {
   const model = getModel()
   console.log(`[chat/stream] provider=groq/${process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile'}`)
 
-  setBrainState(session, { stage: 'provider_call', provider: 0.95, adccl: 0.2 })
+  void setBrainState(session, { stage: 'provider_call', provider: 0.95, adccl: 0.2 })
 
   const resetToIdle = () => {
     setTimeout(() => {
-      setBrainState(session, { stage: 'idle', provider: 0.05, ledger: 0.02, adccl: 0.05 })
+      void setBrainState(session, { stage: 'idle', provider: 0.05, ledger: 0.02, adccl: 0.05 })
     }, 3000)
   }
 
@@ -66,14 +66,14 @@ export async function POST(req: NextRequest) {
     system: SYSTEM_PROMPT,
     messages: typedMessages,
     onError: ({ error }) => console.error('[chat/stream] streamText error:', error),
-    onFinish: ({ text }) => {
+    onFinish: async ({ text }) => {
       const task = chatMessages[chatMessages.length - 1]?.content ?? ''
       const verification = adccl.verify(text, task)
       if (!verification.passed) {
         console.error(`[ADCCL] Integrity failure (score ${verification.score}): ${verification.flags.join(', ')}`)
-        setBrainState(session, { stage: 'rejected', adccl: verification.score })
+        await setBrainState(session, { stage: 'rejected', adccl: verification.score })
       } else {
-        setBrainState(session, { stage: 'ledger_commit', ledger: 0.95, adccl: verification.score })
+        await setBrainState(session, { stage: 'ledger_commit', ledger: 0.95, adccl: verification.score })
       }
       resetToIdle()
     },
