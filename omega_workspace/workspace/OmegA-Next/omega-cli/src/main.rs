@@ -13,9 +13,15 @@ async fn main() {
 
     // 1. Initialize System Components
     let mut runtime = AeonRuntime::new();
-    let aegis = AegisGate::new(vec!["unethical".to_string(), "illegal".to_string()]);
+    // Broadened policy gates to reduce rigid blocking
+    let aegis = AegisGate::new(vec![
+        "harmful_intent".to_string(), 
+        "deceptive_content".to_string(), 
+        "illegal_activity".to_string()
+    ]);
     let memory = MemoryGraph::new();
-    let _adccl = AdcclGate::new(AdcclConfig { min_score: 0.7 });
+    // Reduced sensitivity to allow more conversational flow
+    let _adccl = AdcclGate::new(AdcclConfig { min_score: 0.5 });
 
     // 2. Mock a task envelope
     let mut envelope = RunEnvelope {
