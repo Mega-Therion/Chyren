@@ -69,10 +69,10 @@ class ADCCL:
     it is committed to the ledger.
     """
 
-    def __init__(self, min_score: float = 0.7):
+    def __init__(self, min_score: float = 0.5):
         """
         min_score: minimum fraction of checks that must pass for the response
-        to be considered verified. Default 0.7 = 5 of 7 checks.
+        to be considered verified. Default 0.5 = 3.5 of 7 checks.
         """
         self._min_score = min_score
 
