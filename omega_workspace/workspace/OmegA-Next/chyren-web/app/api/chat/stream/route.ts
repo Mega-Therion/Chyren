@@ -1,5 +1,5 @@
+import { createAnthropic } from '@ai-sdk/anthropic'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
-import { createGroq } from '@ai-sdk/groq'
 import { streamText } from 'ai'
 import { NextRequest } from 'next/server'
 import { checkRateLimit, checkPromptInjection } from '@/lib/hardening'
@@ -12,9 +12,9 @@ You operate with precision, no stubs, and no hallucinations. \
 You route tasks through verified AI providers with integrity checks. \
 Be concise, direct, and authoritative.`
 
-function getGroqModel() {
-  const groq = createGroq({ apiKey: process.env.GROQ_API_KEY ?? '' })
-  return groq(process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile')
+function getAnthropicModel() {
+  const anthropic = createAnthropic({ apiKey: process.env.ANTHROPIC_API_KEY ?? '' })
+  return anthropic(process.env.ANTHROPIC_MODEL ?? 'claude-haiku-4-5-20251001')
 }
 
 function getGeminiModel() {
@@ -23,14 +23,12 @@ function getGeminiModel() {
 }
 
 export async function POST(req: NextRequest) {
-  // Rate limit
   const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
   if (!checkRateLimit(ip)) {
     return new Response('Too Many Requests', { status: 429 })
   }
 
   const session = req.nextUrl.searchParams.get('session') ?? 'global'
-
   const { messages = [], message } = await req.json().catch(() => ({}))
 
   const chatMessages: { role: string; content: string }[] = messages.length
@@ -44,7 +42,6 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  // Prompt injection guard
   const lastUserContent = chatMessages[chatMessages.length - 1]?.content ?? ''
   if (checkPromptInjection(lastUserContent)) {
     return new Response(JSON.stringify({ error: 'Request rejected by integrity filter' }), {
@@ -53,10 +50,12 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  // Provider: Groq primary → Gemini fallback
-  const useGroq = Boolean(process.env.GROQ_API_KEY)
-  const model = useGroq ? getGroqModel() : getGeminiModel()
-  const providerLabel = useGroq ? `groq/${process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile'}` : `gemini/${process.env.GEMINI_MODEL ?? 'gemini-2.0-flash'}`
+  // Provider: Anthropic Haiku primary → Gemini fallback
+  const useAnthropic = Boolean(process.env.ANTHROPIC_API_KEY)
+  const model = useAnthropic ? getAnthropicModel() : getGeminiModel()
+  const providerLabel = useAnthropic
+    ? `anthropic/${process.env.ANTHROPIC_MODEL ?? 'claude-haiku-4-5-20251001'}`
+    : `gemini/${process.env.GEMINI_MODEL ?? 'gemini-2.0-flash'}`
   console.log(`[chat/stream] provider=${providerLabel}`)
 
   setBrainState(session, { stage: 'provider_call', provider: 0.95, adccl: 0.2 })

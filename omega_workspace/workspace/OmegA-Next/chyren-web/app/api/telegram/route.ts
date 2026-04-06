@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateText } from 'ai';
-import { createGroq } from '@ai-sdk/groq';
+import { createAnthropic } from '@ai-sdk/anthropic';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 
 export const runtime = 'nodejs';
@@ -20,13 +20,13 @@ interface TelegramUpdate {
 }
 
 async function getAIResponse(userText: string): Promise<string> {
-  const groqKey = process.env.GROQ_API_KEY;
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
   const geminiKey = process.env.GEMINI_API_KEY;
 
-  if (groqKey) {
-    const groq = createGroq({ apiKey: groqKey });
+  if (anthropicKey) {
+    const anthropic = createAnthropic({ apiKey: anthropicKey });
     const { text } = await generateText({
-      model: groq('llama-3.3-70b-versatile'),
+      model: anthropic(process.env.ANTHROPIC_MODEL ?? 'claude-haiku-4-5-20251001'),
       system: SYSTEM_PROMPT,
       prompt: userText,
     });
@@ -43,7 +43,7 @@ async function getAIResponse(userText: string): Promise<string> {
     return text;
   }
 
-  throw new Error('No AI provider configured: set GROQ_API_KEY or GEMINI_API_KEY');
+  throw new Error('No AI provider configured: set ANTHROPIC_API_KEY or GEMINI_API_KEY');
 }
 
 async function sendTelegramMessage(chatId: number, text: string): Promise<void> {
