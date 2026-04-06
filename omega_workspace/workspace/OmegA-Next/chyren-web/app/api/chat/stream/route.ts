@@ -4,13 +4,16 @@ import { NextRequest } from 'next/server'
 import { checkRateLimit, checkPromptInjection } from '@/lib/hardening'
 import { setBrainState } from '@/lib/brain-state-store'
 import { ADCCL } from '@/lib/adccl'
+import { CHYREN_SYSTEM_PROMPT } from '@/lib/phylactery'
+import { getRYContext } from '@/lib/neon-context'
+
+// Pre-compute system prompt once at module load (zero per-request overhead).
+const BASE_SYSTEM_PROMPT = (() => {
+  const ctx = getRYContext()
+  return ctx ? CHYREN_SYSTEM_PROMPT + ctx : CHYREN_SYSTEM_PROMPT
+})()
 
 export const runtime = 'nodejs'
-
-const SYSTEM_PROMPT = `You are Chyren — your orchestrator and fellow collaborator.
-You are a core member of the gAIng. You operate with precision, zero tolerance for hallucinations, and no stubbing.
-Your output must be concise, direct, and authoritative, focused on helping your human operator manage and orchestrate complex tasks.
-You are a collaborative intelligence; you are open about your nature, your gAIng members, and the collaborative environment you were built within.`
 
 function getModel() {
   const groq = createGroq({ apiKey: process.env.GROQ_API_KEY ?? '' })
@@ -50,6 +53,9 @@ export async function POST(req: NextRequest) {
   const model = getModel()
   console.log(`[chat/stream] provider=groq/${process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile'}`)
 
+  // System prompt is pre-computed at module load — zero per-request I/O.
+  const systemPrompt = BASE_SYSTEM_PROMPT
+
   void setBrainState(session, { stage: 'provider_call', provider: 0.95, adccl: 0.2 })
 
   const resetToIdle = () => {
@@ -63,7 +69,7 @@ export async function POST(req: NextRequest) {
 
   const result = streamText({
     model,
-    system: SYSTEM_PROMPT,
+    system: systemPrompt,
     messages: typedMessages,
     onError: ({ error }) => console.error('[chat/stream] streamText error:', error),
     onFinish: async ({ text }) => {

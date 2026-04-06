@@ -18,4 +18,12 @@ fi
 
 # Project "Root Directory" on Vercel is omega_workspace/.../chyren-web — run CLI from Git root.
 cd "$REPO_ROOT"
-exec vercel "$@"
+vercel "$@"
+
+# After a production deploy, warm the Neon context cache.
+if [[ "$*" == *"--prod"* ]]; then
+  echo "Warming Neon context cache..."
+  curl -sf -X POST "https://chyren-web.vercel.app/api/cron/warm-context" \
+    -H "Authorization: Bearer ${CRON_SECRET:-}" \
+    -w "  HTTP:%{http_code} TIME:%{time_total}s\n" || echo "  (warmup skipped — CRON_SECRET not set or endpoint error)"
+fi

@@ -75,7 +75,7 @@ impl Conductor {
         envelope.task = plan.steps.join("\n");
 
         let memory = self.memory.lock().await;
-        *envelope = self.aegis.admit(envelope.clone(), &memory);
+        let status = self.aegis.admit(envelope.clone(), &memory); envelope.status = status;
         drop(memory);
 
         if let RunStatus::Rejected(ref r) = envelope.status {

@@ -36,7 +36,7 @@ async fn main() {
 
     // 3. Execution Pipeline
     println!("Step 1: Aegis Gate...");
-    envelope = aegis.admit(envelope, &memory);
+    envelope.status = aegis.admit(envelope.clone(), &memory);
     if envelope.status == RunStatus::Rejected("Constitutional misalignment".to_string()) {
         println!("Task Rejected by Aegis!");
         return;
