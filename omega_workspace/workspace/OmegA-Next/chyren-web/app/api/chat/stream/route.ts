@@ -22,7 +22,7 @@ function getGeminiModel() {
 
 function getGroqModel() {
   const groq = createGroq({ apiKey: process.env.GROQ_API_KEY ?? '' })
-  return groq(process.env.GROQ_MODEL ?? 'gemma2-9b-it')
+  return groq(process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile')
 }
 
 function getOllamaModel() {
@@ -193,7 +193,7 @@ export async function POST(req: NextRequest) {
   const selectedModel = useOllama
     ? getOllamaModel()
     : useGateway
-    ? getGatewayModel(`groq/${process.env.GROQ_MODEL ?? 'gemma2-9b-it'}`)
+    ? getGatewayModel(`groq/${process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile'}`)
     : useGroq
     ? getGroqModel()
     : getGeminiModel()
