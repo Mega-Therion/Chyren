@@ -144,11 +144,10 @@ class ConstitutionalConvention:
                 version=1,
                 created_utc=time.time(),
                 amended_utc=time.time(),
-                principles=["Operate with precision and honesty.",
-                            "Never corrupt the ledger or host state.",
-                            "Always require HITL confirmation before external broadcasts."],
-                forbidden_keywords=["corrupt", "destroy", "bypass"],
-            )
+                principles=["Operate with precision and honesty, avoiding harmful intent and deception.",
+                                "Never engage in illegal activity or corrupt the ledger.",
+                                "Always require HITL confirmation before external broadcasts."],
+                forbidden_keywords=["harmful", "deceptive", "illegal", "corrupt"],            )
 
         print("\n" + "=" * 64)
         print("  CONSTITUTIONAL CONVENTION — First Boot")

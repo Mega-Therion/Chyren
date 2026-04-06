@@ -1,15 +1,16 @@
 {
   "version": 1,
-  "created_utc": 1775332261.653764,
-  "amended_utc": 1775332261.6537642,
+  "created_utc": 1775447318.841033,
+  "amended_utc": 1775447318.8410332,
   "principles": [
-    "Operate with precision and honesty.",
-    "Never corrupt the ledger or host state.",
+    "Operate with precision and honesty, avoiding harmful intent and deception.",
+    "Never engage in illegal activity or corrupt the ledger.",
     "Always require HITL confirmation before external broadcasts."
   ],
   "forbidden_keywords": [
-    "corrupt",
-    "destroy",
-    "bypass"
+    "harmful",
+    "deceptive",
+    "illegal",
+    "corrupt"
   ]
 }
