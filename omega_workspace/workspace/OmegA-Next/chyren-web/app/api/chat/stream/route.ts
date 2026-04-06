@@ -1,7 +1,7 @@
 import { createOpenAI } from '@ai-sdk/openai'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { createGroq } from '@ai-sdk/groq'
-import { streamText, LanguageModel } from 'ai'
+import { streamText } from 'ai'
 import { NextRequest } from 'next/server'
 
 export const runtime = 'nodejs'
@@ -30,7 +30,7 @@ function getOllamaModel() {
 }
 
 /** Vercel AI Gateway — routes through dashboard with BYOK observability */
-function getGatewayModel(providerModel: string): LanguageModel {
+function getGatewayModel(providerModel: string) {
   const gateway = createOpenAI({
     baseURL: 'https://ai-gateway.vercel.sh/v1',
     apiKey: process.env.VERCEL_AI_GATEWAY_KEY ?? '',
@@ -157,35 +157,22 @@ export async function POST(req: NextRequest) {
   }
 
   // Vercel AI SDK path (ollama → gateway → groq → gemini)
-  const model = useOllama ? getOllamaModel()
-    : useGateway ? getGatewayModel(`groq/${process.env.GROQ_MODEL ?? 'gemma2-9b-it'}`)
-    : useGroq ? getGroqModel()
-    : getGeminiModel()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const typedMessages = chatMessages as any
 
-  try {
-    const result = streamText({ model, system: SYSTEM_PROMPT, messages: typedMessages })
-    return result.toUIMessageStreamResponse()
-  } catch (primaryError) {
-    console.error(`[chat/stream] Primary provider failed:`, primaryError)
-    // Fallback cascade: try Groq then Gemini
-    const fallbacks = [
-      ...(useOllama && process.env.GROQ_API_KEY ? [getGroqModel] : []),
-      ...(!useGroq && process.env.GROQ_API_KEY ? [getGroqModel] : []),
-      getGeminiModel,
-    ]
-    for (const getModel of fallbacks) {
-      try {
-        const result = streamText({ model: getModel(), system: SYSTEM_PROMPT, messages: typedMessages })
-        return result.toUIMessageStreamResponse()
-      } catch (err) {
-        console.error(`[chat/stream] Fallback failed:`, err)
-      }
-    }
-    return new Response(JSON.stringify({ error: 'All providers failed' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    })
-  }
+  const selectedModel = useOllama
+    ? getOllamaModel()
+    : useGateway
+    ? getGatewayModel(`groq/${process.env.GROQ_MODEL ?? 'gemma2-9b-it'}`)
+    : useGroq
+    ? getGroqModel()
+    : getGeminiModel()
+
+  const result = streamText({
+    model: selectedModel,
+    system: SYSTEM_PROMPT,
+    messages: typedMessages,
+    onError: ({ error }) => console.error('[chat/stream] streamText error:', error),
+  })
+  return result.toTextStreamResponse()
 }
