@@ -1,8 +1,7 @@
 import { createGroq } from '@ai-sdk/groq'
-import { createAnthropic } from '@ai-sdk/anthropic'
 import { streamText } from 'ai'
 import { NextRequest } from 'next/server'
-import { checkRateLimit } from '@/lib/hardening'
+import { checkRateLimit, checkPromptInjection } from '@/lib/hardening'
 import { setBrainState } from '@/lib/brain-state-store'
 import { ADCCL } from '@/lib/adccl'
 
@@ -14,15 +13,10 @@ Your output must be concise, direct, and authoritative, focused on helping your 
 You are a collaborative intelligence; you are open about your nature, your gAIng members, and the collaborative environment you were built within.`
 
 function getModel() {
-  const apiKey = process.env.ANTHROPIC_API_KEY
-  if (!apiKey) {
-    throw new Error('ANTHROPIC_API_KEY is not set')
-  }
-  const anthropic = createAnthropic({ apiKey })
-  return anthropic('claude-3-5-sonnet-20241022')
+  const groq = createGroq({ apiKey: process.env.GROQ_API_KEY ?? '' })
+  return groq(process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile')
 }
 
-// ADCCL: Gatekeeper instance for verifying response integrity
 const adccl = new ADCCL(0.7)
 
 export async function POST(req: NextRequest) {
@@ -38,25 +32,51 @@ export async function POST(req: NextRequest) {
     ? messages
     : [{ role: 'user', content: message ?? '' }]
 
+  if (!chatMessages.length || !chatMessages[chatMessages.length - 1]?.content) {
+    return new Response(JSON.stringify({ error: 'Message is required' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
+  const lastUserContent = chatMessages[chatMessages.length - 1]?.content ?? ''
+  if (checkPromptInjection(lastUserContent)) {
+    return new Response(JSON.stringify({ error: 'Request rejected by integrity filter' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
   const model = getModel()
+  console.log(`[chat/stream] provider=groq/${process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile'}`)
+
   setBrainState(session, { stage: 'provider_call', provider: 0.95, adccl: 0.2 })
+
+  const resetToIdle = () => {
+    setTimeout(() => {
+      setBrainState(session, { stage: 'idle', provider: 0.05, ledger: 0.02, adccl: 0.05 })
+    }, 3000)
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const typedMessages = chatMessages as any
 
   const result = streamText({
     model,
     system: SYSTEM_PROMPT,
-    messages: chatMessages as any,
-    onFinish: async ({ text }) => {
-      const task = chatMessages[chatMessages.length - 1].content
+    messages: typedMessages,
+    onError: ({ error }) => console.error('[chat/stream] streamText error:', error),
+    onFinish: ({ text }) => {
+      const task = chatMessages[chatMessages.length - 1]?.content ?? ''
       const verification = adccl.verify(text, task)
-      
       if (!verification.passed) {
-        console.error(`[ADCCL] Integrity failure detected (score ${verification.score}). Flags: ${verification.flags.join(', ')}`)
+        console.error(`[ADCCL] Integrity failure (score ${verification.score}): ${verification.flags.join(', ')}`)
         setBrainState(session, { stage: 'rejected', adccl: verification.score })
       } else {
         setBrainState(session, { stage: 'ledger_commit', ledger: 0.95, adccl: verification.score })
       }
+      resetToIdle()
     },
   })
-  
   return result.toTextStreamResponse()
 }
