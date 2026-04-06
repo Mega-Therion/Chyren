@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     let response: string
     if (useGroq) {
       const groq = createGroq({ apiKey: process.env.GROQ_API_KEY ?? '' })
-      const model = groq(process.env.GROQ_MODEL ?? 'gemma2-9b-it')
+      const model = groq(process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile')
       const result = await generateText({
         model,
         system: SYSTEM_PROMPT,
