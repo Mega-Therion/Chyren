@@ -51,6 +51,7 @@ from providers.anthropic import AnthropicProvider
 from providers.openai import OpenAIProvider
 from providers.deepseek import DeepSeekProvider
 from providers.gemini import GeminiProvider
+from providers.gemma4 import Gemma4Provider
 
 # Sovereign identity injected into every spoke call as the system prompt prefix.
 _SOVEREIGN_IDENTITY = (
@@ -97,7 +98,8 @@ class Chyren:
         self._router.register(OpenAIProvider())
         self._router.register(DeepSeekProvider())
         self._router.register(GeminiProvider())
-        self._router.set_preference(["anthropic", "openai", "deepseek", "gemini"])
+        self._router.register(Gemma4Provider())
+        self._router.set_preference(["gemma4", "anthropic", "openai", "deepseek", "gemini"])
 
         self._adccl = ADCCL(min_score=0.7)
 
@@ -338,7 +340,7 @@ def main() -> None:
     parser.add_argument("task", nargs="?", help="Task to run")
     parser.add_argument(
         "--provider", "-p",
-        choices=["anthropic", "openai", "deepseek", "gemini"],
+        choices=["anthropic", "openai", "deepseek", "gemini", "gemma4"],
         default=None,
         help="Preferred provider (falls back to chain if unavailable)",
     )

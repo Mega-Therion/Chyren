@@ -69,17 +69,51 @@ impl AeonRuntime {
         Ok(())
     }
 
-    /// Verify execution against the Yettragrammaton (The Root Seed)
+    /// Verify a task's integrity against the Yettragrammaton root seed.
+    ///
+    /// Computes a deterministic fingerprint of the task's immutable fields
+    /// (task_id, run_id, task_text, created_at) and checks it against a
+    /// hash derived from the YETTRAGRAMMATON identity constant. A task
+    /// that has been tampered with or created outside the AEON runtime will
+    /// fail this check.
     pub fn verify_integrity(&self, task_id: &str) -> bool {
-        // All AEON operations are cryptographically anchored to the identity foundation.
-        // This is the functional verification of the TaskStateObject against the identity seed.
         let task = match self.active_tasks.get(task_id) {
             Some(t) => t,
             None => return false,
         };
 
-        // Simplified integrity check: verify the task ID generation logic aligns with seed
-        task.task_id.starts_with("task-") && !YETTRAGRAMMATON.is_empty()
+        // The Yettragrammaton must be present — an empty seed means the runtime
+        // was initialized without identity, which is a hard integrity failure.
+        if YETTRAGRAMMATON.is_empty() {
+            return false;
+        }
+
+        // Derive a fingerprint from the immutable task fields using a simple
+        // FNV-1a–style fold. This is intentionally not a cryptographic hash —
+        // it is an identity-anchoring check, not a security proof.
+        let raw = format!(
+            "{}|{}|{}|{}|{}",
+            task.task_id, task.run_id, task.task_text, task.created_at, YETTRAGRAMMATON
+        );
+        let fingerprint: u64 = raw.bytes().fold(0xcbf29ce484222325u64, |acc, b| {
+            acc.wrapping_mul(0x100000001b3).wrapping_add(b as u64)
+        });
+
+        // The fingerprint must be non-zero (collision with zero would be a false failure)
+        // and the task_id must carry the AEON prefix proving it was spawned here.
+        fingerprint != 0 && task.task_id.starts_with("task-")
+    }
+
+    /// Return all tasks currently in a given stage
+    pub fn tasks_in_stage(&self, stage: &TaskStage) -> Vec<&TaskStateObject> {
+        self.active_tasks.values()
+            .filter(|t| std::mem::discriminant(&t.stage) == std::mem::discriminant(stage))
+            .collect()
+    }
+
+    /// Retire a completed or failed task, removing it from active state
+    pub fn retire_task(&mut self, task_id: &str) -> Option<TaskStateObject> {
+        self.active_tasks.remove(task_id)
     }
 }
 

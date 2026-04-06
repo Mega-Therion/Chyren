@@ -17,55 +17,79 @@ interface MessageListProps {
 }
 
 export function MessageList({ messages, isLoading = false }: MessageListProps) {
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const endRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    endRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  return (
-    <div className="flex flex-col flex-1 overflow-y-auto px-4 py-6 space-y-1">
-      {messages.length === 0 ? (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-4xl mb-4 opacity-50">Ω</div>
-            <h2 className="text-2xl font-bold gradient-text mb-2">Chyren</h2>
-            <p className="text-slate-400 text-sm max-w-xs mx-auto leading-relaxed">
-              Sovereign Intelligence Orchestrator. Ask me anything and I'll route your task through
-              multiple AI providers with integrity verification.
-            </p>
+  if (messages.length === 0) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center gap-6 px-8 grid-bg">
+        <div className="text-center">
+          <div
+            className="font-mono text-7xl font-light mb-4 omega-glow select-none"
+            style={{ color: '#6366f1' }}
+          >
+            Ω
+          </div>
+          <div className="font-mono text-xs tracking-[0.3em] text-slate-500 uppercase mb-2">
+            Sovereign Intelligence Orchestrator
+          </div>
+          <div className="font-mono text-xs text-slate-700 mb-8">v2.0 // ADCCL ACTIVE</div>
+          <div className="grid grid-cols-3 gap-3 max-w-sm mx-auto">
+            {['Task Routing', 'ADCCL Verify', 'Ledger Commit'].map((label) => (
+              <div
+                key={label}
+                className="terminal-panel rounded px-3 py-2 text-center"
+              >
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mx-auto mb-1.5"
+                  style={{ boxShadow: '0 0 6px #10b981' }}
+                />
+                <div className="font-mono text-xs text-slate-500">{label}</div>
+              </div>
+            ))}
           </div>
         </div>
-      ) : (
-        <>
-          {messages.map((message) => (
-            <ChatMessage
-              key={message.id}
-              role={message.role}
-              content={message.content}
-              timestamp={message.timestamp}
-              isStreaming={message.isStreaming}
-            />
-          ))}
-          {isLoading && (
-            <div className="flex justify-start mb-4">
-              <div className="flex items-end gap-2">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full glass border border-cyan-500/30 flex items-center justify-center text-xs font-bold">
-                  Ω
-                </div>
-                <div className="glass-darker rounded-2xl rounded-bl-none px-4 py-3 animate-fade-in">
-                  <div className="typing-indicator">
-                    <span className="typing-dot w-2 h-2 bg-cyan-400" />
-                    <span className="typing-dot w-2 h-2 bg-cyan-400" />
-                    <span className="typing-dot w-2 h-2 bg-cyan-400" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </>
+        <div className="font-mono text-xs text-slate-700 text-center">
+          Type a command or ask a question to begin
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex-1 overflow-y-auto flex flex-col divide-y divide-slate-800/50">
+      {messages.map((msg, i) => (
+        <ChatMessage
+          key={msg.id}
+          role={msg.role}
+          content={msg.content}
+          timestamp={msg.timestamp}
+          isStreaming={msg.isStreaming}
+          index={i}
+        />
+      ))}
+      {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
+        <div className="px-5 py-3 msg-assistant fade-up">
+          <div className="flex items-center gap-3 mb-2">
+            <span className="font-mono text-xs font-medium tracking-wider" style={{ color: '#10b981' }}>
+              Ω CHYREN
+            </span>
+            <span className="badge badge-amber">PROCESSING</span>
+          </div>
+          <div className="pl-3 flex items-center gap-1.5">
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className="pulse-dot w-1 h-1 rounded-full"
+                style={{ background: '#10b981', animationDelay: `${i * 0.2}s` }}
+              />
+            ))}
+          </div>
+        </div>
       )}
+      <div ref={endRef} />
     </div>
   )
 }
