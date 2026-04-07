@@ -1,0 +1,173 @@
+version: '3.8'
+
+services:
+  # Chyren Main Application
+  chyren:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: chyren-app
+    ports:
+      - "8080:8080"  # HTTP API
+      - "8081:8081"  # WebSocket
+      - "8082:8082"  # gRPC
+    environment:
+      - RUST_LOG=info
+      - CHYREN_HOME=/app
+      - CHYREN_DATA=/data
+      - POSTGRES_HOST=postgres
+      - REDIS_HOST=redis
+      - VECTOR_DB_HOST=qdrant
+    volumes:
+      - ./data:/data
+      - ./logs:/app/logs
+    depends_on:
+      - postgres
+      - redis
+      - qdrant
+    networks:
+      - chyren-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: chyren-postgres
+    environment:
+      - POSTGRES_DB=chyren
+      - POSTGRES_USER=chyren
+      - POSTGRES_PASSWORD=chyren_password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - chyren-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chyren"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: chyren-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - chyren-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Qdrant Vector Database
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: chyren-qdrant
+    ports:
+      - "6333:6333"  # HTTP
+      - "6334:6334"  # gRPC
+    volumes:
+      - qdrant-data:/qdrant/storage
+    networks:
+      - chyren-network
+    restart: unless-stopped
+    environment:
+      - QDRANT__SERVICE__GRPC_PORT=6334
+
+  # Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: chyren-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    networks:
+      - chyren-network
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+
+  # Grafana Dashboard
+  grafana:
+    image: grafana/grafana:latest
+    container_name: chyren-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+    networks:
+      - chyren-network
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: chyren-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    networks:
+      - chyren-network
+    restart: unless-stopped
+    depends_on:
+      - chyren
+
+volumes:
+  postgres-data:
+  redis-data:
+  qdrant-data:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  chyren-network:
+    driver: bridge
+
+# ==================================
+# Usage Instructions
+# ==================================
+# Development:
+#   docker-compose up
+#
+# Production:
+#   docker-compose -f docker-compose.yml up -d
+#
+# Build and restart specific service:
+#   docker-compose up -d --build chyren
+#
+# View logs:
+#   docker-compose logs -f chyren
+#
+# Stop all services:
+#   docker-compose down
+#
+# Stop and remove volumes:
+#   docker-compose down -v
+# ==================================
