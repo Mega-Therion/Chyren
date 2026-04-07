@@ -15,19 +15,38 @@ const BASE_SYSTEM_PROMPT = (() => {
 
 export const runtime = 'nodejs'
 
+// Model priority list: primary first, fallbacks after
+const MODEL_CHAIN = [
+  process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile',
+  'llama-3.1-8b-instant',
+  'gemma2-9b-it',
+]
+
 function getRequiredEnv(name: string): string {
   const v = process.env[name]
   if (!v) throw new Error(`Missing required env var: ${name}`)
   return v
 }
 
-function getModel() {
+function buildModel(modelId: string) {
   const apiKey = getRequiredEnv('GROQ_API_KEY')
   const groq = createGroq({ apiKey })
-  return groq(process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile')
+  return groq(modelId)
 }
 
 const adccl = new ADCCL(0.7)
+
+/** Stream a plain-text error message back to the client so the UI shows it. */
+function errorStream(message: string): ReadableStream<Uint8Array> {
+  const encoder = new TextEncoder()
+  return new ReadableStream({
+    start(controller) {
+      // Vercel AI SDK data-stream format: "0:" prefix
+      controller.enqueue(encoder.encode(`0:${JSON.stringify(message)}\n`))
+      controller.close()
+    },
+  })
+}
 
 export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
@@ -57,21 +76,6 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  let model: ReturnType<ReturnType<typeof createGroq>>
-  try {
-    model = getModel()
-  } catch (err) {
-    const msg = (err as Error)?.message ?? String(err)
-    return new Response(JSON.stringify({ error: msg }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    })
-  }
-
-  console.log(
-    `[chat/stream] provider=groq/${process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile'}`,
-  )
-
   // System prompt is pre-computed at module load — zero per-request I/O.
   const systemPrompt = BASE_SYSTEM_PROMPT
 
@@ -85,22 +89,103 @@ export async function POST(req: NextRequest) {
 
   const typedMessages = chatMessages as ModelMessage[]
 
-  const result = streamText({
-    model,
-    system: systemPrompt,
-    messages: typedMessages,
-    onError: ({ error }) => console.error('[chat/stream] streamText error:', error),
-    onFinish: async ({ text }) => {
-      const task = chatMessages[chatMessages.length - 1]?.content ?? ''
-      const verification = adccl.verify(text, task)
-      if (!verification.passed) {
-        console.error(`[ADCCL] Integrity failure (score ${verification.score}): ${verification.flags.join(', ')}`)
-        await setBrainState(session, { stage: 'rejected', adccl: verification.score })
-      } else {
-        await setBrainState(session, { stage: 'ledger_commit', ledger: 0.95, adccl: verification.score })
+  // Try each model in chain until one succeeds (handles rate limits gracefully)
+  for (const modelId of MODEL_CHAIN) {
+    try {
+      console.log(`[chat/stream] attempting provider=groq/${modelId}`)
+      const model = buildModel(modelId)
+
+      const result = streamText({
+        model,
+        system: systemPrompt,
+        messages: typedMessages,
+        onError: ({ error }) => {
+          console.error(`[chat/stream] streamText error on ${modelId}:`, error)
+        },
+        onFinish: async ({ text }) => {
+          const task = chatMessages[chatMessages.length - 1]?.content ?? ''
+          const verification = adccl.verify(text, task)
+          if (!verification.passed) {
+            console.error(`[ADCCL] Integrity failure (score ${verification.score}): ${verification.flags?.join(', ')}`)
+            await setBrainState(session, { stage: 'rejected', adccl: verification.score })
+          } else {
+            await setBrainState(session, { stage: 'ledger_commit', ledger: 0.95, adccl: verification.score })
+          }
+          resetToIdle()
+        },
+      })
+
+      // Probe the stream: if first chunk throws a rate-limit error, fall through to next model
+      const streamResponse = result.toTextStreamResponse()
+      const reader = streamResponse.body?.getReader()
+      if (!reader) {
+        // No body — fall through
+        continue
       }
-      resetToIdle()
-    },
+
+      // Pass-through stream, intercepting rate-limit signals
+      let isRateLimited = false
+      const passThrough = new ReadableStream<Uint8Array>({
+        async start(controller) {
+          const decoder = new TextDecoder()
+          try {
+            while (true) {
+              const { done, value } = await reader.read()
+              if (done) break
+              const text = decoder.decode(value, { stream: true })
+              // Detect Groq rate-limit error propagated through stream
+              if (text.includes('rate_limit_exceeded') || text.includes('Rate limit')) {
+                isRateLimited = true
+                break
+              }
+              controller.enqueue(value)
+            }
+          } catch (e) {
+            const msg = (e as Error).message ?? ''
+            if (msg.includes('rate') || msg.includes('Rate') || msg.includes('429')) {
+              isRateLimited = true
+            } else {
+              controller.error(e)
+              return
+            }
+          } finally {
+            if (!isRateLimited) {
+              controller.close()
+            }
+          }
+        },
+      })
+
+      if (!isRateLimited) {
+        return new Response(passThrough, {
+          headers: streamResponse.headers,
+        })
+      }
+
+      console.warn(`[chat/stream] rate-limited on ${modelId}, trying next model`)
+      continue
+    } catch (err) {
+      const msg = (err as Error)?.message ?? String(err)
+      const isRateLimit = msg.includes('rate') || msg.includes('Rate') || msg.includes('429') || msg.includes('quota')
+      if (isRateLimit) {
+        console.warn(`[chat/stream] rate-limit error on ${modelId}: ${msg}`)
+        continue // try next model
+      }
+      // Non-rate-limit error: return immediately
+      return new Response(JSON.stringify({ error: msg }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+  }
+
+  // All models exhausted — return a user-visible error through the stream
+  console.error('[chat/stream] all models rate-limited or unavailable')
+  void setBrainState(session, { stage: 'rejected', adccl: 0 })
+  resetToIdle()
+
+  return new Response(errorStream('Neural link saturated — all inference pathways are rate-limited. Please wait 60 seconds and retry.'), {
+    status: 200,
+    headers: { 'Content-Type': 'text/plain; charset=utf-8', 'X-Vercel-AI-Data-Stream': 'v1' },
   })
-  return result.toTextStreamResponse()
 }
