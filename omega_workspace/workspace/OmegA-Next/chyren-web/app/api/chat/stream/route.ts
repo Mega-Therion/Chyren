@@ -76,9 +76,7 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  // System prompt is pre-computed at module load — zero per-request I/O.
   const systemPrompt = BASE_SYSTEM_PROMPT
-
   void setBrainState(session, { stage: 'provider_call', provider: 0.95, adccl: 0.2 })
 
   const resetToIdle = () => {
@@ -89,12 +87,14 @@ export async function POST(req: NextRequest) {
 
   const typedMessages = chatMessages as ModelMessage[]
 
-  // Try each model in chain until one succeeds (handles rate limits gracefully)
+  // Try each model in chain
   for (const modelId of MODEL_CHAIN) {
     try {
       console.log(`[chat/stream] attempting provider=groq/${modelId}`)
       const model = buildModel(modelId)
 
+      // Use the AI SDK result directly. The built-in retry/fallback in some providers 
+      // is good, but here we handle it manually across different model IDs.
       const result = streamText({
         model,
         system: systemPrompt,
@@ -115,63 +115,19 @@ export async function POST(req: NextRequest) {
         },
       })
 
-      // Probe the stream: if first chunk throws a rate-limit error, fall through to next model
-      const streamResponse = result.toTextStreamResponse()
-      const reader = streamResponse.body?.getReader()
-      if (!reader) {
-        // No body — fall through
-        continue
-      }
+      // We return the response immediately. If the stream fails later due to rate limits,
+      // the client will see an error. 
+      // NOTE: For true fallback, we'd need to wait for the first chunk before returning the Response,
+      // but that increases initial latency. Given Groq's speed, we'll favor low latency.
+      return result.toTextStreamResponse()
 
-      // Pass-through stream, intercepting rate-limit signals
-      let isRateLimited = false
-      const passThrough = new ReadableStream<Uint8Array>({
-        async start(controller) {
-          const decoder = new TextDecoder()
-          try {
-            while (true) {
-              const { done, value } = await reader.read()
-              if (done) break
-              const text = decoder.decode(value, { stream: true })
-              // Detect Groq rate-limit error propagated through stream
-              if (text.includes('rate_limit_exceeded') || text.includes('Rate limit')) {
-                isRateLimited = true
-                break
-              }
-              controller.enqueue(value)
-            }
-          } catch (e) {
-            const msg = (e as Error).message ?? ''
-            if (msg.includes('rate') || msg.includes('Rate') || msg.includes('429')) {
-              isRateLimited = true
-            } else {
-              controller.error(e)
-              return
-            }
-          } finally {
-            if (!isRateLimited) {
-              controller.close()
-            }
-          }
-        },
-      })
-
-      if (!isRateLimited) {
-        return new Response(passThrough, {
-          headers: streamResponse.headers,
-        })
-      }
-
-      console.warn(`[chat/stream] rate-limited on ${modelId}, trying next model`)
-      continue
     } catch (err) {
       const msg = (err as Error)?.message ?? String(err)
       const isRateLimit = msg.includes('rate') || msg.includes('Rate') || msg.includes('429') || msg.includes('quota')
       if (isRateLimit) {
-        console.warn(`[chat/stream] rate-limit error on ${modelId}: ${msg}`)
-        continue // try next model
+        console.warn(`[chat/stream] initial rate-limit on ${modelId}, trying next...`)
+        continue
       }
-      // Non-rate-limit error: return immediately
       return new Response(JSON.stringify({ error: msg }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
@@ -179,12 +135,8 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // All models exhausted — return a user-visible error through the stream
-  console.error('[chat/stream] all models rate-limited or unavailable')
-  void setBrainState(session, { stage: 'rejected', adccl: 0 })
-  resetToIdle()
-
-  return new Response(errorStream('Neural link saturated — all inference pathways are rate-limited. Please wait 60 seconds and retry.'), {
+  console.error('[chat/stream] all models exhausted')
+  return new Response(errorStream('Neural link saturated — please try again in a moment.'), {
     status: 200,
     headers: { 'Content-Type': 'text/plain; charset=utf-8', 'X-Vercel-AI-Data-Stream': 'v1' },
   })
