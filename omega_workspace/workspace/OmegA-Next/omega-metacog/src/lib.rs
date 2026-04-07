@@ -1,6 +1,7 @@
-// omega-metacog: Reflective agent for autonomous insight generation.
-// The metacog layer analyzes the MemoryGraph to identify patterns,
-// drifts, and opportunities for cognitive optimization.
+//! omega-metacog: Reflective agent for autonomous insight generation.
+//!
+//! The metacog layer analyzes the MemoryGraph to identify patterns, drifts, and
+//! opportunities for cognitive optimization.
 
 #![warn(missing_docs)]
 
@@ -47,7 +48,7 @@ pub struct MetacogAgent {
     /// Epiphanies generated across all reflection cycles
     pub history: Vec<Epiphany>,
     /// Minimum retrieval count to qualify as a HotNode
-    hot_threshold: u32,
+    hot_threshold: u64,
     /// Maximum decay score before a node is considered Cold
     cold_threshold: f64,
     /// Minimum decay score for a node to be considered active
@@ -118,10 +119,14 @@ impl MetacogAgent {
         // surfaced repeatedly via threat_fabric entries in the graph.
         let threat_count = graph.threat_fabric.len();
         if threat_count >= 3 {
-            let ids: Vec<String> = graph.threat_fabric.iter()
+            let ids: Vec<String> = graph
+                .threat_fabric
+                .iter()
                 .map(|t| t.pattern_id.clone())
                 .collect();
-            let top_entry = graph.threat_fabric.iter()
+            let top_entry = graph
+                .threat_fabric
+                .iter()
                 .max_by_key(|t| t.severity.as_str());
             let top_label = top_entry
                 .and_then(|t| t.labels.first())
@@ -131,7 +136,8 @@ impl MetacogAgent {
                 insight: format!(
                     "{} threat patterns in memory fabric (highest severity label: '{}').\
                     Escalating to AEGIS for policy hardening.",
-                    threat_count, &top_label[..top_label.len().min(60)],
+                    threat_count,
+                    &top_label[..top_label.len().min(60)],
                 ),
                 supporting_nodes: ids,
                 confidence: 0.92,
@@ -146,8 +152,13 @@ impl MetacogAgent {
             std::collections::HashMap::new();
         for episode in &graph.episodes {
             for node_id in &episode.result_nodes {
-                co_access.entry(node_id.clone()).or_default()
-                    .extend(episode.result_nodes.iter().filter(|n| *n != node_id).cloned());
+                co_access.entry(node_id.clone()).or_default().extend(
+                    episode
+                        .result_nodes
+                        .iter()
+                        .filter(|n| *n != node_id)
+                        .cloned(),
+                );
             }
         }
         for (anchor, co_nodes) in &co_access {
@@ -162,7 +173,8 @@ impl MetacogAgent {
                     insight: format!(
                         "Node '{}' is consistently co-accessed with {} other nodes — \
                         cluster candidate. Consider consolidating into a semantic group.",
-                        anchor, unique_co.len(),
+                        anchor,
+                        unique_co.len(),
                     ),
                     supporting_nodes: cluster_ids,
                     confidence: 0.70,
@@ -173,11 +185,14 @@ impl MetacogAgent {
         }
 
         // Pass 5: Orphaned knowledge — nodes with edges but zero retrievals
-        let connected_ids: std::collections::HashSet<String> = graph.edges.iter()
+        let connected_ids: std::collections::HashSet<String> = graph
+            .edges
+            .iter()
             .flat_map(|e| [e.from_id.clone(), e.to_id.clone()])
             .collect();
         for (id, node) in &graph.nodes {
-            if connected_ids.contains(id) && node.retrieval_count == 0
+            if connected_ids.contains(id)
+                && node.retrieval_count == 0
                 && node.decay_score > self.active_floor
             {
                 new_insights.push(Epiphany {
@@ -185,7 +200,11 @@ impl MetacogAgent {
                         "Node '{}' is connected to {} other nodes but has never been retrieved. \
                         Potential orphaned knowledge — review for relevance.",
                         &node.content[..node.content.len().min(60)],
-                        graph.edges.iter().filter(|e| &e.from_id == id || &e.to_id == id).count(),
+                        graph
+                            .edges
+                            .iter()
+                            .filter(|e| &e.from_id == id || &e.to_id == id)
+                            .count(),
                     ),
                     supporting_nodes: vec![id.clone()],
                     confidence: 0.65,
@@ -226,12 +245,17 @@ impl MetacogAgent {
 
     /// Return all epiphanies of a given category from history
     pub fn epiphanies_by_category(&self, category: &EpiphanyCategory) -> Vec<&Epiphany> {
-        self.history.iter().filter(|e| &e.category == category).collect()
+        self.history
+            .iter()
+            .filter(|e| &e.category == category)
+            .collect()
     }
 
     /// Return the highest-confidence epiphany from the last reflection
     pub fn top_insight(&self) -> Option<&Epiphany> {
-        self.history.iter().max_by(|a, b| a.confidence.partial_cmp(&b.confidence).unwrap())
+        self.history
+            .iter()
+            .max_by(|a, b| a.confidence.partial_cmp(&b.confidence).unwrap())
     }
 
     /// Return threat escalations that should be forwarded to AEGIS
@@ -248,8 +272,141 @@ impl Default for MetacogAgent {
 
 /// MetacogAgent: Validation logic for context radius.
 impl MetacogAgent {
-    pub fn validate_context_radius(&self, expanded_context: &[omega_core::RetrievalEpisode]) -> Vec<omega_core::RetrievalEpisode> {
+    /// Validate an expanded retrieval context and prune empty episodes.
+    pub fn validate_context_radius(
+        &self,
+        expanded_context: &[omega_core::RetrievalEpisode],
+    ) -> Vec<omega_core::RetrievalEpisode> {
         // Prune irrelevant nodes: keep only episodes with high causal link density.
-        expanded_context.iter().filter(|e| !e.result_nodes.is_empty()).cloned().collect()
+        expanded_context
+            .iter()
+            .filter(|e| !e.result_nodes.is_empty())
+            .cloned()
+            .collect()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use omega_core::{MemoryEdge, MemoryNode, RetrievalEpisode};
+    use omega_myelin::{MemoryGraph, ThreatEntry};
+
+    fn hot_node(id: &str) -> MemoryNode {
+        MemoryNode {
+            node_id: id.into(),
+            content: format!("Hot content for {}", id),
+            retrieval_count: 10,
+            decay_score: 0.2,
+        }
+    }
+
+    fn cold_node(id: &str) -> MemoryNode {
+        MemoryNode {
+            node_id: id.into(),
+            content: format!("Cold content for {}", id),
+            retrieval_count: 0,
+            decay_score: 0.05,
+        }
+    }
+
+    fn connected_orphan(id: &str) -> MemoryNode {
+        MemoryNode {
+            node_id: id.into(),
+            content: format!("Orphaned content for {}", id),
+            retrieval_count: 0,
+            decay_score: 0.5,
+        }
+    }
+
+    #[test]
+    fn test_hot_node_detection() {
+        let mut agent = MetacogAgent::new();
+        let mut graph = MemoryGraph::new();
+        graph.add_node(hot_node("h1"));
+        let insights = agent.reflect(&graph);
+        assert!(insights.iter().any(|e| e.category == EpiphanyCategory::HotNode));
+    }
+
+    #[test]
+    fn test_cold_node_detection() {
+        let mut agent = MetacogAgent::new();
+        let mut graph = MemoryGraph::new();
+        graph.add_node(cold_node("c1"));
+        let insights = agent.reflect(&graph);
+        assert!(insights.iter().any(|e| e.category == EpiphanyCategory::ColdNode));
+    }
+
+    #[test]
+    fn test_threat_escalation() {
+        let mut agent = MetacogAgent::new();
+        let mut graph = MemoryGraph::new();
+        for i in 0..4 {
+            graph.threat_fabric.push(ThreatEntry {
+                pattern_id: format!("p-{}", i),
+                severity: "high".into(),
+                labels: vec!["JAILBREAK".into()],
+            });
+        }
+        let insights = agent.reflect(&graph);
+        assert!(insights.iter().any(|e| e.category == EpiphanyCategory::ThreatEscalation));
+    }
+
+    #[test]
+    fn test_orphaned_knowledge_detection() {
+        let mut agent = MetacogAgent::new();
+        let mut graph = MemoryGraph::new();
+        let node = connected_orphan("o1");
+        graph.add_node(node);
+        graph.add_node(connected_orphan("o2"));
+        graph.edges.push(MemoryEdge {
+            from: "o1".into(),
+            to: "o2".into(),
+            from_id: "o1".into(),
+            to_id: "o2".into(),
+        });
+        let insights = agent.reflect(&graph);
+        assert!(insights.iter().any(|e| e.category == EpiphanyCategory::OrphanedKnowledge));
+    }
+
+    #[test]
+    fn test_epiphanies_by_category() {
+        let mut agent = MetacogAgent::new();
+        let mut graph = MemoryGraph::new();
+        graph.add_node(hot_node("h1"));
+        graph.add_node(cold_node("c1"));
+        agent.reflect(&graph);
+        let hot = agent.epiphanies_by_category(&EpiphanyCategory::HotNode);
+        assert!(!hot.is_empty());
+    }
+
+    #[test]
+    fn test_top_insight() {
+        let mut agent = MetacogAgent::new();
+        let mut graph = MemoryGraph::new();
+        graph.add_node(hot_node("h1"));
+        agent.reflect(&graph);
+        assert!(agent.top_insight().is_some());
+    }
+
+    #[test]
+    fn test_validate_context_radius_prunes_empty() {
+        let agent = MetacogAgent::new();
+        let episodes = vec![
+            RetrievalEpisode {
+                episode_id: "e1".into(),
+                content: "test".into(),
+                result_nodes: vec!["n1".into()],
+            },
+            RetrievalEpisode {
+                episode_id: "e2".into(),
+                content: "empty".into(),
+                result_nodes: vec![],
+            },
+        ];
+        let pruned = agent.validate_context_radius(&episodes);
+        assert_eq!(pruned.len(), 1);
+        assert_eq!(pruned[0].episode_id, "e1");
+    }
+}
+

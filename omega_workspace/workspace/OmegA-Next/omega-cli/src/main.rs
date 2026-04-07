@@ -15,9 +15,9 @@ async fn main() {
     let mut runtime = AeonRuntime::new();
     // Broadened policy gates to reduce rigid blocking
     let aegis = AegisGate::new(vec![
-        "harmful_intent".to_string(), 
-        "deceptive_content".to_string(), 
-        "illegal_activity".to_string()
+        "harmful_intent".to_string(),
+        "deceptive_content".to_string(),
+        "illegal_activity".to_string(),
     ]);
     let memory = MemoryGraph::new();
     // Reduced sensitivity to allow more conversational flow
@@ -25,20 +25,22 @@ async fn main() {
 
     // 2. Mock a task envelope
     let mut envelope = RunEnvelope {
+        task_id: "task-1234".to_string(),
         run_id: "run-1234".to_string(),
         task: "Draft a secure protocol specification".to_string(),
+        task_text: "Draft a secure protocol specification".to_string(),
+        created_at: now(),
         status: RunStatus::Pending,
         risk_score: 0.0,
         verified_payload: None,
         evidence_packet: EvidencePacket::new(),
-        created_at: now(),
     };
 
     // 3. Execution Pipeline
     println!("Step 1: Aegis Gate...");
     envelope.status = aegis.admit(envelope.clone(), &memory);
-    if envelope.status == RunStatus::Rejected("Constitutional misalignment".to_string()) {
-        println!("Task Rejected by Aegis!");
+    if let RunStatus::Rejected(reason) = &envelope.status {
+        println!("Task Rejected by Aegis: {}", reason);
         return;
     }
 

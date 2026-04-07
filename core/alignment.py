@@ -140,14 +140,19 @@ class ConstitutionalConvention:
         If interactive=False, returns an empty placeholder (for programmatic use).
         """
         if not interactive:
+            # Return a default Constitution for programmatic use when interactive interviews are disabled.
+            # This ensures a valid Constitution object is returned even without user input.
             return Constitution(
                 version=1,
                 created_utc=time.time(),
                 amended_utc=time.time(),
-                principles=["Operate with precision and honesty, avoiding harmful intent and deception.",
-                                "Never engage in illegal activity or corrupt the ledger.",
-                                "Always require HITL confirmation before external broadcasts."],
-                forbidden_keywords=["harmful", "deceptive", "illegal", "corrupt"],            )
+                principles=[
+                    "Default principle: Operate within defined ethical and safety boundaries.",
+                    "Never engage in illegal activity or corrupt the ledger.",
+                    "Always require HITL confirmation before external broadcasts.",
+                ],
+                forbidden_keywords=["harmful", "illegal", "deceptive"],
+            )
 
         print("\n" + "=" * 64)
         print("  CONSTITUTIONAL CONVENTION — First Boot")
