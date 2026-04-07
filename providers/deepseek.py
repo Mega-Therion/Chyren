@@ -72,6 +72,13 @@ class DeepSeekProvider:
                     token_count=usage.get("completion_tokens", 0),
                     raw_metadata={"usage": usage},
                 )
+        except TimeoutError:
+            return ProviderResponse(
+                text="", provider_name=self.name, model=model,
+                status=ProviderStatus.TIMEOUT,
+                latency_ms=(time.time() - start) * 1000,
+                error_message="Request timed out",
+            )
         except urllib.error.HTTPError as e:
             body = e.read().decode() if hasattr(e, "read") else ""
             return ProviderResponse(

@@ -11,7 +11,7 @@ Architecture:
                   Each entry is a sanitized BehavioralPattern signed with
                   the Yettragrammaton.
 
-  phylactic_sync() — stub for the decentralized broadcast layer. In solo
+  phylactic_sync() — placeholder for the decentralized broadcast layer (implementation pending).
                      operation this writes patterns locally. When a mesh
                      endpoint is configured (THREAT_FABRIC_ENDPOINT env var),
                      it POSTs the signed pattern for cross-instance sync.
