@@ -43,6 +43,11 @@ Chyren is a **stateful sovereign AI orchestrator** — a high-integrity executio
 
 ## 🏗️ Architecture
 
+📚 **Detailed Architecture Documentation:**
+
+- [AEGIS Framework](/docs/AEGIS.md) - AI-Enhanced Governance & Integrity Specification
+- [OmegA Stack](/docs/OMEGA_STACK.md) - Complete integration blueprint and implementation roadmap
+
 ### High-Level System Flow
 
 ```mermaid
