@@ -1,5 +1,21 @@
 <div align="center">
 
+<div align="center">
+
+[![License](https://img.shields.io/badge/License-Proprietary-red.svg)](https://github.com/Mega-Therion/Chyren/blob/main/LICENSE)
+[![Rust](https://img.shields.io/badge/rust-1.75+-orange.svg)](https://www.rust-lang.org)
+[![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org)
+[![GitHub Stars](https://img.shields.io/github/stars/Mega-Therion/Chyren?style=social)](https://github.com/Mega-Therion/Chyren/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/Mega-Therion/Chyren?style=social)](https://github.com/Mega-Therion/Chyren/network/members)
+
+[![AI Safety](https://img.shields.io/badge/AI-Safety-success.svg)]()  
+[![Sovereign AI](https://img.shields.io/badge/Sovereign-AI-blueviolet.svg)]()  
+[![Verified](https://img.shields.io/badge/Cryptographically-Verified-brightgreen.svg)]()  
+[![ADCCL](https://img.shields.io/badge/ADCCL-Threshold_0.7-yellow.svg)]()  
+[![Zero Knowledge](https://img.shields.io/badge/Zero--Knowledge-Proofs-9cf.svg)]()
+
+</div>
+
 ```
   ██████╗██╗  ██╗██╗   ██╗██████╗ ███████╗███╗   ██╗
  ██╔════╝██║  ██║╚██╗ ██╔╝██╔══██╗██╔════╝████╗  ██║
