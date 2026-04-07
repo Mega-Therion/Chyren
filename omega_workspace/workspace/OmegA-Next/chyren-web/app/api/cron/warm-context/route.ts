@@ -1,17 +1,16 @@
 /**
  * /api/cron/warm-context — Neon context warmer
  */
-import { NextRequest } from 'next/server'
 import { getRYContext } from '@/lib/neon-context'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   return runWarm();
 }
 
-export async function POST(req: NextRequest) {
+export async function POST() {
   return runWarm();
 }
 
