@@ -13,6 +13,15 @@ function publicApiBaseUrl(): string {
   return 'http://localhost:8080'
 }
 
+/** Returns the list of allowed origins for Server Actions, filtering out empty strings */
+function allowedServerActionOrigins(): string[] {
+  return [
+    'localhost:3000',
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '',
+    process.env.NEXT_PUBLIC_API_BASE_URL ?? '',
+  ].filter(Boolean) as string[]
+}
+
 /** Security headers for production hardening */
 const securityHeaders = [
   {
@@ -39,6 +48,30 @@ const securityHeaders = [
     key: 'Strict-Transport-Security',
     value: 'max-age=63072000; includeSubDomains; preload',
   },
+  {
+    // Content-Security-Policy
+    // - default-src 'self': only load resources from same origin by default
+    // - script-src 'self' 'unsafe-eval': Next.js requires unsafe-eval in dev; restrict further if needed
+    // - style-src 'self' 'unsafe-inline': Tailwind generates inline styles
+    // - img-src 'self' data: blob: https:: allow data URIs and external images
+    // - connect-src 'self' https:: allow API calls to external services (Groq, Firebase, Neon)
+    // - frame-ancestors 'none': block all framing (stronger than X-Frame-Options)
+    key: 'Content-Security-Policy',
+    value: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https:",
+      "font-src 'self' data:",
+      "connect-src 'self' https: wss:",
+      "media-src 'none'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'none'",
+      "upgrade-insecure-requests",
+    ].join('; '),
+  },
 ]
 
 const nextConfig: NextConfig = {
@@ -61,10 +94,10 @@ const nextConfig: NextConfig = {
       },
     ]
   },
-  // Suppress known experimental warnings
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:3000', process.env.VERCEL_URL ?? ''],
+      // Filter out empty strings to prevent Next.js origin mismatch warnings
+      allowedOrigins: allowedServerActionOrigins(),
     },
   },
 }
