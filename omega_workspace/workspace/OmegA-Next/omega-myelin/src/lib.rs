@@ -33,3 +33,16 @@ impl MemoryGraph {
 }
 
 pub mod db;
+
+impl MemoryGraph {
+    pub fn anchor_recall(&self, anchor: &omega_core::TemporalAnchor, radius: usize) -> Vec<omega_core::RetrievalEpisode> {
+        let mut results = Vec::new();
+        // Locate anchor, then expand by radius
+        if let Some(pos) = self.episodes.iter().position(|e| e.episode_id == anchor.episode_id) {
+            let start = pos.saturating_sub(radius);
+            let end = (pos + radius + 1).min(self.episodes.len());
+            results.extend(self.episodes[start..end].iter().cloned());
+        }
+        results
+    }
+}

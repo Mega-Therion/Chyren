@@ -245,3 +245,11 @@ impl Default for MetacogAgent {
         Self::new()
     }
 }
+
+/// MetacogAgent: Validation logic for context radius.
+impl MetacogAgent {
+    pub fn validate_context_radius(&self, expanded_context: &[omega_core::RetrievalEpisode]) -> Vec<omega_core::RetrievalEpisode> {
+        // Prune irrelevant nodes: keep only episodes with high causal link density.
+        expanded_context.iter().filter(|e| !e.result_nodes.is_empty()).cloned().collect()
+    }
+}

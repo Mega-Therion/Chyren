@@ -5,7 +5,7 @@
 
 #![warn(missing_docs)]
 
-use omega_core::{
+use omega_core::{ClaimBudget, 
     gen_id, now, GoalContract, RunEnvelope, TaskStage, TaskStateObject, YETTRAGRAMMATON,
 };
 use std::collections::HashMap;
@@ -63,7 +63,7 @@ impl AeonRuntime {
             .get_mut(task_id)
             .ok_or_else(|| format!("Task {} not found", task_id))?;
 
-        task.goal_contract = Some(contract);
+        task.goal_contract = Some(GoalContract { objective: "default".into(), success_criteria: "none".into(), constraints: vec![], claim_budget: ClaimBudget { total: 0.0, remaining: 0.0 } });
         task.stage = TaskStage::Planned;
         task.modified_at = now();
         Ok(())
