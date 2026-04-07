@@ -2,22 +2,32 @@
  * /api/cron/warm-context — Neon context warmer
  */
 import { getRYContext } from '@/lib/neon-context'
+import type { NextRequest } from 'next/server'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
 
-export async function GET() {
-  return runWarm();
+function isAuthorized(req: NextRequest): boolean {
+  const secret = process.env.CRON_SECRET
+  if (!secret) return false
+  const auth = req.headers.get('authorization') ?? ''
+  return auth === `Bearer ${secret}`
 }
 
-export async function POST() {
-  return runWarm();
+export async function GET(req: NextRequest) {
+  if (!isAuthorized(req)) return new Response('Unauthorized', { status: 401 })
+  return runWarm()
+}
+
+export async function POST(req: NextRequest) {
+  if (!isAuthorized(req)) return new Response('Unauthorized', { status: 401 })
+  return runWarm()
 }
 
 async function runWarm() {
   const start = Date.now()
   try {
-    const context = await getRYContext()
+    const context = getRYContext()
     const ms = Date.now() - start
     return Response.json({ ok: true, length: context.length, ms })
   } catch (err) {
