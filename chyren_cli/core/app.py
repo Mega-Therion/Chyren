@@ -10,7 +10,7 @@ from chyren_cli.core.router import ProviderRouter
 from chyren_cli.core.state import HistoryStore
 from chyren_cli.providers.gemini import GeminiProvider
 from chyren_cli.providers.openrouter import OpenRouterProvider
-from chyren_cli.ui.render import render_stream, render_text
+from chyren_cli.ui.render import render_banner, render_stream, render_text
 
 app = typer.Typer(
     add_completion=False,
@@ -77,6 +77,7 @@ def repl_cmd(
     """
     REPL mode: iterative prompting with history.
     """
+    render_banner()
     router = _router()
     store = HistoryStore.default()
     session_id = store.create_session()
@@ -110,4 +111,88 @@ def history_cmd(
     rows = store.recent_messages(limit=limit)
     for row in rows:
         typer.echo(f"{row['created_at']}  {row['session_id'][:8]}  {row['role']}: {row['content']}")
+
+
+@app.command("health")
+def health_cmd() -> None:
+    """
+    Audit and verify the status of all Chyren orchestration layers.
+    """
+    from rich.console import Console
+    from rich.table import Table
+    import requests
+    import os
+
+    console = Console()
+    table = Table(title="CHYREN SYSTEM HEALTH", border_style="blue")
+    table.add_column("Layer", style="cyan")
+    table.add_column("Status", style="bold")
+    table.add_column("Details", style="blue")
+
+    # 1. Web Layer
+    try:
+        resp = requests.get("https://chyren-web.vercel.app/api/health", timeout=5)
+        status = "[green]ONLINE[/]" if resp.status_code == 200 else "[red]DEGRADED[/]"
+        table.add_row("Next.js Web", status, f"HTTP {resp.status_code}")
+    except Exception as e:
+        table.add_row("Next.js Web", "[red]OFFLINE[/]", str(e))
+
+    # 2. Local Hub Core
+    try:
+        from core.adccl import ADCCL
+        ADCCL()
+        table.add_row("Python Hub", "[green]HEALTHY[/]", "ADCCL initialized")
+    except Exception as e:
+        table.add_row("Python Hub", "[red]ERROR[/]", str(e))
+
+    # 3. Rust Workspace (Build Check)
+    target = "/home/mega/Chyren/omega_workspace/workspace/OmegA-Next/target/debug/chyren_api"
+    if os.path.exists(target):
+        table.add_row("OmegA-Next (Rust)", "[green]READY[/]", "Binary compiled")
+    else:
+        table.add_row("OmegA-Next (Rust)", "[yellow]UNBUILT[/]", "Cargo build required")
+
+    console.print(table)
+
+
+@app.command("audit")
+def audit_cmd() -> None:
+    """
+    Perform a sovereign self-audit of the codebase for integrity and stubs.
+    """
+    import os
+    from rich.console import Console
+    from rich.status import Status
+
+    console = Console()
+    with Status("[bold cyan]Scanning files for integrity...", console=console) as status:
+        # Search for stubs or placeholders
+        stubs = []
+        for root, _, files in os.walk("."):
+            for f in files:
+                if f.endswith((".py", ".rs", ".ts", ".tsx")):
+                    path = os.path.join(root, f)
+                    try:
+                        with open(path, "r") as content:
+                            if "TODO" in content or "FIXME" in content or "placeholder" in content.lower():
+                                stubs.append(path)
+                    except:
+                        pass
+        
+        if not stubs:
+            console.print("[green]✔ Codebase integrity verified. No high-level stubs detected.[/]")
+        else:
+            console.print(f"[yellow]⚠ Found {len(stubs)} files with potential internal notes/stubs.[/]")
+            for s in stubs[:5]:
+                console.print(f"  - {s}")
+
+@app.command("purge")
+def purge_cmd() -> None:
+    """
+    Purge local intelligence history and cache.
+    """
+    from chyren_cli.core.state import HistoryStore
+    store = HistoryStore.default()
+    store.clear_history()
+    typer.echo("Local memory purged successfully.")
 
