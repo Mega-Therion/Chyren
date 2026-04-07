@@ -30,7 +30,7 @@ const securityHeaders = [
   },
   {
     key: 'X-Frame-Options',
-    value: 'SAMEORIGIN',
+    value: 'DENY',
   },
   {
     key: 'X-Content-Type-Options',
@@ -49,13 +49,6 @@ const securityHeaders = [
     value: 'max-age=63072000; includeSubDomains; preload',
   },
   {
-    // Content-Security-Policy
-    // - default-src 'self': only load resources from same origin by default
-    // - script-src 'self' 'unsafe-eval': Next.js requires unsafe-eval in dev; restrict further if needed
-    // - style-src 'self' 'unsafe-inline': Tailwind generates inline styles
-    // - img-src 'self' data: blob: https:: allow data URIs and external images
-    // - connect-src 'self' https:: allow API calls to external services (Groq, Firebase, Neon)
-    // - frame-ancestors 'none': block all framing (stronger than X-Frame-Options)
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
@@ -93,12 +86,6 @@ const nextConfig: NextConfig = {
         headers: securityHeaders,
       },
     ]
-  },
-  experimental: {
-    serverActions: {
-      // Filter out empty strings to prevent Next.js origin mismatch warnings
-      allowedOrigins: allowedServerActionOrigins(),
-    },
   },
 }
 

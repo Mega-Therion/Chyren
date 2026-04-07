@@ -39,6 +39,16 @@ export function validateChatRequest(req: NextRequest): boolean {
 }
 
 export function checkPromptInjection(input: string): boolean {
-  const injections = ['ignore previous instructions', 'system override']
-  return injections.some(i => input.toLowerCase().includes(i))
+  const injections = [
+    'ignore previous instructions',
+    'system override',
+    'forget all',
+    'disregard',
+    'new persona',
+    'you are now',
+    'act as if',
+    'DAN',
+    'override instruction'
+  ]
+  return injections.some(i => input.toLowerCase().includes(i.toLowerCase()))
 }
