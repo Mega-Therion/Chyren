@@ -2,9 +2,9 @@
  * lib/firebase.ts — Firebase app initialization and AI Logic SDK integration.
  *
  * Exports:
- *   - `firebaseApp`   — initialized Firebase app (lazy singleton)
- *   - `getAIModel`    — returns a Firebase AI Logic generative model instance
- *   - `firebaseReady` — true when NEXT_PUBLIC_FIREBASE_PROJECT_ID is set
+ *  - `firebaseApp`   – initialized Firebase app (lazy singleton)
+ *  - `getAIModel`    – returns a Firebase AI Logic generative model instance
+ *  - `firebaseReady` – true when NEXT_PUBLIC_FIREBASE_PROJECT_ID is set
  *
  * To activate: set the NEXT_PUBLIC_FIREBASE_* env vars in one-true.env and
  * run `bash scripts/sync-vercel-env-from-one-true.sh` to push to Vercel.
@@ -12,6 +12,32 @@
 
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app'
 import { getVertexAI, getGenerativeModel, type GenerativeModel } from '@firebase/vertexai'
+
+/** Required Firebase config keys — warn at module load if any are missing */
+const REQUIRED_FIREBASE_KEYS = [
+  'NEXT_PUBLIC_FIREBASE_API_KEY',
+  'NEXT_PUBLIC_FIREBASE_PROJECT_ID',
+  'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN',
+  'NEXT_PUBLIC_FIREBASE_APP_ID',
+] as const
+
+/** Validate Firebase config at module load time (server + client) */
+function validateFirebaseConfig(): void {
+  if (typeof process === 'undefined') return // Edge runtime safety
+  const missing = REQUIRED_FIREBASE_KEYS.filter(
+    (key) => !process.env[key],
+  )
+  if (missing.length > 0 && process.env.NODE_ENV === 'production') {
+    console.warn(
+      `[firebase] Missing required env vars: ${missing.join(', ')}. ` +
+      'Firebase AI Logic will be unavailable. ' +
+      'Set these in Vercel dashboard or one-true.env.',
+    )
+  }
+}
+
+// Run validation once at module load
+validateFirebaseConfig()
 
 const firebaseConfig = {
   apiKey:            process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -59,41 +85,16 @@ export async function generateWithFirebase(
       error: 'Firebase AI Logic not configured — set NEXT_PUBLIC_FIREBASE_* env vars',
     }
   }
-
   try {
     const request = systemInstruction
       ? { contents: [{ role: 'user' as const, parts: [{ text: prompt }] }], systemInstruction }
       : { contents: [{ role: 'user' as const, parts: [{ text: prompt }] }] }
-
     const result = await model.generateContent(request)
     const text = result.response.text()
     return { text }
   } catch (err) {
-    return { text: '', error: String(err) }
-  }
-}
-
-/**
- * Stream a response via Firebase AI Logic.
- * Returns an async iterable of text chunks.
- */
-export async function* streamWithFirebase(
-  prompt: string,
-  systemInstruction?: string,
-): AsyncIterable<string> {
-  const model = getAIModel()
-  if (!model) {
-    yield '[Firebase AI Logic not configured]'
-    return
-  }
-
-  const request = systemInstruction
-    ? { contents: [{ role: 'user' as const, parts: [{ text: prompt }] }], systemInstruction }
-    : { contents: [{ role: 'user' as const, parts: [{ text: prompt }] }] }
-
-  const result = await model.generateContentStream(request)
-  for await (const chunk of result.stream) {
-    const text = chunk.text()
-    if (text) yield text
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[firebase] generateContent failed:', message)
+    return { text: '', error: message }
   }
 }
