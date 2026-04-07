@@ -79,12 +79,32 @@ export default function ChatPage() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [ttsEnabled, setTtsEnabled]  = useState(true);
   const [error, setError]            = useState<string | null>(null);
+
+  // Persistence: load from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('chyren_messages');
+    if (saved) {
+      try {
+        setMessages(JSON.parse(saved));
+      } catch {}
+    }
+  }, []);
+
+  // Persistence: save to localStorage on change
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem('chyren_messages', JSON.stringify(messages));
+    }
+  }, [messages]);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortRef       = useRef<AbortController | null>(null);
   const textareaRef    = useRef<HTMLTextAreaElement>(null);
   const ttsEnabledRef  = useRef(ttsEnabled);
+
   // Keep ref in sync so the streaming closure always reads the latest value
   useEffect(() => { ttsEnabledRef.current = ttsEnabled; }, [ttsEnabled]);
+
   // Pre-load voices (Chrome lazy-initialises them)
   useEffect(() => {
     const load = () => window.speechSynthesis?.getVoices();
@@ -95,56 +115,70 @@ export default function ChatPage() {
       window.speechSynthesis?.cancel();
     };
   }, []);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
   useEffect(() => {
     const ta = textareaRef.current;
     if (!ta) return;
     ta.style.height = 'auto';
     ta.style.height = Math.min(ta.scrollHeight, 140) + 'px';
   }, [input]);
+
   const sendMessage = useCallback(async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || isStreaming) return;
+
     // Cancel any ongoing speech before starting a new response
     window.speechSynthesis?.cancel();
+
     setError(null);
     setInput('');
+
     const userMsg: Message = { id: `u-${Date.now()}`, role: 'user', content: trimmed };
     const history = [...messages, userMsg];
     setMessages(history);
     setIsStreaming(true);
+
     const assistantId = `a-${Date.now()}`;
     setMessages(prev => [...prev, { id: assistantId, role: 'assistant', content: '' }]);
+
     try {
       abortRef.current?.abort();
       const abort = new AbortController();
       abortRef.current = abort;
+
       const res = await fetch('/api/chat/stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: history.map(m => ({ role: m.role, content: m.content })) }),
         signal: abort.signal,
       });
+
       if (!res.ok) {
         const body = await res.text().catch(() => '');
         throw new Error(`HTTP ${res.status}: ${body.slice(0, 120)}`);
       }
+
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
       let accumulated = '';
       let speechBuffer = '';
+
       if (reader) {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
           const delta = parseChunk(decoder.decode(value, { stream: true }));
           if (!delta) continue;
+
           accumulated += delta;
           setMessages(prev =>
             prev.map(m => m.id === assistantId ? { ...m, content: accumulated } : m)
           );
+
           // Stream TTS: speak sentence-by-sentence as text arrives
           if (ttsEnabledRef.current) {
             speechBuffer += delta;
@@ -157,10 +191,12 @@ export default function ChatPage() {
           }
         }
       }
+
       // Speak any remaining buffer after stream ends
       if (ttsEnabledRef.current && speechBuffer.trim()) {
         speak(speechBuffer.trim());
       }
+      
       // If nothing was received, remove the blank bubble and show an error
       if (!accumulated) {
         setMessages(prev => prev.filter(m => m.id !== assistantId));
@@ -178,40 +214,58 @@ export default function ChatPage() {
       abortRef.current = null;
     }
   }, [messages, isStreaming]);
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage(input);
     }
   };
+
   const toggleTTS = () => {
     if (ttsEnabled) window.speechSynthesis?.cancel();
     setTtsEnabled(s => !s);
   };
+
   const isEmpty = messages.length === 0;
   const lastMsg = messages[messages.length - 1];
+
   return (
     <div className="omega-root">
       <div className="omega-bg">
         <NeuralBrain isActive={isStreaming} />
       </div>
+
       <header className="omega-header">
         <div className="omega-logo">
           <span className="omega-symbol">Ω</span>
         </div>
         <span className="omega-brand">Chyren</span>
+
         <div className="omega-header-status">
           <span className={`omega-status-dot ${isStreaming ? 'omega-status-active' : ''}`} />
           <span className="omega-status-label">
             {isStreaming ? 'PROCESSING' : 'SOVEREIGN'}
           </span>
         </div>
+
         <div className="omega-header-actions">
+          {!isEmpty && (
+            <button 
+              onClick={() => { setMessages([]); localStorage.removeItem('chyren_messages'); }} 
+              className="omega-icon-btn" 
+              title="Purge Memory"
+              style={{ fontSize: '11px', marginRight: '8px', opacity: 0.7 }}
+            >
+              PURGE
+            </button>
+          )}
           <button onClick={toggleTTS} className="omega-icon-btn" title={ttsEnabled ? 'Mute' : 'Unmute'}>
             {ttsEnabled ? <Volume2 size={15} /> : <VolumeX size={15} />}
           </button>
         </div>
       </header>
+
       <main className="omega-main">
         {isEmpty ? (
           <div className="omega-idle">
@@ -246,6 +300,7 @@ export default function ChatPage() {
             <div ref={messagesEndRef} />
           </div>
         )}
+
         {error && (
           <div className="omega-error">
             <AlertCircle size={13} />
@@ -254,6 +309,7 @@ export default function ChatPage() {
           </div>
         )}
       </main>
+
       <footer className="omega-footer">
         <div className="omega-input-wrap">
           <textarea
@@ -266,6 +322,7 @@ export default function ChatPage() {
             rows={1}
             disabled={isStreaming}
           />
+
           <button
             className="omega-send-btn"
             onClick={() => sendMessage(input)}
@@ -275,6 +332,7 @@ export default function ChatPage() {
             {isStreaming ? <Loader2 size={17} className="omega-spin" /> : <Send size={17} />}
           </button>
         </div>
+
         <div className="omega-footer-meta">
           <span className="omega-footer-label">NEURAL LINK</span>
           <span className={`omega-footer-dot ${isStreaming ? 'omega-footer-dot-active' : ''}`} />
