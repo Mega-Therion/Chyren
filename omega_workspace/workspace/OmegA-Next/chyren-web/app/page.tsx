@@ -80,6 +80,21 @@ export default function ChatPage() {
   const [ttsEnabled, setTtsEnabled]  = useState(true);
   const [error, setError]            = useState<string | null>(null);
 
+  useEffect(() => {
+    const saved = localStorage.getItem('chyren_messages');
+    if (saved) {
+      try {
+        setMessages(JSON.parse(saved));
+      } catch {}
+    }
+  }, []);
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem('chyren_messages', JSON.stringify(messages));
+    }
+  }, [messages]);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortRef       = useRef<AbortController | null>(null);
   const textareaRef    = useRef<HTMLTextAreaElement>(null);
@@ -227,6 +242,16 @@ export default function ChatPage() {
         </div>
 
         <div className="omega-header-actions">
+          {!isEmpty && (
+            <button 
+              onClick={() => { setMessages([]); localStorage.removeItem('chyren_messages'); }} 
+              className="omega-icon-btn" 
+              title="Purge Memory"
+              style={{ fontSize: '11px', marginRight: '8px', opacity: 0.7 }}
+            >
+              PURGE
+            </button>
+          )}
           <button onClick={toggleTTS} className="omega-icon-btn" title={ttsEnabled ? 'Mute' : 'Unmute'}>
             {ttsEnabled ? <Volume2 size={15} /> : <VolumeX size={15} />}
           </button>
