@@ -1,5 +1,5 @@
 import { createGroq } from '@ai-sdk/groq'
-import { streamText } from 'ai'
+import { streamText, type ModelMessage } from 'ai'
 import { NextRequest } from 'next/server'
 import { checkRateLimit, checkPromptInjection } from '@/lib/hardening'
 import { setBrainState } from '@/lib/brain-state-store'
@@ -15,8 +15,15 @@ const BASE_SYSTEM_PROMPT = (() => {
 
 export const runtime = 'nodejs'
 
+function getRequiredEnv(name: string): string {
+  const v = process.env[name]
+  if (!v) throw new Error(`Missing required env var: ${name}`)
+  return v
+}
+
 function getModel() {
-  const groq = createGroq({ apiKey: process.env.GROQ_API_KEY ?? '' })
+  const apiKey = getRequiredEnv('GROQ_API_KEY')
+  const groq = createGroq({ apiKey })
   return groq(process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile')
 }
 
@@ -50,8 +57,20 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  const model = getModel()
-  console.log(`[chat/stream] provider=groq/${process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile'}`)
+  let model: ReturnType<ReturnType<typeof createGroq>>
+  try {
+    model = getModel()
+  } catch (err) {
+    const msg = (err as Error)?.message ?? String(err)
+    return new Response(JSON.stringify({ error: msg }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
+  console.log(
+    `[chat/stream] provider=groq/${process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile'}`,
+  )
 
   // System prompt is pre-computed at module load — zero per-request I/O.
   const systemPrompt = BASE_SYSTEM_PROMPT
@@ -64,8 +83,7 @@ export async function POST(req: NextRequest) {
     }, 3000)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const typedMessages = chatMessages as any
+  const typedMessages = chatMessages as ModelMessage[]
 
   const result = streamText({
     model,

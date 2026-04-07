@@ -7,10 +7,9 @@ interface ChatMessageProps {
   content: string
   timestamp?: Date
   isStreaming?: boolean
-  index?: number
 }
 
-export function ChatMessage({ role, content, timestamp, isStreaming = false, index = 0 }: ChatMessageProps) {
+export function ChatMessage({ role, content, timestamp, isStreaming = false }: ChatMessageProps) {
   const isUser = role === 'user'
   const time = timestamp
     ? timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })

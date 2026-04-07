@@ -190,7 +190,6 @@ export default function ChatPage() {
       setIsStreaming(false);
       abortRef.current = null;
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages, isStreaming]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
