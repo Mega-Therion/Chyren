@@ -47,3 +47,17 @@ jobs:
           cache-dependency-path: omega_workspace/workspace/OmegA-Next/chyren-web/package-lock.json
       - name: Install and build
         run: npm ci && npm run build
+
+  python-hub:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run Pytest
+        run: pytest tests/
