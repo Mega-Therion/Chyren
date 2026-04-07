@@ -1,0 +1,14 @@
+blank: true
+contact_links:
+  - name: "💬 Community Discussions"
+    url: https://github.com/Mega-Therion/Chyren/discussions
+    about: "Ask questions, share ideas, or discuss Chyren with the community."
+  - name: "📖 Documentation"
+    url: https://github.com/Mega-Therion/Chyren/blob/main/CLAUDE.md
+    about: "Read the full Chyren documentation before opening an issue."
+  - name: "🔐 Security Vulnerability"
+    url: https://github.com/Mega-Therion/Chyren/blob/main/SECURITY.md
+    about: "Report security vulnerabilities privately — do NOT open a public issue."
+  - name: "🌐 Live Demo"
+    url: https://chyren-web.vercel.app
+    about: "Test Chyren live before reporting an issue."
