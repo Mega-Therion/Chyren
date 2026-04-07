@@ -9,7 +9,7 @@
  * context so the build still succeeds.
  */
 
-import { writeFileSync, existsSync } from 'fs'
+import { writeFileSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 

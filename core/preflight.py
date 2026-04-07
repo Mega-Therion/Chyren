@@ -52,6 +52,7 @@ def run_preflight(strict: bool = False) -> list[str]:
     Returns a list of warning strings (empty = all clear).
     """
     warnings: list[str] = []
+    hard_warnings: list[str] = []
 
     # Check 1: Python version
     if sys.version_info < _MIN_PYTHON:
@@ -78,11 +79,13 @@ def run_preflight(strict: bool = False) -> list[str]:
     # Check 3: At least one provider key
     available_keys = [k for k in _PROVIDER_KEYS if os.environ.get(k)]
     if not available_keys:
-        warnings.append(
+        msg = (
             "PREFLIGHT WARN: No provider API keys found. "
             f"Set at least one of: {', '.join(_PROVIDER_KEYS)} "
             f"in ~/.omega/one-true.env before running tasks."
         )
+        warnings.append(msg)
+        hard_warnings.append(msg)
 
     # Check 4: State directory writable
     try:
@@ -104,8 +107,8 @@ def run_preflight(strict: bool = False) -> list[str]:
             "Run: pip install python-dotenv"
         )
 
-    if strict and warnings:
-        raise EnvironmentError("\n".join(warnings))
+    if strict and hard_warnings:
+        raise EnvironmentError("\n".join(hard_warnings))
 
     for w in warnings:
         print(f"[PREFLIGHT] {w}", file=sys.stderr)

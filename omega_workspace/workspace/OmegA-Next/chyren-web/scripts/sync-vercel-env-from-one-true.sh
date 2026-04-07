@@ -4,7 +4,6 @@
 set -euo pipefail
 
 WEB_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-REPO_ROOT="$(cd "$WEB_ROOT/../../../.." && pwd)"
 ENV_FILE="${CHYREN_ENV_FILE:-$HOME/.omega/one-true.env}"
 
 if [[ ! -f "$ENV_FILE" ]]; then
@@ -17,7 +16,7 @@ set -a
 source "$ENV_FILE"
 set +a
 
-cd "$REPO_ROOT"
+cd "$WEB_ROOT"
 
 sync_one() {
   local name="$1"
@@ -33,5 +32,11 @@ sync_one() {
 }
 
 sync_one NEXT_PUBLIC_API_BASE_URL
+sync_one NEXT_PUBLIC_FIREBASE_API_KEY
+sync_one NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+sync_one NEXT_PUBLIC_FIREBASE_PROJECT_ID
+sync_one NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+sync_one NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+sync_one NEXT_PUBLIC_FIREBASE_APP_ID
 
 echo "Done. vercel env list"
