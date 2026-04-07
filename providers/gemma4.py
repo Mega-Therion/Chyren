@@ -62,7 +62,7 @@ class Gemma4Provider:
         )
 
         try:
-            with urllib.request.urlopen(req, timeout=120) as resp:
+            with urllib.request.urlopen(req, timeout=600) as resp:
                 data = json.loads(resp.read().decode())
                 text = data["choices"][0]["message"]["content"]
                 usage = data.get("usage", {})
