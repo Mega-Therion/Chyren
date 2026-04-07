@@ -16,17 +16,26 @@ import { fileURLToPath } from 'url'
 const __dir = dirname(fileURLToPath(import.meta.url))
 const OUT = join(__dir, '..', 'lib', 'generated-context.ts')
 
-// ─── Neon HTTP SQL ────────────────────────────────────────────────────────────
+// —— Neon HTTP SQL ————————————————————————————————————————
+/** Timeout in ms for each Neon HTTP request (build-time fetch) */
+const NEON_FETCH_TIMEOUT_MS = 8_000
 
 async function neonQuery(query, host, auth) {
-  const resp = await fetch(`https://${host}/sql`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Neon-Connection-String': auth },
-    body: JSON.stringify({ query, params: [] }),
-  })
-  if (!resp.ok) throw new Error(`Neon HTTP ${resp.status}`)
-  const data = await resp.json()
-  return data.rows ?? []
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), NEON_FETCH_TIMEOUT_MS)
+  try {
+    const resp = await fetch(`https://${host}/sql`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Neon-Connection-String': auth },
+      body: JSON.stringify({ query, params: [] }),
+      signal: controller.signal,
+    })
+    if (!resp.ok) throw new Error(`Neon HTTP ${resp.status}`)
+    const data = await resp.json()
+    return data.rows ?? []
+  } finally {
+    clearTimeout(timer)
+  }
 }
 
 function parseConnectionString(connStr) {
@@ -62,78 +71,69 @@ async function fetchContext() {
       host, auth,
     ),
     neonQuery(
-      `SELECT content, importance, domain
-       FROM omega_memory_entries
-       WHERE namespace = 'personal'
-         AND (superseded_by IS NULL OR superseded_by = '')
-         AND content IS NOT NULL
-         AND LENGTH(content) > 20
-       ORDER BY importance DESC NULLS LAST
-       LIMIT 10`,
+      `SELECT content, memory_type, importance, created_at
+       FROM personal_memories
+       ORDER BY importance DESC, created_at DESC
+       LIMIT 20`,
       host, auth,
     ),
   ])
 
-  const sections = []
+  const parts = []
 
   if (familyRows.length > 0) {
-    const familyText = familyRows.map(p => {
-      const fullName = [p.name, p.last_name].filter(Boolean).join(' ')
-      const parts = [`${fullName} (${p.relationship})`]
-      if (p.location) parts.push(`Location: ${p.location}`)
-      if (p.birthday) parts.push(`Birthday: ${p.birthday}`)
-      if (p.deceased) parts.push('Status: Deceased')
-      if (p.occupation) parts.push(`Occupation: ${p.occupation}`)
-      if (p.partner) parts.push(`Partner: ${p.partner}`)
-      if (p.children) parts.push(`Children: ${p.children}`)
-      if (p.how_to_greet) parts.push(`How to greet: ${p.how_to_greet}`)
-      if (p.ry_notes) parts.push(`Notes from RY: ${String(p.ry_notes).slice(0, 250)}`)
-      if (p.notes_for_omega) parts.push(`Instructions: ${String(p.notes_for_omega).slice(0, 250)}`)
-      return parts.join('\n  ')
-    }).join('\n\n')
-    sections.push(`FAMILY PROFILES (${familyRows.length} members):\n${familyText}`)
+    parts.push('FAMILY PROFILES:')
+    for (const r of familyRows) {
+      const name = [r.name, r.last_name].filter(Boolean).join(' ')
+      const details = [
+        r.relationship && `relationship: ${r.relationship}`,
+        r.location && `location: ${r.location}`,
+        r.birthday && `birthday: ${r.birthday}`,
+        r.occupation && `occupation: ${r.occupation}`,
+        r.partner && `partner: ${r.partner}`,
+        r.children && `children: ${r.children}`,
+        r.how_to_greet && `greet: ${r.how_to_greet}`,
+        r.ry_notes && `notes: ${r.ry_notes}`,
+        r.notes_for_omega && `operator-notes: ${r.notes_for_omega}`,
+      ].filter(Boolean).join(', ')
+      parts.push(`- ${name} (${details})`)
+    }
   }
 
-  const bioRows = knowledgeRows.filter(r => ['biography', 'creator', 'concept'].includes(String(r.category)))
-  if (bioRows.length > 0) {
-    const bioText = bioRows
-      .map(r => `[${String(r.category).toUpperCase()}] ${r.title}: ${String(r.content).slice(0, 250)}`)
-      .join('\n\n')
-    sections.push(`KNOWLEDGE ABOUT RY & OMEGA:\n${bioText}`)
-  }
-
-  const quotes = knowledgeRows.filter(r => r.category === 'quote')
-  if (quotes.length > 0) {
-    const quoteText = quotes.slice(0, 6).map(r => `"${r.content}" — ${r.title}`).join('\n')
-    sections.push(`RY CANONICAL QUOTES:\n${quoteText}`)
+  if (knowledgeRows.length > 0) {
+    parts.push('\nKNOWLEDGE BASE:')
+    for (const r of knowledgeRows) {
+      parts.push(`[${r.category}] ${r.title}: ${r.content}`)
+    }
   }
 
   if (memoryRows.length > 0) {
-    const memText = memoryRows.map(r => String(r.content).slice(0, 250)).join('\n')
-    sections.push(`PERSONAL MEMORIES (high-importance):\n${memText}`)
+    parts.push('\nPERSONAL MEMORIES:')
+    for (const r of memoryRows) {
+      parts.push(`- [${r.memory_type}] ${r.content}`)
+    }
   }
 
-  if (sections.length === 0) return ''
-
-  return `\n\n--- LIVE KNOWLEDGE CONTEXT (from Neon sovereign database) ---\n${sections.join('\n\n---\n')}\n--- END KNOWLEDGE CONTEXT ---`
+  return parts.join('\n')
 }
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
+async function main() {
+  let ctx = ''
+  try {
+    ctx = await fetchContext()
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    if (msg.includes('aborted') || msg.toLowerCase().includes('timeout')) {
+      console.warn(`[gen-context] Neon request timed out after ${NEON_FETCH_TIMEOUT_MS}ms — using empty context`)
+    } else {
+      console.warn('[gen-context] Neon fetch failed:', msg)
+    }
+    ctx = ''
+  }
 
-try {
-  const context = await fetchContext()
-
-  const ts = `// AUTO-GENERATED at build time by scripts/generate-context.mjs
-// Do not edit manually — regenerated on every \`npm run build\`.
-
-export const GENERATED_RY_CONTEXT: string = ${JSON.stringify(context)}
-`
-
+  const ts = `// AUTO-GENERATED — do not edit. Regenerated on each production deploy.\nexport const GENERATED_RY_CONTEXT = ${JSON.stringify(ctx)}\n`
   writeFileSync(OUT, ts, 'utf8')
-  console.log(`[gen-context] wrote ${context.length} chars to lib/generated-context.ts`)
-} catch (err) {
-  console.error('[gen-context] error:', err.message)
-  // Write empty context so build still succeeds
-  writeFileSync(OUT, `// Auto-generated — context unavailable at build time.\nexport const GENERATED_RY_CONTEXT: string = ''\n`, 'utf8')
-  console.log('[gen-context] wrote empty context (build will proceed without RAG)')
+  console.log(`[gen-context] wrote ${ctx.length} chars to lib/generated-context.ts`)
 }
+
+main()
