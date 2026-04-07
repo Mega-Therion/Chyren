@@ -53,10 +53,13 @@ function extractSpeakable(buffer: string): { chunk: string | null; remaining: st
 
 function getVoice(): SpeechSynthesisVoice | null {
   const voices = window.speechSynthesis.getVoices();
+  // Priority: British Male -> British -> English -> First available
   return (
+    voices.find(v => v.lang.startsWith('en-GB') && (v.name.includes('Male') || v.name.includes('Daniel') || v.name.includes('Arthur'))) ||
+    voices.find(v => v.lang.startsWith('en-GB')) ||
+    voices.find(v => v.lang.includes('en-GB')) ||
     voices.find(v => v.name.toLowerCase().includes('google') && v.lang.startsWith('en')) ||
     voices.find(v => v.lang.startsWith('en-US')) ||
-    voices.find(v => v.lang.startsWith('en')) ||
     voices[0] ||
     null
   );
@@ -65,8 +68,9 @@ function getVoice(): SpeechSynthesisVoice | null {
 function speak(text: string) {
   if (!text.trim() || typeof window === 'undefined') return;
   const utter = new SpeechSynthesisUtterance(text.trim());
-  utter.rate = 1.05;
-  utter.pitch = 1.0;
+  // "Smart wise" tuning: slightly slower, slightly lower pitch
+  utter.rate = 0.95; 
+  utter.pitch = 0.9;
   utter.volume = 1.0;
   const v = getVoice();
   if (v) utter.voice = v;
