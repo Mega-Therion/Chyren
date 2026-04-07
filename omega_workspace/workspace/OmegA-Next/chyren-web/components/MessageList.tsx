@@ -60,14 +60,13 @@ export function MessageList({ messages, isLoading = false }: MessageListProps) {
 
   return (
     <div className="flex-1 overflow-y-auto flex flex-col divide-y divide-slate-800/50">
-      {messages.map((msg, i) => (
+      {messages.map((msg) => (
         <ChatMessage
           key={msg.id}
           role={msg.role}
           content={msg.content}
           timestamp={msg.timestamp}
           isStreaming={msg.isStreaming}
-          index={i}
         />
       ))}
       {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (

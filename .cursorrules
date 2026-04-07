@@ -1,0 +1,26 @@
+# Chyren CLI — core architecture requirements (Cursor agent rules)
+#
+# Goal: Build Chyren as an async-first "Super CLI" for LLM orchestration.
+#
+# Non-interactive-first CLI for agents:
+# - Every input must be expressible via flags (interactive is fallback only)
+# - Every command and subcommand must support --help with Examples
+# - Support stdin/stdout piping whenever meaningful
+# - Fail fast with actionable errors + example invocations
+# - Idempotent reruns (safe retries)
+# - Destructive actions require --dry-run and support --yes/--force
+# - Success output should include machine-useful fields (ids/urls/durations)
+#
+# Core architecture:
+# - Modular provider system with a unified provider interface
+# - Asyncio-based core for streaming + concurrency (no blocking I/O)
+# - SQLite-backed session/history logging: searchable and resumable
+# - Graceful fallbacks / optional failover between providers
+#
+# Feature parity targets (incremental):
+# - Multi-model orchestration + "Arena" comparison view
+# - Context injection: @file, @folder, @url decorators + file-tree indexing
+# - Token counting/guardrails to prevent context overflow
+# - Rich streaming markdown UI + deterministic plain output mode
+# - Safe "Sandbox" execution mode (confirm-before-exec)
+

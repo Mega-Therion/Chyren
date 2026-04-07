@@ -4,7 +4,6 @@
 set -euo pipefail
 
 WEB_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-REPO_ROOT="$(cd "$WEB_ROOT/../../../.." && pwd)"
 ENV_FILE="${CHYREN_ENV_FILE:-$HOME/.omega/one-true.env}"
 
 if [[ ! -f "$ENV_FILE" ]]; then
@@ -17,7 +16,7 @@ set -a
 source "$ENV_FILE"
 set +a
 
-cd "$REPO_ROOT"
+cd "$WEB_ROOT"
 
 sync_one() {
   local name="$1"

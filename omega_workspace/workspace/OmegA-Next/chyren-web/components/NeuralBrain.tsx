@@ -96,7 +96,6 @@ export default function NeuralBrain({ isActive = false }: { isActive?: boolean }
       const W = canvas.width;
       const H = canvas.height;
       stateRef.current.t += 0.016;
-      const t = stateRef.current.t;
 
       ctx.clearRect(0, 0, W, H);
 
