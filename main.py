@@ -89,7 +89,7 @@ class Chyren:
 
     def __init__(self, ledger_path: str | None = None, interactive: bool = False):
         # Phase 0 — Preflight: verify host environment before any node spins up.
-        run_preflight()
+        run_preflight(strict=not interactive)
 
         self._ledger = Ledger(path=ledger_path) if ledger_path else Ledger()
         self._ledger.load()
