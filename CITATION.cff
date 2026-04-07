@@ -1,0 +1,45 @@
+cff-version: 1.2.0
+message: "If you use Chyren in your research or work, please cite it as below."
+title: "Chyren: Sovereign Intelligence Orchestrator"
+version: 0.1.0
+date-released: 2026-04-07
+license: Proprietary
+repository-code: https://github.com/Mega-Therion/Chyren
+url: https://chyren-web.vercel.app
+abstract: >
+  Chyren is a stateful sovereign AI orchestrator featuring hub-and-spoke
+  architecture, ADCCL (Anti-Drift Cognitive Control Loop) verification,
+  and Yettragrammaton-signed cryptographic ledger integrity. Built on the
+  Chiral Invariant principle for mathematically grounded sovereign AI
+  verification. Implements a 58,000-entry phylactery identity kernel and
+  multi-provider routing (Anthropic, OpenAI, DeepSeek, Gemini) with
+  zero-tolerance for hallucination or drift.
+authors:
+  - family-names: Therion
+    given-names: Mega
+    alias: Mega-Therion
+    email: mega_therion@yahoo.com
+keywords:
+  - sovereign-ai
+  - ai-orchestration
+  - adccl
+  - cryptographic-ledger
+  - chiral-invariant
+  - anti-drift
+  - multi-agent
+  - rust
+  - python
+  - yettragrammaton
+references:
+  - type: article
+    title: "Chiral Thesis: Mathematical Foundation for Sovereign AI Verification"
+    authors:
+      - family-names: Therion
+        given-names: Mega
+    url: https://github.com/Mega-Therion/Chyren/blob/main/docs/CHIRAL_THESIS.md
+  - type: software
+    title: "AEGIS Framework: AI-Enhanced Governance & Integrity Specification"
+    authors:
+      - family-names: Therion
+        given-names: Mega
+    url: https://github.com/Mega-Therion/Chyren/blob/main/docs/AEGIS.md
