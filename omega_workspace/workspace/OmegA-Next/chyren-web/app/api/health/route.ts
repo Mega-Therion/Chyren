@@ -2,10 +2,9 @@ import { NextResponse } from 'next/server'
 
 /**
  * Same-origin health check for the web deployment (Rust `chyren-api` uses `/health` on port 8080).
+ * Returns minimal status only — no secret enumeration.
  */
 export async function GET() {
-  const hasCronSecret = Boolean(process.env.CRON_SECRET)
-  const hasGroqKey = Boolean(process.env.GROQ_API_KEY)
   const ctxLen = (() => {
     try {
       return (process.env.OMEGA_DB_URL ? 'runtime' : 'build_or_empty')
@@ -18,10 +17,6 @@ export async function GET() {
     status: 'operational',
     timestamp: Date.now() / 1000,
     layer: 'chyren-web',
-    config: {
-      hasCronSecret,
-      hasGroqKey,
-      contextMode: ctxLen,
-    },
+    contextMode: ctxLen,
   })
 }
