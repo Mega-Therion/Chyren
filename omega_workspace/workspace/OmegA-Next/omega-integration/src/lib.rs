@@ -1,8 +1,6 @@
-
 //! omega-integration: Bridge between engines and providers.
 
-use omega_core::{RunEnvelope, EvidencePacket};
-use omega_spokes::{SpokeRegistry, SpokeCapability};
+use omega_spokes::{SpokeCapability, SpokeRegistry};
 use std::sync::Arc;
 
 pub struct IntegrationBridge {
@@ -11,7 +9,9 @@ pub struct IntegrationBridge {
 
 impl IntegrationBridge {
     pub fn new(registry: Arc<SpokeRegistry>) -> Self {
-        Self { spoke_registry: registry }
+        Self {
+            spoke_registry: registry,
+        }
     }
 
     pub fn get_primary_spoke(&self) -> Option<String> {

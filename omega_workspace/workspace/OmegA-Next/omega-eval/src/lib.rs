@@ -3,10 +3,10 @@
 
 #![warn(missing_docs)]
 
-use omega_core::{RunEnvelope, RunStatus, EvidencePacket, now};
-use omega_aegis::AegisGate;
 use omega_adccl::AdcclGate;
-use omega_telemetry::{TelemetryBus, SystemEvent, EventLevel};
+use omega_aegis::AegisGate;
+use omega_core::{now, EvidencePacket, RunEnvelope, RunStatus};
+use omega_telemetry::{EventLevel, SystemEvent, TelemetryBus};
 use serde::{Deserialize, Serialize};
 
 /// Evaluation result for a specific test case
@@ -24,7 +24,9 @@ pub struct EvalResult {
 
 /// Evaluation Suite
 pub struct EvalSuite {
+    /// Policy gate used for regressions.
     pub aegis: AegisGate,
+    /// ADCCL gate used for regressions.
     pub adccl: AdcclGate,
 }
 
@@ -35,16 +37,22 @@ impl EvalSuite {
     }
 
     /// Run a security regression test against a prompt
-    pub async fn run_regression(&self, prompt: &str, memory: &omega_myelin::MemoryGraph) -> EvalResult {
+    pub async fn run_regression(
+        &self,
+        prompt: &str,
+        memory: &omega_myelin::MemoryGraph,
+    ) -> EvalResult {
         let start = now();
         let envelope = RunEnvelope {
+            task_id: "eval-task".to_string(),
             run_id: "eval-run".to_string(),
             task: prompt.to_string(),
+            task_text: prompt.to_string(),
+            created_at: now(),
             status: RunStatus::Pending,
             risk_score: 0.0,
             verified_payload: None,
             evidence_packet: EvidencePacket::new(),
-            created_at: now(),
         };
 
         let result = self.aegis.admit(envelope, memory);

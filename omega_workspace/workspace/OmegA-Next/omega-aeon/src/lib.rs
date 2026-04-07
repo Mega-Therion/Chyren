@@ -5,7 +5,7 @@
 
 #![warn(missing_docs)]
 
-use omega_core::{ClaimBudget, 
+use omega_core::{
     gen_id, now, GoalContract, RunEnvelope, TaskStage, TaskStateObject, YETTRAGRAMMATON,
 };
 use std::collections::HashMap;
@@ -63,7 +63,7 @@ impl AeonRuntime {
             .get_mut(task_id)
             .ok_or_else(|| format!("Task {} not found", task_id))?;
 
-        task.goal_contract = Some(GoalContract { objective: "default".into(), success_criteria: "none".into(), constraints: vec![], claim_budget: ClaimBudget { total: 0.0, remaining: 0.0 } });
+        task.goal_contract = Some(contract);
         task.stage = TaskStage::Planned;
         task.modified_at = now();
         Ok(())
@@ -106,7 +106,8 @@ impl AeonRuntime {
 
     /// Return all tasks currently in a given stage
     pub fn tasks_in_stage(&self, stage: &TaskStage) -> Vec<&TaskStateObject> {
-        self.active_tasks.values()
+        self.active_tasks
+            .values()
             .filter(|t| std::mem::discriminant(&t.stage) == std::mem::discriminant(stage))
             .collect()
     }
@@ -122,3 +123,104 @@ impl Default for AeonRuntime {
         Self::new()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use omega_core::{EvidencePacket, RunEnvelope, RunStatus};
+
+    fn test_envelope(task: &str) -> RunEnvelope {
+        RunEnvelope {
+            task_id: "test-task".into(),
+            run_id: "test-run".into(),
+            task: task.into(),
+            task_text: task.into(),
+            created_at: now(),
+            status: RunStatus::Pending,
+            risk_score: 0.0,
+            verified_payload: None,
+            evidence_packet: EvidencePacket::new(),
+        }
+    }
+
+    #[test]
+    fn test_spawn_task() {
+        let mut rt = AeonRuntime::new();
+        let env = test_envelope("Test task");
+        let task_id = rt.spawn_task(&env);
+        assert!(task_id.starts_with("task-"));
+        assert_eq!(rt.active_tasks.len(), 1);
+    }
+
+    #[test]
+    fn test_advance_task_stage() {
+        let mut rt = AeonRuntime::new();
+        let env = test_envelope("Test task");
+        let task_id = rt.spawn_task(&env);
+        assert!(rt.advance_task(&task_id, TaskStage::Executing).is_ok());
+        assert_eq!(rt.active_tasks[&task_id].stage, TaskStage::Executing);
+    }
+
+    #[test]
+    fn test_advance_nonexistent_task_fails() {
+        let mut rt = AeonRuntime::new();
+        assert!(rt.advance_task("nonexistent", TaskStage::Executing).is_err());
+    }
+
+    #[test]
+    fn test_bind_goal_contract() {
+        let mut rt = AeonRuntime::new();
+        let env = test_envelope("Test task");
+        let task_id = rt.spawn_task(&env);
+        let contract = GoalContract {
+            objective: "Test".into(),
+            success_criteria: vec!["Passes tests".into()],
+            constraints: vec![],
+            claim_budget: omega_core::ClaimBudget {
+                max_claims: 5,
+                claims_used: 0,
+                allowed_claim_types: vec![],
+            },
+        };
+        assert!(rt.bind_goal(&task_id, contract).is_ok());
+        assert_eq!(rt.active_tasks[&task_id].stage, TaskStage::Planned);
+        assert!(rt.active_tasks[&task_id].goal_contract.is_some());
+    }
+
+    #[test]
+    fn test_verify_integrity() {
+        let mut rt = AeonRuntime::new();
+        let env = test_envelope("Secure task");
+        let task_id = rt.spawn_task(&env);
+        assert!(rt.verify_integrity(&task_id));
+    }
+
+    #[test]
+    fn test_verify_integrity_nonexistent_fails() {
+        let rt = AeonRuntime::new();
+        assert!(!rt.verify_integrity("nonexistent"));
+    }
+
+    #[test]
+    fn test_tasks_in_stage() {
+        let mut rt = AeonRuntime::new();
+        let env1 = test_envelope("Task 1");
+        let env2 = test_envelope("Task 2");
+        rt.spawn_task(&env1);
+        rt.spawn_task(&env2);
+        let received = rt.tasks_in_stage(&TaskStage::Received);
+        assert_eq!(received.len(), 2);
+    }
+
+    #[test]
+    fn test_retire_task() {
+        let mut rt = AeonRuntime::new();
+        let env = test_envelope("Retire me");
+        let task_id = rt.spawn_task(&env);
+        assert_eq!(rt.active_tasks.len(), 1);
+        let retired = rt.retire_task(&task_id);
+        assert!(retired.is_some());
+        assert_eq!(rt.active_tasks.len(), 0);
+    }
+}
+

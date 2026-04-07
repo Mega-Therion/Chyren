@@ -102,14 +102,23 @@ class ProviderRouter:
             if not provider or not provider.is_available():
                 errors.append(f"{name}: not available")
                 continue
-            try:
-                response = provider.generate(request)
-            except Exception as exc:
-                errors.append(f"{name}: exception — {exc}")
-                continue
-            if response.ok:
+            retries = 3
+            response = None
+            for attempt in range(retries):
+                try:
+                    response = provider.generate(request)
+                    if response.ok:
+                        break
+                except Exception as exc:
+                    if attempt == retries - 1:
+                        errors.append(f"{name}: exception — {exc}")
+                    time.sleep(1)
+            
+            if response and response.ok:
                 return response
-            errors.append(f"{name}: {response.error_message}")
+
+            if response:
+                errors.append(f"{name}: {response.error_message}")
 
         return ProviderResponse(
             text="",

@@ -11,10 +11,15 @@ async fn main() -> anyhow::Result<()> {
         .context("DATABASE_URL must be set (Neon or other Postgres connection string)")?;
     let ledger_path = "sync_ledger.json";
 
-    let store: MemoryStore = MemoryStore::connect(&db_url, ledger_path).await.map_err(|e: Box<dyn std::error::Error + Send + Sync>| anyhow::anyhow!(e))?;
+    let store: MemoryStore = MemoryStore::connect(&db_url, ledger_path)
+        .await
+        .map_err(|e: Box<dyn std::error::Error + Send + Sync>| anyhow::anyhow!(e))?;
 
     println!("Performing delta sync...");
-    let new_nodes: Vec<omega_core::MemoryNode> = store.sync_delta().await.map_err(|e: Box<dyn std::error::Error + Send + Sync>| anyhow::anyhow!(e))?;
+    let new_nodes: Vec<omega_core::MemoryNode> = store
+        .sync_delta()
+        .await
+        .map_err(|e: Box<dyn std::error::Error + Send + Sync>| anyhow::anyhow!(e))?;
 
     println!("Ingested {} new memory nodes.", new_nodes.len());
     for node in new_nodes.iter().take(5) {

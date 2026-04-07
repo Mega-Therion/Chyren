@@ -39,12 +39,19 @@ class ADCCL:
         score = 1.0
 
         # Hard stub markers.
-        if re.search(r"\b(TODO|FIXME|XXX|STUB)\b", text, flags=re.IGNORECASE):
+        if re.search(r"\b(TODO|FIXME|XXX|STUB|PLACEHOLDER)\b|\[(INSERT|YOUR)[^\\]]*\]", text, flags=re.IGNORECASE):
             flags.append("STUB_MARKERS_DETECTED")
             score -= 0.6
 
         # Too short to be useful.
-        if len(text) < 40:
+        short_answer_ok = bool(
+            re.search(
+                r"\b(nothing\s+else|one\s+word|single\s+word|only\s+say|just\s+say|exactly)\b",
+                task_text,
+                flags=re.IGNORECASE,
+            )
+        )
+        if len(text) < 40 and not (short_answer_ok and len(text) <= 20):
             flags.append("RESPONSE_TOO_SHORT")
             score -= 0.35
 

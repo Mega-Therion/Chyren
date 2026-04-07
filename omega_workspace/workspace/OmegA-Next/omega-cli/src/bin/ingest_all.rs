@@ -21,8 +21,13 @@ async fn main() -> anyhow::Result<()> {
         println!("Syncing project: {} ({})", name, pid);
         let ledger_path = format!("sync_ledger_{}.json", pid);
 
-        let store = MemoryStore::connect(&db_url, &ledger_path).await.map_err(|e: Box<dyn std::error::Error + Send + Sync>| anyhow::anyhow!(e))?;
-        let nodes = store.sync_delta().await.map_err(|e: Box<dyn std::error::Error + Send + Sync>| anyhow::anyhow!(e))?;
+        let store = MemoryStore::connect(&db_url, &ledger_path)
+            .await
+            .map_err(|e: Box<dyn std::error::Error + Send + Sync>| anyhow::anyhow!(e))?;
+        let nodes = store
+            .sync_delta()
+            .await
+            .map_err(|e: Box<dyn std::error::Error + Send + Sync>| anyhow::anyhow!(e))?;
         println!(
             " - Successfully ingested {} nodes from {}",
             nodes.len(),
