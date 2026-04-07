@@ -1,4 +1,5 @@
 
+import re
 import time
 from dataclasses import dataclass, field
 
@@ -23,5 +24,48 @@ class ADCCL:
         return self._base_min_score + progression
 
     def verify(self, response_text, task=""):
-        # Gates are now dynamic.
-        return VerificationResult(passed=True, score=1.0)
+        """
+        Anti-Drift Cognitive Control Loop.
+
+        This is intentionally heuristic-based (no model calls). It is designed to:
+        - reject obvious stubs/placeholders
+        - reject responses unrelated to the task
+        - penalize overly short / non-answers
+        """
+        text = (response_text or "").strip()
+        task_text = (task or "").strip()
+
+        flags: list[str] = []
+        score = 1.0
+
+        # Hard stub markers.
+        if re.search(r"\b(TODO|FIXME|XXX|STUB)\b", text, flags=re.IGNORECASE):
+            flags.append("STUB_MARKERS_DETECTED")
+            score -= 0.6
+
+        # Too short to be useful.
+        if len(text) < 40:
+            flags.append("RESPONSE_TOO_SHORT")
+            score -= 0.35
+
+        # "Non-answer" patterns.
+        if re.search(r"\b(as an ai|i can't|i cannot|i'm unable to)\b", text, flags=re.IGNORECASE):
+            flags.append("CAPABILITY_REFUSAL")
+            score -= 0.25
+
+        # Task overlap gate: ensure some lexical overlap with the task for non-trivial tasks.
+        if task_text and len(task_text) >= 12 and len(text) >= 40:
+            task_words = {w for w in re.findall(r"[a-zA-Z]{4,}", task_text.lower())}
+            resp_words = {w for w in re.findall(r"[a-zA-Z]{4,}", text.lower())}
+            if task_words:
+                overlap = len(task_words & resp_words) / max(1, min(len(task_words), 30))
+                if overlap < 0.08:
+                    flags.append("NO_TASK_WORD_OVERLAP")
+                    score -= 0.35
+
+        # Clamp score.
+        score = max(0.0, min(1.0, score))
+
+        min_score = self.get_calibrated_min_score()
+        passed = score >= min_score and "STUB_MARKERS_DETECTED" not in flags
+        return VerificationResult(passed=passed, score=score, flags=flags)
