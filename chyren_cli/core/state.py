@@ -77,3 +77,10 @@ class HistoryStore:
             ).fetchall()
         return [dict(r) for r in reversed(rows)]
 
+    def clear_history(self) -> None:
+        """Delete all sessions and messages from the local store."""
+        with self._connect() as conn:
+            conn.execute("DELETE FROM messages")
+            conn.execute("DELETE FROM sessions")
+            conn.commit()
+
