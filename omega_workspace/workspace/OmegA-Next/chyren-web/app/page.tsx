@@ -24,8 +24,8 @@ interface Message {
 // Handles Hub events (data: {...}) and plain-text streams
 function parseHubChunk(chunk: string): { content?: string, audit?: { passed: boolean, score: number, flags: string[] }, status?: string } {
   let content = '';
-  let audit = null;
-  let status = null;
+  let audit: { passed: boolean, score: number, flags: string[] } | undefined;
+  let status: string | undefined;
 
   for (const line of chunk.split('\n')) {
     const trimmed = line.trim();
