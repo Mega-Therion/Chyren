@@ -1,12 +1,9 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "nextjs",
-  "installCommand": "npm install",
-  "buildCommand": "npm run build",
-  "crons": [
+  "rewrites": [
     {
-      "path": "/api/cron/warm-context",
-      "schedule": "0 6 * * *"
+      "source": "/(.*)",
+      "destination": "/$1"
     }
-  ]
+  ],
+  "maxDuration": 60
 }

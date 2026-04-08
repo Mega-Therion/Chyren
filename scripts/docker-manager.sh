@@ -6,6 +6,9 @@ set -e
 COMMAND=$1
 shift
 
+# Path to the Sovereign Compose file
+COMPOSE_FILE="omega_workspace/workspace/OmegA-Next/docker-compose.yml"
+
 function show_help() {
   echo "Usage: ./scripts/docker-manager.sh [command]"
   echo ""
@@ -14,6 +17,7 @@ function show_help() {
   echo "  down      Stop all services"
   echo "  build     Build OR Re-build all images"
   echo "  logs      View logs from all services (follow)"
+  echo "  status    Check service health"
   echo "  restart   Restart services"
   echo "  clean     Stop services and remove volumes (WIPE DATA)"
   echo ""
@@ -21,23 +25,26 @@ function show_help() {
 
 case $COMMAND in
   up)
-    docker-compose up -d
+    docker-compose -f $COMPOSE_FILE up -d
     echo "[SYSTEM] Chyren Hub is coming online..."
     ;;
   down)
-    docker-compose down
+    docker-compose -f $COMPOSE_FILE down
     ;;
   build)
-    docker-compose build "$@"
+    docker-compose -f $COMPOSE_FILE build "$@"
     ;;
   logs)
-    docker-compose logs -f "$@"
+    docker-compose -f $COMPOSE_FILE logs -f "$@"
+    ;;
+  status)
+    docker-compose -f $COMPOSE_FILE ps
     ;;
   restart)
-    docker-compose restart "$@"
+    docker-compose -f $COMPOSE_FILE restart "$@"
     ;;
   clean)
-    docker-compose down -v
+    docker-compose -f $COMPOSE_FILE down -v
     echo "[SYSTEM] Data wiped. Environment clean."
     ;;
   *)

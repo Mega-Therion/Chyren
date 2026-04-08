@@ -143,6 +143,7 @@ impl SpokeRegistry {
             ("deepseek", 40),
             ("search", 90),
             ("neon", 100),
+            ("sovereign", 0),
         ];
 
         for (p, priority) in providers {
@@ -159,6 +160,7 @@ impl SpokeRegistry {
                 "deepseek" => Some(Arc::new(spokes::DeepSeekSpoke::new(config))),
                 "search" => Some(Arc::new(spokes::SearchSpoke::new(config))),
                 "neon" => Some(Arc::new(spokes::NeonSpoke::new(config))),
+                "sovereign" => Some(Arc::new(spokes::SovereignSpoke::new(config))),
                 _ => None,
             };
 

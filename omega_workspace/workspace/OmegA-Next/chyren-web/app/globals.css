@@ -412,37 +412,70 @@ html, body {
   margin-top: 12px;
   padding: 4px 10px;
   border-radius: 4px;
-  font-size: 9px;
+  margin-top: 15px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
   font-weight: 600;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  border: 1px solid transparent;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: seal-fade-in 0.6s ease-out;
-}
-
-@keyframes seal-fade-in {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  transition: all 0.3s ease;
 }
 
 .omega-audit-passed {
-  background: rgba(52, 211, 153, 0.08);
-  border-color: rgba(52, 211, 153, 0.3);
-  color: var(--emerald);
-  box-shadow: 0 0 10px rgba(52, 211, 153, 0.1);
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.05);
 }
 
 .omega-audit-drift {
-  background: rgba(245, 158, 11, 0.08);
-  border-color: rgba(245, 158, 11, 0.3);
-  color: #f59e0b;
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.1);
+  background: rgba(234, 179, 8, 0.1);
+  border: 1px solid rgba(234, 179, 8, 0.2);
+  color: #fde047;
+  box-shadow: 0 0 15px rgba(234, 179, 8, 0.05);
+}
+
+.omega-consensus-seal {
+  margin-top: 15px;
+  margin-bottom: 5px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(124, 58, 237, 0.1);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  color: #a78bfa;
+  box-shadow: 0 0 15px rgba(124, 58, 237, 0.05);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.omega-consensus-icon {
+  font-size: 14px;
+  animation: omega-pulse 2s infinite ease-in-out;
+}
+
+@keyframes omega-pulse {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
 }
 
 .omega-correction-block {
-  border-left-color: #f59e0b !important;
-  background: rgba(245, 158, 11, 0.04) !important;
+  border-left: 2px solid #7c3aed;
+  background: rgba(124, 58, 237, 0.03);
+  padding-left: 15px;
+  margin-left: -15px;
   position: relative;
 }
 
