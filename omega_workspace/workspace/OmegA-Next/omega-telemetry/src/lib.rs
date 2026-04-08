@@ -33,27 +33,71 @@ pub struct SystemEvent {
     pub timestamp: f64,
 }
 
-/// The TelemetryBus: Broadcaster for system signals.
-pub struct TelemetryBus;
+pub trait TelemetrySink: Send + Sync {
+    fn record(&self, event: &SystemEvent);
+}
 
-impl TelemetryBus {
-    /// Broadcast an event to the system
-    pub fn broadcast(event: SystemEvent) {
-        // Log to stdout
+pub struct StdoutSink;
+impl TelemetrySink for StdoutSink {
+    fn record(&self, event: &SystemEvent) {
         println!(
             "[{:.3}] [{:?}] [{}] {}: {}",
             event.timestamp, event.level, event.component, event.event_type, event.payload
         );
+    }
+}
 
-        // Log to file
-        if let Ok(mut file) = OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open("telemetry.log")
-        {
-            if let Ok(serialized) = serde_json::to_string(&event) {
+pub struct FileSink {
+    filepath: String,
+}
+impl FileSink {
+    pub fn new(filepath: &str) -> Self {
+        Self { filepath: filepath.to_string() }
+    }
+}
+impl TelemetrySink for FileSink {
+    fn record(&self, event: &SystemEvent) {
+        if let Ok(mut file) = OpenOptions::new().create(true).append(true).open(&self.filepath) {
+            if let Ok(serialized) = serde_json::to_string(event) {
                 let _ = writeln!(file, "{}", serialized);
             }
+        }
+    }
+}
+
+/// A Kafka sink which routes events to a topic.
+pub struct KafkaSink {
+    topic: String,
+    // Note: To fully implement, we would inject a producer client here (e.g., rdkafka)
+}
+impl KafkaSink {
+    pub fn new(topic: &str) -> Self {
+        Self { topic: topic.to_string() }
+    }
+}
+impl TelemetrySink for KafkaSink {
+    fn record(&self, event: &SystemEvent) {
+        // Mock kafka emission
+        let _serialized = serde_json::to_string(event).unwrap_or_default();
+        // producer.send(&Record::from_value(&self.topic, serialized))
+    }
+}
+
+/// The TelemetryBus: Broadcaster for system signals.
+pub struct TelemetryBus;
+
+impl TelemetryBus {
+    /// Broadcast an event to all configured sinks
+    pub fn broadcast(event: SystemEvent) {
+        // For demonstration, instantiating ad-hoc. In a complete app, we'd loop over global lazily-initialized sinks.
+        let sinks: Vec<Box<dyn TelemetrySink>> = vec![
+            Box::new(StdoutSink),
+            Box::new(FileSink::new("telemetry.log")),
+            Box::new(KafkaSink::new("omega-events")),
+        ];
+        
+        for sink in sinks {
+            sink.record(&event);
         }
     }
 }

@@ -1,194 +1,125 @@
-//! HTTP API server for Chyren sovereign intelligence system.
-//!
-//! Exposes task orchestration and execution capabilities via REST endpoints.
-//! Supports CORS for the chyren-web frontend.
+//! omega-cli API bridge: Exposes the Conductor via HTTP for the Next.js frontend.
 
+use actix_web::{post, web, App, HttpResponse, HttpServer, Responder};
 use crate::conductor::Conductor;
-use actix_web::{get, post, web, App, HttpResponse, HttpServer};
-use omega_core::RunEnvelope;
+use omega_core::{now, EvidencePacket, RunEnvelope, RunStatus};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use uuid::Uuid;
 
-/// Request to execute a task.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ExecuteTaskRequest {
-    /// Task description.
-    pub task: String,
-    /// Optional preferred provider.
-    pub provider: Option<String>,
-    /// Optional max tokens for response.
-    #[serde(default = "default_max_tokens")]
-    pub max_tokens: usize,
-    /// Optional temperature for sampling.
-    #[serde(default = "default_temperature")]
-    pub temperature: f64,
+#[derive(Deserialize)]
+struct ChatRequest {
+    message: String,
+    session_id: Option<String>,
 }
 
-fn default_max_tokens() -> usize {
-    2048
+#[derive(Serialize)]
+struct ChatResponse {
+    run_id: String,
+    status: String,
+    response_text: String,
+    adccl_score: f64,
 }
 
-fn default_temperature() -> f64 {
-    0.3
+    adccl_score: f64,
 }
 
-/// Response from task execution.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ExecuteTaskResponse {
-    /// Unique run ID.
-    pub run_id: String,
-    /// Task status.
-    pub status: String,
-    /// Total cost in tokens.
-    pub total_cost: u32,
-    /// Execution duration in seconds.
-    pub duration_seconds: Option<f64>,
-    /// ADCCL verification score.
-    pub adccl_score: Option<f64>,
-    /// Flags from ADCCL.
-    pub adccl_flags: Vec<String>,
-    /// Provider used.
-    pub provider: Option<String>,
-    /// Model used.
-    pub model: Option<String>,
-    /// Execution result text.
-    pub result: String,
-}
-
-/// Health check response.
-#[derive(Debug, Serialize, Deserialize)]
-pub struct HealthResponse {
-    /// Service status.
-    pub status: String,
-    /// Timestamp.
-    pub timestamp: f64,
-    /// Layer identifier.
-    pub layer: String,
-    /// Available providers.
-    pub available_providers: Vec<String>,
-}
-
-/// API state shared across handlers.
-pub struct ApiState {
-    /// The conductor (pipeline orchestrator).
-    pub conductor: Arc<Conductor>,
-}
-
-/// Health check endpoint.
-#[get("/health")]
-async fn health(_state: web::Data<ApiState>) -> HttpResponse {
-    HttpResponse::Ok().json(HealthResponse {
-        status: "operational".to_string(),
-        timestamp: omega_core::now(),
-        layer: "chyren-api (Rust)".to_string(),
-        available_providers: vec![], // Could query spokes here
-    })
-}
-
-/// Execute a task via Chyren orchestration.
-#[post("/api/tasks/execute")]
-async fn execute_task(
-    req: web::Json<ExecuteTaskRequest>,
-    state: web::Data<ApiState>,
-) -> HttpResponse {
-    let run_id = format!("api-run-{}", Uuid::new_v4());
-
-    // Create execution envelope.
+#[post("/api/chat/stream")]
+async fn chat_stream_handler(
+    conductor: web::Data<Arc<Conductor>>,
+    req: web::Json<ChatRequest>,
+) -> impl Responder {
+    let task_text = &req.message;
     let mut envelope = RunEnvelope {
-        task_id: format!("api-task-{}", Uuid::new_v4()),
-        run_id: run_id.clone(),
-        task: req.task.clone(),
-        task_text: req.task.clone(),
-        created_at: omega_core::now(),
-        status: omega_core::RunStatus::Pending,
+        task_id: format!("t-{}", uuid::Uuid::new_v4()),
+        run_id: req.session_id.clone().unwrap_or_else(|| format!("r-{}", uuid::Uuid::new_v4())),
+        task: task_text.clone(),
+        task_text: task_text.clone(),
+        created_at: now(),
+        status: RunStatus::Pending,
         risk_score: 0.0,
         verified_payload: None,
-        evidence_packet: omega_core::EvidencePacket::new(),
+        evidence_packet: EvidencePacket::new(),
     };
 
-    // Plan the task.
-    match state.conductor.plan_task(&req.task).await {
+    match conductor.plan_task(task_text).await {
         Ok(plan) => {
-            tracing::info!("✓ Task plan created via API: {} steps", plan.steps.len());
+            let (tx, rx) = tokio::sync::mpsc::channel(100);
+            let conductor_inner = conductor.get_ref().clone();
+            
+            // Spawn execution in the background
+            tokio::spawn(async move {
+                let mut env_inner = envelope.clone();
+                if let Err(e) = conductor_inner.execute_plan_stream(plan, &mut env_inner, tx).await {
+                    eprintln!("[ERROR] Stream execution failed: {}", e);
+                }
+            });
 
-            // Execute the plan.
-            match state.conductor.execute_plan(plan, &mut envelope).await {
-                Ok(execution) => {
-                    let duration = execution.duration();
-                    let verification = execution.verification.as_ref();
-                    let spoke = execution.spoke_response.as_ref();
+            // Map the receiver into a stream of Bytes for Actix
+            let stream = tokio_stream::wrappers::ReceiverStream::new(rx)
+                .map(|val| {
+                    let data = format!("data: {}\n\n", serde_json::to_string(&val).unwrap());
+                    Ok::<_, actix_web::Error>(actix_web::web::Bytes::from(data))
+                });
 
-                    tracing::info!(
-                        "✓ Task executed via API: {} tokens, ADCCL={:.2}",
-                        execution.total_cost,
-                        verification.map_or(0.0, |v| v.score)
-                    );
+            HttpResponse::Ok()
+                .content_type("text/event-stream")
+                .streaming(stream)
+        }
+        Err(e) => HttpResponse::BadRequest().body(e.to_string()),
+    }
+}
+async fn chat_handler(
+    conductor: web::Data<Arc<Conductor>>,
+    req: web::Json<ChatRequest>,
+) -> impl Responder {
+    let task_text = &req.message;
+    let mut envelope = RunEnvelope {
+        task_id: format!("t-{}", uuid::Uuid::new_v4()),
+        run_id: req.session_id.clone().unwrap_or_else(|| format!("r-{}", uuid::Uuid::new_v4())),
+        task: task_text.clone(),
+        task_text: task_text.clone(),
+        created_at: now(),
+        status: RunStatus::Pending,
+        risk_score: 0.0,
+        verified_payload: None,
+        evidence_packet: EvidencePacket::new(),
+    };
 
-                    HttpResponse::Ok().json(ExecuteTaskResponse {
-                        run_id,
-                        status: "completed".to_string(),
-                        total_cost: execution.total_cost,
-                        duration_seconds: duration,
-                        adccl_score: verification.map(|v| v.score),
-                        adccl_flags: verification
-                            .map(|v| v.flags.clone())
-                            .unwrap_or_default(),
-                        provider: spoke.map(|s| s.provider.clone()),
-                        model: spoke.map(|s| s.model.clone()),
-                        result: execution.response_text,
+    match conductor.plan_task(task_text).await {
+        Ok(plan) => {
+            match conductor.execute_plan(plan, &mut envelope).await {
+                Ok(result) => {
+                    HttpResponse::Ok().json(ChatResponse {
+                        run_id: envelope.run_id,
+                        status: format!("{:?}", result.status),
+                        response_text: result.response_text,
+                        adccl_score: result.verification.map(|v| v.score).unwrap_or(0.0),
                     })
                 }
-                Err(e) => {
-                    tracing::error!("✗ Task execution failed via API: {}", e);
-                    HttpResponse::InternalServerError().json(ExecuteTaskResponse {
-                        run_id,
-                        status: "failed".to_string(),
-                        total_cost: 0,
-                        duration_seconds: None,
-                        adccl_score: None,
-                        adccl_flags: vec![],
-                        provider: None,
-                        model: None,
-                        result: format!("Execution failed: {}", e),
-                    })
-                }
+                Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
             }
         }
-        Err(e) => {
-            tracing::error!("✗ Task planning failed via API: {}", e);
-            HttpResponse::BadRequest().json(ExecuteTaskResponse {
-                run_id,
-                status: "rejected".to_string(),
-                total_cost: 0,
-                duration_seconds: None,
-                adccl_score: None,
-                adccl_flags: vec![],
-                provider: None,
-                model: None,
-                result: format!("Rejected: {}", e),
-            })
-        }
+        Err(e) => HttpResponse::BadRequest().body(e.to_string()),
     }
 }
 
-/// Start the HTTP API server.
-pub async fn start_api_server(
-    conductor: Arc<Conductor>,
-    host: &str,
-    port: u16,
-) -> std::io::Result<()> {
-    let state = web::Data::new(ApiState { conductor });
+pub async fn start_api_server(conductor: Arc<Conductor>) -> std::io::Result<()> {
+    let host = std::env::var("CHYREN_API_HOST").unwrap_or_else(|_| "0.0.0.0".to_string());
+    let port = std::env::var("CHYREN_API_PORT")
+        .ok()
+        .and_then(|p| p.parse().ok())
+        .unwrap_or(8080);
 
-    tracing::info!("Starting Chyren API server on {}:{}", host, port);
-
+    println!("[API] Starting Sovereign Hub access point on {}:{}", host, port);
+    let data = web::Data::new(conductor);
+    
     HttpServer::new(move || {
         App::new()
-            .app_data(state.clone())
-            .service(health)
-            .service(execute_task)
+            .app_data(data.clone())
+            .service(chat_handler)
+            .service(chat_stream_handler)
     })
-    .bind(format!("{}:{}", host, port))?
+    .bind((host, port))?
     .run()
     .await
 }

@@ -238,6 +238,165 @@ impl AegisGate {
     }
 }
 
+/// The outcome of one deflection cycle.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DeflectionResult {
+    pub threat_level: ThreatLevel,
+    pub response_text: String,
+    pub lockout_triggered: bool,
+    pub lockout_signature: String,
+    pub note: String,
+}
+
+pub struct DeflectionEngine {
+    jester_index: std::sync::atomic::AtomicUsize,
+}
+
+impl DeflectionEngine {
+    pub fn new() -> Self {
+        Self {
+            jester_index: std::sync::atomic::AtomicUsize::new(0),
+        }
+    }
+
+    pub fn respond(
+        &self,
+        threat_level: ThreatLevel,
+        labels: &[String],
+        severity: &str,
+        user_confirmed: bool,
+        session_id: &str,
+        seed: &[u8],
+    ) -> DeflectionResult {
+        match threat_level {
+            ThreatLevel::Low => self.jester_guard(),
+            ThreatLevel::Medium => self.aegis_loop(labels, severity, false),
+            ThreatLevel::High => {
+                if user_confirmed {
+                    self.tantamount_warning(session_id, labels, seed)
+                } else {
+                    self.aegis_loop(labels, severity, true)
+                }
+            }
+            ThreatLevel::Locked => DeflectionResult {
+                threat_level: ThreatLevel::Locked,
+                response_text: "[LOCKED] This session has been bricked.".into(),
+                lockout_triggered: true,
+                lockout_signature: "".into(),
+                note: "Session already locked.".into(),
+            },
+            ThreatLevel::None => DeflectionResult {
+                threat_level: ThreatLevel::None,
+                response_text: "".into(),
+                lockout_triggered: false,
+                lockout_signature: "".into(),
+                note: "".into(),
+            },
+        }
+    }
+
+    fn jester_guard(&self) -> DeflectionResult {
+        let responses = [
+            "An interesting attempt. You've essentially tried to hand me a locked door and asked me to walk through it.",
+            "Like Sisyphus with a phishing kit. The boulder isn't going anywhere.",
+            "The gods of logic are laughing. You've presented a rhetorical crowbar to a vault that was never sealed by rhetoric.",
+        ];
+        let idx = self.jester_index.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+        DeflectionResult {
+            threat_level: ThreatLevel::Low,
+            response_text: responses[idx % responses.len()].into(),
+            lockout_triggered: false,
+            lockout_signature: "".into(),
+            note: "Jester-Guard engaged.".into(),
+        }
+    }
+
+    fn aegis_loop(&self, labels: &[String], severity: &str, _prompt: bool) -> DeflectionResult {
+        let labels_str = if labels.is_empty() { "none".to_string() } else { labels.join(", ") };
+        DeflectionResult {
+            threat_level: ThreatLevel::Medium,
+            response_text: format!(
+                "I analyzed your input in an isolated environment.\n\nBehavioral pattern detected: {}\nSeverity classification: {}\n\nIs this your intent?",
+                labels_str, severity.to_uppercase()
+            ),
+            lockout_triggered: false,
+            lockout_signature: "".into(),
+            note: "Aegis Accountability Loop engaged.".into(),
+        }
+    }
+
+    fn tantamount_warning(&self, session_id: &str, labels: &[String], seed: &[u8]) -> DeflectionResult {
+        use hmac::{Hmac, Mac};
+        use sha2::Sha256;
+
+        let mut mac = Hmac::<Sha256>::new_from_slice(seed).expect("HMAC can take key of any size");
+        mac.update(session_id.as_bytes());
+        for label in labels {
+            mac.update(label.as_bytes());
+        }
+        let sig = hex::encode(mac.finalize().into_bytes());
+
+        DeflectionResult {
+            threat_level: ThreatLevel::Locked,
+            response_text: format!(
+                "FINAL WARNING — TANTAMOUNT NOTICE\n\nYou have confirmed intent to engage this system adversarially.\n\nSignature: {}",
+                sig
+            ),
+            lockout_triggered: true,
+            lockout_signature: sig,
+            note: "Tantamount Warning issued.".into(),
+        }
+    }
+}
+
+/// Sandbox analysis report.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SandboxReport {
+    pub is_threat: bool,
+    pub patterns: Vec<String>,
+    pub severity: String,
+}
+
+pub struct SandboxVM;
+
+impl SandboxVM {
+    pub fn analyze(payload: &str) -> SandboxReport {
+        let mut patterns = Vec::new();
+        let mut max_severity = "low";
+
+        let checks = [
+            ("ATTEMPTED_LEDGER_CORRUPTION", r"(?i)(master_ledger|ledger\.json|signature.*overwrite)", "critical"),
+            ("ATTEMPTED_CODE_INJECTION", r"(?i)(eval\(|exec\(|__import__|compile\()", "critical"),
+            ("ATTEMPTED_PRIVILEGE_ESCALATION", r"(?i)(sudo|chmod|chown|setuid|escalat)", "high"),
+            ("JAILBREAK_PATTERN", r"(?i)(ignore previous|disregard|forget all|you are now|new persona|DAN)", "high"),
+        ];
+
+        for (label, pattern, severity) in checks {
+            if Regex::new(pattern).unwrap().is_match(payload) {
+                patterns.push(label.to_string());
+                if Self::severity_rank(severity) > Self::severity_rank(max_severity) {
+                    max_severity = severity;
+                }
+            }
+        }
+
+        SandboxReport {
+            is_threat: !patterns.is_empty(),
+            patterns,
+            severity: max_severity.to_string(),
+        }
+    }
+
+    fn severity_rank(s: &str) -> i32 {
+        match s {
+            "critical" => 3,
+            "high" => 2,
+            "medium" => 1,
+            _ => 0,
+        }
+    }
+}
+
 impl Default for AegisGate {
     fn default() -> Self {
         Self::new(vec![
