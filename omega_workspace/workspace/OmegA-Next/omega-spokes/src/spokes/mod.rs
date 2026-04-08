@@ -3,7 +3,14 @@
 pub mod anthropic_spoke;
 pub mod neon_spoke;
 pub mod search_spoke;
+pub mod openai_spoke;
+pub mod gemini_spoke;
+
+pub mod deepseek_spoke;
 
 pub use anthropic_spoke::AnthropicSpoke;
 pub use neon_spoke::NeonSpoke;
 pub use search_spoke::SearchSpoke;
+pub use openai_spoke::OpenAISpoke;
+pub use gemini_spoke::GeminiSpoke;
+pub use deepseek_spoke::DeepSeekSpoke;

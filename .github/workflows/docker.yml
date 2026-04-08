@@ -1,0 +1,39 @@
+name: Chyren Docker CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'omega_workspace/workspace/OmegA-Next/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/docker.yml'
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    name: Build & Verify Production Images
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Chyren API (Rust)
+        run: |
+          docker build \
+            -f ./omega_workspace/workspace/OmegA-Next/Dockerfile.api \
+            ./omega_workspace/workspace/OmegA-Next \
+            --tag chyren-api:test
+
+      - name: Build Chyren Web (Next.js)
+        run: |
+          docker build \
+            -f ./omega_workspace/workspace/OmegA-Next/chyren-web/Dockerfile \
+            ./omega_workspace/workspace/OmegA-Next/chyren-web \
+            --tag chyren-web:test
+
+      - name: Verify Docker Compose
+        run: |
+          docker-compose config

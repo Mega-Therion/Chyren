@@ -31,7 +31,6 @@ impl Spoke for AnthropicSpoke {
         vec![
             SpokeCapability::Inference,
             SpokeCapability::Tools,
-            SpokeCapability::Integration,
         ]
     }
 
@@ -39,7 +38,7 @@ impl Spoke for AnthropicSpoke {
         // Anthropic provides tool_use capability
         Ok(vec![
             ToolDefinition {
-                name: "invoke_claude".to_string(),
+                name: "chat_completion".to_string(),
                 description: "Call Claude LLM for inference or reasoning".to_string(),
                 input_schema: json!({
                     "type": "object",
@@ -72,8 +71,8 @@ impl Spoke for AnthropicSpoke {
         let start = std::time::Instant::now();
 
         let result = match invocation.tool.as_str() {
-            "invoke_claude" => {
-                match self.invoke_claude(&invocation.input).await {
+            "chat_completion" => {
+                match self.chat_completion(&invocation.input).await {
                     Ok(response) => response,
                     Err(e) => {
                         return Ok(ToolResult {
@@ -110,6 +109,10 @@ impl Spoke for AnthropicSpoke {
         })
     }
 
+    async fn invoke_tool_stream(&self, _invocation: ToolInvocation, _tx: mpsc::Sender<Value>) -> Result<(), String> {
+         Err("Streaming not yet implemented for AnthropicSpoke".to_string())
+    }
+
     async fn health_check(&self) -> Result<SpokeStatus, String> {
         // In real implementation, would ping Anthropic API
         Ok(SpokeStatus {
@@ -128,7 +131,7 @@ impl Spoke for AnthropicSpoke {
 
 impl AnthropicSpoke {
     /// Invoke Claude model via Anthropic API
-    async fn invoke_claude(&self, input: &Value) -> Result<Value, String> {
+    async fn chat_completion(&self, input: &Value) -> Result<Value, String> {
         let api_key = env::var("ANTHROPIC_API_KEY")
             .map_err(|_| "ANTHROPIC_API_KEY environment variable not set".to_string())?;
 

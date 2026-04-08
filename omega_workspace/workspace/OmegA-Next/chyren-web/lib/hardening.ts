@@ -1,5 +1,5 @@
 import { getCache } from '@vercel/functions'
-import { NextRequest } from 'next/server'
+import { type NextRequest } from 'next/server'
 
 const RATE_LIMIT_MAX = 20
 const RATE_LIMIT_WINDOW_MS = 60_000

@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server'
+import { type NextRequest } from 'next/server'
 import { getBrainState } from '@/lib/brain-state-store'
 import { checkRateLimit } from '@/lib/hardening'
 

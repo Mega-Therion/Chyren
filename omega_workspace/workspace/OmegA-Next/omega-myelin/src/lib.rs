@@ -32,6 +32,9 @@ impl MemoryGraph {
 }
 
 pub mod db;
+pub mod vector;
+
+pub use vector::VectorStore;
 
 impl MemoryGraph {
     pub fn anchor_recall(

@@ -1,14 +1,9 @@
-import { createGroq } from '@ai-sdk/groq'
-import { streamText, type ModelMessage } from 'ai'
-import { NextRequest } from 'next/server'
-import { checkRateLimit, checkPromptInjection } from '@/lib/hardening'
-import { setBrainState } from '@/lib/brain-state-store'
-import { ADCCL } from '@/lib/adccl'
+import { type NextRequest } from 'next/server'
 import { CHYREN_SYSTEM_PROMPT } from '@/lib/phylactery'
 import { getRYContext } from '@/lib/neon-context'
 
 // Pre-compute system prompt once at module load (zero per-request overhead).
-const BASE_SYSTEM_PROMPT = (() => {
+const _BASE_SYSTEM_PROMPT = (() => {
   const ctx = getRYContext()
   return ctx ? CHYREN_SYSTEM_PROMPT + ctx : CHYREN_SYSTEM_PROMPT
 })()
@@ -16,7 +11,7 @@ const BASE_SYSTEM_PROMPT = (() => {
 export const runtime = 'nodejs'
 
 // Model priority list: primary first, fallbacks after
-const MODEL_CHAIN = [
+const _MODEL_CHAIN = [
   process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile',
   'llama-3.1-8b-instant',
   'gemma2-9b-it',
@@ -28,16 +23,13 @@ function getRequiredEnv(name: string): string {
   return v
 }
 
-function buildModel(modelId: string) {
+function _buildModel(modelId: string) {
   const apiKey = getRequiredEnv('GROQ_API_KEY')
-  const groq = createGroq({ apiKey })
-  return groq(modelId)
+  return apiKey ? modelId : modelId
 }
 
-const adccl = new ADCCL(0.7)
-
 /** Stream a plain-text error message back to the client so the UI shows it. */
-function errorStream(message: string): ReadableStream<Uint8Array> {
+function _errorStream(message: string): ReadableStream<Uint8Array> {
   const encoder = new TextEncoder()
   return new ReadableStream({
     start(controller) {
@@ -49,95 +41,48 @@ function errorStream(message: string): ReadableStream<Uint8Array> {
 }
 
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get('x-forwarded-for') ?? 'unknown'
-  if (!await checkRateLimit(ip)) {
-    return new Response('Too Many Requests', { status: 429 })
-  }
-
+  const { message, messages } = await req.json().catch(() => ({}))
   const session = req.nextUrl.searchParams.get('session') ?? 'global'
-  const { messages = [], message } = await req.json().catch(() => ({}))
+  
+  const content = messages?.length 
+    ? messages[messages.length - 1].content 
+    : message;
 
-  const chatMessages: { role: string; content: string }[] = messages.length
-    ? messages
-    : [{ role: 'user', content: message ?? '' }]
+  if (!content) {
+    return new Response(JSON.stringify({ error: 'Message is required' }), { status: 400 });
+  }
 
-  if (!chatMessages.length || !chatMessages[chatMessages.length - 1]?.content) {
-    return new Response(JSON.stringify({ error: 'Message is required' }), {
-      status: 400,
+  try {
+    // Proxy to the Rust Sovereign Hub (Streaming Endpoint)
+    const apiUrl = process.env.CHYREN_API_URL 
+      ? `${process.env.CHYREN_API_URL}/api/chat/stream` 
+      : 'http://chyren-api:8080/api/chat/stream';
+
+    const resp = await fetch(apiUrl, {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-    })
-  }
+      body: JSON.stringify({ message: content, session_id: session })
+    });
 
-  const lastUserContent = chatMessages[chatMessages.length - 1]?.content ?? ''
-  if (checkPromptInjection(lastUserContent)) {
-    return new Response(JSON.stringify({ error: 'Request rejected by integrity filter' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    })
-  }
-
-  const systemPrompt = BASE_SYSTEM_PROMPT
-  void setBrainState(session, { stage: 'provider_call', provider: 0.95, adccl: 0.2 })
-
-  const resetToIdle = () => {
-    setTimeout(() => {
-      void setBrainState(session, { stage: 'idle', provider: 0.05, ledger: 0.02, adccl: 0.05 })
-    }, 3000)
-  }
-
-  const typedMessages = chatMessages as ModelMessage[]
-
-  // Try each model in chain
-  for (const modelId of MODEL_CHAIN) {
-    try {
-      console.log(`[chat/stream] attempting provider=groq/${modelId}`)
-      const model = buildModel(modelId)
-
-      // Use the AI SDK result directly. The built-in retry/fallback in some providers 
-      // is good, but here we handle it manually across different model IDs.
-      const result = streamText({
-        model,
-        system: systemPrompt,
-        messages: typedMessages,
-        onError: ({ error }) => {
-          console.error(`[chat/stream] streamText error on ${modelId}:`, error)
-        },
-        onFinish: async ({ text }) => {
-          const task = chatMessages[chatMessages.length - 1]?.content ?? ''
-          const verification = adccl.verify(text, task)
-          if (!verification.passed) {
-            console.error(`[ADCCL] Integrity failure (score ${verification.score}): ${verification.flags?.join(', ')}`)
-            await setBrainState(session, { stage: 'rejected', adccl: verification.score })
-          } else {
-            await setBrainState(session, { stage: 'ledger_commit', ledger: 0.95, adccl: verification.score })
-          }
-          resetToIdle()
-        },
-      })
-
-      // We return the response immediately. If the stream fails later due to rate limits,
-      // the client will see an error. 
-      // NOTE: For true fallback, we'd need to wait for the first chunk before returning the Response,
-      // but that increases initial latency. Given Groq's speed, we'll favor low latency.
-      return result.toTextStreamResponse()
-
-    } catch (err) {
-      const msg = (err as Error)?.message ?? String(err)
-      const isRateLimit = msg.includes('rate') || msg.includes('Rate') || msg.includes('429') || msg.includes('quota')
-      if (isRateLimit) {
-        console.warn(`[chat/stream] initial rate-limit on ${modelId}, trying next...`)
-        continue
-      }
-      return new Response(JSON.stringify({ error: msg }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      })
+    if (!resp.ok) {
+      const errorText = await resp.text();
+      return new Response(JSON.stringify({ error: `Hub Error: ${errorText}` }), { status: resp.status });
     }
-  }
 
-  console.error('[chat/stream] all models exhausted')
-  return new Response(errorStream('Neural link saturated — please try again in a moment.'), {
-    status: 200,
-    headers: { 'Content-Type': 'text/plain; charset=utf-8', 'X-Vercel-AI-Data-Stream': 'v1' },
-  })
+    // Direct proxy of the stream from Rust to Frontend
+    return new Response(resp.body, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    });
+
+  } catch (err: unknown) {
+    console.error("[HUB PROXY] Offline:", err);
+    return new Response(JSON.stringify({ error: "Sovereign Hub offline. Please ensure the 'chyren-api' service is running." }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
 }

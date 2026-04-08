@@ -1,39 +1,44 @@
 version: '3.8'
 
 services:
-  # Chyren Main Application
-  chyren:
+  # OmegA-Next API (Rust)
+  chyren-api:
     build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: chyren-app
+      context: ./omega_workspace/workspace/OmegA-Next
+      dockerfile: Dockerfile.api
+    container_name: chyren-api
     ports:
-      - "8080:8080"  # HTTP API
-      - "8081:8081"  # WebSocket
-      - "8082:8082"  # gRPC
+      - "8080:8080"
     environment:
       - RUST_LOG=info
-      - CHYREN_HOME=/app
-      - CHYREN_DATA=/data
-      - POSTGRES_HOST=postgres
+      - OMEGA_DB_URL=postgresql://chyren:chyren_password@postgres:5432/chyren
       - REDIS_HOST=redis
-      - VECTOR_DB_HOST=qdrant
-    volumes:
-      - ./data:/data
-      - ./logs:/app/logs
+      - QDRANT_HOST=qdrant
     depends_on:
-      - postgres
-      - redis
-      - qdrant
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - chyren-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+
+  # Chyren Web (Next.js)
+  chyren-web:
+    build:
+      context: ./omega_workspace/workspace/OmegA-Next/chyren-web
+      dockerfile: Dockerfile
+    container_name: chyren-web
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
+      - CHYREN_API_URL=http://chyren-api:8080/api/chat
+    depends_on:
+      - chyren-api
+    networks:
+      - chyren-network
+    restart: unless-stopped
 
   # PostgreSQL Database
   postgres:
@@ -45,8 +50,6 @@ services:
       - POSTGRES_PASSWORD=chyren_password
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
     networks:
       - chyren-network
     restart: unless-stopped
@@ -60,14 +63,9 @@ services:
   redis:
     image: redis:7-alpine
     container_name: chyren-redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
     networks:
       - chyren-network
     restart: unless-stopped
-    command: redis-server --appendonly yes
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -79,95 +77,44 @@ services:
     image: qdrant/qdrant:latest
     container_name: chyren-qdrant
     ports:
-      - "6333:6333"  # HTTP
-      - "6334:6334"  # gRPC
+      - "6333:6333"
     volumes:
       - qdrant-data:/qdrant/storage
     networks:
       - chyren-network
     restart: unless-stopped
-    environment:
-      - QDRANT__SERVICE__GRPC_PORT=6334
 
   # Prometheus Monitoring
   prometheus:
     image: prom/prometheus:latest
     container_name: chyren-prometheus
-    ports:
-      - "9090:9090"
     volumes:
-      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./.docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus-data:/prometheus
     networks:
       - chyren-network
     restart: unless-stopped
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
 
-  # Grafana Dashboard
-  grafana:
-    image: grafana/grafana:latest
-    container_name: chyren-grafana
-    ports:
-      - "3000:3000"
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_SECURITY_ADMIN_USER=admin
-    volumes:
-      - grafana-data:/var/lib/grafana
-      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
-    networks:
-      - chyren-network
-    restart: unless-stopped
-    depends_on:
-      - prometheus
-
-  # Nginx Reverse Proxy
+  # Nginx Reverse Proxy (Optional entry point)
   nginx:
     image: nginx:alpine
     container_name: chyren-nginx
     ports:
       - "80:80"
-      - "443:443"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/ssl:/etc/nginx/ssl
+      - ./.docker/nginx/nginx.conf:/etc/nginx/nginx.conf
     networks:
       - chyren-network
     restart: unless-stopped
     depends_on:
-      - chyren
+      - chyren-api
+      - chyren-web
 
 volumes:
   postgres-data:
-  redis-data:
   qdrant-data:
   prometheus-data:
-  grafana-data:
 
 networks:
   chyren-network:
     driver: bridge
-
-# ==================================
-# Usage Instructions
-# ==================================
-# Development:
-#   docker-compose up
-#
-# Production:
-#   docker-compose -f docker-compose.yml up -d
-#
-# Build and restart specific service:
-#   docker-compose up -d --build chyren
-#
-# View logs:
-#   docker-compose logs -f chyren
-#
-# Stop all services:
-#   docker-compose down
-#
-# Stop and remove volumes:
-#   docker-compose down -v
-# ==================================

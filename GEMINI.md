@@ -31,7 +31,22 @@ The project is currently in a **transitional state**, moving from a modular Pyth
   ```bash
   python main.py "Your task here" --provider anthropic
   ```
-- **Configuration:** API keys and project settings are loaded from `~/.omega/one-true.env`.
+### Docker Environment (OmegA-Next)
+- **Launch Full Stack:** Starts API, Web, Postgres, Redis, Qdrant, and Monitoring.
+  ```bash
+  ./scripts/docker-manager.sh up
+  ```
+- **Building Images:**
+  ```bash
+  ./scripts/docker-manager.sh build
+  ```
+- **View Logs:**
+  ```bash
+  ./scripts/docker-manager.sh logs
+  ```
+
+### Configuration:
+- API keys and project settings are loaded from `~/.omega/one-true.env`.
 
 ### Next-Gen Architecture (Rust/OmegA)
 - **Scaffolding:** Use the bootstrap script to initialize the Rust workspace:

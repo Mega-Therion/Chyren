@@ -222,9 +222,8 @@ export default function ChatPage() {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      sendMessage(input);
-    }
-  };
+      void sendMessage(input);
+      }  };
 
   const toggleTTS = () => {
     if (ttsEnabled) window.speechSynthesis?.cancel();
@@ -257,9 +256,8 @@ export default function ChatPage() {
           {!isEmpty && (
             <button 
               onClick={() => { setMessages([]); localStorage.removeItem('chyren_messages'); }} 
-              className="omega-icon-btn" 
+              className="omega-icon-btn omega-purge-btn" 
               title="Purge Memory"
-              style={{ fontSize: '11px', marginRight: '8px', opacity: 0.7 }}
             >
               PURGE
             </button>

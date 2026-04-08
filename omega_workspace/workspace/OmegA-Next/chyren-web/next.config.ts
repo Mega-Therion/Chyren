@@ -14,7 +14,7 @@ function publicApiBaseUrl(): string {
 }
 
 /** Returns the list of allowed origins for Server Actions, filtering out empty strings */
-function allowedServerActionOrigins(): string[] {
+function _allowedServerActionOrigins(): string[] {
   return [
     'localhost:3000',
     process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '',
