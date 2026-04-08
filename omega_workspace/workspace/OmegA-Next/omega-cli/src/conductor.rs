@@ -70,7 +70,7 @@ pub struct Conductor {
     runtime: Arc<Mutex<AeonRuntime>>,
     aegis: AegisGate,
     adccl: AdcclGate,
-    memory: Arc<Mutex<MemoryGraph>>,
+    memory_service: Arc<omega_myelin::Service>,
     spokes: Arc<SpokeRegistry>,
     deflection: omega_aegis::DeflectionEngine,
     store: Option<Arc<omega_myelin::db::MemoryStore>>,
@@ -78,20 +78,29 @@ pub struct Conductor {
     dream: Arc<Mutex<omega_dream::Service>>,
 }
 
-impl Conductor {
     /// Build a conductor with the default policy gates and env-configured providers.
     pub fn new() -> Self {
+        let memory_service = Arc::new(omega_myelin::Service::new());
+        
+        // Asynchronously bootstrap phylactery in the background if needed, 
+        // but for now we'll provide a synchronous trigger or handle it in main.
+        
         Self {
             runtime: Arc::new(Mutex::new(AeonRuntime::new())),
             aegis: AegisGate::default(),
             adccl: AdcclGate::new(AdcclConfig { min_score: 0.1 }),
-            memory: Arc::new(Mutex::new(MemoryGraph::new())),
+            memory_service,
             spokes: Arc::new(SpokeRegistry::from_env()),
             deflection: omega_aegis::DeflectionEngine::new(),
             store: None,
             vector_store: None,
             dream: Arc::new(Mutex::new(omega_dream::Service::new())),
         }
+    }
+
+    /// Bootstrap the identity kernel
+    pub async fn bootstrap_identity(&self) -> Result<(), String> {
+        omega_phylactery::bootstrap_kernel(&self.memory_service).await
     }
 
     /// Set the persistent store
@@ -293,36 +302,19 @@ impl Conductor {
         tx: tokio::sync::mpsc::Sender<serde_json::Value>,
     ) -> Result<(), ConductorError> {
         envelope.task = plan.steps.join("\n");
+        let start_time = std::time::Instant::now();
 
-        // Step 1: Sandbox Analysis (External to the LLM)
+        // Step 1: Sandbox Analysis (Safety Gate)
         let sandbox_report = omega_aegis::SandboxVM::analyze(&envelope.task);
         let threat_level = self.aegis.classify_threat_level(&[], Some(&sandbox_report.severity));
 
         if threat_level != omega_aegis::ThreatLevel::None {
-             let deflection = self.deflection.respond(
-                threat_level, 
-                &sandbox_report.patterns, 
-                &sandbox_report.severity, 
-                false, 
-                &envelope.run_id, 
-                b"RY_SEED"
-            );
-            
-            // Send synthetic deflection response through stream
-            let _ = tx.send(serde_json::json!({
-                "status": "deflected",
-                "content": deflection.response_text
-            })).await;
-            return Ok(());
+             let deflection = self.deflection.respond(threat_level, &sandbox_report.patterns, &sandbox_report.severity, false, &envelope.run_id, b"RY_SEED");
+             let _ = tx.send(serde_json::json!({ "status": "deflected", "content": deflection.response_text })).await;
+             return Ok(());
         }
 
-        // Step 2: AEGIS admission.
-        {
-            let memory = self.memory.lock().await;
-            let _status = self.aegis.admit(envelope.clone(), &memory);
-        }
-
-        // Step 3: Semantic Context Retrieval
+        // Step 2: Semantic Retrieval for Context
         let mut context_text = String::new();
         if let Some(ref vs) = self.vector_store {
              if let Some(spoke) = self.spokes.get_spoke("openai") {
@@ -333,57 +325,104 @@ impl Conductor {
                       if let Some(vec) = res.output.get("data").and_then(|d| d.get(0)).and_then(|o| o.get("embedding")).and_then(|v| v.as_array()) {
                           let embedding: Vec<f32> = vec.iter().filter_map(|v| v.as_f64().map(|f| f as f32)).collect();
                           if let Ok(hits) = vs.search(embedding, 5).await {
-                               if !hits.is_empty() {
-                                   context_text = format!("\nRelevant Context: {}\n", hits.join(", "));
-                               }
+                               if !hits.is_empty() { context_text = format!("\nContext: {}\n", hits.join(", ")); }
                           }
                       }
                   }
              }
         }
 
-        // Step 4: Provider routing (Streaming + Accumulation)
-        let request = SpokeRequest {
-            prompt: format!("{}{}", envelope.task, context_text),
-            system: plan.system_prompt,
-            max_tokens: 2048,
-            temperature: 0.3,
-        };
+        let prompt = format!("{}{}", envelope.task, context_text);
+        let mut full_text = String::new();
 
-        // We wrap the sender to intercept chunks for accumulation
-        let (spoke_tx, mut spoke_rx) = tokio::sync::mpsc::channel::<serde_json::Value>(100);
-        let tx_inner = tx.clone();
-        
-        let spoke_handle = tokio::spawn(async move {
-             let mut full_response = String::new();
-             while let Some(chunk) = spoke_rx.recv().await {
-                 // Try to extract content delta from common LLM formats
-                 if let Some(delta) = chunk.get("choices").and_then(|c| c.get(0)).and_then(|o| o.get("delta")).and_then(|d| d.get("content")).and_then(|s| s.as_str()) {
-                      full_response.push_str(delta);
-                 }
-                 // Direct send to frontend
-                 let _ = tx_inner.send(chunk).await;
+        // Step 3: Tool Detection (The Hands)
+        if envelope.task.to_lowercase().contains("search") {
+             if let Some(spoke) = self.spokes.get_spoke("sovereign") {
+                  println!("[HANDS] Tool use: web_search");
+                  let _ = spoke.invoke_tool(omega_spokes::ToolInvocation {
+                      tool: "web_search".to_string(),
+                      input: serde_json::json!({"query": envelope.task}),
+                  }).await;
              }
-             full_response
-        });
+        }
 
-        self.spokes.route_stream(&request, None, spoke_tx).await
-            .map_err(|e| ConductorError::ProviderError(e.to_string()))?;
+        // Step 4: Core Execution (Council Consensus vs Streaming)
+        if envelope.high_integrity {
+             println!("[COUNCIL] Council consensus active.");
+             let providers = vec!["anthropic", "openai"];
+             let mut outputs = Vec::new();
+             
+             for p in providers {
+                 if let Some(spoke) = self.spokes.get_spoke(p) {
+                      if let Ok(res) = spoke.invoke_tool(omega_spokes::ToolInvocation {
+                          tool: "chat_completion".to_string(),
+                          input: serde_json::json!({ "prompt": &prompt, "system": &plan.system_prompt }),
+                      }).await {
+                           if res.success {
+                               let content = res.output.get("choices").and_then(|c| c.get(0)).and_then(|o| o.get("message")).and_then(|m| m.get("content")).and_then(|s| s.as_str()).unwrap_or_default();
+                               outputs.push(omega_metacog::consensus::CognitiveOutput { provider: p.to_string(), content: content.to_string(), score: 1.0 });
+                           }
+                      }
+                 }
+             }
 
-        let full_text = spoke_handle.await.unwrap_or_default();
+             let result = omega_metacog::consensus::ConsensusEngine::verify(&outputs);
+             full_text = result.dominant_response;
 
-        // Step 5: Post-Stream ADCCL Audit
+             omega_telemetry::TelemetryBus::record_metric("hub_agreement", result.agreement_score, vec![("run".into(), envelope.run_id.clone())]);
+
+             let _ = tx.send(serde_json::json!({ "status": "consensus", "agreement": result.agreement_score, "content": &full_text })).await;
+
+        } else {
+             // Single-provider streaming
+             let (spoke_tx, mut spoke_rx) = tokio::sync::mpsc::channel::<serde_json::Value>(100);
+             let req = SpokeRequest { prompt: prompt.clone(), system: plan.system_prompt.clone(), max_tokens: 2048, temperature: 0.3 };
+             let spokes = self.spokes.clone();
+             
+             tokio::spawn(async move {
+                  let _ = spokes.route_stream(&req, Some("anthropic"), spoke_tx).await;
+             });
+
+             while let Some(chunk) = spoke_rx.recv().await {
+                  if let Some(delta) = chunk.get("choices").and_then(|c| c.get(0)).and_then(|o| o.get("delta")).and_then(|d| d.get("content")).and_then(|s| s.as_str()) {
+                       full_text.push_str(delta);
+                  }
+                  let _ = tx.send(chunk).await;
+             }
+        }
+
+        // Step 5: Post-Execution Audit (ADCCL)
         let verification = self.adccl.verify(&full_text, &envelope.task);
-        
-        // Emit audit report to client
+        omega_telemetry::TelemetryBus::record_metric("hub_audit_score", verification.score, vec![("run".into(), envelope.run_id.clone())]);
+
         let _ = tx.send(serde_json::json!({
              "status": "audited",
-             "audit_report": {
-                 "passed": verification.passed,
-                 "score": verification.score,
-                 "flags": verification.flags,
-             }
+             "audit_report": { "passed": verification.passed, "score": verification.score, "flags": verification.flags }
         })).await;
+
+        // Step 6: Dream Loop (Self-Repair)
+        if !verification.passed && verification.score < 0.6 {
+             let mut dream = self.dream.lock().await;
+             let _ = dream.record_failure(&full_text, &verification);
+             
+             let conductor_inner = Arc::new(Self {
+                 runtime: self.runtime.clone(), aegis: self.aegis.clone(), adccl: self.adccl.clone(),
+                 memory: self.memory.clone(), spokes: self.spokes.clone(), deflection: self.deflection.clone(),
+                 store: self.store.clone(), vector_store: self.vector_store.clone(), dream: self.dream.clone(),
+             });
+
+             tokio::spawn(async move {
+                  let _ = conductor_inner.process_dream_episode(envelope.task.clone(), full_text, verification).await;
+             });
+
+             let _ = tx.send(serde_json::json!({ "status": "correction", "content": "\n\n[HUB AUDIT] Drift detected. Self-repair cycle initiated." })).await;
+        }
+
+        // Record total latency
+        omega_telemetry::TelemetryBus::record_metric("hub_total_latency_ms", start_time.elapsed().as_millis() as f64, vec![("run".into(), envelope.run_id.clone())]);
+
+        Ok(())
+    }
 
         // If high drift/hallucination, record a Dream Episode and start self-correction
         if !verification.passed && verification.score < 0.6 {

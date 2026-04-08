@@ -5,15 +5,19 @@ edition.workspace = true
 authors.workspace = true
 license.workspace = true
 
-[lib]
-
 [dependencies]
 omega-core = { path = "../omega-core" }
 omega-telemetry = { path = "../omega-telemetry" }
 omega-aegis = { path = "../omega-aegis" }
 omega-myelin = { path = "../omega-myelin" }
+omega-spokes = { path = "../omega-spokes" }
+omega-dream = { path = "../omega-dream" }
+omega-metacog = { path = "../omega-metacog" }
+omega-phylactery = { path = "../omega-phylactery" }
 anyhow = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "1"
 tokio = { version = "1", features = ["full"] }
+async-trait = "0.1"
+futures = "0.3"

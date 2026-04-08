@@ -36,7 +36,6 @@ async fn main() -> anyhow::Result<()> {
 
     let mut conductor = Conductor::new();
     
-    // Connect to database if OMEGA_DB_URL is set
     if let Ok(url) = std::env::var("OMEGA_DB_URL") {
         match omega_myelin::db::MemoryStore::connect(&url, "").await {
             Ok(store) => {
@@ -45,6 +44,13 @@ async fn main() -> anyhow::Result<()> {
             }
             Err(e) => println!("[WARN] Failed to connect to DB: {}. Using volatile ledger.", e),
         }
+    }
+
+    // Phase 6: Identity Synthesis
+    if let Err(e) = conductor.bootstrap_identity().await {
+        println!("[WARN] Phylactery bootstrap failed: {}. Running as generic orchestrator.", e);
+    } else {
+        println!("[SYSTEM] Phylactery Identity Kernel active (L6 Canonical).");
     }
 
     let conductor = Arc::new(conductor);

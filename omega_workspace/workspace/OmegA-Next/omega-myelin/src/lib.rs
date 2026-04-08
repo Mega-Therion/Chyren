@@ -29,6 +29,45 @@ impl MemoryGraph {
     pub fn add_node(&mut self, node: MemoryNode) {
         self.nodes.insert(node.node_id.clone(), node);
     }
+
+    pub fn write_node(&mut self, content: String, _stratum: omega_core::MemoryStratum) -> MemoryNode {
+        let node = MemoryNode {
+            node_id: omega_core::gen_id("node"),
+            content,
+            retrieval_count: 0,
+            decay_score: 1.0,
+        };
+        self.add_node(node.clone());
+        node
+    }
+
+    pub fn create_edge(&mut self, from: String, to: String, edge_type: String, _weight: f64) {
+        self.edges.push(omega_core::MemoryEdge {
+            from: from.clone(),
+            to: to.clone(),
+            from_id: from,
+            to_id: to,
+        });
+    }
+}
+
+/// Myelin Service: Thread-safe memory access layer.
+pub struct Service {
+    pub graph: std::sync::Arc<tokio::sync::Mutex<MemoryGraph>>,
+}
+
+impl Service {
+    pub fn new() -> Self {
+        Self {
+            graph: std::sync::Arc::new(tokio::sync::Mutex::new(MemoryGraph::new())),
+        }
+    }
+
+    pub async name(&self) -> String { "myelin".into() }
+    
+    pub async fn lock(&self) -> tokio::sync::MutexGuard<'_, MemoryGraph> {
+        self.graph.lock().await
+    }
 }
 
 pub mod db;

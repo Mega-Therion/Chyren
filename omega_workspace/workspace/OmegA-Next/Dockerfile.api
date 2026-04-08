@@ -21,11 +21,13 @@ COPY omega-telemetry/Cargo.toml ./omega-telemetry/
 COPY omega-conductor/Cargo.toml ./omega-conductor/
 COPY omega-eval/Cargo.toml ./omega-eval/
 COPY omega-cli/Cargo.toml ./omega-cli/
+COPY omega-phylactery/Cargo.toml ./omega-phylactery/
+COPY omega-telegram-gateway/Cargo.toml ./omega-telegram-gateway/
 
 # Create dummy source files for each member to build dependencies
 RUN mkdir -p omega-core/src omega-aegis/src omega-aeon/src omega-adccl/src omega-myelin/src \
     omega-dream/src omega-metacog/src omega-worldmodel/src omega-integration/src \
-    omega-spokes/src omega-telemetry/src omega-conductor/src omega-eval/src omega-cli/src && \
+    omega-spokes/src omega-telemetry/src omega-conductor/src omega-eval/src omega-cli/src omega-phylactery/src omega-telegram-gateway/src && \
     echo "pub fn main() {}" > omega-core/src/lib.rs && \
     echo "pub fn main() {}" > omega-aegis/src/lib.rs && \
     echo "pub fn main() {}" > omega-aeon/src/lib.rs && \
@@ -40,7 +42,9 @@ RUN mkdir -p omega-core/src omega-aegis/src omega-aeon/src omega-adccl/src omega
     echo "pub fn main() {}" > omega-conductor/src/lib.rs && \
     echo "pub fn main() {}" > omega-eval/src/lib.rs && \
     echo "fn main() {}" > omega-cli/src/main.rs && \
-    echo "pub fn main() {}" > omega-cli/src/lib.rs
+    echo "pub fn main() {}" > omega-cli/src/lib.rs && \
+    echo "pub fn main() {}" > omega-phylactery/src/lib.rs && \
+    echo "pub fn main() {}" > omega-telegram-gateway/src/lib.rs
 
 # Build dependencies (cached)
 RUN cargo build --release -p omega-cli --bin chyren && \
