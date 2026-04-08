@@ -12,30 +12,55 @@ interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  audit?: {
+    passed: boolean;
+    score: number;
+    flags: string[];
+  };
+  isCorrection?: boolean;
 }
 
 // Handles Vercel AI SDK text stream (0:"chunk") and plain-text streams
-function parseChunk(chunk: string): string {
-  let out = '';
+// Handles Hub events (data: {...}) and plain-text streams
+function parseHubChunk(chunk: string): { content?: string, audit?: { passed: boolean, score: number, flags: string[] }, status?: string } {
+  let content = '';
+  let audit = null;
+  let status = null;
+
   for (const line of chunk.split('\n')) {
-    if (line.startsWith('0:')) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    if (trimmed.startsWith('data: ')) {
       try {
-        const delta = JSON.parse(line.slice(2));
-        if (typeof delta === 'string') out += delta;
-      } catch { /* skip malformed */ }
-    } else if (
-      line.trim() &&
-      !line.startsWith('e:') &&
-      !line.startsWith('d:') &&
-      !line.startsWith('data:') &&
-      !line.startsWith('f:') &&
-      !line.startsWith('8:') &&
-      !line.startsWith('2:')
-    ) {
-      out += line;
+        const json = JSON.parse(trimmed.slice(6));
+        
+        // Handle Standard AI Chunks
+        const delta = json.choices?.[0]?.delta?.content;
+        if (delta) content += delta;
+
+        // Handle Hub Status Events
+        if (json.status === 'audited') {
+           audit = json.audit_report;
+        }
+        if (json.status === 'correction') {
+           content += json.content;
+           status = 'correction';
+        }
+        if (json.status === 'deflected') {
+           content = json.content;
+           status = 'deflected';
+        }
+      } catch { /* skip */ }
+    } else if (trimmed.startsWith('0:')) {
+       // Vercel AI SDK compatibility
+       try {
+         const delta = JSON.parse(trimmed.slice(2));
+         if (typeof delta === 'string') content += delta;
+       } catch {}
     }
   }
-  return out;
+  return { content, audit, status };
 }
 
 // Pull a speakable chunk from the buffer:
@@ -175,13 +200,26 @@ export default function ChatPage() {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-          const delta = parseChunk(decoder.decode(value, { stream: true }));
-          if (!delta) continue;
+          const { content: delta, audit, status } = parseHubChunk(decoder.decode(value, { stream: true }));
+          
+          if (delta) {
+            accumulated += delta;
+            setMessages(prev =>
+              prev.map(m => m.id === assistantId ? { ...m, content: accumulated } : m)
+            );
+          }
 
-          accumulated += delta;
-          setMessages(prev =>
-            prev.map(m => m.id === assistantId ? { ...m, content: accumulated } : m)
-          );
+          if (audit) {
+            setMessages(prev =>
+              prev.map(m => m.id === assistantId ? { ...m, audit } : m)
+            );
+          }
+
+          if (status === 'correction') {
+             setMessages(prev =>
+               prev.map(m => m.id === assistantId ? { ...m, isCorrection: true } : m)
+             );
+          }
 
           // Stream TTS: speak sentence-by-sentence as text arrives
           if (ttsEnabledRef.current) {
@@ -287,11 +325,17 @@ export default function ChatPage() {
                 <div className="omega-msg-label">
                   {msg.role === 'user' ? '▸ OPERATOR' : 'Ω CHYREN'}
                 </div>
-                <div className="omega-msg-content">
+                <div className={`omega-msg-content ${msg.isCorrection ? 'omega-correction-block' : ''}`}>
                   {msg.role === 'assistant' ? (
                     <>
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
                       {isStreaming && msg === lastMsg && <span className="omega-cursor" />}
+                      
+                      {msg.audit && (
+                        <div className={`omega-audit-seal ${msg.audit.passed ? 'omega-audit-passed' : 'omega-audit-drift'}`}>
+                           {msg.audit.passed ? '🛡 VERIFIED BY ADCCL' : `⚠ COGNITIVE DRIFT DETECTED (${msg.audit.score.toFixed(2)})`}
+                        </div>
+                      )}
                     </>
                   ) : (
                     <p>{msg.content}</p>
