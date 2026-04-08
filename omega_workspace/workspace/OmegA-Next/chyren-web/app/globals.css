@@ -404,6 +404,62 @@ html, body {
 }
 @keyframes cur-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
+/* ── Audit Seals & Corrections ────────────────────────────────────────── */
+.omega-audit-seal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: seal-fade-in 0.6s ease-out;
+}
+
+@keyframes seal-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.omega-audit-passed {
+  background: rgba(52, 211, 153, 0.08);
+  border-color: rgba(52, 211, 153, 0.3);
+  color: var(--emerald);
+  box-shadow: 0 0 10px rgba(52, 211, 153, 0.1);
+}
+
+.omega-audit-drift {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #f59e0b;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.1);
+}
+
+.omega-correction-block {
+  border-left-color: #f59e0b !important;
+  background: rgba(245, 158, 11, 0.04) !important;
+  position: relative;
+}
+
+.omega-correction-block::after {
+  content: 'RECURSIVE CORRECTION';
+  position: absolute;
+  top: -8px;
+  right: 12px;
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  color: #f59e0b;
+  background: var(--bg-void);
+  padding: 0 6px;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 2px;
+}
+
 /* ── Error / transcript bars ──────────────────────────────────────────── */
 .omega-error {
   display: flex;
