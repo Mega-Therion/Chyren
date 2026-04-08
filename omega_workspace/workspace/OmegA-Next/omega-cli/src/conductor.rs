@@ -75,6 +75,7 @@ pub struct Conductor {
     deflection: omega_aegis::DeflectionEngine,
     store: Option<Arc<omega_myelin::db::MemoryStore>>,
     vector_store: Option<Arc<omega_myelin::VectorStore>>,
+    dream: Arc<Mutex<omega_dream::Service>>,
 }
 
 impl Conductor {
@@ -89,6 +90,7 @@ impl Conductor {
             deflection: omega_aegis::DeflectionEngine::new(),
             store: None,
             vector_store: None,
+            dream: Arc::new(Mutex::new(omega_dream::Service::new())),
         }
     }
 
@@ -383,13 +385,33 @@ impl Conductor {
              }
         })).await;
 
-        // If high drift/hallucination, append a recursive correction
-        if !verification.passed && verification.score < 0.4 {
+        // If high drift/hallucination, record a Dream Episode and start self-correction
+        if !verification.passed && verification.score < 0.6 {
+             let mut dream = self.dream.lock().await;
+             let episode = dream.record_failure(&full_text, &verification);
+             println!("[DREAM] Recorded cognitive failure episode: {}. Starting background repair.", episode.episode_id);
+             
+             // Spawn Background Self-Repair Loop
+             let conductor_inner = Arc::new(Self {
+                 runtime: self.runtime.clone(),
+                 aegis: self.aegis.clone(),
+                 adccl: self.adccl.clone(),
+                 memory: self.memory.clone(),
+                 spokes: self.spokes.clone(),
+                 deflection: self.deflection.clone(),
+                 store: self.store.clone(),
+                 vector_store: self.vector_store.clone(),
+                 dream: self.dream.clone(),
+             });
+
+             tokio::spawn(async move {
+                  let _ = conductor_inner.process_dream_episode(envelope.task.clone(), full_text, verification).await;
+             });
+
              let _ = tx.send(serde_json::json!({
                  "status": "correction",
                  "content": "\n\n[HUB AUDIT] Significant cognitive drift detected. Re-processing in sovereign sandbox..."
              })).await;
-             // Here we would trigger the 'Dream' loop...
         }
 
         // Step 6: Ledger & Memory Commitment
@@ -415,6 +437,68 @@ impl Conductor {
                  // I'll skip re-implementing the embedding call here for brevity, 
                  // but in production it maps to the same archiving logic.
             }
+        }
+
+        Ok(())
+    }
+
+    /// Background Loop: Process a dream episode (failure) to generate 'Waking Knowledge'.
+    pub async fn process_dream_episode(
+        &self,
+        task: String,
+        failed_response: String,
+        verification: omega_adccl::VerificationResult,
+    ) -> Result<(), ConductorError> {
+        println!("[DREAM] Initiating autonomous self-repair for cognitive drift...");
+
+        // Call a Strong 'Teacher' spoke for evaluation
+        let spoke = self.spokes.get_spoke("openai")
+            .ok_or_else(|| ConductorError::ProviderError("OpenAI spoke required for Dream Loop".into()))?;
+
+        let teacher_prompt = format!(
+            "TASK: {}\nFAILED RESPONSE: {}\nDRIFT FLAGS: {:?}\n\nACT AS CHYREN TEACHER: Produce a high-quality, corrected version of the response that addresses the drift and aligns perfectly with the sovereign constitution.",
+            task, failed_response, verification.flags
+        );
+
+        let result = spoke.invoke_tool(omega_spokes::ToolInvocation {
+            tool: "chat_completion".to_string(),
+            input: serde_json::json!({"prompt": teacher_prompt}),
+        }).await.map_err(|e| ConductorError::ProviderError(e.to_string()))?;
+
+        if !result.success {
+            return Err(ConductorError::ProviderError("Teacher spoke failed".into()));
+        }
+
+        let corrected_text = result.output.get("choices").and_then(|c| c.get(0)).and_then(|o| o.get("message")).and_then(|m| m.get("content")).and_then(|s| s.as_str())
+            .unwrap_or_default();
+
+        if corrected_text.is_empty() {
+             return Ok(());
+        }
+
+        println!("[DREAM] Correction produced. Grafting into memory...");
+
+        // Graft correction into Semantic Memory
+        if let Some(ref vs) = self.vector_store {
+             // 1. Get embedding for the corrected version
+             if let Ok(embed_res) = spoke.invoke_tool(omega_spokes::ToolInvocation {
+                 tool: "create_embedding".to_string(),
+                 input: serde_json::json!({"text": format!("Task: {}\nCorrected: {}", task, corrected_text)}),
+             }).await {
+                 if let Some(vec) = embed_res.output.get("data").and_then(|d| d.get(0)).and_then(|o| o.get("embedding")).and_then(|v| v.as_array()) {
+                      let embedding: Vec<f32> = vec.iter().filter_map(|v| v.as_f64().map(|f| f as f32)).collect();
+                      
+                      let node = omega_core::MemoryNode {
+                          node_id: format!("repair-{}", uuid::Uuid::new_v4()),
+                          content: corrected_text.to_string(),
+                          retrieval_count: 0,
+                          decay_score: 1.0,
+                      };
+                      
+                      let _ = vs.upsert_node(&node, embedding).await;
+                      println!("[DREAM] Waking Knowledge establishing. Hub memory synchronized.");
+                 }
+             }
         }
 
         Ok(())
