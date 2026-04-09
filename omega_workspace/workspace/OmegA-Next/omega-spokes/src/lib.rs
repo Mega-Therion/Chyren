@@ -160,7 +160,7 @@ impl SpokeRegistry {
                 "deepseek" => Some(Arc::new(spokes::DeepSeekSpoke::new(config))),
                 "search" => Some(Arc::new(spokes::SearchSpoke::new(config))),
                 "neon" => Some(Arc::new(spokes::NeonSpoke::new(config))),
-                "sovereign" => Some(Arc::new(spokes::SovereignSpoke::new(config))),
+                "sovereign" => Some(Arc::new(spokes::DeepSeekSpoke::new(config))),
                 _ => None,
             };
 
@@ -181,6 +181,17 @@ impl SpokeRegistry {
 
     pub fn register(&mut self, spoke: Arc<dyn Spoke>) {
         self.spokes.insert(spoke.name().to_string(), spoke);
+    }
+
+    pub fn primary(&self) -> Option<Arc<dyn Spoke>> {
+        self.preference.first().and_then(|name| self.spokes.get(name).cloned())
+    }
+
+    pub fn spokes_with_capability(&self, capability: SpokeCapability) -> Vec<Arc<dyn Spoke>> {
+        self.spokes.values()
+            .filter(|s| s.capabilities().contains(&capability))
+            .cloned()
+            .collect()
     }
 
     pub fn get_spoke(&self, name: &str) -> Option<Arc<dyn Spoke>> {

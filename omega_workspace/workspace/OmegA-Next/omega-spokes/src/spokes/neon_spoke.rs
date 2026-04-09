@@ -30,9 +30,9 @@ impl Spoke for NeonSpoke {
 
     fn capabilities(&self) -> Vec<SpokeCapability> {
         vec![
-            SpokeCapability::Retrieval,
+            SpokeCapability::Inference,
             SpokeCapability::Tools,
-            SpokeCapability::RealTime,
+            SpokeCapability::Inference,
         ]
     }
 

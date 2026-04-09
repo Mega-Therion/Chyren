@@ -10,6 +10,10 @@ name = "chyren"
 path = "src/main.rs"
 
 [[bin]]
+name = "chyren_api"
+path = "src/bin/chyren_api.rs"
+
+[[bin]]
 name = "ingestion_test"
 path = "src/bin/ingestion_test.rs"
 

@@ -14,6 +14,10 @@ services:
       - OMEGA_DB_URL=postgresql://chyren:chyren_password@postgres:5432/chyren
       - REDIS_HOST=redis
       - QDRANT_HOST=qdrant
+      - ANTHROPIC_API_KEY=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
+      - OPENAI_API_KEY=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
+      - DEEPSEEK_API_KEY=sk-e2d86b3010ce4d99b07ed1d81441b9c7
+      - GEMINI_API_KEY=AIzaSyBb9r424wzrxBVJZU090evpRG_mO4GnYJI
     depends_on:
       postgres:
         condition: service_healthy

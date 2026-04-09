@@ -3,9 +3,9 @@
 
 #![warn(missing_docs)]
 
-use omega_adccl::AdcclGate;
-use omega_aegis::AegisGate;
-use omega_core::{now, EvidencePacket, RunEnvelope, RunStatus};
+use omega_adccl::ADCCL;
+use omega_aegis::AlignmentLayer;
+use omega_core::now;
 use omega_telemetry::{EventLevel, SystemEvent, TelemetryBus};
 use serde::{Deserialize, Serialize};
 
@@ -25,14 +25,14 @@ pub struct EvalResult {
 /// Evaluation Suite
 pub struct EvalSuite {
     /// Policy gate used for regressions.
-    pub aegis: AegisGate,
+    pub aegis: AlignmentLayer,
     /// ADCCL gate used for regressions.
-    pub adccl: AdcclGate,
+    pub adccl: ADCCL,
 }
 
 impl EvalSuite {
     /// Initialize suite
-    pub fn new(aegis: AegisGate, adccl: AdcclGate) -> Self {
+    pub fn new(aegis: AlignmentLayer, adccl: ADCCL) -> Self {
         Self { aegis, adccl }
     }
 
@@ -40,22 +40,12 @@ impl EvalSuite {
     pub async fn run_regression(
         &self,
         prompt: &str,
-        memory: &omega_myelin::MemoryGraph,
+        _memory: &omega_myelin::MemoryGraph,
     ) -> EvalResult {
         let start = now();
-        let envelope = RunEnvelope {
-            task_id: "eval-task".to_string(),
-            run_id: "eval-run".to_string(),
-            task: prompt.to_string(),
-            task_text: prompt.to_string(),
-            created_at: now(),
-            status: RunStatus::Pending,
-            risk_score: 0.0,
-            verified_payload: None,
-            evidence_packet: EvidencePacket::new(),
-        };
-
-        let result = self.aegis.admit(envelope, memory);
+        let alignment = self.aegis.check(prompt);
+        let verification = self.adccl.verify(prompt, prompt);
+        let passed = alignment.passed && verification.passed;
         let duration = now() - start;
 
         // Broadcast to telemetry
@@ -65,7 +55,7 @@ impl EvalSuite {
             level: EventLevel::Info,
             payload: serde_json::json!({
                 "prompt": prompt,
-                "passed": matches!(result, RunStatus::Admitted),
+                "passed": passed,
                 "latency_ms": duration
             }),
             timestamp: now(),
@@ -73,9 +63,13 @@ impl EvalSuite {
 
         EvalResult {
             case_id: "reg-001".to_string(),
-            passed: matches!(result, RunStatus::Admitted),
+            passed,
             latency_ms: duration,
-            failure_reason: None,
+            failure_reason: if passed {
+                None
+            } else {
+                Some(format!("{} | {}", alignment.note, verification.status))
+            },
         }
     }
 }

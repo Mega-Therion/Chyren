@@ -1,4 +1,5 @@
-//! Anthropic API spoke for Claude inference
+use tokio::sync::mpsc;
+/// Anthropic API spoke for Claude inference
 
 use crate::{Spoke, SpokeCapability, SpokeConfig, ToolDefinition, ToolInvocation, ToolResult, SpokeStatus};
 use async_trait::async_trait;

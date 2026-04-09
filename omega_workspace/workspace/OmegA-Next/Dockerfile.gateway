@@ -1,5 +1,5 @@
 # Use the existing build for the API as a base, then install the new gateway binary
-FROM rust:1.80-slim-bookworm AS builder
+FROM rustlang/rust:nightly-slim-bookworm AS builder
 WORKDIR /usr/src/app
 COPY . .
 RUN cargo build --package omega-telegram-gateway --release

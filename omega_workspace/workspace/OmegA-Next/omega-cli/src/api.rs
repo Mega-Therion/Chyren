@@ -5,6 +5,7 @@ use crate::conductor::Conductor;
 use omega_core::{now, EvidencePacket, RunEnvelope, RunStatus};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
+use tokio_stream::StreamExt;
 
 #[derive(Deserialize)]
 struct ChatRequest {
@@ -17,9 +18,6 @@ struct ChatResponse {
     run_id: String,
     status: String,
     response_text: String,
-    adccl_score: f64,
-}
-
     adccl_score: f64,
 }
 
@@ -68,6 +66,7 @@ async fn chat_stream_handler(
         Err(e) => HttpResponse::BadRequest().body(e.to_string()),
     }
 }
+#[post("/api/chat")]
 async fn chat_handler(
     conductor: web::Data<Arc<Conductor>>,
     req: web::Json<ChatRequest>,
@@ -93,7 +92,10 @@ async fn chat_handler(
                         run_id: envelope.run_id,
                         status: format!("{:?}", result.status),
                         response_text: result.response_text,
-                        adccl_score: result.verification.map(|v| v.score).unwrap_or(0.0),
+                        adccl_score: result
+                            .verification
+                            .map(|v| v.score as f64)
+                            .unwrap_or(0.0),
                     })
                 }
                 Err(e) => HttpResponse::InternalServerError().body(e.to_string()),

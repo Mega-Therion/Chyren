@@ -51,6 +51,13 @@ pub struct UserContext {
     pub bio: String,
 }
 
+/// Memory stratum classification for persisted nodes.
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq)]
+pub enum MemoryStratum {
+    /// High-integrity, identity/policy anchors.
+    Canonical,
+}
+
 /// MatrixProgram: a signed payload that can be ingested/executed by the system.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct MatrixProgram {
