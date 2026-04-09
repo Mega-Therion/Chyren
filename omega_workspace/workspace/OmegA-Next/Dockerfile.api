@@ -42,20 +42,26 @@ RUN mkdir -p omega-core/src omega-aegis/src omega-aeon/src omega-adccl/src omega
     echo "pub fn main() {}" > omega-conductor/src/lib.rs && \
     echo "pub fn main() {}" > omega-eval/src/lib.rs && \
     echo "fn main() {}" > omega-cli/src/main.rs && \
-    echo "fn main() {}" > omega-cli/src/bin/chyren_api.rs && \
     echo "pub fn main() {}" > omega-cli/src/lib.rs && \
     echo "pub fn main() {}" > omega-phylactery/src/lib.rs && \
     echo "pub fn main() {}" > omega-telegram-gateway/src/lib.rs
 
-# Build dependencies (cached)
-RUN cargo build --release -p omega-cli --bin chyren_api && \
+# Build dependencies (cached) using only the library target.
+RUN cargo build --release -p omega-cli --lib && \
     rm -rf omega-*/src
 
 # Copy actual source code
 COPY . .
 
-# Build the release API binary
-RUN cargo build --release -p omega-cli --bin chyren_api
+# Debug/guard: ensure real omega-cli sources replaced warm-up stubs.
+RUN test -f /app/omega-cli/src/api.rs && test -f /app/omega-cli/src/conductor.rs && \
+    grep -q "pub mod api;" /app/omega-cli/src/lib.rs && \
+    grep -q "pub mod conductor;" /app/omega-cli/src/lib.rs
+
+# Build the real release API binary from actual sources (avoid reusing dummy prebuild artifact)
+RUN rm -f /app/target/release/chyren_api && \
+    cargo clean && \
+    cargo build --release -p omega-cli --bin chyren_api
 
 FROM debian:bookworm-slim
 RUN apt-get update \
@@ -67,4 +73,4 @@ COPY --from=builder /app/target/release/chyren_api /usr/local/bin/chyren-api
 EXPOSE 8080
 ENV CHYREN_API_HOST=0.0.0.0
 ENV CHYREN_API_PORT=8080
-CMD ["chyren-api", "server"]
+CMD ["chyren-api"]
