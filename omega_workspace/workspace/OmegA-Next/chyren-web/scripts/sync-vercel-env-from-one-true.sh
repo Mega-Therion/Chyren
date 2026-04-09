@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Push selected public env vars from ~/.omega/one-true.env into the linked Vercel project.
-# Only NEXT_PUBLIC_* belongs here (browser-visible). Server secrets: use Vercel env as Encrypted only.
+# Push selected env vars from ~/.omega/one-true.env into the linked Vercel project.
+# Browser-visible vars stay NEXT_PUBLIC_*; server secrets that the web runtime needs are synced too.
 set -euo pipefail
 
 WEB_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -38,5 +38,7 @@ sync_one NEXT_PUBLIC_FIREBASE_PROJECT_ID
 sync_one NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
 sync_one NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
 sync_one NEXT_PUBLIC_FIREBASE_APP_ID
+sync_one GROQ_API_KEY
+sync_one CRON_SECRET
 
 echo "Done. vercel env list"

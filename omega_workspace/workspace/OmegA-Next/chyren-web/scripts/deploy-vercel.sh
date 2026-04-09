@@ -21,7 +21,14 @@ tmp_out="$(mktemp)"
 trap 'rm -f "$tmp_out"' EXIT
 
 # Use JSON output so we can warm the exact deployment URL.
-vercel "$@" --json | tee "$tmp_out"
+# Prefer a local Vercel CLI if present; otherwise run it through npx.
+if command -v vercel >/dev/null 2>&1; then
+  vercel_cmd=(vercel)
+else
+  vercel_cmd=(npx --yes vercel@latest)
+fi
+
+"${vercel_cmd[@]}" deploy . "$@" --json | tee "$tmp_out"
 
 # After a production deploy, warm the Neon context cache.
 if [[ "$*" == *"--prod"* ]]; then
