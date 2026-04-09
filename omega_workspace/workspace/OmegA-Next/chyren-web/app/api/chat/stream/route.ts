@@ -204,26 +204,30 @@ export async function POST(req: NextRequest) {
   const history = toChatHistory(messages, content)
   const { prompt: systemPrompt, profile } = buildSystemPrompt(session, memberContext)
   let hubFailure: string | null = null
-
-  try {
-    // Prefer Rust sovereign hub when configured.
-    if (process.env.CHYREN_API_URL) {
-      const hubResp = await fetchHubStream(content, session, profile, memberContext)
-      if (hubResp.ok && hubResp.body) {
-        return new Response(hubResp.body, { headers: sseHeaders() })
-      }
-
-      hubFailure = await hubResp.text().catch(() => `Hub status ${hubResp.status}`)
-      console.warn('[HUB PROXY] Hub returned non-OK, falling back to Groq:', hubFailure)
+try {
+  // Prefer Rust sovereign hub when configured.
+  if (process.env.CHYREN_API_URL) {
+    console.log('[CHAT STREAM] Attempting hub stream...');
+    const hubResp = await fetchHubStream(content, session, profile, memberContext)
+    if (hubResp.ok && hubResp.body) {
+      console.log('[CHAT STREAM] Hub stream established.');
+      return new Response(hubResp.body, { headers: sseHeaders() })
     }
 
-    // Automatic failover path for Vercel if hub is unavailable.
-    const groqResp = await fetchGroqStream(history, systemPrompt, profile.temperature)
-    return new Response(groqResp.body, { headers: sseHeaders() })
+    hubFailure = await hubResp.text().catch(() => `Hub status ${hubResp.status}`)
+    console.warn('[HUB PROXY] Hub returned non-OK, falling back:', hubFailure)
+  }
 
-  } catch (err: unknown) {
-    const errMsg = err instanceof Error ? err.message : 'unknown error'
-    console.error('[CHAT STREAM] Upstream failure:', { hubFailure, errMsg })
+  // Automatic failover path for Vercel if hub is unavailable.
+  console.log('[CHAT STREAM] Attempting Groq fallback...');
+  const groqResp = await fetchGroqStream(history, systemPrompt, profile.temperature)
+  return new Response(groqResp.body, { headers: sseHeaders() })
+
+} catch (err: unknown) {
+  const errMsg = err instanceof Error ? err.message : 'unknown error'
+  console.error('[CHAT STREAM] Upstream failure:', { hubFailure, errMsg })
+  // ...
+
     const offlineMessage = hubFailure
       ? 'Chyren is temporarily unavailable right now. Please try again in a moment.'
       : 'Chyren is not fully configured yet. Please try again in a moment.'

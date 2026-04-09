@@ -105,28 +105,20 @@ function hashAnswer(input: string, salt?: string): string {
 }
 
 async function getSessionState(session: string): Promise<SessionAuthState> {
-  try {
-    const cache = getCache({ namespace: _CACHE_NAMESPACE })
-    return (
-      ((await cache.get(`session:${session}`)) as SessionAuthState | undefined) ?? {
-        failedAttempts: 0,
-      }
-    )
-  } catch {
-    return _LOCAL_SESSIONS.get(session) ?? { failedAttempts: 0 }
+  const cache = getCache({ namespace: _CACHE_NAMESPACE })
+  const state = (await cache.get(`session:${session}`)) as SessionAuthState | undefined
+  if (!state) {
+    return { failedAttempts: 0 }
   }
+  return state
 }
 
 async function setSessionState(session: string, state: SessionAuthState): Promise<void> {
-  try {
-    const cache = getCache({ namespace: _CACHE_NAMESPACE })
-    await cache.set(`session:${session}`, state, {
-      ttl: _SESSION_TTL_SECONDS,
-      tags: ['family-auth'],
-    })
-  } catch {
-    _LOCAL_SESSIONS.set(session, state)
-  }
+  const cache = getCache({ namespace: _CACHE_NAMESPACE })
+  await cache.set(`session:${session}`, state, {
+    ttl: _SESSION_TTL_SECONDS,
+    tags: ['family-auth'],
+  })
 }
 
 async function getCorrections(memberId: string): Promise<string[]> {
