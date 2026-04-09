@@ -140,17 +140,15 @@ export default function ChatPage() {
         setMessages(JSON.parse(saved));
       } catch {}
     }
-    const savedSession = localStorage.getItem('chyren_session_id');
-    if (savedSession) {
-      setSessionId(savedSession);
-      return;
-    }
+    // If we want a fresh session on every page load, we just generate a new one every time.
     const nextSession =
       typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
         ? crypto.randomUUID()
         : `session-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
     localStorage.setItem('chyren_session_id', nextSession);
+    localStorage.removeItem('chyren_messages'); // Clear conversation history on new session
     setSessionId(nextSession);
+    setMessages([]); // Clear messages state
   }, []);
 
   // Persistence: save to localStorage on change

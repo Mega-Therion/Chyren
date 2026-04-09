@@ -207,10 +207,8 @@ export async function POST(req: NextRequest) {
 try {
   // Prefer Rust sovereign hub when configured.
   if (process.env.CHYREN_API_URL) {
-    console.log('[CHAT STREAM] Attempting hub stream...');
     const hubResp = await fetchHubStream(content, session, profile, memberContext)
     if (hubResp.ok && hubResp.body) {
-      console.log('[CHAT STREAM] Hub stream established.');
       return new Response(hubResp.body, { headers: sseHeaders() })
     }
 
@@ -219,13 +217,13 @@ try {
   }
 
   // Automatic failover path for Vercel if hub is unavailable.
-  console.log('[CHAT STREAM] Attempting Groq fallback...');
   const groqResp = await fetchGroqStream(history, systemPrompt, profile.temperature)
   return new Response(groqResp.body, { headers: sseHeaders() })
 
 } catch (err: unknown) {
   const errMsg = err instanceof Error ? err.message : 'unknown error'
   console.error('[CHAT STREAM] Upstream failure:', { hubFailure, errMsg })
+
   // ...
 
     const offlineMessage = hubFailure
