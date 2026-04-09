@@ -224,13 +224,12 @@ export async function POST(req: NextRequest) {
   } catch (err: unknown) {
     const errMsg = err instanceof Error ? err.message : 'unknown error'
     console.error('[CHAT STREAM] Upstream failure:', { hubFailure, errMsg })
-    return new Response(JSON.stringify({
-      error: hubFailure
-        ? `Hub unavailable and fallback failed: ${hubFailure}`
-        : 'Sovereign Hub offline and fallback unavailable. Set CHYREN_API_URL and/or GROQ_API_KEY.',
-    }), {
-      status: 503,
-      headers: { 'Content-Type': 'application/json' },
-    })
+    const offlineMessage = hubFailure
+      ? 'Chyren is temporarily unavailable right now. Please try again in a moment.'
+      : 'Chyren is not fully configured yet. Please try again in a moment.'
+
+    // Return a valid SSE payload so the client can render a graceful offline message
+    // instead of surfacing a hard transport error.
+    return createSingleSseTextResponse(offlineMessage)
   }
 }
