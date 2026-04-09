@@ -1,6 +1,6 @@
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
-use crate::ADCCL;
+use crate::adccl_logic::ADCCL;
 
 #[no_mangle]
 pub extern "C" fn verify_response(response_ptr: *const c_char, task_ptr: *const c_char) -> *mut c_char {
