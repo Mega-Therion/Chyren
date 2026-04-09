@@ -36,7 +36,7 @@ impl ADCCL {
 
     pub fn verify(&self, response_text: &str, task: &str) -> VerificationResult {
         let text = response_text.trim();
-        let task_text = task.trim();
+        let _task_text = task.trim();
         let mut flags = Vec::new();
         let mut score: f32 = 1.0;
 
