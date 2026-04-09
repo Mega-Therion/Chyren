@@ -8,21 +8,21 @@
 [![GitHub Stars](https://img.shields.io/github/stars/Mega-Therion/Chyren?style=social)](https://github.com/Mega-Therion/Chyren/stargazers)
 [![GitHub Forks](https://img.shields.io/github/forks/Mega-Therion/Chyren?style=social)](https://github.com/Mega-Therion/Chyren/network/members)
 
-[![AI Safety](https://img.shields.io/badge/AI-Safety-success.svg)]()  
-[![Sovereign AI](https://img.shields.io/badge/Sovereign-AI-blueviolet.svg)]()  
-[![Verified](https://img.shields.io/badge/Cryptographically-Verified-brightgreen.svg)]()  
-[![ADCCL](https://img.shields.io/badge/ADCCL-Threshold_0.7-yellow.svg)]()  
-[![Zero Knowledge](https://img.shields.io/badge/Zero--Knowledge-Proofs-9cf.svg)]()
+[![AI Safety](https://img.shields.io/badge/AI-Safety-success.svg)](https://github.com/Mega-Therion/Chyren)  
+[![Sovereign AI](https://img.shields.io/badge/Sovereign-AI-blueviolet.svg)](https://github.com/Mega-Therion/Chyren)  
+[![Verified](https://img.shields.io/badge/Cryptographically-Verified-brightgreen.svg)](https://github.com/Mega-Therion/Chyren)  
+[![ADCCL](https://img.shields.io/badge/ADCCL-Threshold_0.7-yellow.svg)](https://github.com/Mega-Therion/Chyren)  
+[![Zero Knowledge](https://img.shields.io/badge/Zero--Knowledge-Proofs-9cf.svg)](https://github.com/Mega-Therion/Chyren)
 
 </div>
 
-```
+```text
   ██████╗██╗  ██╗██╗   ██╗██████╗ ███████╗███╗   ██╗
- ██╔════╝██║  ██║╚██╗ ██╔╝██╔══██╗██╔════╝████╗  ██║
- ██║     ███████║ ╚████╔╝ ██████╔╝█████╗  ██╔██╗ ██║
- ██║     ██╔══██║  ╚██╔╝  ██╔══██╗██╔══╝  ██║╚██╗██║
- ╚██████╗██║  ██║   ██║   ██║  ██║███████╗██║ ╚████║
-  ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝
+  ██╔════╝██║  ██║╚██╗ ██╔╝██╔══██╗██╔════╝████╗  ██║
+  ██║     ███████║ ╚████╔╝ ██████╔╝█████╗  ██╔██╗ ██║
+  ██║     ██╔══██║  ╚██╔╝  ██╔══██╗██╔══╝  ██║╚██╗██║
+  ╚██████╗██║  ██║   ██║   ██║  ██║███████╗██║ ╚████║
+   ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝
 ```
 
 # Ω CHYREN
@@ -51,7 +51,7 @@ Chyren is a **stateful sovereign AI orchestrator** — a high-integrity executio
 - 🔐 **Enforces cryptographic ledger integrity** — every interaction signed and immutable
 - 🛡️ **Challenges every response** through ADCCL (Anti-Drift Cognitive Control Loop) — threshold: 0.7
 - 🧬 **Synthesizes identity** from a 58,000-entry phylactery kernel
-- ⚡ **Built for migration** from Python to Rust (OmegA-Next) for production-scale deployment
+- ⚡ **OmegA-Next Architecture**: High-performance Rust hub with real-time streaming and semantic memory.
 
 > **Every response is challenged. Every interaction is signed. Nothing passes without proof.**
 
@@ -74,55 +74,41 @@ graph TB
         WEB["🖥️ chyren-web<br/>(Next.js 15)"]
     end
     
-    subgraph "🧠 Chyren Hub (Python)"
-        HUB["🎯 Orchestrator<br/>(main.py)"]
+    subgraph "⚡ OmegA-Next (Rust Hub)"
+        CONDUCTOR["🎼 Conductor<br/>(Orchestrator)"]
         LEDGER["📜 Master Ledger<br/>(Immutable)"]
         ADCCL["🔬 ADCCL<br/>(Verification Gate)"]
-        ALIGN["⚖️ Alignment Layer<br/>(Constitutional)"]
-        THREAT["🛡️ Threat Fabric<br/>(Pattern Memory)"]
-        PHYLACTERY["🧬 Phylactery<br/>(58K Identity Kernel)"]
+        MYELIN["💾 Myelin<br/>(Semantic Memory)"]
+        DREAM["👁️ Dream<br/>(Background Learning)"]
     end
     
     subgraph "🔌 Provider Spokes"
-        ANTHROPIC["🤖 Anthropic<br/>(Claude)"]
-        OPENAI["🧑‍💻 OpenAI<br/>(GPT-4)"]
+        ANTHROPIC["🤖 Anthropic"]
+        OPENAI["🧑‍💻 OpenAI"]
         DEEPSEEK["🔍 DeepSeek"]
         GEMINI["✨ Gemini"]
     end
+
+    WEB --> CONDUCTOR
+    CLI --> CONDUCTOR
     
-    subgraph "⚡ OmegA-Next (Rust)"
-        CORE["⚙️ omega-core"]
-        AEGIS["🛡️ omega-aegis"]
-        MYELIN["💾 omega-myelin"]
-        METACOG["🪞 omega-metacog"]
-    end
-    
-    CLI --> HUB
-    WEB --> HUB
-    
-    HUB --> PHYLACTERY
-    HUB --> ALIGN
-    ALIGN --> THREAT
-    HUB --> ANTHROPIC
-    HUB --> OPENAI
-    HUB --> DEEPSEEK
-    HUB --> GEMINI
+    CONDUCTOR --> MYELIN
+    CONDUCTOR --> ANTHROPIC
+    CONDUCTOR --> OPENAI
+    CONDUCTOR --> DEEPSEEK
+    CONDUCTOR --> GEMINI
     
     ANTHROPIC --> ADCCL
     OPENAI --> ADCCL
     DEEPSEEK --> ADCCL
     GEMINI --> ADCCL
     
-    ADCCL -->|"✅ Pass (≥0.7)"| LEDGER
-    ADCCL -.->|"❌ Reject (<0.7)"| THREAT
+    ADCCL -->|"✅ Pass"| LEDGER
+    ADCCL -.->|"❌ Reject"| DREAM
     
-    LEDGER --> CLI
     LEDGER --> WEB
-    
-    HUB -.->|"Migration Path"| CORE
-    CORE --> AEGIS
-    CORE --> MYELIN
-    CORE --> METACOG
+    LEDGER --> CLI
+    DREAM --> MYELIN
     
     style HUB fill:#00e5ff,stroke:#0097a7,color:#000
     style ADCCL fill:#ff6b6b,stroke:#c92a2a,color:#fff
@@ -457,6 +443,7 @@ It encodes:
 - Cognitive foundations
 
 **Refresh identity synthesis:**
+
 ```bash
 python chyren_py/identity_synthesis.py
 ```
@@ -582,11 +569,11 @@ gantt
     section Phase 2
     Core Crates Implementation :done, p2, 2025-02, 2025-03
     section Phase 3
-    Provider Integration :active, p3, 2025-03, 2025-05
+    Provider Integration :done, p3, 2025-03, 2025-05
     section Phase 4
-    Full Python Migration :p4, 2025-05, 2025-07
+    Full Python Migration :done, p4, 2025-05, 2025-07
     section Phase 5
-    Production Deployment :p5, 2025-07, 2025-09
+    Production Deployment :active, p5, 2025-07, 2025-09
 ```
 
 **Completed:**

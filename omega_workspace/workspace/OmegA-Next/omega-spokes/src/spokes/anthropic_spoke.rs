@@ -149,15 +149,20 @@ impl AnthropicSpoke {
 
         // Make HTTP request to Anthropic API
         let client = reqwest::Client::new();
+        let messages = input.get("messages")
+            .and_then(|m| m.as_array())
+            .map(|arr| {
+                let start = arr.len().saturating_sub(15);
+                arr[start..].to_vec()
+            })
+            .unwrap_or_else(|| vec![json!({"role": "user", "content": prompt})]);
+
+        // Make HTTP request to Anthropic API
+        let client = reqwest::Client::new();
         let request_body = json!({
             "model": model,
             "max_tokens": max_tokens,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ]
+            "messages": messages
         });
 
         let response = client
