@@ -40,7 +40,7 @@ if os.path.exists(_ENV_PATH):
 
 from core.integrity import YETTRAGRAMMATON
 from core.ledger import Ledger, LedgerEntry
-from core.adccl import ADCCL
+from core.adccl_ffi import ADCCL
 from core.preflight import run_preflight
 from core.alignment import AlignmentLayer
 from core.sandbox import analyze_payload

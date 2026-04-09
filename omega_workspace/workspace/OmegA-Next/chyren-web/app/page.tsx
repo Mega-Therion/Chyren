@@ -18,11 +18,19 @@ interface Message {
     flags: string[];
   };
   isCorrection?: boolean;
+  consensus?: {
+    agreement: number;
+  };
 }
 
 // Handles Vercel AI SDK text stream (0:"chunk") and plain-text streams
 // Handles Hub events (data: {...}) and plain-text streams
-function parseHubChunk(chunk: string): { content?: string, audit?: { passed: boolean, score: number, flags: string[] }, status?: string } {
+function parseHubChunk(chunk: string): {
+  content: string,
+  audit?: { passed: boolean, score: number, flags: string[] },
+  status?: string,
+  consensus?: { agreement: number }
+} {
   let content = '';
   let audit: { passed: boolean, score: number, flags: string[] } | undefined;
   let status: string | undefined;
@@ -51,6 +59,11 @@ function parseHubChunk(chunk: string): { content?: string, audit?: { passed: boo
            content = json.content;
            status = 'deflected';
         }
+        if (json.status === 'consensus') {
+           content = json.content;
+           status = 'consensus';
+           // Using local status to pass metadata in next pass
+        }
       } catch { /* skip */ }
     } else if (trimmed.startsWith('0:')) {
        // Vercel AI SDK compatibility
@@ -60,7 +73,16 @@ function parseHubChunk(chunk: string): { content?: string, audit?: { passed: boo
        } catch {}
     }
   }
-  return { content, audit, status };
+  // Re-parse status for consensus data
+  let consensus: { agreement: number } | undefined = undefined;
+  if (chunk.includes('"status":"consensus"')) {
+     try {
+       const json = JSON.parse(chunk.split('\n').find(l => l.includes('"status":"consensus"'))?.slice(6) || '{}');
+       consensus = { agreement: json.agreement };
+     } catch {}
+  }
+
+  return { content, audit, status, consensus };
 }
 
 // Pull a speakable chunk from the buffer:
@@ -76,7 +98,7 @@ function extractSpeakable(buffer: string): { chunk: string | null; remaining: st
   return { chunk: null, remaining: buffer };
 }
 
-function getVoice(): SpeechSynthesisVoice | null {
+function getVoice(): SpeechSynthesisVoice | undefined {
   const voices = window.speechSynthesis.getVoices();
   // Priority: British Male -> British -> English -> First available
   return (
@@ -86,7 +108,7 @@ function getVoice(): SpeechSynthesisVoice | null {
     voices.find(v => v.name.toLowerCase().includes('google') && v.lang.startsWith('en')) ||
     voices.find(v => v.lang.startsWith('en-US')) ||
     voices[0] ||
-    null
+    undefined
   );
 }
 
@@ -200,7 +222,7 @@ export default function ChatPage() {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-          const { content: delta, audit, status } = parseHubChunk(decoder.decode(value, { stream: true }));
+          const { content: delta, audit, status, consensus } = parseHubChunk(decoder.decode(value, { stream: true }));
           
           if (delta) {
             accumulated += delta;
@@ -212,6 +234,12 @@ export default function ChatPage() {
           if (audit) {
             setMessages(prev =>
               prev.map(m => m.id === assistantId ? { ...m, audit } : m)
+            );
+          }
+
+          if (consensus) {
+            setMessages(prev =>
+              prev.map(m => m.id === assistantId ? { ...m, consensus } : m)
             );
           }
 
@@ -331,6 +359,13 @@ export default function ChatPage() {
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
                       {isStreaming && msg === lastMsg && <span className="omega-cursor" />}
                       
+                      {msg.consensus && (
+                        <div className="omega-consensus-seal">
+                           <span className="omega-consensus-icon">⚖</span>
+                           COUNCIL CONSENSUS: {(msg.consensus.agreement * 100).toFixed(0)}% AGREEMENT
+                        </div>
+                      )}
+
                       {msg.audit && (
                         <div className={`omega-audit-seal ${msg.audit.passed ? 'omega-audit-passed' : 'omega-audit-drift'}`}>
                            {msg.audit.passed ? '🛡 VERIFIED BY ADCCL' : `⚠ COGNITIVE DRIFT DETECTED (${msg.audit.score.toFixed(2)})`}

@@ -6,6 +6,7 @@
 #![warn(missing_docs)]
 
 pub mod dream;
+pub mod consensus;
 
 use omega_core::now;
 use omega_myelin::MemoryGraph;

@@ -110,6 +110,21 @@ services:
       - chyren-api
       - chyren-web
 
+  # Telegram Gateway
+  telegram-gateway:
+    build:
+      context: ./omega_workspace/workspace/OmegA-Next
+      dockerfile: Dockerfile.gateway
+    container_name: chyren-telegram-gateway
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_GAING_BOT_TOKEN}
+      - CHYREN_API_URL=http://chyren-api:8080/api/chat
+    networks:
+      - chyren-network
+    restart: unless-stopped
+    depends_on:
+      - chyren-api
+
 volumes:
   postgres-data:
   qdrant-data:
