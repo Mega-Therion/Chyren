@@ -130,6 +130,7 @@ export default function ChatPage() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [ttsEnabled, setTtsEnabled]  = useState(true);
   const [error, setError]            = useState<string | null>(null);
+  const [sessionId, setSessionId]    = useState<string>('global');
 
   // Persistence: load from localStorage on mount
   useEffect(() => {
@@ -139,6 +140,17 @@ export default function ChatPage() {
         setMessages(JSON.parse(saved));
       } catch {}
     }
+    const savedSession = localStorage.getItem('chyren_session_id');
+    if (savedSession) {
+      setSessionId(savedSession);
+      return;
+    }
+    const nextSession =
+      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : `session-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    localStorage.setItem('chyren_session_id', nextSession);
+    setSessionId(nextSession);
   }, []);
 
   // Persistence: save to localStorage on change
@@ -201,7 +213,7 @@ export default function ChatPage() {
       const abort = new AbortController();
       abortRef.current = abort;
 
-      const res = await fetch('/api/chat/stream', {
+      const res = await fetch(`/api/chat/stream?session=${encodeURIComponent(sessionId)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: history.map(m => ({ role: m.role, content: m.content })) }),
@@ -283,7 +295,7 @@ export default function ChatPage() {
       setIsStreaming(false);
       abortRef.current = null;
     }
-  }, [messages, isStreaming]);
+  }, [messages, isStreaming, sessionId]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
