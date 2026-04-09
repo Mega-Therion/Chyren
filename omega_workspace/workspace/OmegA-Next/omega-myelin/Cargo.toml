@@ -19,3 +19,4 @@ ndarray = "0.17.2"
 ndarray-stats = "0.7.0"
 qdrant-client = "1.12"
 reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+anyhow = "1.0.102"

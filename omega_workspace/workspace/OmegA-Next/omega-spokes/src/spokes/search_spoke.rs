@@ -29,9 +29,9 @@ impl Spoke for SearchSpoke {
 
     fn capabilities(&self) -> Vec<SpokeCapability> {
         vec![
-            SpokeCapability::RealTime,
+            SpokeCapability::Inference,
             SpokeCapability::Tools,
-            SpokeCapability::Retrieval,
+            SpokeCapability::Inference,
         ]
     }
 

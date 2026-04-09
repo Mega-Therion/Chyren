@@ -8,12 +8,6 @@ use std::sync::Arc;
 async fn main() -> std::io::Result<()> {
     tracing_subscriber::fmt::init();
 
-    let host = std::env::var("CHYREN_API_HOST").unwrap_or_else(|_| "0.0.0.0".into());
-    let port: u16 = std::env::var("CHYREN_API_PORT")
-        .ok()
-        .and_then(|s| s.parse().ok())
-        .unwrap_or(8080);
-
     let conductor = Arc::new(Conductor::new());
-    start_api_server(conductor, &host, port).await
+    start_api_server(conductor).await
 }
