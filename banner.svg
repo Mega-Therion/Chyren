@@ -1,153 +1,102 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" width="100%">
   <defs>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&amp;family=Cinzel:wght@700&amp;display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&amp;display=swap');
       
-      .bg { fill: #000205; }
+      .bg { fill: #000103; }
       
       .main-neon {
         font-family: 'Orbitron', sans-serif;
         font-weight: 900;
+        text-anchor: middle;
         fill: #050505;
         stroke-width: 1.5px;
         paint-order: stroke;
         animation: color-cycle 30s linear infinite;
       }
       
-      .main-neon-inverse {
-        font-family: 'Cinzel', serif;
-        font-weight: 700;
-        fill: #050505;
-        stroke-width: 1.5px;
-        paint-order: stroke;
-        animation: inverse-color-cycle 30s linear infinite;
-      }
-
-      .text-char { font-size: 85px; text-anchor: middle; }
-      .symbol-char { font-size: 85px; text-anchor: middle; font-family: 'Cinzel', serif; }
+      .chyren { font-size: 85px; letter-spacing: 20px; }
       
       @keyframes color-cycle {
-        0% { stroke: hsl(0, 100%, 50%); filter: drop-shadow(0 0 4px hsl(0, 100%, 50%)); }
-        50% { stroke: hsl(180, 100%, 50%); filter: drop-shadow(0 0 4px hsl(180, 100%, 50%)); }
-        100% { stroke: hsl(360, 100%, 50%); filter: drop-shadow(0 0 4px hsl(360, 100%, 50%)); }
-      }
-
-      @keyframes inverse-color-cycle {
-        0% { stroke: hsl(180, 100%, 50%); filter: drop-shadow(0 0 4px hsl(180, 100%, 50%)); }
-        50% { stroke: hsl(360, 100%, 50%); filter: drop-shadow(0 0 4px hsl(360, 100%, 50%)); }
-        100% { stroke: hsl(540, 100%, 50%); filter: drop-shadow(0 0 4px hsl(540, 100%, 50%)); }
-      }
-
-      .scanner-bar {
-        fill: url(#scannerGradient);
-        animation: scannerSweep 8s linear infinite;
-      }
-
-      @keyframes scannerSweep {
-        from { transform: translateX(-100%); }
-        to { transform: translateX(100%); }
+        0% { stroke: hsl(0, 100%, 50%); filter: drop-shadow(0 0 5px hsl(0, 100%, 50%)); }
+        50% { stroke: hsl(180, 100%, 50%); filter: drop-shadow(0 0 5px hsl(180, 100%, 50%)); }
+        100% { stroke: hsl(360, 100%, 50%); filter: drop-shadow(0 0 5px hsl(360, 100%, 50%)); }
       }
 
       /* Parallax Stars */
-      .star-pan-1 { animation: starPan 60s linear infinite; }
-      .star-pan-2 { animation: starPan 100s linear infinite; }
-      .star-pan-3 { animation: starPan 160s linear infinite; }
+      .star-pan-1 { animation: starPan 180s linear infinite; }
+      .star-pan-2 { animation: starPan 320s linear infinite; }
+      .star-pan-3 { animation: starPan 560s linear infinite; }
       
       @keyframes starPan { 
         0% { transform: translateX(0); } 
         100% { transform: translateX(-800px); } 
       }
-
-      /* Shooting Stars */
-      .sh-star { opacity: 0; animation: shoot 8s ease-out infinite; }
-      .sh-star-2 { opacity: 0; animation: shoot 14s ease-out infinite 5s; }
-      .sh-star-3 { opacity: 0; animation: shoot 20s ease-out infinite 11s; }
-      
-      @keyframes shoot {
-        0% { transform: translate(850px, -50px); opacity: 0; }
-        1% { opacity: 1; text-shadow: 0 0 5px white; }
-        20% { transform: translate(100px, 700px); opacity: 0; }
-        100% { opacity: 0; }
-      }
     </style>
-    
-    <linearGradient id="scannerGradient" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="transparent" />
-      <stop offset="50%" stop-color="rgba(255,255,255,0.08)" />
-      <stop offset="100%" stop-color="transparent" />
-    </linearGradient>
 
     <!-- Deep Space Star Fields (Tileable) -->
     <g id="star-layer1">
-      <circle cx="50" cy="50" r="1.5" fill="white" opacity="0.9" />
-      <circle cx="150" cy="80" r="1.2" fill="white" opacity="0.8" />
-      <circle cx="220" cy="30" r="1.8" fill="white" opacity="0.6" />
-      <circle cx="310" cy="120" r="1" fill="white" opacity="0.8" />
-      <circle cx="450" cy="50" r="1.5" fill="white" opacity="0.9" />
-      <circle cx="580" cy="180" r="2" fill="white" opacity="0.7" />
-      <circle cx="690" cy="90" r="1.2" fill="white" opacity="0.8" />
-      <circle cx="750" cy="40" r="1" fill="white" opacity="0.6" />
-      <circle cx="90" cy="220" r="1.5" fill="white" opacity="0.9" />
-      <circle cx="270" cy="250" r="1" fill="white" opacity="0.7" />
-      <circle cx="380" cy="280" r="1.8" fill="white" opacity="0.6" />
-      <circle cx="500" cy="210" r="1.2" fill="white" opacity="0.8" />
-      <circle cx="620" cy="260" r="1.5" fill="white" opacity="0.9" />
-      <circle cx="780" cy="240" r="1" fill="white" opacity="0.8" />
-      <circle cx="190" cy="190" r="2" fill="white" opacity="0.5" />
-      <circle cx="40" cy="140" r="1.2" fill="white" opacity="0.7" />
-      <circle cx="110" cy="110" r="1.5" fill="white" opacity="0.6" />
-      <circle cx="330" cy="70" r="1" fill="white" opacity="0.8" />
-      <circle cx="480" cy="150" r="1.8" fill="white" opacity="0.5" />
-      <circle cx="710" cy="160" r="1.2" fill="white" opacity="0.7" />
+      <circle cx="50" cy="50" r="0.8" fill="#ffffff" opacity="0.6" />
+      <circle cx="150" cy="80" r="0.5" fill="#f0fbff" opacity="0.8" />
+      <circle cx="220" cy="30" r="1.0" fill="#ffffff" opacity="0.5" />
+      <circle cx="310" cy="120" r="0.6" fill="#fff5eb" opacity="0.8" />
+      <circle cx="450" cy="50" r="0.9" fill="#ffffff" opacity="0.7" />
+      <circle cx="580" cy="180" r="1.1" fill="#e8f4ff" opacity="0.5" />
+      <circle cx="690" cy="90" r="0.7" fill="#ffffff" opacity="0.8" />
+      <circle cx="750" cy="40" r="0.5" fill="#ffffff" opacity="0.6" />
+      <circle cx="90" cy="220" r="1.0" fill="#fffaf0" opacity="0.9" />
+      <circle cx="270" cy="250" r="0.6" fill="#ffffff" opacity="0.7" />
+      <circle cx="380" cy="280" r="1.2" fill="#ffffff" opacity="0.4" />
+      <circle cx="500" cy="210" r="0.7" fill="#f4f8ff" opacity="0.8" />
+      <circle cx="620" cy="260" r="0.9" fill="#ffffff" opacity="0.7" />
+      <circle cx="780" cy="240" r="0.6" fill="#ffffff" opacity="0.8" />
+      <circle cx="190" cy="190" r="1.0" fill="#fff5ec" opacity="0.5" />
+      <circle cx="40" cy="140" r="0.7" fill="#ffffff" opacity="0.7" />
+      <circle cx="110" cy="110" r="0.8" fill="#ffffff" opacity="0.6" />
+      <circle cx="330" cy="70" r="0.6" fill="#eaf5ff" opacity="0.8" />
+      <circle cx="480" cy="150" r="1.0" fill="#ffffff" opacity="0.5" />
+      <circle cx="710" cy="160" r="0.7" fill="#ffffff" opacity="0.7" />
     </g>
+    
     <g id="star-layer2">
-      <circle cx="30" cy="150" r="0.8" fill="white" opacity="0.5" />
-      <circle cx="80" cy="30" r="1" fill="white" opacity="0.4" />
-      <circle cx="170" cy="220" r="0.8" fill="white" opacity="0.5" />
-      <circle cx="260" cy="90" r="1" fill="white" opacity="0.3" />
-      <circle cx="340" cy="260" r="0.8" fill="white" opacity="0.6" />
-      <circle cx="390" cy="40" r="1" fill="white" opacity="0.4" />
-      <circle cx="460" cy="180" r="0.8" fill="white" opacity="0.5" />
-      <circle cx="530" cy="80" r="1" fill="white" opacity="0.6" />
-      <circle cx="590" cy="230" r="0.8" fill="white" opacity="0.4" />
-      <circle cx="640" cy="50" r="1" fill="white" opacity="0.5" />
-      <circle cx="720" cy="190" r="0.8" fill="white" opacity="0.6" />
-      <circle cx="770" cy="110" r="1" fill="white" opacity="0.4" />
-      <circle cx="790" cy="270" r="0.8" fill="white" opacity="0.5" />
+      <!-- Midspeed, medium density -->
+      <circle cx="30" cy="150" r="0.4" fill="#ffffff" opacity="0.5" />
+      <circle cx="80" cy="30" r="0.5" fill="#ffffff" opacity="0.4" />
+      <circle cx="170" cy="220" r="0.6" fill="#f0fbff" opacity="0.5" />
+      <circle cx="260" cy="90" r="0.5" fill="#ffffff" opacity="0.3" />
+      <circle cx="340" cy="260" r="0.4" fill="#ffffff" opacity="0.6" />
+      <circle cx="390" cy="40" r="0.5" fill="#fff5f5" opacity="0.4" />
+      <circle cx="460" cy="180" r="0.6" fill="#ffffff" opacity="0.5" />
+      <circle cx="530" cy="80" r="0.5" fill="#eef7ff" opacity="0.6" />
+      <circle cx="590" cy="230" r="0.4" fill="#ffffff" opacity="0.4" />
+      <circle cx="640" cy="50" r="0.6" fill="#ffffff" opacity="0.5" />
+      <circle cx="720" cy="190" r="0.5" fill="#ffffff" opacity="0.6" />
+      <circle cx="770" cy="110" r="0.6" fill="#fff0ec" opacity="0.4" />
+      <circle cx="790" cy="270" r="0.4" fill="#ffffff" opacity="0.5" />
+      <circle cx="110" cy="250" r="0.5" fill="#ddebff" opacity="0.6" />
+      <circle cx="210" cy="60" r="0.4" fill="#fff1f5" opacity="0.5" />
+      <circle cx="380" cy="170" r="0.5" fill="#ffffff" opacity="0.4" />
+      <circle cx="480" cy="290" r="0.4" fill="#ebf6ff" opacity="0.6" />
+      <circle cx="670" cy="130" r="0.6" fill="#ffffff" opacity="0.3" />
     </g>
+    
     <g id="star-layer3">
-      <circle cx="10" cy="10" r="0.5" fill="white" opacity="0.3" />
-      <circle cx="120" cy="170" r="0.4" fill="white" opacity="0.4" />
-      <circle cx="280" cy="60" r="0.5" fill="white" opacity="0.2" />
-      <circle cx="450" cy="250" r="0.4" fill="white" opacity="0.3" />
-      <circle cx="550" cy="120" r="0.5" fill="white" opacity="0.4" />
-      <circle cx="680" cy="20" r="0.4" fill="white" opacity="0.2" />
-      <circle cx="760" cy="210" r="0.5" fill="white" opacity="0.3" />
+      <!-- Distant background dust / tiny stars -->
+      <circle cx="10" cy="10" r="0.3" fill="#ffffff" opacity="0.3" />
+      <circle cx="120" cy="170" r="0.2" fill="#ffffff" opacity="0.4" />
+      <circle cx="280" cy="60" r="0.3" fill="#ffffff" opacity="0.2" />
+      <circle cx="450" cy="250" r="0.2" fill="#ffffff" opacity="0.3" />
+      <circle cx="550" cy="120" r="0.3" fill="#ffffff" opacity="0.4" />
+      <circle cx="680" cy="20" r="0.2" fill="#ffffff" opacity="0.2" />
+      <circle cx="760" cy="210" r="0.3" fill="#ffffff" opacity="0.3" />
+      <circle cx="85" cy="100" r="0.2" fill="#eef7ff" opacity="0.4" />
+      <circle cx="195" cy="280" r="0.3" fill="#ffffff" opacity="0.2" />
+      <circle cx="325" cy="140" r="0.2" fill="#ffffff" opacity="0.3" />
+      <circle cx="410" cy="70" r="0.3" fill="#xfffaf" opacity="0.4" />
+      <circle cx="510" cy="190" r="0.2" fill="#ffffff" opacity="0.2" />
+      <circle cx="630" cy="240" r="0.3" fill="#eaf5ff" opacity="0.3" />
+      <circle cx="700" cy="160" r="0.2" fill="#ffffff" opacity="0.4" />
     </g>
-
-    <!-- Shooting Star Core -->
-    <linearGradient id="shootingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="rgba(255,255,255,1)" />
-      <stop offset="100%" stop-color="rgba(255,255,255,0)" />
-    </linearGradient>
-
-    <g id="shooting-star">
-      <line x1="0" y1="0" x2="-60" y2="60" stroke="url(#shootingGrad)" stroke-width="2" />
-      <circle cx="0" cy="0" r="2" fill="white" filter="drop-shadow(0 0 2px white)" />
-    </g>
-
-    <!-- Base Text Mask to apply neon sweep -->
-    <mask id="textMask">
-      <g fill="white" stroke="white">
-        <text x="138" y="180" class="symbol-char" transform="rotate(-90, 138, 150)">Ω</text>
-        <text x="243" y="180" class="text-char">H</text>
-        <text x="348" y="180" class="text-char">Y</text>
-        <text x="453" y="180" class="text-char">R</text>
-        <text x="558" y="180" class="symbol-char" transform="rotate(90, 558, 150)">ω</text>
-        <text x="663" y="180" class="text-char">N</text>
-      </g>
-    </mask>
-
   </defs>
   
   <!-- Outer Wrapper & Deep Space Background -->
@@ -163,29 +112,13 @@
     <use href="#star-layer2" x="0" y="0" />
     <use href="#star-layer2" x="800" y="0" />
   </g>
-  <!-- Layer 3: Close Fast Stars -->
+  <!-- Layer 3: Close Stars -->
   <g class="star-pan-1">
     <use href="#star-layer1" x="0" y="0" />
     <use href="#star-layer1" x="800" y="0" />
   </g>
 
-  <!-- Layer 4: Occasional Shooting Stars with translated entry points -->
-  <g><use href="#shooting-star" class="sh-star" /></g>
-  <g transform="translate(0, 100)"><use href="#shooting-star" class="sh-star-2" /></g>
-  <g transform="translate(-150, -80)"><use href="#shooting-star" class="sh-star-3" /></g>
+  <!-- Top Layer: Clean Typography -->
+  <text x="410" y="180" class="main-neon chyren">CHYREN</text>
   
-  <!-- Layer 5: Perfectly Aligned C(Ω) H Y R E(ω) N string -->
-  <g class="main-neon">
-    <!-- Rotated Omega (C) -->
-    <text x="138" y="180" class="main-neon-inverse text-char symbol-char" transform="rotate(-90, 138, 150)">Ω</text>
-    <text x="243" y="180" class="text-char">H</text>
-    <text x="348" y="180" class="text-char">Y</text>
-    <text x="453" y="180" class="text-char">R</text>
-    <!-- Rotated lowercase omega (E) -->
-    <text x="558" y="180" class="main-neon-inverse text-char symbol-char" transform="rotate(90, 558, 150)">ω</text>
-    <text x="663" y="180" class="text-char">N</text>
-  </g>
-  
-  <!-- Top Layer: KITT sweep scanner -->
-  <rect x="0" y="0" width="800" height="300" class="scanner-bar" mask="url(#textMask)" />
 </svg>
