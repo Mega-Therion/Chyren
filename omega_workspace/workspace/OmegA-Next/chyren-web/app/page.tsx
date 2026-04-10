@@ -75,6 +75,19 @@ function parseHubChunk(chunk: string): {
   return { content, audit, status, consensus };
 }
 
+function consumeSseBuffer(buffer: string): {
+  events: Array<ReturnType<typeof parseHubChunk>>;
+  remaining: string;
+} {
+  const records = buffer.split('\n\n');
+  const remaining = records.pop() ?? '';
+  const events = records
+    .map((record) => parseHubChunk(record))
+    .filter((event) => event.content || event.audit || event.status || event.consensus);
+
+  return { events, remaining };
+}
+
 function extractSpeakable(buffer: string): { chunk: string | null; remaining: string } {
   const m = buffer.match(/^([\s\S]+?[.!?\n]+)\s*([\s\S]*)$/);
   if (m) return { chunk: m[1].trim(), remaining: m[2] };
@@ -200,38 +213,65 @@ export default function ChatPage() {
         const decoder = new TextDecoder();
         let accumulated = '';
         let speechBuffer = '';
+        let sseBuffer = '';
 
         if (reader) {
           while (true) {
             const { done, value } = await reader.read();
-            if (done) break;
-            const { content: delta, audit, status, consensus } = parseHubChunk(decoder.decode(value, { stream: true }));
+            sseBuffer += decoder.decode(value ?? new Uint8Array(), { stream: !done });
 
+            const { events, remaining } = consumeSseBuffer(sseBuffer);
+            sseBuffer = remaining;
+
+            for (const { content: delta, audit, status, consensus } of events) {
+              if (delta) {
+                accumulated += delta;
+                setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, content: accumulated } : m)));
+              }
+
+              if (audit) {
+                setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, audit } : m)));
+              }
+
+              if (consensus) {
+                setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, consensus } : m)));
+              }
+
+              if (status === 'correction') {
+                setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, isCorrection: true } : m)));
+              }
+
+              if (ttsEnabledRef.current && delta) {
+                speechBuffer += delta;
+                let result = extractSpeakable(speechBuffer);
+                while (result.chunk) {
+                  speak(result.chunk);
+                  speechBuffer = result.remaining;
+                  result = extractSpeakable(speechBuffer);
+                }
+              }
+            }
+
+            if (done) break;
+          }
+
+          if (sseBuffer.trim()) {
+            const { content: delta, audit, status, consensus } = parseHubChunk(sseBuffer);
             if (delta) {
               accumulated += delta;
               setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, content: accumulated } : m)));
             }
-
             if (audit) {
               setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, audit } : m)));
             }
-
             if (consensus) {
               setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, consensus } : m)));
             }
-
             if (status === 'correction') {
               setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, isCorrection: true } : m)));
             }
-
-            if (ttsEnabledRef.current) {
+            if (ttsEnabledRef.current && delta) {
               speechBuffer += delta;
-              let result = extractSpeakable(speechBuffer);
-              while (result.chunk) {
-                speak(result.chunk);
-                speechBuffer = result.remaining;
-                result = extractSpeakable(speechBuffer);
-              }
             }
           }
         }
