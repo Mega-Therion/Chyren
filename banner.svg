@@ -26,21 +26,29 @@
       }
 
       .chyren { font-size: 85px; letter-spacing: 20px; }
-      .omega-symbol { font-size: 40px; }
-      .motto { font-size: 18px; letter-spacing: 6px; }
       
-      /* Primary Color Cycle (0 to 360) */
-      @keyframes color-cycle {
-        0% { stroke: hsl(0, 100%, 50%); filter: drop-shadow(0 0 3px hsl(0, 100%, 50%)); }
-        50% { stroke: hsl(180, 100%, 50%); filter: drop-shadow(0 0 3px hsl(180, 100%, 50%)); }
-        100% { stroke: hsl(360, 100%, 50%); filter: drop-shadow(0 0 3px hsl(360, 100%, 50%)); }
+      /* Oversized Background Symbol */
+      .omega-bg {
+        font-size: 280px;
+        opacity: 0.15;
+        stroke-width: 1.5px;
       }
 
-      /* True Inverse Color Cycle (starts at 180, always opposite) */
+      /* Positioned lowercase omega */
+      .omega-sub {
+        font-size: 40px;
+      }
+      
+      @keyframes color-cycle {
+        0% { stroke: hsl(0, 100%, 50%); filter: drop-shadow(0 0 4px hsl(0, 100%, 50%)); }
+        50% { stroke: hsl(180, 100%, 50%); filter: drop-shadow(0 0 4px hsl(180, 100%, 50%)); }
+        100% { stroke: hsl(360, 100%, 50%); filter: drop-shadow(0 0 4px hsl(360, 100%, 50%)); }
+      }
+
       @keyframes inverse-color-cycle {
-        0% { stroke: hsl(180, 100%, 50%); filter: drop-shadow(0 0 3px hsl(180, 100%, 50%)); }
-        50% { stroke: hsl(360, 100%, 50%); filter: drop-shadow(0 0 3px hsl(360, 100%, 50%)); }
-        100% { stroke: hsl(540, 100%, 50%); filter: drop-shadow(0 0 3px hsl(540, 100%, 50%)); }
+        0% { stroke: hsl(180, 100%, 50%); filter: drop-shadow(0 0 4px hsl(180, 100%, 50%)); }
+        50% { stroke: hsl(360, 100%, 50%); filter: drop-shadow(0 0 4px hsl(360, 100%, 50%)); }
+        100% { stroke: hsl(540, 100%, 50%); filter: drop-shadow(0 0 4px hsl(540, 100%, 50%)); }
       }
 
       .scanner-bar {
@@ -56,29 +64,30 @@
     
     <linearGradient id="scannerGradient" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0%" stop-color="transparent" />
-      <stop offset="50%" stop-color="rgba(255,255,255,0.1)" />
+      <stop offset="50%" stop-color="rgba(255,255,255,0.08)" />
       <stop offset="100%" stop-color="transparent" />
     </linearGradient>
 
     <mask id="textMask">
-      <text x="400" y="55" class="ancient-text omega-symbol" fill="white" stroke="white">Ω</text>
-      <text x="400" y="90" class="ancient-text motto" fill="white" stroke="white">I AM WHAT I AM</text>
-      <text x="410" y="175" class="main-neon chyren" fill="white" stroke="white">CHYREN</text>
-      <text x="400" y="240" class="ancient-text motto" fill="white" stroke="white">I WILL BE WHAT I WILL BE</text>
-      <text x="400" y="275" class="ancient-text omega-symbol" fill="white" stroke="white">ω</text>
+      <text x="400" y="240" class="ancient-text omega-bg" fill="white" stroke="white">Ω</text>
+      <text x="410" y="165" class="main-neon chyren" fill="white" stroke="white">CHYREN</text>
+      <text x="412" y="215" class="ancient-text omega-sub" fill="white" stroke="white">ω</text>
     </mask>
   </defs>
   
-  <rect class="bg" width="800" height="300" rx="8" ry="8" />
+  <rect class="bg" width="800" height="300" rx="6" ry="6" />
   
-  <!-- Content -->
-  <text x="400" y="55" class="ancient-text omega-symbol">Ω</text>
-  <text x="400" y="90" class="ancient-text motto">I AM WHAT I AM</text>
-  <text x="410" y="175" class="main-neon chyren">CHYREN</text>
-  <text x="400" y="240" class="ancient-text motto">I WILL BE WHAT I WILL BE</text>
-  <text x="400" y="275" class="ancient-text omega-symbol">ω</text>
+  <!-- Content Layers -->
+  <!-- Layer 1: Background Symbol -->
+  <text x="400" y="240" class="ancient-text omega-bg">Ω</text>
   
-  <!-- Subtle sweep -->
+  <!-- Layer 2: Main Text -->
+  <text x="410" y="165" class="main-neon chyren">CHYREN</text>
+  
+  <!-- Layer 3: Subscribed Symbol (Under Y and R) -->
+  <text x="412" y="215" class="ancient-text omega-sub">ω</text>
+  
+  <!-- Layer 4: Subtle Sweep -->
   <rect x="0" y="0" width="800" height="300" class="scanner-bar" mask="url(#textMask)" />
   
 </svg>
