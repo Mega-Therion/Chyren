@@ -3,7 +3,7 @@
 
 #![warn(missing_docs)]
 
-use omega_adccl::ADCCL;
+use omega_adccl::adccl_logic::ADCCL;
 use omega_aegis::AlignmentLayer;
 use omega_core::now;
 use omega_telemetry::{EventLevel, SystemEvent, TelemetryBus};
