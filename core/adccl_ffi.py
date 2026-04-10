@@ -4,7 +4,7 @@ import json
 import platform
 
 # Determine the library path
-LIB_PATH = "/home/mega/Chyren/omega_workspace/workspace/OmegA-Next/target/release/libomega_adccl.so"
+LIB_PATH = "/home/mega/Chyren/omega/target/release/libomega_adccl.so"
 
 # Load the Rust library
 _lib = ctypes.CDLL(LIB_PATH)
