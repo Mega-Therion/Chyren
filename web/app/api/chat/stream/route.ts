@@ -94,6 +94,13 @@ function pickExpressionProfile(sessionId: string): ExpressionProfile {
   return _EXPRESSION_PROFILES[hash % _EXPRESSION_PROFILES.length]
 }
 
+// Phase 1 — UI conciseness gate (sovereign, non-negotiable unless user explicitly overrides)
+const _CONCISENESS_DIRECTIVE =
+  `\n\nRESPONSE LENGTH GATE (enforced): Unless the operator explicitly requests a longer ` +
+  `response, strictly limit your reply to 1–3 concise sentences. ` +
+  `Lead with the answer. Omit preamble, filler, and unnecessary elaboration. ` +
+  `If the question genuinely requires more, you may expand — but default is tight and conversational.`
+
 function buildSystemPrompt(
   sessionId: string,
   memberContext?: string | null,
@@ -104,6 +111,7 @@ function buildSystemPrompt(
   const profile = pickExpressionProfile(sessionId)
   let prompt =
     _BASE_SYSTEM_PROMPT +
+    _CONCISENESS_DIRECTIVE +
     `\n\nResponse expression profile: ${profile.styleId}.\n` +
     `${profile.guidance}\n` +
     `Preserve semantic intent and policy constraints exactly; vary only phrasing and rhetorical framing.`

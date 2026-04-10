@@ -62,8 +62,8 @@ async function main() {
     // Alye
     await sql`
       UPDATE family_profiles
-      SET name = ${'Alye'},
-          last_name = ${'Lauren Muldoon'},
+      SET name = ${'Alye Lauren'},
+          last_name = ${'Muldoon'},
           relationship = ${'cousin (paternal side, through Suszie Muldoon)'},
           partner = ${'Justin "Jay" Schwartz'},
           children = ${JSON.stringify(["Deacon 'Bean' Schwartz (b. ~2022)"])},

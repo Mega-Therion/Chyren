@@ -21,7 +21,13 @@ interface Spark {
   startedAt: number;
 }
 
-export default function NeuralBrain({ isActive = false }: { isActive?: boolean }) {
+export default function NeuralBrain({
+  isActive = false,
+  audioLevel = 0,
+}: {
+  isActive?: boolean;
+  audioLevel?: number;
+}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef<number>(0);
   const stateRef = useRef<{ nodes: Node[]; sparks: Spark[]; t: number }>({
@@ -77,7 +83,10 @@ export default function NeuralBrain({ isActive = false }: { isActive?: boolean }
 
     const INDIGO = (a: number) => `rgba(99,102,241,${a})`;
     const EMERALD = (a: number) => `rgba(52,211,153,${a})`;
-    const VIOLET = (a: number) => `rgba(139,92,246,${a})`;
+    const VIOLET  = (a: number) => `rgba(139,92,246,${a})`;
+
+    // Bridge: read audioLevel from dataset each frame to avoid closure staleness
+    const readAudioLevel = () => parseFloat(canvas.dataset.audioLevel ?? '0') || 0;
 
     const spawnSpark = () => {
       const { nodes, sparks } = stateRef.current;
@@ -97,18 +106,23 @@ export default function NeuralBrain({ isActive = false }: { isActive?: boolean }
       const H = canvas.height;
       stateRef.current.t += 0.016;
 
+      // Read live audioLevel from dataset bridge (zero-GC, no closure staleness)
+      const al = readAudioLevel();
+
       ctx.clearRect(0, 0, W, H);
 
-      // Move nodes
+      // Move nodes — voice level boosts velocity slightly for reactive feel
+      const boost = 1 + al * 1.4;
       nodes.forEach(n => {
-        n.x += n.vx;
-        n.y += n.vy;
+        n.x += n.vx * boost;
+        n.y += n.vy * boost;
         if (n.x < 0 || n.x > W) { n.vx *= -1; n.x = Math.max(0, Math.min(W, n.x)); }
         if (n.y < 0 || n.y > H) { n.vy *= -1; n.y = Math.max(0, Math.min(H, n.y)); }
         n.pulsePhase += n.pulseSpeed;
       });
 
-      // Draw edges
+      // Draw edges — voice level brightens them
+      const edgeBoost = 0.18 + al * 0.22;
       for (let i = 0; i < nodes.length; i++) {
         const a = nodes[i];
         for (const j of a.connections) {
@@ -117,9 +131,9 @@ export default function NeuralBrain({ isActive = false }: { isActive?: boolean }
           const dx = b.x - a.x;
           const dy = b.y - a.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          const alpha = Math.max(0, (1 - dist / 220) * 0.18);
+          const alpha = Math.max(0, (1 - dist / 220) * edgeBoost);
           ctx.strokeStyle = INDIGO(alpha);
-          ctx.lineWidth = 0.8;
+          ctx.lineWidth = 0.8 + al * 0.6;
           ctx.beginPath();
           ctx.moveTo(a.x, a.y);
           ctx.lineTo(b.x, b.y);
@@ -149,13 +163,11 @@ export default function NeuralBrain({ isActive = false }: { isActive?: boolean }
         ctx.fill();
       });
 
-      // Spawn sparks when active
-      if (isActive && Date.now() - lastSpawn > 400) {
-        spawnSpark();
-        lastSpawn = Date.now();
-      }
-      // Always spawn occasionally even idle
-      if (!isActive && Date.now() - lastSpawn > 1800) {
+      // Spawn sparks — rate increases with audio level
+      const spawnInterval = isActive
+        ? Math.max(80, 400 - al * 300)
+        : Math.max(400, 1800 - al * 1400);
+      if (Date.now() - lastSpawn > spawnInterval) {
         spawnSpark();
         lastSpawn = Date.now();
       }
@@ -203,7 +215,17 @@ export default function NeuralBrain({ isActive = false }: { isActive?: boolean }
       window.removeEventListener('resize', resize);
       cancelAnimationFrame(animRef.current);
     };
+  // Re-run only when isActive changes; audioLevel is read from a ref each frame
   }, [isActive]);
+
+  // Sync audioLevel into the ref used by the draw loop (no remount needed)
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    // Write to the draw-loop ref via a globally accessible side-channel not possible
+    // in this closure architecture — we use a dataset attribute as a zero-GC bridge
+    canvas.dataset.audioLevel = String(audioLevel);
+  }, [audioLevel]);
 
   return (
     <canvas

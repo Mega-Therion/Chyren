@@ -2,39 +2,100 @@
 
 import React, { useRef, useState, useCallback, useEffect } from 'react'
 import { useVoiceEngine } from '@/hooks/useVoiceEngine'
+import { haptic } from '@/lib/haptics-ry'
+import { saveDraft, loadDraft, clearDraft } from '@/lib/draft-ry'
 
 interface ChatInputProps {
   onSend: (message: string) => void
+  onBargeIn?: () => void
+  /** Injected by parent when swipe-to-quote fires */
+  quotedText?: string
+  onQuoteConsumed?: () => void
+  onAudioLevel?: (level: number) => void
   disabled?: boolean
   isLoading?: boolean
+  sessionId?: string
 }
 
-export function ChatInput({ onSend, disabled = false, isLoading = false }: ChatInputProps) {
+export function ChatInput({
+  onSend,
+  onBargeIn,
+  quotedText,
+  onQuoteConsumed,
+  onAudioLevel,
+  disabled = false,
+  isLoading = false,
+  sessionId = 'global',
+}: ChatInputProps) {
   const [input, setInput] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const hasLoadedDraftRef = useRef(false)
 
-  const handleTranscript = useCallback((text: string) => {
-    setInput((prev) => (prev ? prev + ' ' + text : text))
-  }, [])
-
-  const { isRecording, startRecording, stopRecording } = useVoiceEngine(handleTranscript)
-
+  // --- Draft persistence ---
   useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = '22px'
-      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px'
+    // Load draft once on mount
+    if (!hasLoadedDraftRef.current) {
+      hasLoadedDraftRef.current = true
+      const saved = loadDraft(sessionId)
+      if (saved) setInput(saved)
     }
+  }, [sessionId])
+
+  // Persist draft on every change (debounced inside saveDraft)
+  useEffect(() => {
+    saveDraft(sessionId, input)
+  }, [input, sessionId])
+
+  // --- Swipe-to-quote injection ---
+  useEffect(() => {
+    if (quotedText) {
+      const prefix = `> ${quotedText}\n\n`
+      setInput(prev => prefix + prev)
+      onQuoteConsumed?.()
+      requestAnimationFrame(() => textareaRef.current?.focus())
+    }
+  }, [quotedText, onQuoteConsumed])
+
+  // --- Auto-resize textarea ---
+  useEffect(() => {
+    const ta = textareaRef.current
+    if (!ta) return
+    ta.style.height = '22px'
+    ta.style.height = Math.min(ta.scrollHeight, 120) + 'px'
   }, [input])
 
+  const handleTranscript = useCallback((text: string) => {
+    setInput(prev => (prev ? `${prev} ${text}` : text))
+    requestAnimationFrame(() => textareaRef.current?.focus())
+  }, [])
+
+  const { isRecording, audioLevel, startRecording, stopRecording } = useVoiceEngine({
+    onTranscript: handleTranscript,
+    onLevel: (lvl) => onAudioLevel?.(lvl),
+    onBargeIn: () => onBargeIn?.(),
+  })
+
+  // Drive parent with audio level even when not sending
+  useEffect(() => {
+    if (isRecording) onAudioLevel?.(audioLevel)
+  }, [audioLevel, isRecording, onAudioLevel])
+
   const handleSend = useCallback(() => {
-    if (input.trim() && !disabled && !isLoading) {
-      onSend(input.trim())
-      setInput('')
-      if (textareaRef.current) textareaRef.current.style.height = '22px'
+    const trimmed = input.trim()
+    if (!trimmed || disabled || isLoading) return
+    haptic('send')
+    onSend(trimmed)
+    setInput('')
+    clearDraft(sessionId)
+    if (textareaRef.current) {
+      textareaRef.current.style.height = '22px'
+      textareaRef.current.blur()       // Dismiss keyboard (Phase 1)
     }
-  }, [input, disabled, isLoading, onSend])
+  }, [input, disabled, isLoading, onSend, sessionId])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((e.nativeEvent as any)?.isComposing) return
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       handleSend()
@@ -63,15 +124,18 @@ export function ChatInput({ onSend, disabled = false, isLoading = false }: ChatI
         style={{ minHeight: '22px' }}
       />
 
-      {/* Voice */}
+      {/* Voice — with live level ring */}
       <button
         onClick={isRecording ? stopRecording : startRecording}
         disabled={disabled || isLoading}
-        className="flex-shrink-0 w-7 h-7 rounded flex items-center justify-center transition-all duration-150 disabled:opacity-30"
+        className="flex-shrink-0 w-7 h-7 rounded flex items-center justify-center transition-all duration-150 disabled:opacity-30 relative"
         style={{
           background: isRecording ? 'rgba(248,113,113,0.15)' : 'rgba(99,102,241,0.1)',
           border: `1px solid ${isRecording ? 'rgba(248,113,113,0.4)' : 'rgba(99,102,241,0.2)'}`,
           color: isRecording ? '#f87171' : '#818cf8',
+          boxShadow: isRecording
+            ? `0 0 ${6 + audioLevel * 18}px rgba(248,113,113,${0.2 + audioLevel * 0.6})`
+            : 'none',
         }}
         title={isRecording ? 'Stop recording' : 'Voice input'}
       >
