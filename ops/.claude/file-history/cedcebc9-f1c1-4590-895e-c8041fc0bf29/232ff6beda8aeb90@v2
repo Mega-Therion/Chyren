@@ -1,0 +1,101 @@
+"""
+Live Downloads deduper — watches /home/mega/Downloads for new/duplicate files.
+Runs continuously, dedupes by MD5 hash, skips binaries and venv junk.
+Also deletes the 2.1GB Omega_Context_Artifact.md (already ingested, giant duplicate).
+"""
+import os, hashlib, time, logging
+
+logging.basicConfig(filename='/home/mega/downloads_deduper.log', level=logging.INFO,
+    format='%(asctime)s - %(message)s')
+console = logging.StreamHandler()
+console.setLevel(logging.INFO)
+logging.getLogger('').addHandler(console)
+
+WATCH_DIR = '/home/mega/Downloads'
+SEEN_HASHES = {}  # hash -> first filepath
+
+SKIP_DIRS = {'venv_linux', 'venv', '__pycache__', 'node_modules', '.git', 'site-packages'}
+SKIP_EXTS = {'.so', '.pyc', '.pyo', '.o', '.a', '.dylib', '.exe', '.bin',
+             '.jpg', '.jpeg', '.png', '.gif', '.mp4', '.mp3', '.wav', '.mov',
+             '.zip', '.tar', '.gz', '.bz2', '.xz', '.deb', '.rpm'}
+
+# Known giant already-ingested files to nuke immediately
+NUKE_NAMES = {'Omega_Context_Artifact.md'}
+
+def md5(path, chunk=65536):
+    h = hashlib.md5()
+    try:
+        with open(path, 'rb') as f:
+            while True:
+                data = f.read(chunk)
+                if not data: break
+                h.update(data)
+        return h.hexdigest()
+    except Exception:
+        return None
+
+def should_skip(path):
+    parts = path.split(os.sep)
+    if any(p in SKIP_DIRS for p in parts): return True
+    ext = os.path.splitext(path)[1].lower()
+    if ext in SKIP_EXTS: return True
+    return False
+
+def scan(seen):
+    deleted = 0
+    for root, dirs, files in os.walk(WATCH_DIR):
+        # Prune skip dirs
+        dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
+        for fn in files:
+            fp = os.path.join(root, fn)
+
+            # Nuke known giant dupes immediately
+            if fn in NUKE_NAMES:
+                try:
+                    os.remove(fp)
+                    logging.info(f"NUKED known giant: {fp}")
+                    deleted += 1
+                except: pass
+                continue
+
+            if should_skip(fp): continue
+
+            try:
+                fsize = os.path.getsize(fp)
+            except: continue
+
+            # Skip files still being written (< 1 second old and < 1MB)
+            try:
+                age = time.time() - os.path.getmtime(fp)
+                if age < 2 and fsize < 1_000_000: continue
+            except: continue
+
+            h = md5(fp)
+            if not h: continue
+
+            if h in seen:
+                # Duplicate — delete it
+                try:
+                    os.remove(fp)
+                    logging.info(f"DEDUPED: {fp} (same as {seen[h]})")
+                    deleted += 1
+                except Exception as e:
+                    logging.error(f"Could not delete {fp}: {e}")
+            else:
+                seen[h] = fp
+
+    return deleted
+
+def main():
+    logging.info("Downloads deduper started. Watching /home/mega/Downloads ...")
+    seen = {}
+    cycle = 0
+    while True:
+        deleted = scan(seen)
+        if deleted > 0:
+            logging.info(f"Cycle {cycle}: removed {deleted} duplicates")
+        cycle += 1
+        time.sleep(15)  # check every 15 seconds
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,203 @@
+#!/usr/bin/env python3
+"""
+Queue-based ingestion: move files as they're processed to eliminate I/O bottleneck.
+"""
+print("INGESTION STARTING", flush=True)
+
+import os
+import sys
+import hashlib
+import shutil
+from pathlib import Path
+from datetime import datetime
+import psycopg2
+from psycopg2.extras import execute_batch
+
+CONSOLIDATED = Path("/home/mega/OMEGA_WORKSPACE/CONSOLIDATED_FILES")
+PROCESSED = Path("/home/mega/OMEGA_WORKSPACE/INGEST/PROCESSED")
+FAILED = Path("/home/mega/OMEGA_WORKSPACE/INGEST/FAILED")
+
+# Create processing directories
+PROCESSED.mkdir(exist_ok=True)
+FAILED.mkdir(exist_ok=True)
+
+# DB2 — has 462 MB available (DB1 hit 512 MB limit)
+DB2_URL = 'postgresql://neondb_owner:npg_m9PMfDUC1kpB@ep-snowy-dew-ak5hrcr3-pooler.c-3.us-west-2.aws.neon.tech/neondb?sslmode=require'
+DB_URI = os.getenv('OMEGA_DB2_URL') or DB2_URL
+
+TEXT_EXTENSIONS = {
+    '.py', '.js', '.ts', '.rs', '.go', '.java', '.c', '.cpp', '.h', '.swift',
+    '.md', '.txt', '.rst', '.json', '.yaml', '.yml', '.toml', '.ini', '.cfg',
+    '.csv', '.xml', '.html', '.css', '.sh', '.bash', '.sql', '.graphql',
+    '.doc', '.docx', '.pdf', '.log', '.conf', '.config', '.env',
+    '.jsx', '.tsx', '.vue', '.svelte', '.astro', '.kt', '.scala', '.rb', '.php'
+}
+
+def is_likely_text(filepath):
+    ext = filepath.suffix.lower()
+    if ext in TEXT_EXTENSIONS:
+        return True
+    if ext in {'.zip', '.tar', '.gz', '.7z', '.rar', '.png', '.jpg', '.jpeg', '.gif', '.mp4', '.mp3', '.wav', '.so', '.o', '.pyc'}:
+        return False
+    return True
+
+def read_text_safe(filepath, max_size=500_000):
+    try:
+        size = os.path.getsize(filepath)
+        if size > max_size:
+            return None
+        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+            content = f.read()
+            # Remove NUL bytes
+            content = content.replace('\x00', '')
+            return content if content.strip() else None
+    except:
+        return None
+
+def build_file_queue():
+    """Build a complete list of files to process (one-time scan)."""
+    print("Building file queue...", flush=True)
+
+    all_files = []
+    categories = ['data', 'archive', 'media', 'docs', 'config', 'code', 'other']
+
+    for category in categories:
+        cat_dir = CONSOLIDATED / category
+        if not cat_dir.exists():
+            print(f"  {category}: NOT FOUND", flush=True)
+            continue
+
+        files = [f for f in cat_dir.rglob('*') if f.is_file()]
+        all_files.extend([(category, f) for f in files])
+        print(f"  {category}: {len(files):,} files", flush=True)
+
+    print(f"\nTotal files to process: {len(all_files):,}", flush=True)
+    return all_files
+
+def ingest_files(conn, file_queue, timestamp):
+    """Process files from queue, moving them as they're completed."""
+    cur = conn.cursor()
+    batch = []
+    total_ingested = 0
+    total_skipped = 0
+
+    for idx, (category, filepath) in enumerate(file_queue):
+        try:
+            if not is_likely_text(filepath):
+                total_skipped += 1
+                # Move to PROCESSED even if skipped (binary file)
+                try:
+                    new_path = PROCESSED / f"{idx}_{filepath.name}"
+                    shutil.move(str(filepath), str(new_path))
+                except:
+                    pass
+                continue
+
+            content = read_text_safe(str(filepath))
+            if not content:
+                total_skipped += 1
+                try:
+                    new_path = PROCESSED / f"{idx}_{filepath.name}"
+                    shutil.move(str(filepath), str(new_path))
+                except:
+                    pass
+                continue
+
+            # Hash and prepare entry
+            with open(filepath, 'rb') as f:
+                file_hash = hashlib.sha256(f.read()).hexdigest()
+
+            batch.append((
+                file_hash, content, str(filepath), category, category,
+                0.7, timestamp, 1, 0.85,
+            ))
+
+            total_ingested += 1
+
+            # Commit in batches of 500
+            if len(batch) >= 500:
+                try:
+                    cur.executemany("""
+                        INSERT INTO public.omega_memory_entries
+                        (id, content, source, namespace, domain, importance, created_at, version, confidence)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        ON CONFLICT(id) DO NOTHING
+                    """, batch)
+                    conn.commit()
+                    print(f"  ✓ Batch {total_ingested:,}: committed", flush=True)
+
+                    # Move processed files
+                    for _, fpath in file_queue[max(0, idx-499):idx+1]:
+                        try:
+                            new_path = PROCESSED / f"{idx}_{fpath.name}"
+                            if fpath.exists():
+                                shutil.move(str(fpath), str(new_path))
+                        except:
+                            pass
+
+                    batch = []
+                except Exception as e:
+                    print(f"  ✗ Batch commit failed: {e}", flush=True)
+                    conn.rollback()
+                    batch = []
+
+            # Progress every 5000 files
+            if (idx + 1) % 5000 == 0:
+                print(f"  Progress: {idx + 1:,} / {len(file_queue):,} ({100*(idx+1)//len(file_queue)}%)", flush=True)
+
+        except Exception as e:
+            total_skipped += 1
+
+    # Final commit
+    if batch:
+        try:
+            cur.executemany("""
+                INSERT INTO public.omega_memory_entries
+                (id, content, source, namespace, domain, importance, created_at, version, confidence)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT(id) DO NOTHING
+            """, batch)
+            conn.commit()
+            print(f"  ✓ Final batch: {len(batch):,} entries committed", flush=True)
+        except Exception as e:
+            conn.rollback()
+
+    cur.close()
+    print(f"\n✓ Ingestion complete: {total_ingested:,} ingested, {total_skipped:,} skipped", flush=True)
+    return total_ingested, total_skipped
+
+def main():
+    print("=" * 80, flush=True)
+    print("QUEUE-BASED INGESTION (Files move to PROCESSED as completed)", flush=True)
+    print("=" * 80, flush=True)
+
+    if not DB_URI:
+        print("ERROR: OMEGA_DB_URL environment variable is not set.")
+        sys.exit(1)
+
+    # Build queue once
+    file_queue = build_file_queue()
+
+    # Connect and ingest
+    conn = psycopg2.connect(DB_URI)
+    timestamp = datetime.now().isoformat()
+
+    print(f"\n[{datetime.now().strftime('%H:%M:%S')}] Starting ingestion...", flush=True)
+    total_ing, total_skip = ingest_files(conn, file_queue, timestamp)
+
+    conn.close()
+
+    print("\n" + "=" * 80, flush=True)
+    print(f"[✓] QUEUE INGESTION COMPLETE", flush=True)
+    print(f"  Total: {total_ing:,} ingested, {total_skip:,} skipped", flush=True)
+    print(f"  Processed files: {PROCESSED}/", flush=True)
+    print("=" * 80, flush=True)
+
+    # Log
+    with open("/home/mega/NEXUS/ERGON.md", 'a') as f:
+        f.write(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M')}] [ROVI] QUEUE-BASED INGESTION COMPLETE\n")
+        f.write(f"  Total: {total_ing:,} entries ingested, {total_skip:,} skipped\n")
+        f.write(f"  Method: Queue-based processing (files moved to PROCESSED/ as completed)\n\n")
+
+if __name__ == '__main__':
+    main()

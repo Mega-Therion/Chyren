@@ -1,0 +1,119 @@
+ You are working in the canonical OmegA repo.
+
+  Repo root:
+  `/home/mega/OMEGA_WORKSPACE/CANON/OmegA-Architecture`
+
+  Goal:
+  Bring OmegA as close as possible to externally
+  verifiable, reproducible, blind-testable, and
+  operationally self-describing. Alye is the first outside
+  tester. The goal is not “more docs”; it is a working
+  external verification path plus a tighter claim/evidence
+  model.
+
+  Core operating principle:
+  You have full implementation freedom. Use whatever
+  approach gets to the correct solution fastest and most
+  reliably. Once you find the correct solution, you must
+  document it concretely and reproducibly: what changed,
+  why it changed, how to rerun it, how to verify it, and
+  what evidence proves it works. Do not stop at working
+  code. The final state must be implemented and fully
+  documented.
+
+  Hard constraints:
+  - Treat `CANON/` as source of truth.
+  - Do not edit archive copies.
+  - Do not touch `VAULT/` or expose secrets.
+  - Keep changes scoped.
+  - Prefer existing docs/scripts over new systems.
+  - If blocked, stop and report the exact blocker.
+  - Keep token usage low: be terse, avoid repetition, and
+  do not rehash unchanged content.
+  - Do not output chain-of-thought. Give only concise
+  actions, results, and blockers.
+
+  What must be accomplished:
+  1. External verification program for blind outsider use.
+  2. Alye setup/onboarding/test protocol.
+  3. Canonical self-description contract for OmegA:
+     - what it is
+     - how it was built
+     - capabilities
+     - limits
+     - what it refuses to claim
+  4. Claim ledger:
+     - proven
+     - demonstrable
+     - conditional
+     - not claimed
+  5. Pass/fail rubric tied to actual repo evidence.
+  6. Release gate aligned with published claims.
+  7. Clear gap report for anything not completed.
+
+  How to approach it:
+  1. Survey the repo first.
+     - Read `catalog/INDEX.md`, `publication/RELEASE.md`,
+  `publication/PUBLICATION_SET.md`, `publication/
+  OMEGA_MASTER_SYNTHESIS.md`, `README.md`, `CLAUDE.md`,
+  `verify.sh`, and any current eval/release-gate scripts.
+  2. Identify the current claim surface and evidence
+  surface.
+     - What is claimed?
+     - What is already proven by tests/gates?
+     - What is only aspirational?
+  3. Build the missing external-verification artifacts in
+  the canonical publication/docs area.
+     - Add an Alye-facing blind test protocol.
+     - Add a self-description contract.
+     - Add a claim ledger.
+     - Add a rubric that ties questions to evidence.
+  4. Reuse existing release/gate machinery.
+     - Do not invent a parallel system if existing scripts
+  can be extended.
+     - If needed, add a small script, but keep it simple
+  and discoverable.
+  5. Integrate routing docs.
+     - Update front-door docs so a new agent knows where
+  the verification package lives.
+  6. Validate.
+     - Run the relevant gates/tests.
+     - Make sure the blind path is executable from the
+  repo instructions.
+  7. Report.
+     - If anything is missing, output a structured blocker
+  report with:
+       - blocker
+       - why it blocks
+       - exact files/vars/inputs needed
+       - next step
+
+  Suggested implementation target:
+  - `publication/` for the verification package
+  - `scripts/` for any small helper/gate
+  - `README.md` / `CLAUDE.md` / `publication/RELEASE.md`
+  for routing
+
+  Minimum deliverables:
+  - `publication/...` artifact for external verification
+  program
+  - Alye onboarding/test protocol
+  - self-description contract
+  - claim ledger
+  - pass/fail rubric
+  - repo docs updated to point at them
+  - final gap report if anything remains
+
+  Quality bar:
+  - Make the system understandable to a skeptical outsider
+  with no prior context.
+  - Make the instructions short, direct, and reproducible.
+  - Prefer clear evidence over broad claims.
+  - If a claim cannot be backed, downgrade it to
+  conditional or not claimed.
+  - After implementation, show your work clearly and
+  concretely.
+
+  Start by surveying the repo and identifying the smallest
+  set of artifacts that can turn the current architecture/
+  release work into a blind external verification path.

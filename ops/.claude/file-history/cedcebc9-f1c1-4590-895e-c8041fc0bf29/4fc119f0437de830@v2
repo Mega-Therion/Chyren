@@ -1,0 +1,143 @@
+"""
+OmegA Agent — Unified agent combining all four layers.
+
+Wires together AEGIS (envelope + risk gate), AEON (phylactery + TSO),
+ADCCL (drift control + verification), and MYELIN (graph memory)
+into a single callable agent.
+
+Now routes through RuntimeOrchestrator for the unified execution path,
+while preserving the existing RunResult interface.
+
+Usage:
+    from omega import OmegaAgent
+
+    agent = OmegaAgent()
+    result = agent.run("Explain the OmegA architecture", model="llama3.2:3b")
+"""
+
+import hashlib
+import time
+from dataclasses import dataclass, field
+from typing import Optional
+
+from omega.runtime import RuntimeOrchestrator, RuntimeResult
+from omega.providers.base import RoutingPolicy
+from omega.teleodynamics import TeleodynamicSignal
+
+
+@dataclass
+class SelfTag:
+    """AEON self-tag — immutable continuity record."""
+    tso_hash: str
+    V: float
+    outcome: str  # verified | uncertain | rejected
+    timestamp: float = field(default_factory=time.time)
+
+
+@dataclass
+class RunResult:
+    """Result of a single OmegA agent run (legacy interface)."""
+    response: str
+    verification: dict
+    self_tag: SelfTag
+    envelope_complete: bool
+    risk_score: float
+    risk_allowed: bool
+    model: str
+    elapsed_ms: float
+    teleodynamic_trace: TeleodynamicSignal
+    runtime_trace: dict = field(default_factory=dict)
+
+
+class OmegaAgent:
+    """
+    Minimal reference implementation of the OmegA stack.
+    Now delegates to RuntimeOrchestrator for the unified execution path.
+    """
+
+    DEFAULT_DOCTRINE = "I am what I am, and I will be what I will be."
+
+    def __init__(self, name: str = "OmegA", doctrine: str | None = None):
+        self.name = name
+        self._runtime = RuntimeOrchestrator(name=name, doctrine=doctrine)
+        self.self_tags: list[SelfTag] = []
+
+    @property
+    def phylactery(self):
+        return self._runtime.phylactery
+
+    @property
+    def memory(self):
+        return self._runtime.memory
+
+    @property
+    def risk_gate(self):
+        return self._runtime.risk_gate
+
+    def run(self, task: str, model: str = "llama3.2:3b",
+            temperature: float = 0.3, provider: str | None = None) -> RunResult:
+        """Execute the full OmegA stack via the unified runtime."""
+        import uuid
+
+        trace_id = f"req_{uuid.uuid4().hex[:8]}"
+
+        # Teleodynamic signal (observability)
+        tele_trace = TeleodynamicSignal(
+            trace_id=trace_id,
+            phase_state="OBSERVE",
+            phase_transition_id=f"pt_{uuid.uuid4().hex[:4]}",
+            resonance_amplitude=0.5,
+            shear_index=0.0,
+            canon_anchor_weight=0.5,
+            structural_integrity_score=1.0,
+            intent_priority_score=0.8,
+            authority_shrink_level=0.0,
+            predicted_failure_modes=[],
+            da_reachability=0.98,
+            da_consensus_delay=12.5,
+        )
+
+        # Route through RuntimeOrchestrator
+        result = self._runtime.run(
+            task=task,
+            model=model,
+            provider=provider,
+            temperature=temperature,
+            routing_policy=RoutingPolicy.PREFERRED if provider else RoutingPolicy.FALLBACK,
+        )
+
+        # Build self-tag from runtime trace
+        tso_hash = hashlib.sha256((task + result.raw_response).encode()).hexdigest()
+        V = result.trace.verification_V
+        outcome = "verified" if result.trace.verification_passed else "uncertain"
+        if not result.trace.risk_allowed:
+            outcome = "rejected"
+
+        tag = SelfTag(tso_hash=tso_hash, V=V, outcome=outcome)
+        self.self_tags.append(tag)
+
+        # Update teleodynamic trace
+        tele_trace.phase_state = result.trace.final_stage.value.upper()
+        if not result.trace.risk_allowed:
+            tele_trace.actual_failure_mode = "RISK_GATED"
+        if result.trace.verification_V < 0.5:
+            tele_trace.shear_index = 0.6
+
+        verification = {
+            "V": V,
+            "passed": result.trace.verification_passed,
+            "outcome": outcome,
+        }
+
+        return RunResult(
+            response=result.text,
+            verification=verification,
+            self_tag=tag,
+            envelope_complete=True,
+            risk_score=result.trace.risk_score,
+            risk_allowed=result.trace.risk_allowed,
+            model=result.trace.model or model,
+            elapsed_ms=result.trace.total_elapsed_ms,
+            teleodynamic_trace=tele_trace,
+            runtime_trace=result.trace.to_dict(),
+        )

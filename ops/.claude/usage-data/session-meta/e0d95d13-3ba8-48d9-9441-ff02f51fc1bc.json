@@ -1,0 +1,64 @@
+{
+  "session_id": "e0d95d13-3ba8-48d9-9441-ff02f51fc1bc",
+  "project_path": "/home/mega",
+  "start_time": "2026-03-25T06:56:32.955Z",
+  "duration_minutes": 12,
+  "user_message_count": 10,
+  "assistant_message_count": 79,
+  "tool_counts": {
+    "Agent": 1,
+    "Bash": 21,
+    "Write": 11,
+    "Edit": 11,
+    "Read": 9
+  },
+  "languages": {
+    "JSON": 5,
+    "Python": 21,
+    "TypeScript": 3,
+    "Markdown": 2
+  },
+  "git_commits": 0,
+  "git_pushes": 0,
+  "input_tokens": 81,
+  "output_tokens": 35772,
+  "first_prompt": "Unknown skill: skillcreator",
+  "user_interruptions": 0,
+  "user_response_times": [],
+  "tool_errors": 3,
+  "tool_error_categories": {
+    "Other": 1,
+    "Command Failed": 2
+  },
+  "uses_task_agent": true,
+  "uses_mcp": false,
+  "uses_web_search": false,
+  "uses_web_fetch": false,
+  "lines_added": 2223,
+  "lines_removed": 15,
+  "files_modified": 15,
+  "message_hours": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+  ],
+  "user_message_timestamps": [
+    "2026-03-25T06:56:32.955Z",
+    "2026-03-25T06:56:32.954Z",
+    "2026-03-25T06:56:32.954Z",
+    "2026-03-25T06:57:41.607Z",
+    "2026-03-25T06:57:41.607Z",
+    "2026-03-25T06:57:52.759Z",
+    "2026-03-25T06:57:52.759Z",
+    "2026-03-25T06:58:01.310Z",
+    "2026-03-25T06:58:01.310Z",
+    "2026-03-25T06:59:10.364Z"
+  ]
+}

@@ -1,0 +1,18 @@
+[package]
+name = "omega-spokes"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[lib]
+
+[dependencies]
+omega-core = { path = "../omega-core" }
+omega-telemetry = { path = "../omega-telemetry" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "1"
+async-trait = "0.1"
+tokio = { version = "1", features = ["full"] }
+reqwest = { version = "0.13.2", features = ["json", "blocking"] }

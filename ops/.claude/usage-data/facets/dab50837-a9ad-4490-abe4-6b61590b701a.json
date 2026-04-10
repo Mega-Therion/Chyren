@@ -1,0 +1,15 @@
+{
+  "underlying_goal": "User attempted to interact with Claude but hit a usage limit",
+  "goal_categories": {
+    "warmup_minimal": 1
+  },
+  "outcome": "not_achieved",
+  "user_satisfaction_counts": {},
+  "claude_helpfulness": "unhelpful",
+  "session_type": "single_task",
+  "friction_counts": {},
+  "friction_detail": "User hit usage limit and could not interact with Claude at all.",
+  "primary_success": "none",
+  "brief_summary": "User tried to use Claude but was blocked by a usage limit, receiving no assistance.",
+  "session_id": "dab50837-a9ad-4490-abe4-6b61590b701a"
+}

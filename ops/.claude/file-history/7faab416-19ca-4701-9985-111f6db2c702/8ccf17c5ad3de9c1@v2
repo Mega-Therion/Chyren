@@ -1,0 +1,151 @@
+"""
+OmegA CLI Plugins — Plugin system for custom extensions.
+"""
+
+import sys
+import importlib.util
+from pathlib import Path
+from typing import Dict, Any, Optional, List, Callable
+
+
+class OmegaPlugin:
+    """Base class for OmegA CLI plugins."""
+
+    def __init__(self, name: str):
+        """Initialize plugin."""
+        self.name = name
+        self.commands: Dict[str, Callable] = {}
+
+    def register_command(self, command_name: str, handler: Callable) -> None:
+        """Register a command handler."""
+        self.commands[command_name] = handler
+
+    def on_load(self) -> None:
+        """Called when plugin is loaded."""
+        pass
+
+    def on_unload(self) -> None:
+        """Called when plugin is unloaded."""
+        pass
+
+
+class PluginManager:
+    """Manages loading, unloading, and invoking plugins."""
+
+    def __init__(self):
+        """Initialize plugin manager."""
+        self.plugins_dir = Path.home() / ".omega" / "cli" / "plugins"
+        self.plugins: Dict[str, OmegaPlugin] = {}
+
+        # Ensure plugins directory exists
+        self.plugins_dir.mkdir(parents=True, exist_ok=True)
+
+    def list_plugins(self) -> List[str]:
+        """List all available plugins."""
+        plugin_files = list(self.plugins_dir.glob("*.py"))
+        return [f.stem for f in plugin_files if not f.stem.startswith("_")]
+
+    def load_plugin(self, plugin_name: str) -> Optional[str]:
+        """
+        Load a plugin by name.
+
+        Args:
+            plugin_name: Name of the plugin (without .py)
+
+        Returns:
+            Error message if loading failed, None if successful
+        """
+        plugin_file = self.plugins_dir / f"{plugin_name}.py"
+
+        if not plugin_file.exists():
+            return f"Plugin file not found: {plugin_file}"
+
+        try:
+            # Load the module
+            spec = importlib.util.spec_from_file_location(plugin_name, plugin_file)
+            if not spec or not spec.loader:
+                return f"Failed to load spec for {plugin_name}"
+
+            module = importlib.util.module_from_spec(spec)
+            sys.modules[plugin_name] = module
+            spec.loader.exec_module(module)
+
+            # Instantiate plugin class
+            if hasattr(module, "OmegaCliPlugin"):
+                plugin_class = module.OmegaCliPlugin
+                plugin = plugin_class(plugin_name)
+                plugin.on_load()
+                self.plugins[plugin_name] = plugin
+                return None
+            else:
+                return f"Plugin {plugin_name} does not define OmegaCliPlugin class"
+
+        except Exception as e:
+            return f"Error loading plugin {plugin_name}: {e}"
+
+    def unload_plugin(self, plugin_name: str) -> Optional[str]:
+        """Unload a plugin."""
+        if plugin_name not in self.plugins:
+            return f"Plugin {plugin_name} is not loaded"
+
+        try:
+            self.plugins[plugin_name].on_unload()
+            del self.plugins[plugin_name]
+            if plugin_name in sys.modules:
+                del sys.modules[plugin_name]
+            return None
+        except Exception as e:
+            return f"Error unloading plugin {plugin_name}: {e}"
+
+    def reload_plugin(self, plugin_name: str) -> Optional[str]:
+        """Reload a plugin."""
+        error = self.unload_plugin(plugin_name)
+        if error:
+            return error
+
+        return self.load_plugin(plugin_name)
+
+    def invoke_command(self, plugin_name: str, command_name: str, args: List[str]) -> str:
+        """
+        Invoke a command in a plugin.
+
+        Args:
+            plugin_name: Name of the plugin
+            command_name: Name of the command
+            args: Command arguments
+
+        Returns:
+            Command output
+        """
+        if plugin_name not in self.plugins:
+            return f"Plugin {plugin_name} is not loaded"
+
+        plugin = self.plugins[plugin_name]
+
+        if command_name not in plugin.commands:
+            return f"Command {command_name} not found in plugin {plugin_name}"
+
+        try:
+            handler = plugin.commands[command_name]
+            return handler(*args)
+        except Exception as e:
+            return f"Error invoking command: {e}"
+
+    def list_plugin_commands(self, plugin_name: str) -> Dict[str, str]:
+        """List all commands in a plugin."""
+        if plugin_name not in self.plugins:
+            return {}
+
+        return self.plugins[plugin_name].commands.copy()
+
+
+# Global plugin manager instance
+_plugin_manager: Optional[PluginManager] = None
+
+
+def get_plugin_manager() -> PluginManager:
+    """Get the global plugin manager instance."""
+    global _plugin_manager
+    if _plugin_manager is None:
+        _plugin_manager = PluginManager()
+    return _plugin_manager

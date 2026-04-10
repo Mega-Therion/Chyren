@@ -1,0 +1,212 @@
+# OmegA CLI Enhancement Prompt (Part 2/4)
+
+## Phase 3: Advanced Features
+
+### 3.1 Real-Time DB & System Monitoring
+**Goal**: Built-in dashboard for DB status, ingest progress, API health.
+
+**Implementation**:
+- Add `/monitor` command that shows live metrics in a panel:
+  ```
+  ┌─ OmegA Status Dashboard ─────────────────────────────────────┐
+  │ DB1 (omega-personal):    ████████░░ 87.3% (446 MB / 512 MB)  │
+  │ DB2 (omega-technical):   ███░░░░░░ 47.3% (242 MB / 512 MB)   │
+  │ Memory entries:          26,143 (avg importance: 0.82)        │
+  │ API health:              ✓ OK (latency: 142ms)                │
+  │ Session age:             3h 24m (tokens: 12.5K / $0.047)      │
+  │                                                                │
+  │ [↑ Ingest] [Expand DB] [Export] [Settings]                   │
+  └────────────────────────────────────────────────────────────────┘
+  ```
+- Use `rich.live.Live` for real-time updates
+- Add `/monitor --interval 5` for custom refresh rate
+- Add `/monitor --export-csv` to save metrics
+
+### 3.2 File-Based Prompt Management
+**Goal**: Handle large prompts by saving to file and referencing instead of embedding in JSON.
+
+**Implementation**:
+- Add `/prompt-file <path>` to load prompt from file
+- Add `/prompt-save <name>` to save current prompt history to `~/.omega/prompts/<name>.md`
+- Add `/prompt-template <name>` to use pre-built templates (e.g., "audit-review", "feature-spec")
+- Show file size warning: `[WARN] Prompt size 245KB — recommend chunking`
+
+**Example**:
+```
+you › /prompt-file /tmp/comprehensive_upgrade.md
+
+[LOAD] Reading /tmp/comprehensive_upgrade.md (187 KB)
+[WARN] Large file detected. Chunking into 3 segments...
+  Segment 1: 62 KB (phases 1-2)
+  Segment 2: 65 KB (phases 3-4)
+  Segment 3: 60 KB (implementation + appendix)
+Ready to send? (y/n):
+```
+
+### 3.3 Git Integration & Diff Preview
+**Goal**: Show code diffs, branch context, and git operations from CLI.
+
+**Implementation**:
+- Add `/git status` shorthand for repo status
+- Add `/git-diff [file]` to show and paginate diffs
+- Add `/git-commit [msg]` to stage and commit from CLI
+- Add `/push-pr [title]` to create PR with auto-generated description
+
+**Example**:
+```
+you › /git-diff omega/cli/omega
+
+[DIFF] Showing changes in OMEGA_WORKSPACE/CODE/bin/omega
+
+@@@ -164,10 +164,12 @@@ def print_banner(session_id: str):
+   def print_banner(session_id: str):
+-      console.print("  [banner]██████╗[/banner]")
++      colors = ["#22d4f5", "#a855f7", "#ec4899", ...]
++      for i, line in enumerate(banner_lines):
++          color = colors[i % len(colors)]
++          console.print(f"  [{color}]{line}[/{color}]")
+
+commit? (y/n):
+```
+
+### 3.4 Multi-Modal Input & Output
+**Goal**: Support voice commands, image uploads for vision analysis, and raw code/data pasting.
+
+**Implementation**:
+- Add `/voice` mode for speech-to-text (requires microphone)
+- Add `/image <path>` to upload image for vision analysis: "Describe this screenshot"
+- Add `/paste` to enter multi-line mode (Ctrl+D to end)
+- Add `/code <language>` to start syntax-highlighted code block input
+
+**Example**:
+```
+you › /code python
+
+[PASTE] Python mode. Type code, end with Ctrl+D:
+
+def resume_ingest():
+    db = connect(OMEGA_DB2_URL)
+    sweep = db.query("...")
+    for item in sweep:
+        process(item)
+^D
+
+[CODE] Received 156 bytes of Python code. Analyze?
+```
+
+### 3.5 Response Streaming & Pagination
+**Goal**: Stream long responses, allow pausing and resuming, rich formatting.
+
+**Implementation**:
+- Real-time streaming with pause/resume: `[pause]`, `[space] to continue`, `[q] to quit`
+- Auto-paginate long responses into sections
+- Syntax highlighting for code blocks with line numbers
+- Table rendering with sorting: `/sort column [asc|desc]`
+
+---
+
+## Phase 4: Architecture & Integration
+
+### 4.1 Event-Driven Architecture
+**Goal**: CLI becomes event sink for external triggers (webhooks, scheduled tasks).
+
+**Implementation**:
+- Internal event bus: `on("ingest.progress")`, `on("db.alert")`, `on("api.error")`
+- Register handlers: `/on ingest.complete → /delegate  "summarize ingest results"`
+- Webhook receiver on localhost:8765 for external triggers
+- Emit telemetry to ERGON.md for multi-agent awareness
+
+### 4.2 Configuration & Theming
+**Goal**: Customizable colors, key bindings, aliases, and environment variables.
+
+**Implementation**:
+- `~/.omega/cli/config.toml` for CLI settings
+- `~/.omega/cli/theme.json` for color customization
+- `~/.omega/cli/aliases.txt` for command shortcuts
+- Built-in editor: `/config edit` opens config in $EDITOR
+
+**Example config**:
+```toml
+[interface]
+banner_colorshift = true
+theme = "dark"
+pagination_size = 50
+
+[api]
+timeout_seconds = 120
+max_payload_kb = 100
+retry_count = 3
+
+[skills]
+auto_suggest = true
+manifest_refresh = "startup"
+
+[monitoring]
+enable_metrics = true
+db_check_interval = 10
+alert_threshold = 85
+```
+
+### 4.3 Plugin System
+**Goal**: Allow operators to write custom CLI commands as Python plugins.
+
+**Implementation**:
+- Plugin directory: `~/.omega/cli/plugins/`
+- Plugin template: `class OmegaPlugin: def register(cli) → cli.add_command(...)`
+- Hot-reload: `/plugin reload <name>`
+- Plugin store: `/plugin install <github-url>`
+
+**Example plugin**:
+```python
+class MyPlugin(OmegaPlugin):
+    def register(cli):
+        @cli.command("/mycommand")
+        def my_command(args):
+            print("Custom plugin command!")
+```
+
+### 4.4 Audit & Compliance Logging
+**Goal**: Every CLI action is logged to ERGON.md with checksums for integrity.
+
+**Implementation**:
+- Append to `/home/mega/NEXUS/ERGON.md` after each major command
+- Format: `[timestamp] [CLI] <action> (exit_code: 0, duration: 2.5s, hash: abc123...)`
+- Include: command, user, exit code, duration, any side effects
+- Enable compliance review: `/audit --last 24h` shows all recent actions
+
+**Example log entry**:
+```
+[2026-03-30 14:32] [CLI] resume_sweep2 (exit_code: 0, duration: 847s)
+  → Items processed: 2,143
+  → DB2 utilization: 47.3% (was 28.1%)
+  → Peak memory: 512 MB
+  hash: 7f4a9c2e1b8d6f3a
+```
+
+---
+
+## Phase 5: Deployment & Documentation
+
+### 5.1 Version Management
+**Goal**: Track CLI version, auto-update, migration guides for breaking changes.
+
+**Implementation**:
+- Version file: `/home/mega/OMEGA_WORKSPACE/CODE/bin/VERSION` (e.g., `2.1.0`)
+- Semver compliance and changelog at `CODE/CHANGELOG.md`
+- `/upgrade` checks for new version and pulls latest code
+- Migration guide auto-display when major version changes
+
+### 5.2 Testing & Validation
+**Goal**: CLI has comprehensive tests, validation hooks, and smoke tests.
+
+**Implementation**:
+- Unit tests: test all commands with mock API responses
+- Integration tests: test real API calls against staging
+- Smoke tests: `/test smoke` runs quick validation
+- Coverage tracking: `/test coverage`
+
+---
+
+**Part 3 coming next: Detailed implementation roadmap and timeline.**
+
+Save and digest this part before moving to Part 3. These two parts cover the full feature spec.

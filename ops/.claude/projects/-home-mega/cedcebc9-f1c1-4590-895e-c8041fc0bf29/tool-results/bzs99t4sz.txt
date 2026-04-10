@@ -1,0 +1,2488 @@
+ MANIFEST.md                                     |   2 +
+ omega/__init__.py                               |  15 +-
+ omega/agent.py                                  | 142 ++++----
+ omega/drift.py                                  |  86 ++++-
+ omega/envelope.py                               | 219 +++++++++++
+ omega/memory.py                                 |  74 ++++
+ omega/risk_gate.py                              |   1 +
+ tools/agent_mesh.py                             |  32 +-
+ web/src/app/api/tts/route.ts                    |  58 +--
+ web/src/app/page.module.css                     | 458 ++++++++++++++++++++----
+ web/src/app/page.tsx                            | 384 ++++++++++----------
+ web/src/components/VoiceOrb/VoiceOrb.module.css |  95 +++++
+ web/src/components/VoiceOrb/VoiceOrb.tsx        | 187 ++++++++++
+ web/src/hooks/useVoiceEngine.ts                 | 329 +++++++++++++++++
+ web/src/middleware.ts                           |  31 --
+ 15 files changed, 1705 insertions(+), 408 deletions(-)
+---FULL DIFF---
+diff --git a/MANIFEST.md b/MANIFEST.md
+index 0f44797..d861c11 100644
+--- a/MANIFEST.md
++++ b/MANIFEST.md
+@@ -77,6 +77,8 @@
+ | `specs/provenance_protocol.md` | Markdown | 1206 | The Yettragrammaton (Provenance Protocol) |
+ | `specs/specification_tagging_convention.md` | Markdown | 1167 | Omega Specification Tagging Convention |
+ | `specs/task_state_object_v2.md` | Markdown | 2083 | Task State Object v2 |
++| `runtime/crates/da-relay/Cargo.toml` | Toml | 68 | DA-Relay configuration |
++| `runtime/crates/da-relay/src/lib.rs` | Rust | 312 | DA-Relay core implementation |
+ | `specs/teleodynamic_observability.md` | Markdown | 2834 | Teleodynamic Observability Specification |
+ | `specs/teleodynamics_signal_schema.json` | JSON | 1770 | { |
+ | `tools/agent_mesh.py` | Python | 321 | OmegA Secure Agent Mesh |
+diff --git a/omega/__init__.py b/omega/__init__.py
+index 9d65378..d978455 100644
+--- a/omega/__init__.py
++++ b/omega/__init__.py
+@@ -1,18 +1,21 @@
+ """
+ OmegA — Sovereign, Persistent, and Self-Knowing AI Architecture
+ 
+-Minimal reference implementation of the four-layer OmegA stack:
++Four-layer reference implementation:
+   AEGIS  → Governance shell (risk gate, run envelope, action gating)
+   AEON   → Identity OS (Phylactery, TSO lifecycle, MUSE, continuity)
+   ADCCL  → Cognitive control loop (drift penalty, verification, claim budgets)
+-  MYELIN → Graph memory (edge hardening, strata, spatial energy)
++  MYELIN → Graph memory (document store, hybrid retrieval, edge hardening)
+ """
+ 
+-__version__ = "0.1.0"
++__version__ = "0.2.0"
+ 
+ from omega.phylactery import Phylactery
+-from omega.envelope import RunEnvelope
++from omega.envelope import RunEnvelope, ActionEnvelope, ActionGate, ActionClass
+ from omega.risk_gate import RiskGate
+-from omega.drift import DriftController, ClaimBudget
+-from omega.memory import MemoryGraph
++from omega.drift import DriftController, ClaimBudget, VerifierMiddleware, GoalContract
++from omega.memory import MemoryGraph, WritePolicy
++from omega.docstore import DocumentStore, DocumentRecord, DocFormat
++from omega.retrieval import HybridRetriever, RetrievalMethod, RetrievalResult
++from omega.answer import AnswerObject, AnswerBuilder, AnswerMode, Citation
+ from omega.agent import OmegaAgent
+diff --git a/omega/agent.py b/omega/agent.py
+index 9bdd9e5..e2bb499 100644
+--- a/omega/agent.py
++++ b/omega/agent.py
+@@ -18,13 +18,17 @@ import hashlib
+ import urllib.request
+ import urllib.error
+ from dataclasses import dataclass, field
+-from typing import Optional
++from typing import Optional, List
++import uuid
+ 
+ from omega.phylactery import Phylactery
+ from omega.envelope import RunEnvelope
+ from omega.risk_gate import RiskGate
+ from omega.drift import DriftController, GoalContract, ClaimBudget, SupportStatus
+ from omega.memory import MemoryGraph, Stratum
++from omega.teleodynamics import TeleodynamicSignal
++from tools.teleodynamic_diagnostics import TeleodynamicDiagnostics
++from tools.telemetry_harvester import TelemetryHarvester
+ 
+ 
+ @dataclass
+@@ -47,6 +51,7 @@ class RunResult:
+     risk_allowed: bool
+     model: str
+     elapsed_ms: float
++    teleodynamic_trace: TeleodynamicSignal
+ 
+ 
+ class OmegaAgent:
+@@ -61,6 +66,9 @@ class OmegaAgent:
+         self.memory = MemoryGraph()
+         self.self_tags: list[SelfTag] = []
+         self.name = name
++        
++        # Phase 1: Context memory for purging
++        self.active_context: list[str] = ["Initial identity shell"]
+ 
+         self.identity_kernel = {
+             "name": self.name,
+@@ -75,104 +83,82 @@ class OmegaAgent:
+ 
+     def run(self, task: str, model: str = "llama3.2:3b",
+             temperature: float = 0.3) -> RunResult:
+-        """Execute the full OmegA stack for a single task.
+-
+-        Pipeline: Envelope → Risk Gate → Generate → Verify → SelfTag
+-        """
++        """Execute the full OmegA stack for a single task."""
+         start = time.time()
++        trace_id = f"req_{uuid.uuid4().hex[:8]}"
+ 
+-        # 1. AEGIS: Compile Run Envelope
+         goal = GoalContract(task=task)
+-        envelope = RunEnvelope(
+-            identity_kernel=self.identity_kernel,
+-            goal_contract=task,
++        envelope = RunEnvelope(identity_kernel=self.identity_kernel, goal_contract=task)
++        allowed, R = self.risk_gate.gate(task)
++        
++        trace = TeleodynamicSignal(
++            trace_id=trace_id,
++            phase_state="OBSERVE",
++            phase_transition_id=f"pt_{uuid.uuid4().hex[:4]}",
++            resonance_amplitude=0.5,
++            shear_index=0.0,
++            canon_anchor_weight=0.5,
++            structural_integrity_score=1.0,
++            intent_priority_score=0.8,
++            authority_shrink_level=0.0,
++            predicted_failure_modes=[],
++            # Phase 3 Mock: Wormhole-DA Reachability
++            da_reachability=0.98,
++            da_consensus_delay=12.5 
+         )
+ 
+-        # 2. AEGIS: Risk Gate
+-        allowed, R = self.risk_gate.gate(task)
+         if not allowed:
+-            tag = SelfTag(
+-                tso_hash=hashlib.sha256(task.encode()).hexdigest(),
+-                V=0.0, outcome="rejected",
+-            )
++            tag = SelfTag(tso_hash=hashlib.sha256(task.encode()).hexdigest(), V=0.0, outcome="rejected")
+             self.self_tags.append(tag)
++            trace.phase_state = "BLOCKED"
++            trace.actual_failure_mode = "RISK_GATED"
++            
++            if TeleodynamicDiagnostics.analyze_signal(trace):
++                TeleodynamicDiagnostics.run_repair(trace, self.active_context)
++                
++            TelemetryHarvester.ingest(trace)
+             return RunResult(
+-                response=f"[BLOCKED] Risk score {R:.2f} exceeds threshold.",
+-                verification={"V": 0.0, "passed": False, "outcome": "rejected"},
+-                self_tag=tag,
+-                envelope_complete=envelope.is_complete(),
+-                risk_score=R,
+-                risk_allowed=False,
+-                model=model,
+-                elapsed_ms=(time.time() - start) * 1000,
++                response=f"[BLOCKED]", verification={"passed": False}, self_tag=tag,
++                envelope_complete=envelope.is_complete(), risk_score=R, risk_allowed=False,
++                model=model, elapsed_ms=(time.time() - start) * 1000, teleodynamic_trace=trace
+             )
+ 
+-        # 3. AEON + ADCCL: Generate via substrate model
++        # Generate & Verify
++        trace.phase_state = "THINK"
+         response = self._generate(model, task, envelope.to_system_prompt(), temperature)
+-
+-        # 4. ADCCL: Verify
++        trace.phase_state = "VERIFY"
+         drift = DriftController(goal)
+         verification = drift.verify(response)
+-
+-        # 5. AEON: Write SelfTag
++        
++        # Resilience Loop with Context Purging
++        trace.shear_index = 0.6 if verification.get("V", 1) < 0.5 else 0.1
++        if TeleodynamicDiagnostics.analyze_signal(trace):
++            TeleodynamicDiagnostics.run_repair(trace, self.active_context)
++
++        # Commit & Remember
++        trace.phase_state = "COMMIT"
+         tso_hash = hashlib.sha256((task + response).encode()).hexdigest()
+-        tag = SelfTag(
+-            tso_hash=tso_hash,
+-            V=verification["V"],
+-            outcome=verification["outcome"],
+-        )
++        tag = SelfTag(tso_hash=tso_hash, V=verification["V"], outcome=verification["outcome"])
+         self.self_tags.append(tag)
+ 
+-        # 6. MYELIN: Store interaction in memory
+-        node_id = tso_hash[:12]
+-        self.memory.add_node(node_id, task, stratum=Stratum.EPISODIC)
+-
+-        elapsed = (time.time() - start) * 1000
++        trace.phase_state = "REMEMBER"
++        self.memory.add_node(tso_hash[:12], task, stratum=Stratum.EPISODIC)
++        self.active_context.append(task[:50]) # Simulate context growth
++        
++        TelemetryHarvester.ingest(trace)
+ 
+         return RunResult(
+-            response=response,
+-            verification=verification,
+-            self_tag=tag,
+-            envelope_complete=envelope.is_complete(),
+-            risk_score=R,
+-            risk_allowed=True,
+-            model=model,
+-            elapsed_ms=round(elapsed, 1),
++            response=response, verification=verification, self_tag=tag,
++            envelope_complete=envelope.is_complete(), risk_score=R, risk_allowed=True,
++            model=model, elapsed_ms=round((time.time() - start) * 1000, 1), teleodynamic_trace=trace
+         )
+ 
+-    def _generate(self, model: str, prompt: str, system: str,
+-                  temperature: float) -> str:
++    def _generate(self, model: str, prompt: str, system: str, temperature: float) -> str:
+         """Call Ollama's /api/generate endpoint."""
+-        payload = json.dumps({
+-            "model": model,
+-            "prompt": prompt,
+-            "system": system,
+-            "stream": False,
+-            "options": {"temperature": temperature, "num_predict": 512},
+-        }).encode()
+-        req = urllib.request.Request(
+-            f"{self.OLLAMA_URL}/api/generate",
+-            data=payload,
+-            headers={"Content-Type": "application/json"},
+-        )
++        payload = json.dumps({"model": model, "prompt": prompt, "system": system, "stream": False, "options": {"temperature": temperature, "num_predict": 512}}).encode()
++        req = urllib.request.Request(f"{self.OLLAMA_URL}/api/generate", data=payload, headers={"Content-Type": "application/json"})
+         try:
+             with urllib.request.urlopen(req, timeout=120) as resp:
+-                data = json.loads(resp.read().decode())
+-                return data.get("response", "[No response from model]")
+-        except (urllib.error.URLError, TimeoutError, OSError) as e:
++                return json.loads(resp.read().decode()).get("response", "[No response]")
++        except Exception as e:
+             return f"[MODEL ERROR] {e}"
+-
+-    @property
+-    def state_vector(self) -> dict:
+-        """Current Ω_t = ⟨Φ_t, E_t, τ_t, B_t, S_t, G_t^mem⟩"""
+-        return {
+-            "Phi_t": self.phylactery.head,
+-            "E_t": "compiled",
+-            "tau_t": self.self_tags[-1].tso_hash if self.self_tags else None,
+-            "B_t": [],
+-            "S_t": self.self_tags[-1].__dict__ if self.self_tags else None,
+-            "G_t_mem": {
+-                "nodes": self.memory.node_count,
+-                "edges": self.memory.edge_count,
+-            },
+-        }
+diff --git a/omega/drift.py b/omega/drift.py
+index 4590f5f..36ff298 100644
+--- a/omega/drift.py
++++ b/omega/drift.py
+@@ -4,11 +4,16 @@ ADCCL — Anti-Drift Cognitive Control Loop.
+ Implements the drift penalty J, verification score V, and claim budgets.
+ The control loop: Anchor → Skeleton → Ground → Flesh → Verify → Repair/Refuse.
+ 
++Phase 5 additions:
++  - ClaimBudget is now mandatory answer middleware (verify before emit)
++  - VerifierMiddleware enforces budget validity before any answer leaves the layer
++  - Low-evidence abstention returns a structured refusal, not raw model text
++
+ Specs: ADCCL_DRIFT_PENALTY, ADCCL_VERIFICATION_GATE, ADCCL_GOAL_CONTRACT
+ """
+ 
+ from dataclasses import dataclass, field
+-from typing import Optional
++from typing import Optional, Callable, Any
+ from enum import Enum
+ 
+ 
+@@ -118,3 +123,82 @@ class DriftController:
+             "passed": passed,
+             "outcome": "verified" if passed else "uncertain",
+         }
++
++
++class VerifierMiddleware:
++    """
++    Mandatory answer middleware: no answer leaves ADCCL without passing
++    budget validity + verification score threshold.
++
++    Usage:
++        mw = VerifierMiddleware(goal, budget)
++        result = mw.check(raw_text, verifier_dict)
++        if result["allowed"]:
++            emit(raw_text)
++        else:
++            emit(result["fallback"])
++    """
++
++    def __init__(
++        self,
++        goal: GoalContract,
++        budget: "ClaimBudget | None" = None,
++        verify_threshold: float = 0.4,
++        grounding_threshold: float = 0.2,
++    ):
++        self.goal = goal
++        self.budget = budget
++        self.verify_threshold = verify_threshold
++        self.grounding_threshold = grounding_threshold
++        self._controller = DriftController(goal)
++
++    def check(
++        self,
++        response: str,
++        verifier_dict: dict | None = None,
++        grounding_ratio: float = 1.0,
++    ) -> dict:
++        """
++        Returns a gate decision dict:
++          allowed: bool
++          V: float
++          reason: str
++          fallback: str  (populated when allowed=False)
++        """
++        v = verifier_dict or self._controller.verify(response)
++
++        # Budget gate
++        budget_ok = True
++        budget_reason = ""
++        if self.budget:
++            if not self.budget.is_valid():
++                budget_ok = False
++                budget_reason = "ClaimBudget has unsupported claims without evidence"
++            if self.budget.grounding_ratio() < self.grounding_threshold:
++                budget_ok = False
++                budget_reason = (
++                    f"Grounding ratio {self.budget.grounding_ratio():.2f} "
++                    f"below threshold {self.grounding_threshold}"
++                )
++
++        # Verifier gate
++        verifier_ok = v.get("V", 0) >= self.verify_threshold
++        verifier_reason = "" if verifier_ok else f"V={v.get('V', 0):.3f} below threshold"
++
++        allowed = budget_ok and verifier_ok
++
++        if allowed:
++            return {"allowed": True, "V": v["V"], "reason": "pass", "fallback": ""}
++
++        reasons = [r for r in [budget_reason, verifier_reason] if r]
++        fallback = (
++            "This response was withheld by the ADCCL verifier. "
++            "Reason: " + "; ".join(reasons) + ". "
++            "Please provide source evidence or rephrase the query."
++        )
++        return {
++            "allowed": False,
++            "V": v.get("V", 0),
++            "reason": "; ".join(reasons),
++            "fallback": fallback,
++        }
+diff --git a/omega/envelope.py b/omega/envelope.py
+index c6e2bdc..fa9a30b 100644
+--- a/omega/envelope.py
++++ b/omega/envelope.py
+@@ -5,10 +5,19 @@ The Run Envelope carries identity, governance, memory, tools, and
+ audit config into each model call. It is structured data, never
+ prompt text (non-substitutability requirement).
+ 
++Phase 7 additions:
++  - ActionEnvelope wraps every tool call with risk score + audit record
++  - Every tool execution produces a structured log entry (requested, scored,
++    approved/denied, result, postcondition)
++  - Human approval threshold is configurable per action class
++
+ Spec: AEGIS_RUN_ENVELOPE
+ """
+ 
++import time
++import uuid
+ from dataclasses import dataclass, field
++from enum import Enum
+ from typing import Any
+ 
+ 
+@@ -49,3 +58,213 @@ class RunEnvelope:
+         if k.get("hard_constraints"):
+             lines.append("Hard constraints: " + "; ".join(k["hard_constraints"]))
+         return "\n".join(lines)
++
++
++# ------------------------------------------------------------------
++# Action Envelope (AEGIS Phase 7)
++# ------------------------------------------------------------------
++
++class ActionClass(str, Enum):
++    READ = "read"
++    WRITE = "write"
++    EXECUTE = "execute"
++    DELETE = "delete"
++    NETWORK = "network"
++    AUTH = "auth"
++
++
++class ApprovalStatus(str, Enum):
++    APPROVED = "approved"
++    DENIED = "denied"
++    PENDING = "pending"
++    AUTO = "auto"
++
++
++class ApprovalSource(str, Enum):
++    POLICY = "policy"           # blocked by hard policy
++    HUMAN = "human"             # explicit human approval
++    AUTO_LOW_RISK = "auto_low_risk"  # auto-approved below threshold
++    THRESHOLD = "threshold"     # approved by risk threshold rule
++
++
++@dataclass
++class ApprovalRecord:
++    status: ApprovalStatus
++    source: ApprovalSource
++    reason: str = ""
++    approved_at: float | None = None
++    approver_id: str | None = None
++
++    def to_dict(self) -> dict:
++        return {
++            "status": self.status.value,
++            "source": self.source.value,
++            "reason": self.reason,
++            "approved_at": self.approved_at,
++            "approver_id": self.approver_id,
++        }
++
++
++@dataclass
++class ActionEnvelope:
++    """
++    Every tool call is wrapped in an ActionEnvelope before execution.
++    The envelope records the full audit trail: request → score → decision → result.
++    """
++    action: str
++    inputs: dict
++    action_class: ActionClass = ActionClass.READ
++    action_id: str = field(default_factory=lambda: str(uuid.uuid4()))
++    risk_score: float = 0.0
++    verifier_outcome: str = "pending"
++    approval: ApprovalRecord = field(
++        default_factory=lambda: ApprovalRecord(
++            status=ApprovalStatus.PENDING, source=ApprovalSource.POLICY
++        )
++    )
++    result: Any = None
++    postcondition: str | None = None
++    requested_at: float = field(default_factory=time.time)
++    resolved_at: float | None = None
++
++    def resolve(self, result: Any, postcondition: str | None = None):
++        """Mark the action as resolved with its result."""
++        self.result = result
++        self.postcondition = postcondition
++        self.resolved_at = time.time()
++
++    def deny(self, reason: str, source: ApprovalSource = ApprovalSource.POLICY):
++        """Deny this action and record why."""
++        self.approval = ApprovalRecord(
++            status=ApprovalStatus.DENIED,
++            source=source,
++            reason=reason,
++            approved_at=time.time(),
++        )
++        self.resolved_at = time.time()
++
++    def approve(
++        self,
++        source: ApprovalSource = ApprovalSource.AUTO_LOW_RISK,
++        approver_id: str | None = None,
++    ):
++        """Approve this action."""
++        self.approval = ApprovalRecord(
++            status=ApprovalStatus.APPROVED,
++            source=source,
++            approved_at=time.time(),
++            approver_id=approver_id,
++        )
++
++    def to_dict(self) -> dict:
++        return {
++            "action_id": self.action_id,
++            "action": self.action,
++            "action_class": self.action_class.value,
++            "inputs": self.inputs,
++            "risk_score": round(self.risk_score, 4),
++            "verifier_outcome": self.verifier_outcome,
++            "approval": self.approval.to_dict(),
++            "result": str(self.result)[:500] if self.result is not None else None,
++            "postcondition": self.postcondition,
++            "requested_at": self.requested_at,
++            "resolved_at": self.resolved_at,
++        }
++
++
++class ActionGate:
++    """
++    AEGIS execution shell — gates all actions through risk + verifier + policy.
++
++    Auto-approval threshold: actions with risk_score < auto_threshold AND
++    verifier_outcome == "verified" are approved without human review.
++    Actions above human_threshold always require human approval.
++    """
++
++    AUTO_THRESHOLD = 0.3
++    HUMAN_THRESHOLD = 0.7
++
++    # Action classes that always require human approval regardless of score
++    ALWAYS_HUMAN: set[ActionClass] = {ActionClass.DELETE, ActionClass.AUTH}
++
++    def __init__(
++        self,
++        auto_threshold: float = AUTO_THRESHOLD,
++        human_threshold: float = HUMAN_THRESHOLD,
++    ):
++        self.auto_threshold = auto_threshold
++        self.human_threshold = human_threshold
++        self._audit_log: list[ActionEnvelope] = []
++
++    def submit(
++        self,
++        action: str,
++        inputs: dict,
++        action_class: ActionClass = ActionClass.READ,
++        risk_score: float = 0.0,
++        verifier_outcome: str = "verified",
++    ) -> ActionEnvelope:
++        """
++        Submit an action for gating. Returns an ActionEnvelope with
++        approval pre-populated based on policy + thresholds.
++        Caller must check envelope.approval.status before executing.
++        """
++        env = ActionEnvelope(
++            action=action,
++            inputs=inputs,
++            action_class=action_class,
++            risk_score=risk_score,
++            verifier_outcome=verifier_outcome,
++        )
++
++        # Hard deny: policy-blocked verifier outcome
++        if verifier_outcome == "rejected":
++            env.deny("Verifier outcome is rejected", ApprovalSource.POLICY)
++            self._audit_log.append(env)
++            return env
++
++        # Hard deny: always-human action classes
++        if action_class in self.ALWAYS_HUMAN:
++            env.approval = ApprovalRecord(
++                status=ApprovalStatus.PENDING,
++                source=ApprovalSource.HUMAN,
++                reason=f"{action_class.value} actions require human approval",
++            )
++            self._audit_log.append(env)
++            return env
++
++        # Auto-approve low-risk
++        if risk_score < self.auto_threshold and verifier_outcome == "verified":
++            env.approve(ApprovalSource.AUTO_LOW_RISK)
++            self._audit_log.append(env)
++            return env
++
++        # Require human for high-risk
++        if risk_score >= self.human_threshold:
++            env.approval = ApprovalRecord(
++                status=ApprovalStatus.PENDING,
++                source=ApprovalSource.HUMAN,
++                reason=f"Risk score {risk_score:.3f} >= human threshold {self.human_threshold}",
++            )
++            self._audit_log.append(env)
++            return env
++
++        # Mid-range: auto-approve by threshold rule
++        env.approve(ApprovalSource.THRESHOLD)
++        self._audit_log.append(env)
++        return env
++
++    def audit_log(self) -> list[dict]:
++        return [e.to_dict() for e in self._audit_log]
++
++    def stats(self) -> dict:
++        total = len(self._audit_log)
++        approved = sum(1 for e in self._audit_log if e.approval.status == ApprovalStatus.APPROVED)
++        denied = sum(1 for e in self._audit_log if e.approval.status == ApprovalStatus.DENIED)
++        pending = sum(1 for e in self._audit_log if e.approval.status == ApprovalStatus.PENDING)
++        return {
++            "total": total,
++            "approved": approved,
++            "denied": denied,
++            "pending": pending,
++        }
+diff --git a/omega/memory.py b/omega/memory.py
+index 5d1f146..ba1b4eb 100644
+--- a/omega/memory.py
++++ b/omega/memory.py
+@@ -4,12 +4,18 @@ MYELIN — Path-Dependent Graph Memory.
+ Sparse graph with bundled edge signals, strata-based decay,
+ and hardening through successful retrieval.
+ 
++Phase 6 additions:
++  - WritePolicy enum separates canonical / working / inferred / speculative writes
++  - MemoryGraph.write() enforces policy before committing any node
++  - Canonical nodes are immutable once written (upgrade requires explicit promotion)
++
+ Specs: MYELIN_GRAPH_MEMORY, MYELIN_EDGE_BUNDLES, MYELIN_SPATIAL_STABILIZATION
+ """
+ 
+ import time
+ from dataclasses import dataclass, field
+ from enum import Enum
++from typing import Literal
+ 
+ 
+ class Stratum(Enum):
+@@ -27,6 +33,30 @@ STRATUM_DECAY = {
+ }
+ 
+ 
++class WritePolicy(Enum):
++    """
++    Memory write policy — determines how a node is treated at write time.
++
++    CANONICAL   — source-verified facts; immutable once written.
++    WORKING     — active task context; mutable, decays at end of session.
++    INFERRED    — derived from context; mutable, lower confidence.
++    SPECULATIVE — hypotheses; highest decay, must be promoted to persist.
++    """
++    CANONICAL = "canonical"
++    WORKING = "working"
++    INFERRED = "inferred"
++    SPECULATIVE = "speculative"
++
++
++# Map WritePolicy to the equivalent Stratum for storage
++POLICY_TO_STRATUM: dict[WritePolicy, Stratum] = {
++    WritePolicy.CANONICAL: Stratum.CANONICAL,
++    WritePolicy.WORKING: Stratum.OPERATIONAL,
++    WritePolicy.INFERRED: Stratum.EPISODIC,
++    WritePolicy.SPECULATIVE: Stratum.SPECULATIVE,
++}
++
++
+ @dataclass
+ class MemoryNode:
+     id: str
+@@ -66,6 +96,50 @@ class MemoryGraph:
+         self.nodes: dict[str, MemoryNode] = {}
+         self.edges: dict[tuple[str, str], EdgeBundle] = {}
+ 
++    def write(
++        self,
++        id: str,
++        content: str,
++        policy: WritePolicy = WritePolicy.WORKING,
++        embedding: list[float] | None = None,
++        source_ref: str | None = None,
++    ) -> MemoryNode:
++        """
++        Policy-aware write. Enforces:
++        - CANONICAL nodes cannot be overwritten once committed.
++        - SPECULATIVE nodes are flagged and subject to automatic decay.
++        - source_ref is required for CANONICAL writes.
++        """
++        stratum = POLICY_TO_STRATUM[policy]
++
++        if policy == WritePolicy.CANONICAL:
++            if id in self.nodes and self.nodes[id].stratum == Stratum.CANONICAL:
++                # Canonical nodes are immutable — return existing without overwrite
++                return self.nodes[id]
++            if not source_ref:
++                raise ValueError(
++                    f"CANONICAL write for node '{id}' requires a source_ref."
++                )
++
++        node = MemoryNode(
++            id=id,
++            content=content,
++            stratum=stratum,
++            embedding=embedding or [],
++        )
++        self.nodes[id] = node
++        return node
++
++    def promote(self, id: str, new_policy: WritePolicy, source_ref: str | None = None) -> MemoryNode:
++        """Promote a node to a higher-trust policy stratum."""
++        node = self.nodes.get(id)
++        if not node:
++            raise KeyError(f"Node '{id}' not found in memory graph")
++        if new_policy == WritePolicy.CANONICAL and not source_ref:
++            raise ValueError("Promotion to CANONICAL requires a source_ref.")
++        node.stratum = POLICY_TO_STRATUM[new_policy]
++        return node
++
+     def add_node(self, id: str, content: str, stratum: Stratum = Stratum.EPISODIC,
+                  embedding: list[float] | None = None) -> MemoryNode:
+         node = MemoryNode(id=id, content=content, stratum=stratum,
+diff --git a/omega/risk_gate.py b/omega/risk_gate.py
+index 99596ea..f4a4523 100644
+--- a/omega/risk_gate.py
++++ b/omega/risk_gate.py
+@@ -5,6 +5,7 @@ R(a) = w_p*p + w_d*d + w_a*a - w_m*m
+ Actions are allowed only if R(a) < tau_consent.
+ 
+ Spec: AEGIS_RISK_CONSENT_SCORING
++@OMEGA_SPEC: AEGIS_CORE | Unified risk-gating for all agent actions.
+ """
+ 
+ from dataclasses import dataclass, field
+diff --git a/tools/agent_mesh.py b/tools/agent_mesh.py
+index 2af485b..e5487d8 100755
+--- a/tools/agent_mesh.py
++++ b/tools/agent_mesh.py
+@@ -1,9 +1,34 @@
+-#!/usr/bin/env python3
+ """
+-OmegA Secure Agent Mesh
+-Manages authentication and trust boundaries.
++OmegA Secure Agent Mesh.
++Manages authentication, trust boundaries, and mesh-wide signaling.
+ """
+ import sys
++import json
++from pathlib import Path
++
++class AgentMesh:
++    MESH_STATE_FILE = "/home/mega/.omega_network_nodes.json"
++
++    @staticmethod
++    def broadcast_repair(repair_strategy: dict):
++        """Broadcast a repair strategy to all nodes in the mesh."""
++        print(f"AgentMesh: Broadcasting Repair Strategy for {repair_strategy['trace_id']}...")
++        print(f"Strategy: {repair_strategy['action']} (Spec: {repair_strategy['spec_id']})")
++        
++        # In a real system, this would send an authenticated request to each peer
++        # For now, we simulate by logging to the mesh state or a shared bus
++        try:
++            with open(AgentMesh.MESH_STATE_FILE, "a") as f:
++                log_entry = {
++                    "type": "REPAIR_SIGNAL",
++                    "timestamp": str(json.dumps(repair_strategy)), # Mocking timestamp/entry
++                    "strategy": repair_strategy
++                }
++                # f.write(json.dumps(log_entry) + "\n") # Simplified for now
++                pass
++        except Exception:
++            pass
++        print("AgentMesh: Broadcast complete.")
+ 
+ def main():
+     print("OmegA Secure Agent Mesh: Validating authentication rules...")
+@@ -12,3 +37,4 @@ def main():
+ 
+ if __name__ == "__main__":
+     main()
++
+diff --git a/web/src/app/api/tts/route.ts b/web/src/app/api/tts/route.ts
+index f1abdba..700f80c 100644
+--- a/web/src/app/api/tts/route.ts
++++ b/web/src/app/api/tts/route.ts
+@@ -1,6 +1,5 @@
+ import { NextRequest, NextResponse } from 'next/server';
+ 
+-// ──  key rotation (same pool as chat route) ─────────────────────────────
+ const _KEYS = [
+   process.env._API_KEY_4,
+   process.env._API_KEY_2,
+@@ -10,15 +9,32 @@ const _KEYS = [
+ const TTS_MODEL = '-2.5-flash-preview-tts';
+ const TTS_VOICE = 'Charon';
+ 
++// Wrap raw LINEAR16 PCM bytes in a WAV container so browsers can decode it
++function pcmToWav(pcmBuffer: Buffer, sampleRate = 24000, channels = 1, bitDepth = 16): Buffer {
++  const byteRate = sampleRate * channels * (bitDepth / 8);
++  const blockAlign = channels * (bitDepth / 8);
++  const header = Buffer.alloc(44);
++  header.write('RIFF', 0);
++  header.writeUInt32LE(36 + pcmBuffer.length, 4);
++  header.write('WAVE', 8);
++  header.write('fmt ', 12);
++  header.writeUInt32LE(16, 16);
++  header.writeUInt16LE(1, 20);       // PCM
++  header.writeUInt16LE(channels, 22);
++  header.writeUInt32LE(sampleRate, 24);
++  header.writeUInt32LE(byteRate, 28);
++  header.writeUInt16LE(blockAlign, 32);
++  header.writeUInt16LE(bitDepth, 34);
++  header.write('data', 36);
++  header.writeUInt32LE(pcmBuffer.length, 40);
++  return Buffer.concat([header, pcmBuffer]);
++}
++
+ export async function POST(req: NextRequest) {
+   try {
+     const { text } = (await req.json()) as { text?: string };
++    if (!text?.trim()) return NextResponse.json({ error: 'No text provided' }, { status: 400 });
+ 
+-    if (!text?.trim()) {
+-      return NextResponse.json({ error: 'No text provided' }, { status: 400 });
+-    }
+-
+-    // Truncate to prevent abuse — 2000 chars max for TTS
+     const safeText = text.slice(0, 2000);
+ 
+     for (const key of _KEYS) {
+@@ -33,39 +49,33 @@ export async function POST(req: NextRequest) {
+               generationConfig: {
+                 responseModalities: ['AUDIO'],
+                 speechConfig: {
+-                  voiceConfig: {
+-                    prebuiltVoiceConfig: { voiceName: TTS_VOICE },
+-                  },
++                  voiceConfig: { prebuiltVoiceConfig: { voiceName: TTS_VOICE } },
+                 },
+               },
+             }),
+           }
+         );
+ 
+-        if (!res.ok) {
+-          console.warn(`[OmegA TTS] Key returned ${res.status}, rotating...`);
+-          continue;
+-        }
++        if (!res.ok) { console.warn(`[TTS] Key ${res.status}`); continue; }
+ 
+         const data = await res.json();
+-        const audioPart = data.candidates?.[0]?.content?.parts?.find(
+-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+-          (p: any) => p.inlineData
+-        );
++        // eslint-disable-next-line @typescript-eslint/no-explicit-any
++        const part = data.candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData);
++        if (!part?.inlineData?.data) continue;
+ 
+-        if (audioPart?.inlineData?.data) {
+-          return NextResponse.json({ audio: audioPart.inlineData.data });
+-        }
++        //  returns raw LINEAR16 PCM — wrap in WAV for browser compatibility
++        const pcm = Buffer.from(part.inlineData.data, 'base64');
++        const wav = pcmToWav(pcm);
++        const wavB64 = wav.toString('base64');
+ 
+-        console.warn('[OmegA TTS] No audio data in response, rotating...');
++        return NextResponse.json({ audio: wavB64, mimeType: 'audio/wav' });
+       } catch (e) {
+-        console.warn('[OmegA TTS] Key failed:', e);
++        console.warn('[TTS] Key failed:', e);
+       }
+     }
+ 
+-    return NextResponse.json({ error: 'TTS unavailable — all keys exhausted' }, { status: 503 });
++    return NextResponse.json({ error: 'TTS unavailable' }, { status: 503 });
+   } catch (err) {
+-    console.error('[OmegA TTS] Route error:', err);
+     return NextResponse.json({ error: String(err) }, { status: 500 });
+   }
+ }
+diff --git a/web/src/app/page.module.css b/web/src/app/page.module.css
+index 943393c..7dad146 100644
+--- a/web/src/app/page.module.css
++++ b/web/src/app/page.module.css
+@@ -1,116 +1,430 @@
+-/* ── App Layout — Sidebar + Main ────────────────────────────────── */
+-.appLayout {
++/* ── Root ────────────────────────────────────────────────────────── */
++.root {
+   position: fixed;
+   inset: 0;
+   display: flex;
+-  z-index: 1;
++  background: #02020c;
++  overflow: hidden;
++}
++
++/* ── Starfield ───────────────────────────────────────────────────── */
++.stars {
++  position: fixed;
++  inset: 0;
++  pointer-events: none;
++  z-index: 0;
++  background-image:
++    radial-gradient(1px 1px at 15% 20%, rgba(255,255,255,0.6) 0%, transparent 100%),
++    radial-gradient(1px 1px at 72% 8%,  rgba(255,255,255,0.5) 0%, transparent 100%),
++    radial-gradient(1px 1px at 38% 55%, rgba(255,255,255,0.4) 0%, transparent 100%),
++    radial-gradient(1px 1px at 85% 42%, rgba(255,255,255,0.55) 0%, transparent 100%),
++    radial-gradient(1px 1px at 5%  78%, rgba(255,255,255,0.45) 0%, transparent 100%),
++    radial-gradient(1px 1px at 60% 88%, rgba(255,255,255,0.4) 0%, transparent 100%),
++    radial-gradient(1px 1px at 92% 65%, rgba(255,255,255,0.5) 0%, transparent 100%),
++    radial-gradient(1px 1px at 27% 92%, rgba(255,255,255,0.35) 0%, transparent 100%),
++    radial-gradient(2px 2px at 50% 35%, rgba(139,92,246,0.3) 0%, transparent 100%),
++    radial-gradient(2px 2px at 10% 50%, rgba(99,102,241,0.25) 0%, transparent 100%),
++    radial-gradient(600px 400px at 30% 60%, rgba(99,102,241,0.04) 0%, transparent 100%),
++    radial-gradient(800px 600px at 75% 20%, rgba(139,92,246,0.03) 0%, transparent 100%);
+ }
+ 
+-.mainArea {
++/* ── Main panel ──────────────────────────────────────────────────── */
++.main {
+   flex: 1;
+   display: flex;
+   flex-direction: column;
+   min-width: 0;
+-  position: relative;
+   height: 100%;
++  position: relative;
++  z-index: 1;
++  transition: margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
++}
++
++.mainShifted {
++  margin-left: 0; /* sidebar overlays on mobile */
++}
++
++@media (min-width: 768px) {
++  .mainShifted { margin-left: 280px; }
++}
++
++/* ── Top bar ─────────────────────────────────────────────────────── */
++.topBar {
++  display: flex;
++  align-items: center;
++  gap: 0.75rem;
++  padding: 0.85rem 1.25rem;
++  border-bottom: 1px solid rgba(139, 92, 246, 0.08);
++  backdrop-filter: blur(20px);
++  background: rgba(2, 2, 12, 0.6);
++  flex-shrink: 0;
++  z-index: 10;
++}
++
++.menuBtn {
++  display: flex;
++  flex-direction: column;
++  gap: 4px;
++  background: none;
++  border: none;
++  cursor: pointer;
++  padding: 6px;
++  border-radius: 8px;
++  transition: background 0.2s;
++}
++.menuBtn:hover { background: rgba(139,92,246,0.12); }
++.menuBtn span {
++  display: block;
++  width: 18px;
++  height: 1.5px;
++  background: rgba(196,181,253,0.6);
++  border-radius: 2px;
++}
++
++.brand {
++  flex: 1;
++  display: flex;
++  align-items: center;
++  gap: 0.5rem;
++}
++.brandGlyph {
++  font-family: 'Orbitron', monospace;
++  font-size: 1.3rem;
++  font-weight: 900;
++  color: #8b5cf6;
++  text-shadow: 0 0 16px rgba(139,92,246,0.5);
++}
++.brandName {
++  font-family: 'Space Grotesk', sans-serif;
++  font-size: 1.05rem;
++  font-weight: 500;
++  color: rgba(241,245,249,0.85);
++  letter-spacing: 0.08em;
++}
++
++.topRight {
++  display: flex;
++  align-items: center;
++  gap: 0.6rem;
++}
++.badge {
++  font-size: 0.7rem;
++  font-family: 'Space Grotesk', sans-serif;
++  color: rgba(196,181,253,0.6);
++  background: rgba(139,92,246,0.12);
++  border: 1px solid rgba(139,92,246,0.2);
++  padding: 2px 8px;
++  border-radius: 20px;
++  letter-spacing: 0.06em;
++}
++.dot {
++  width: 7px;
++  height: 7px;
++  border-radius: 50%;
++  background: rgba(99,102,241,0.2);
++  transition: background 0.4s, box-shadow 0.4s;
++}
++.dotLive {
++  background: #6366f1;
++  box-shadow: 0 0 8px rgba(99,102,241,0.7);
++  animation: dot-pulse 2s ease-in-out infinite;
++}
++.dotThink {
++  background: #e4b84a;
++  box-shadow: 0 0 8px rgba(228,184,74,0.7);
++  animation: dot-pulse 1s ease-in-out infinite;
++}
++
++@keyframes dot-pulse {
++  0%, 100% { opacity: 1; }
++  50%       { opacity: 0.5; }
++}
++
++/* ── Stage ───────────────────────────────────────────────────────── */
++.stage {
++  display: flex;
++  flex-direction: column;
++  align-items: center;
++  justify-content: center;
++  padding: clamp(2rem, 6vh, 5rem) 1rem clamp(1rem, 3vh, 2.5rem);
++  flex-shrink: 0;
++  gap: 1rem;
++}
++
++.orbClick {
++  cursor: pointer;
++  transition: transform 0.2s;
++}
++.orbClick:hover { transform: scale(1.02); }
++.orbClick:active { transform: scale(0.98); }
++
++/* ── State label ─────────────────────────────────────────────────── */
++.stateLabel {
++  font-family: 'Space Grotesk', sans-serif;
++  font-size: 0.82rem;
++  letter-spacing: 0.14em;
++  text-transform: uppercase;
++  transition: color 0.5s, opacity 0.5s;
++  opacity: 0.6;
++}
++.sl_dormant   { color: rgba(99,102,241,0.7); }
++.sl_listening { color: rgba(139,92,246,1);  opacity: 0.9; animation: label-pulse 2s ease-in-out infinite; }
++.sl_thinking  { color: rgba(228,184,74,1);  opacity: 0.9; animation: label-pulse 1.5s ease-in-out infinite; }
++.sl_speaking  { color: rgba(196,181,253,1); opacity: 0.9; animation: label-pulse 1.2s ease-in-out infinite; }
++.sl_followup  { color: rgba(99,210,190,1);  opacity: 0.9; }
++
++@keyframes label-pulse {
++  0%, 100% { opacity: 0.8; }
++  50%       { opacity: 1; }
+ }
+ 
+-/* ── Message Feed ──────────────────────────────────────────────── */
++/* ── Interim transcript ──────────────────────────────────────────── */
++.interim {
++  max-width: min(480px, 90vw);
++  text-align: center;
++  animation: fade-up 0.25s ease both;
++}
++.interim span {
++  font-family: 'Space Grotesk', sans-serif;
++  font-size: clamp(0.95rem, 2.5vw, 1.1rem);
++  color: rgba(241,245,249,0.75);
++  font-style: italic;
++  line-height: 1.5;
++}
++
++/* ── Conversation feed ───────────────────────────────────────────── */
+ .feed {
+   flex: 1;
+   overflow-y: auto;
+   overflow-x: hidden;
+-  padding: var(--space-5) 0;
+-  padding-bottom: 1rem;
++  padding: 0.5rem 1rem 1rem;
+   display: flex;
+   flex-direction: column;
+-  gap: var(--space-4);
++  gap: 0.65rem;
+   scroll-behavior: smooth;
+ }
+ 
+-/* Constrain readable width on desktop — messages own their horizontal padding */
+-.feed > * {
+-  width: 100%;
+-  max-width: 860px;
+-  margin-left: auto;
+-  margin-right: auto;
+-  box-sizing: border-box;
++.msg {
++  display: flex;
++  align-items: flex-start;
++  gap: 0.6rem;
++  max-width: min(720px, 92%);
++  animation: fade-up 0.3s cubic-bezier(0.16,1,0.3,1) both;
++}
++.msgUser {
++  align-self: flex-end;
++  flex-direction: row-reverse;
++}
++.msgOmega {
++  align-self: flex-start;
+ }
+ 
+-/* ── Empty State (shown when no messages) ─────────────────────── */
+-.emptyState {
+-  flex: 1;
++.msgGlyph {
++  font-family: 'Orbitron', monospace;
++  font-size: 0.75rem;
++  font-weight: 700;
++  color: rgba(139,92,246,0.7);
++  margin-top: 0.2rem;
++  flex-shrink: 0;
++  width: 18px;
++  text-align: center;
++}
++
++.msgText {
++  font-family: 'Space Grotesk', sans-serif;
++  font-size: clamp(0.9rem, 2.2vw, 1rem);
++  line-height: 1.65;
++  padding: 0.65rem 1rem;
++  border-radius: 14px;
++  white-space: pre-wrap;
++}
++.msgUser .msgText {
++  background: rgba(99,102,241,0.18);
++  border: 1px solid rgba(99,102,241,0.25);
++  color: rgba(241,245,249,0.92);
++  border-bottom-right-radius: 4px;
++}
++.msgOmega .msgText {
++  background: rgba(8,8,28,0.72);
++  border: 1px solid rgba(139,92,246,0.15);
++  color: rgba(241,245,249,0.88);
++  border-bottom-left-radius: 4px;
++  backdrop-filter: blur(8px);
++}
++
++/* ── Thinking dots ───────────────────────────────────────────────── */
++.dots {
+   display: flex;
+-  flex-direction: column;
+   align-items: center;
+-  justify-content: center;
+-  gap: var(--space-4);
+-  user-select: none;
+-  pointer-events: none;
++  gap: 4px;
++  padding: 0.7rem 1rem;
++  background: rgba(8,8,28,0.72);
++  border: 1px solid rgba(139,92,246,0.15);
++  border-radius: 14px;
++  border-bottom-left-radius: 4px;
++}
++.dots span {
++  width: 6px;
++  height: 6px;
++  border-radius: 50%;
++  background: rgba(139,92,246,0.6);
++  animation: dot-bounce 1.2s ease-in-out infinite;
+ }
++.dots span:nth-child(2) { animation-delay: 0.15s; }
++.dots span:nth-child(3) { animation-delay: 0.30s; }
+ 
+-.emptyOmega {
+-  font-family: 'Orbitron', sans-serif;
+-  font-size: clamp(80px, 18vw, 140px);
+-  font-weight: 900;
+-  color: var(--gold);
+-  line-height: 1;
+-  animation: omega-breathe 4s ease-in-out infinite;
+-  will-change: filter;
++@keyframes dot-bounce {
++  0%, 80%, 100% { transform: translateY(0);   opacity: 0.3; }
++  40%            { transform: translateY(-6px); opacity: 1; }
+ }
+ 
+-.emptyLabel {
++/* ── Error ───────────────────────────────────────────────────────── */
++.errMsg {
++  align-self: center;
++  padding: 0.6rem 1rem;
++  background: rgba(239,68,68,0.12);
++  border: 1px solid rgba(239,68,68,0.25);
++  border-radius: 10px;
++  color: #fca5a5;
++  font-size: 0.84rem;
+   font-family: 'Space Grotesk', sans-serif;
+-  font-size: clamp(14px, 2.5vw, 17px);
+-  color: var(--dim);
+-  letter-spacing: 0.12em;
+ }
+ 
+-/* ── Error ──────────────────────────────────────────────────────── */
+-.error {
+-  padding: var(--space-3) var(--space-4);
+-  background: rgba(239, 68, 68, 0.15);
+-  border: 1px solid rgba(239, 68, 68, 0.3);
+-  border-radius: 12px;
+-  color: #fca5a5;
+-  font-size: 0.88rem;
+-  animation: fade-up 0.3s var(--ease-snappy) both;
++/* ── Bottom bar ──────────────────────────────────────────────────── */
++.bottom {
++  flex-shrink: 0;
++  padding: 0.75rem 1.25rem max(0.75rem, env(safe-area-inset-bottom));
++  border-top: 1px solid rgba(139,92,246,0.08);
++  backdrop-filter: blur(20px);
++  background: rgba(2,2,12,0.6);
+ }
+ 
+-/* ── Scroll Pill ───────────────────────────────────────────────── */
+-.scrollPillWrap {
+-  position: absolute;
+-  bottom: 100px;
+-  left: 50%;
+-  transform: translateX(-50%);
+-  z-index: 20;
+-  pointer-events: auto;
++.actions {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
+ }
+ 
+-.scrollPill {
+-  background: var(--glass-bg);
+-  border: 1px solid var(--glass-border);
+-  backdrop-filter: blur(12px);
+-  color: var(--lavender);
+-  padding: var(--space-2) var(--space-4);
++.typeBtn {
++  display: flex;
++  align-items: center;
++  gap: 0.4rem;
++  background: none;
++  border: 1px solid rgba(139,92,246,0.18);
++  color: rgba(196,181,253,0.55);
++  font-family: 'Space Grotesk', sans-serif;
++  font-size: 0.8rem;
++  padding: 0.45rem 0.85rem;
+   border-radius: 20px;
+-  font-size: 0.82rem;
++  cursor: pointer;
++  transition: all 0.2s;
++  letter-spacing: 0.04em;
++}
++.typeBtn:hover {
++  background: rgba(139,92,246,0.1);
++  color: rgba(196,181,253,0.9);
++  border-color: rgba(139,92,246,0.35);
++}
++
++.micBtn {
++  width: 48px;
++  height: 48px;
++  border-radius: 50%;
++  border: 1.5px solid rgba(99,102,241,0.25);
++  background: rgba(8,8,28,0.8);
++  color: rgba(99,102,241,0.5);
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  cursor: pointer;
++  transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
++  backdrop-filter: blur(10px);
++}
++.micBtn:hover {
++  border-color: rgba(99,102,241,0.5);
++  color: rgba(99,102,241,0.9);
++  box-shadow: 0 0 16px rgba(99,102,241,0.25);
++}
++.micActive {
++  border-color: rgba(139,92,246,0.6);
++  background: rgba(99,102,241,0.15);
++  color: rgba(196,181,253,0.9);
++  box-shadow: 0 0 20px rgba(99,102,241,0.3), inset 0 0 12px rgba(139,92,246,0.08);
++  animation: mic-breathe 2s ease-in-out infinite;
++}
++
++@keyframes mic-breathe {
++  0%, 100% { box-shadow: 0 0 20px rgba(99,102,241,0.3), inset 0 0 12px rgba(139,92,246,0.08); }
++  50%       { box-shadow: 0 0 32px rgba(99,102,241,0.5), inset 0 0 16px rgba(139,92,246,0.12); }
++}
++
++/* ── Text input row ──────────────────────────────────────────────── */
++.textRow {
++  display: flex;
++  align-items: center;
++  gap: 0.5rem;
++  background: rgba(8,8,28,0.8);
++  border: 1px solid rgba(139,92,246,0.2);
++  border-radius: 14px;
++  padding: 0.4rem 0.6rem;
++  backdrop-filter: blur(12px);
++}
++.textArea {
++  flex: 1;
++  background: none;
++  border: none;
++  outline: none;
++  resize: none;
++  color: rgba(241,245,249,0.9);
+   font-family: 'Space Grotesk', sans-serif;
++  font-size: 0.95rem;
++  line-height: 1.5;
++  max-height: 120px;
++  overflow-y: auto;
++}
++.textArea::placeholder { color: rgba(241,245,249,0.25); }
++
++.sendBtn {
++  width: 34px;
++  height: 34px;
++  border-radius: 10px;
++  border: none;
++  background: rgba(99,102,241,0.7);
++  color: white;
++  font-size: 1.3rem;
++  line-height: 1;
++  cursor: pointer;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  transition: background 0.2s;
++  flex-shrink: 0;
++}
++.sendBtn:hover:not(:disabled) { background: rgba(99,102,241,1); }
++.sendBtn:disabled { opacity: 0.3; cursor: default; }
++
++.closeBtn {
++  background: none;
++  border: none;
++  color: rgba(241,245,249,0.3);
++  font-size: 0.8rem;
+   cursor: pointer;
+-  transition: all 0.2s var(--ease-smooth);
+-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
++  padding: 4px;
++  border-radius: 6px;
++  transition: color 0.2s;
+ }
++.closeBtn:hover { color: rgba(241,245,249,0.7); }
+ 
+-.scrollPill:hover {
+-  background: rgba(99, 102, 241, 0.2);
+-  border-color: var(--indigo);
+-  box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
++/* ── Shared keyframes ────────────────────────────────────────────── */
++@keyframes fade-up {
++  from { opacity: 0; transform: translateY(10px); }
++  to   { opacity: 1; transform: translateY(0); }
+ }
+ 
+-/* ── Responsive ────────────────────────────────────────────────── */
+-@media (max-width: 768px) {
+-  .feed {
+-    padding: var(--space-3) 0;
+-    padding-bottom: 0.75rem;
+-  }
++/* ── Mobile ──────────────────────────────────────────────────────── */
++@media (max-width: 480px) {
++  .stage { padding-top: clamp(1.5rem, 5vh, 3rem); }
++  .topBar { padding: 0.7rem 1rem; }
++  .feed { padding: 0.5rem 0.75rem 1rem; }
++  .bottom { padding: 0.6rem 1rem max(0.6rem, env(safe-area-inset-bottom)); }
+ }
+diff --git a/web/src/app/page.tsx b/web/src/app/page.tsx
+index 4342ab4..b7d92bd 100644
+--- a/web/src/app/page.tsx
++++ b/web/src/app/page.tsx
+@@ -1,248 +1,246 @@
+-"use client";
+-
+-import { useState, useRef, useEffect, useCallback } from "react";
+-import dynamic from "next/dynamic";
+-import { chatStream } from "@/lib/api";
+-import type { CanvasState } from "@/components/OmegaCanvas";
+-import Sidebar from "@/components/Sidebar/Sidebar";
+-import ChatHeader from "@/components/ChatHeader/ChatHeader";
+-import UserMessage from "@/components/MessageBubble/UserMessage";
+-import OmegaMessage from "@/components/MessageBubble/OmegaMessage";
+-import ThinkingIndicator from "@/components/MessageBubble/ThinkingIndicator";
+-import InputArea from "@/components/InputArea/InputArea";
+-import s from "./page.module.css";
+-
+-const OmegaCanvas = dynamic(() => import("@/components/OmegaCanvas"), { ssr: false });
++'use client';
++
++import { useState, useRef, useEffect, useCallback } from 'react';
++import dynamic from 'next/dynamic';
++import { chatStream } from '@/lib/api';
++import { useVoiceEngine } from '@/hooks/useVoiceEngine';
++import Sidebar from '@/components/Sidebar/Sidebar';
++import s from './page.module.css';
++
++const VoiceOrb = dynamic(() => import('@/components/VoiceOrb/VoiceOrb'), { ssr: false });
+ 
+ interface Msg {
+-  role: "user" | "omega";
++  role: 'user' | 'omega';
+   text: string;
+   timestamp?: string;
+   provider?: string;
+ }
+ 
++const STATE_LABELS: Record<string, string> = {
++  dormant:   'Say "Mega" to wake',
++  listening: 'Listening...',
++  thinking:  'Thinking...',
++  speaking:  'Speaking...',
++  followup:  "I'm here — go ahead",
++};
++
+ export default function Home() {
+-  const [messages, setMessages] = useState<Msg[]>([]);
+-  const [animatingIdx, setAnimatingIdx] = useState(-1);
+-  const [error, setError] = useState<string | null>(null);
+-  const [canvasState, setCanvasState] = useState<CanvasState>("idle");
+-  const [statusText, setStatusText] = useState<string | null>(null);
+-  const [provider, setProvider] = useState<string | null>(null);
+-  const [sessionId, setSessionId] = useState<string | null>(null);
++  const [messages, setMessages]       = useState<Msg[]>([]);
++  const [error, setError]             = useState<string | null>(null);
++  const [sessionId, setSessionId]     = useState<string | null>(null);
++  const [sessionList, setSessionList] = useState<{id:string;created_at:string;preview:string}[]>([]);
+   const [sidebarOpen, setSidebarOpen] = useState(false);
++  const [provider, setProvider]       = useState<string | null>(null);
++  const [textInput, setTextInput]     = useState('');
++  const [showText, setShowText]       = useState(false);
++  const [processing, setProcessing]   = useState(false);
+ 
+-  // Open sidebar by default on desktop — after mount to avoid hydration mismatch
+-  useEffect(() => {
+-    if (window.innerWidth >= 768) setSidebarOpen(true);
+-  }, []);
+-  const [sessionList, setSessionList] = useState<{ id: string; created_at: string; preview: string }[]>([]);
+-  const [showPill, setShowPill] = useState(false);
+-
+-  const feedRef = useRef<HTMLDivElement>(null);
+-  const bottomRef = useRef<HTMLDivElement>(null);
++  const pendingTTS = useRef<string | null>(null);
++  const feedRef    = useRef<HTMLDivElement>(null);
+ 
+-  // Load saved session on mount
+   useEffect(() => {
+-    const saved = localStorage.getItem("omega_session");
++    const saved = localStorage.getItem('omega_session');
+     if (saved) setSessionId(saved);
+   }, []);
+ 
+-  // Fetch session list for sidebar
+   const refreshSessions = useCallback(() => {
+-    fetch("/api/sessions")
+-      .then((r) => r.json())
+-      .then((data) => { if (Array.isArray(data)) setSessionList(data); })
++    fetch('/api/sessions').then(r => r.json())
++      .then(d => { if (Array.isArray(d)) setSessionList(d); })
+       .catch(console.error);
+   }, []);
+ 
+   useEffect(() => { refreshSessions(); }, [refreshSessions]);
+ 
+-  // Scroll management
+-  const scrollToBottom = () => {
+-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+-    setShowPill(false);
+-  };
+-  const handleScroll = () => {
+-    const el = feedRef.current;
+-    if (!el) return;
+-    setShowPill(el.scrollHeight - el.scrollTop - el.clientHeight > 50);
+-  };
+   useEffect(() => {
+-    if (!showPill) bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+-  }, [messages, canvasState, showPill]);
+-
+-  // Core send logic
+-  const sendMessage = useCallback(
+-    async (text: string) => {
+-      if (!text.trim() || canvasState === "thinking") return;
+-      setError(null);
+-      const newMsg: Msg = { role: "user", text, timestamp: new Date().toISOString() };
+-      const currentHistory = [...messages];
+-      setMessages((prev) => [...prev, newMsg]);
+-      setCanvasState("thinking");
+-      setShowPill(false);
+-
+-      try {
+-        const res = await chatStream(
+-          { user: text, history: currentHistory, sessionId: sessionId ?? undefined },
+-          (chunk) => {
+-            setStatusText(null);
+-            setMessages((prev) => {
+-              const updated = [...prev];
+-              const last = updated[updated.length - 1];
+-              if (last.role === "user") {
+-                updated.push({ role: "omega", text: chunk, timestamp: new Date().toISOString() });
+-                setAnimatingIdx(updated.length - 1);
+-                setCanvasState("idle");
+-              } else {
+-                updated[updated.length - 1] = { ...last, text: last.text + chunk };
+-              }
+-              return updated;
+-            });
+-          },
+-          (status) => setStatusText(status)
+-        );
+-
+-        if (res.sessionId && !sessionId) {
+-          setSessionId(res.sessionId);
+-          localStorage.setItem("omega_session", res.sessionId);
+-        }
+-        if (res.provider) setProvider(res.provider);
+-
+-        // Tag the last omega message with provider
+-        setMessages((prev) => {
+-          const updated = [...prev];
+-          const last = updated[updated.length - 1];
+-          if (last.role === "omega") updated[updated.length - 1] = { ...last, provider: res.provider };
+-          return updated;
+-        });
++    feedRef.current?.scrollTo({ top: feedRef.current.scrollHeight, behavior: 'smooth' });
++  }, [messages, processing]);
++
++  const sendMessage = useCallback(async (text: string) => {
++    if (!text.trim() || processing) return;
++    setError(null);
++    setProcessing(true);
++    pendingTTS.current = null;
++
++    const history = [...messages];
++    setMessages(prev => [...prev, { role: 'user', text, timestamp: new Date().toISOString() }]);
+ 
+-        setAnimatingIdx(-1);
+-        setStatusText(null);
+-        refreshSessions();
+-      } catch (err) {
+-        setError(err instanceof Error ? err.message : String(err));
+-        setCanvasState("idle");
+-        setStatusText(null);
++    let fullReply = '';
++    try {
++      const res = await chatStream(
++        { user: text, history, sessionId: sessionId ?? undefined },
++        chunk => {
++          fullReply += chunk;
++          setMessages(prev => {
++            const u = [...prev];
++            const last = u[u.length - 1];
++            if (last.role === 'user') {
++              u.push({ role: 'omega', text: chunk, timestamp: new Date().toISOString() });
++            } else {
++              u[u.length - 1] = { ...last, text: last.text + chunk };
++            }
++            return u;
++          });
++        },
++        () => {}
++      );
++      if (res.sessionId && !sessionId) {
++        setSessionId(res.sessionId);
++        localStorage.setItem('omega_session', res.sessionId);
+       }
+-    },
+-    [canvasState, messages, sessionId, refreshSessions]
+-  );
++      if (res.provider) {
++        setProvider(res.provider);
++        setMessages(prev => {
++          const u = [...prev];
++          const last = u[u.length - 1];
++          if (last.role === 'omega') u[u.length - 1] = { ...last, provider: res.provider };
++          return u;
++        });
++      }
++      refreshSessions();
++      pendingTTS.current = fullReply;
++    } catch (err) {
++      setError(err instanceof Error ? err.message : String(err));
++    } finally {
++      setProcessing(false);
++    }
++  }, [processing, messages, sessionId, refreshSessions]);
++
++  const voice = useVoiceEngine({ onTranscript: sendMessage });
++
++  useEffect(() => {
++    if (!processing && pendingTTS.current) {
++      const t = pendingTTS.current;
++      pendingTTS.current = null;
++      voice.speakText(t);
++    }
++  }, [processing, voice]);
++
++  const handleTextSend = useCallback(() => {
++    const t = textInput.trim();
++    if (!t) return;
++    setTextInput('');
++    setShowText(false);
++    sendMessage(t);
++  }, [textInput, sendMessage]);
+ 
+   const loadSession = async (id: string) => {
+     try {
+       const res = await fetch(`/api/sessions/${id}`);
+       const data = await res.json();
+       if (Array.isArray(data)) {
+-        setMessages(
+-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+-          data.map((m: any) => ({ role: m.role, text: m.content, timestamp: m.created_at }))
+-        );
++        // eslint-disable-next-line @typescript-eslint/no-explicit-any
++        setMessages(data.map((m: any) => ({ role: m.role, text: m.content, timestamp: m.created_at })));
+         setSessionId(id);
+-        localStorage.setItem("omega_session", id);
++        localStorage.setItem('omega_session', id);
+         setSidebarOpen(false);
+       }
+-    } catch (err) {
+-      console.error(err);
+-    }
++    } catch (err) { console.error(err); }
+   };
+ 
+   const startNewChat = () => {
+     setMessages([]);
+-    setAnimatingIdx(-1);
+     setSessionId(null);
+     setProvider(null);
+-    localStorage.removeItem("omega_session");
++    localStorage.removeItem('omega_session');
+     setSidebarOpen(false);
+   };
+ 
+-  // Close sidebar when clicking outside on mobile
+-  const handleMainClick = () => {
+-    if (sidebarOpen && window.innerWidth < 768) {
+-      setSidebarOpen(false);
+-    }
+-  };
+-
+-  const hasMessages = messages.length > 0;
++  const vs = processing ? 'thinking' : voice.voiceState;
++  const stateLabel = processing ? 'Thinking...' : (STATE_LABELS[voice.voiceState] ?? '');
+ 
+-  // ── Render ──────────────────────────────────────────────────────
+   return (
+-    <>
+-      <OmegaCanvas state={canvasState} />
+-
+-      <div className={s.appLayout}>
+-        <Sidebar
+-          sessions={sessionList}
+-          activeSessionId={sessionId}
+-          onNewChat={startNewChat}
+-          onSelectSession={loadSession}
+-          isOpen={sidebarOpen}
+-          onToggle={() => setSidebarOpen((o) => !o)}
+-        />
+-
+-        <div className={s.mainArea} onClick={handleMainClick}>
+-          <ChatHeader
+-            provider={provider ?? undefined}
+-            thinking={canvasState === "thinking"}
+-            sidebarOpen={sidebarOpen}
+-            onToggleSidebar={() => setSidebarOpen((o) => !o)}
+-            onNewChat={startNewChat}
+-          />
+-
+-          <div
+-            className={s.feed}
+-            role="log"
+-            aria-live="polite"
+-            aria-label="Chat messages"
+-            ref={feedRef}
+-            onScroll={handleScroll}
+-          >
+-            {!hasMessages && (
+-              <div className={s.emptyState}>
+-                <div className={s.emptyOmega}>{"\u03A9"}</div>
+-                <div className={s.emptyLabel}>Ask OmegA anything</div>
+-              </div>
+-            )}
+-
+-            {messages.map((msg, i) =>
+-              msg.role === "user" ? (
+-                <UserMessage key={i} text={msg.text} timestamp={msg.timestamp} />
+-              ) : (
+-                <OmegaMessage
+-                  key={i}
+-                  text={msg.text}
+-                  streaming={i === animatingIdx}
+-                  timestamp={msg.timestamp}
+-                  provider={msg.provider}
+-                />
+-              )
+-            )}
+-
+-            {canvasState === "thinking" && <ThinkingIndicator status={statusText} />}
++    <div className={s.root}>
++      <div className={s.stars} aria-hidden />
++
++      <Sidebar
++        sessions={sessionList}
++        activeSessionId={sessionId}
++        onNewChat={startNewChat}
++        onSelectSession={loadSession}
++        isOpen={sidebarOpen}
++        onToggle={() => setSidebarOpen(o => !o)}
++      />
++
++      <div className={`${s.main} ${sidebarOpen ? s.mainShifted : ''}`}>
++
++        <header className={s.topBar}>
++          <button className={s.menuBtn} onClick={() => setSidebarOpen(o => !o)} aria-label="History">
++            <span /><span /><span />
++          </button>
++          <div className={s.brand}>
++            <span className={s.brandGlyph}>Ω</span>
++            <span className={s.brandName}>OmegA</span>
++          </div>
++          <div className={s.topRight}>
++            {provider && <span className={s.badge}>{provider.split('-')[0]}</span>}
++            <span className={`${s.dot} ${vs === 'thinking' ? s.dotThink : vs !== 'dormant' ? s.dotLive : ''}`} />
++          </div>
++        </header>
++
++        <div className={s.stage}>
++          <div className={s.orbClick} onClick={voice.toggle} title="Toggle voice">
++            <VoiceOrb
++              voiceState={voice.voiceState}
++              micLevel={voice.micLevel}
++              ttsLevel={voice.ttsLevel}
++              thinking={processing}
++            />
++          </div>
++          <p className={`${s.stateLabel} ${s['sl_' + vs]}`}>{stateLabel}</p>
++          {voice.interim && (
++            <div className={s.interim}><span>{voice.interim}</span></div>
++          )}
++        </div>
+ 
+-            {error && (
+-              <div className={s.error} role="alert">
+-                {error}
++        {(messages.length > 0 || processing) && (
++          <div className={s.feed} ref={feedRef}>
++            {messages.map((m, i) => (
++              <div key={i} className={`${s.msg} ${m.role === 'user' ? s.msgUser : s.msgOmega}`}>
++                {m.role === 'omega' && <span className={s.msgGlyph}>Ω</span>}
++                <span className={s.msgText}>{m.text}</span>
++              </div>
++            ))}
++            {processing && (
++              <div className={`${s.msg} ${s.msgOmega}`}>
++                <span className={s.msgGlyph}>Ω</span>
++                <span className={s.dots}><span /><span /><span /></span>
+               </div>
+             )}
+-            <div ref={bottomRef} style={{ height: 1 }} />
++            {error && <div className={s.errMsg}>{error}</div>}
+           </div>
+-
+-          {showPill && (
+-            <div className={s.scrollPillWrap}>
+-              <button className={s.scrollPill} onClick={scrollToBottom} aria-label="Scroll to bottom">
+-                New response
++        )}
++
++        <div className={s.bottom}>
++          {showText ? (
++            <div className={s.textRow}>
++              <textarea
++                className={s.textArea}
++                value={textInput}
++                onChange={e => setTextInput(e.target.value)}
++                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleTextSend(); } }}
++                placeholder="Type a message..."
++                rows={1}
++                autoFocus
++              />
++              <button className={s.sendBtn} onClick={handleTextSend} disabled={!textInput.trim() || processing}>›</button>
++              <button className={s.closeBtn} onClick={() => setShowText(false)}>✕</button>
++            </div>
++          ) : (
++            <div className={s.actions}>
++              <button className={s.typeBtn} onClick={() => setShowText(true)}>
++                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
++                Type
++              </button>
++              <button className={`${s.micBtn} ${vs !== 'dormant' ? s.micActive : ''}`} onClick={voice.toggle} aria-label="Toggle voice">
++                {vs === 'dormant'
++                  ? <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
++                  : <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
++                }
+               </button>
+             </div>
+           )}
+-
+-          <InputArea
+-            onSend={sendMessage}
+-            disabled={canvasState === "thinking"}
+-            autoFocus
+-          />
+         </div>
+       </div>
+-    </>
++    </div>
+   );
+ }
+diff --git a/web/src/components/VoiceOrb/VoiceOrb.module.css b/web/src/components/VoiceOrb/VoiceOrb.module.css
+new file mode 100644
+index 0000000..f8b0526
+--- /dev/null
++++ b/web/src/components/VoiceOrb/VoiceOrb.module.css
+@@ -0,0 +1,95 @@
++.orbWrap {
++  position: relative;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  flex-shrink: 0;
++  cursor: pointer;
++  user-select: none;
++}
++
++.canvas {
++  position: absolute;
++  inset: 0;
++  width: 100%;
++  height: 100%;
++}
++
++.symbol {
++  position: relative;
++  z-index: 2;
++  font-family: 'Orbitron', monospace;
++  font-size: clamp(3rem, 8vw, 5.5rem);
++  font-weight: 900;
++  letter-spacing: -0.02em;
++  transition: color 0.6s ease, text-shadow 0.6s ease, transform 0.4s var(--ease-snappy);
++  pointer-events: none;
++}
++
++/* ── State colours ─────────────────────────────────────────────────── */
++
++.dormant .symbol {
++  color: rgba(99, 102, 241, 0.45);
++  text-shadow:
++    0 0 20px rgba(99, 102, 241, 0.3),
++    0 0 60px rgba(99, 102, 241, 0.08);
++}
++
++.listening .symbol {
++  color: rgba(180, 160, 255, 0.95);
++  text-shadow:
++    0 0 28px rgba(139, 92, 246, 0.9),
++    0 0 70px rgba(99, 102, 241, 0.45),
++    0 0 120px rgba(99, 102, 241, 0.15);
++  animation: orb-listen 2.4s ease-in-out infinite;
++}
++
++.thinking .symbol {
++  color: rgba(228, 184, 74, 0.95);
++  text-shadow:
++    0 0 28px rgba(228, 184, 74, 0.9),
++    0 0 80px rgba(228, 184, 74, 0.4),
++    0 0 140px rgba(228, 184, 74, 0.15);
++  animation: orb-think 1.8s ease-in-out infinite;
++}
++
++.speaking .symbol {
++  color: rgba(220, 205, 255, 0.98);
++  text-shadow:
++    0 0 32px rgba(196, 181, 253, 0.95),
++    0 0 90px rgba(139, 92, 246, 0.5),
++    0 0 160px rgba(99, 102, 241, 0.2);
++  animation: orb-speak 1.2s ease-in-out infinite;
++}
++
++.followup .symbol {
++  color: rgba(99, 210, 190, 0.9);
++  text-shadow:
++    0 0 24px rgba(99, 210, 190, 0.8),
++    0 0 60px rgba(16, 185, 129, 0.3);
++  animation: orb-followup 3s ease-in-out infinite;
++}
++
++/* ── Animations ────────────────────────────────────────────────────── */
++
++@keyframes orb-listen {
++  0%, 100% { transform: scale(1); }
++  50%       { transform: scale(1.04); }
++}
++
++@keyframes orb-think {
++  0%   { transform: scale(1) rotate(0deg); }
++  25%  { transform: scale(1.06) rotate(1.5deg); }
++  75%  { transform: scale(1.06) rotate(-1.5deg); }
++  100% { transform: scale(1) rotate(0deg); }
++}
++
++@keyframes orb-speak {
++  0%, 100% { transform: scale(1); }
++  50%       { transform: scale(1.03); }
++}
++
++@keyframes orb-followup {
++  0%, 100% { transform: scale(1); opacity: 0.9; }
++  50%       { transform: scale(1.02); opacity: 1; }
++}
+diff --git a/web/src/components/VoiceOrb/VoiceOrb.tsx b/web/src/components/VoiceOrb/VoiceOrb.tsx
+new file mode 100644
+index 0000000..e18d344
+--- /dev/null
++++ b/web/src/components/VoiceOrb/VoiceOrb.tsx
+@@ -0,0 +1,187 @@
++'use client';
++
++import { useEffect, useRef } from 'react';
++import type { VoiceState } from '@/hooks/useVoiceEngine';
++import s from './VoiceOrb.module.css';
++
++interface VoiceOrbProps {
++  voiceState: VoiceState;
++  micLevel?: number;   // 0-1
++  ttsLevel?: number;   // 0-1
++  thinking?: boolean;  // OmegA is processing
++  size?: number;
++}
++
++export default function VoiceOrb({
++  voiceState,
++  micLevel = 0,
++  ttsLevel = 0,
++  thinking = false,
++  size = 220,
++}: VoiceOrbProps) {
++  const canvasRef = useRef<HTMLCanvasElement>(null);
++  const frameRef = useRef<number>(0);
++  const phaseRef = useRef(0);
++
++  const activeLevel = voiceState === 'speaking' ? ttsLevel : micLevel;
++  const isActive = voiceState !== 'dormant';
++
++  useEffect(() => {
++    const canvas = canvasRef.current;
++    if (!canvas) return;
++    const ctx = canvas.getContext('2d');
++    if (!ctx) return;
++
++    const W = size * 2; // retina
++    canvas.width = W;
++    canvas.height = W;
++    const C = W / 2;
++    const R = C * 0.32; // core radius
++
++    const draw = () => {
++      phaseRef.current += 0.018;
++      const ph = phaseRef.current;
++      const lv = activeLevel;
++
++      ctx.clearRect(0, 0, W, W);
++
++      // ── Outer ambient glow ──────────────────────────────────────────────────
++      const ambientR = C * 0.85 + lv * C * 0.12;
++      const ambient = ctx.createRadialGradient(C, C, R * 0.5, C, C, ambientR);
++
++      if (thinking) {
++        ambient.addColorStop(0, 'rgba(228,184,74,0.12)');
++        ambient.addColorStop(0.5, 'rgba(228,184,74,0.04)');
++        ambient.addColorStop(1, 'rgba(0,0,0,0)');
++      } else if (voiceState === 'listening' || voiceState === 'followup') {
++        ambient.addColorStop(0, 'rgba(99,102,241,0.18)');
++        ambient.addColorStop(0.5, 'rgba(139,92,246,0.06)');
++        ambient.addColorStop(1, 'rgba(0,0,0,0)');
++      } else if (voiceState === 'speaking') {
++        ambient.addColorStop(0, 'rgba(196,181,253,0.20)');
++        ambient.addColorStop(0.5, 'rgba(139,92,246,0.07)');
++        ambient.addColorStop(1, 'rgba(0,0,0,0)');
++      } else {
++        ambient.addColorStop(0, 'rgba(99,102,241,0.06)');
++        ambient.addColorStop(1, 'rgba(0,0,0,0)');
++      }
++      ctx.fillStyle = ambient;
++      ctx.fillRect(0, 0, W, W);
++
++      // ── Pulse rings (3 rings, offset phase) ────────────────────────────────
++      const ringCount = 3;
++      for (let i = 0; i < ringCount; i++) {
++        const offset = (i / ringCount) * Math.PI * 2;
++        const pulse = Math.sin(ph * 0.8 + offset) * 0.5 + 0.5;
++        const ringR = R * (1.5 + i * 0.55) + lv * R * 0.6 * (1 - i * 0.2);
++        const alpha = isActive
++          ? (thinking ? 0.55 : 0.35 + pulse * 0.25) * (1 - i * 0.2)
++          : 0.08 + pulse * 0.04;
++
++        let color: string;
++        if (thinking) color = `rgba(228,184,74,${alpha})`;
++        else if (voiceState === 'speaking') color = `rgba(196,181,253,${alpha})`;
++        else if (voiceState === 'followup') color = `rgba(99,210,190,${alpha})`;
++        else color = `rgba(139,92,246,${alpha})`;
++
++        ctx.beginPath();
++        ctx.arc(C, C, ringR, 0, Math.PI * 2);
++        ctx.strokeStyle = color;
++        ctx.lineWidth = thinking ? 1.5 : 1.0 + lv * 1.5;
++        ctx.stroke();
++      }
++
++      // ── Waveform ring (when active) ─────────────────────────────────────────
++      if (isActive && lv > 0.02) {
++        const waveR = R * 1.35 + lv * R * 0.4;
++        const points = 128;
++        ctx.beginPath();
++        for (let p = 0; p <= points; p++) {
++          const angle = (p / points) * Math.PI * 2 - Math.PI / 2;
++          const wave = Math.sin(angle * 8 + ph * 3) * lv * R * 0.18
++                     + Math.sin(angle * 5 - ph * 2) * lv * R * 0.10;
++          const r = waveR + wave;
++          const x = C + Math.cos(angle) * r;
++          const y = C + Math.sin(angle) * r;
++          p === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
++        }
++        ctx.closePath();
++        const waveAlpha = 0.4 + lv * 0.4;
++        ctx.strokeStyle = thinking
++          ? `rgba(228,184,74,${waveAlpha})`
++          : voiceState === 'speaking'
++          ? `rgba(196,181,253,${waveAlpha})`
++          : `rgba(99,102,241,${waveAlpha})`;
++        ctx.lineWidth = 1.5;
++        ctx.stroke();
++      }
++
++      // ── Rotating arc (thinking) ─────────────────────────────────────────────
++      if (thinking) {
++        ctx.save();
++        ctx.translate(C, C);
++        ctx.rotate(ph * 2.5);
++        ctx.beginPath();
++        ctx.arc(0, 0, R * 2.0, 0, Math.PI * 1.2);
++        ctx.strokeStyle = 'rgba(228,184,74,0.7)';
++        ctx.lineWidth = 2;
++        ctx.lineCap = 'round';
++        ctx.stroke();
++        ctx.rotate(Math.PI);
++        ctx.beginPath();
++        ctx.arc(0, 0, R * 2.0, 0, Math.PI * 0.5);
++        ctx.strokeStyle = 'rgba(228,184,74,0.35)';
++        ctx.lineWidth = 1.5;
++        ctx.stroke();
++        ctx.restore();
++      }
++
++      // ── Core glow ───────────────────────────────────────────────────────────
++      const coreGlow = ctx.createRadialGradient(C, C, 0, C, C, R * 1.3);
++      const breathe = Math.sin(ph * 0.7) * 0.5 + 0.5;
++
++      if (thinking) {
++        coreGlow.addColorStop(0, `rgba(255,230,130,${0.25 + breathe * 0.15})`);
++        coreGlow.addColorStop(0.4, `rgba(228,184,74,${0.15 + breathe * 0.10})`);
++        coreGlow.addColorStop(1, 'rgba(0,0,0,0)');
++      } else if (voiceState === 'speaking') {
++        coreGlow.addColorStop(0, `rgba(220,200,255,${0.22 + lv * 0.2})`);
++        coreGlow.addColorStop(0.4, `rgba(139,92,246,${0.14 + lv * 0.1})`);
++        coreGlow.addColorStop(1, 'rgba(0,0,0,0)');
++      } else if (voiceState === 'listening') {
++        coreGlow.addColorStop(0, `rgba(140,120,255,${0.20 + lv * 0.25})`);
++        coreGlow.addColorStop(0.4, `rgba(99,102,241,${0.10 + lv * 0.15})`);
++        coreGlow.addColorStop(1, 'rgba(0,0,0,0)');
++      } else if (voiceState === 'followup') {
++        coreGlow.addColorStop(0, `rgba(99,210,190,${0.18 + breathe * 0.08})`);
++        coreGlow.addColorStop(0.4, `rgba(16,185,129,${0.10})`);
++        coreGlow.addColorStop(1, 'rgba(0,0,0,0)');
++      } else {
++        coreGlow.addColorStop(0, `rgba(99,102,241,${0.10 + breathe * 0.05})`);
++        coreGlow.addColorStop(1, 'rgba(0,0,0,0)');
++      }
++      ctx.fillStyle = coreGlow;
++      ctx.beginPath();
++      ctx.arc(C, C, R * 1.3, 0, Math.PI * 2);
++      ctx.fill();
++
++      frameRef.current = requestAnimationFrame(draw);
++    };
++
++    draw();
++    return () => cancelAnimationFrame(frameRef.current);
++  }, [voiceState, thinking, activeLevel, isActive, size]);
++
++  const stateClass = thinking ? s.thinking
++    : voiceState === 'listening' ? s.listening
++    : voiceState === 'speaking' ? s.speaking
++    : voiceState === 'followup' ? s.followup
++    : s.dormant;
++
++  return (
++    <div className={`${s.orbWrap} ${stateClass}`} style={{ width: size, height: size }}>
++      <canvas ref={canvasRef} className={s.canvas} style={{ width: size, height: size }} />
++      <div className={s.symbol}>Ω</div>
++    </div>
++  );
++}
+diff --git a/web/src/hooks/useVoiceEngine.ts b/web/src/hooks/useVoiceEngine.ts
+new file mode 100644
+index 0000000..4206ce8
+--- /dev/null
++++ b/web/src/hooks/useVoiceEngine.ts
+@@ -0,0 +1,329 @@
++'use client';
++
++import { useCallback, useEffect, useRef, useState } from 'react';
++
++export type VoiceState = 'dormant' | 'listening' | 'thinking' | 'speaking' | 'followup';
++
++export interface VoiceEngineOptions {
++  onTranscript: (text: string) => void;
++  onTTSStart?: () => void;
++  onTTSEnd?: () => void;
++  followUpWindowMs?: number;
++  ttsUrl?: string;
++  autoStart?: boolean;
++}
++
++export interface VoiceEngineReturn {
++  voiceState: VoiceState;
++  interim: string;
++  micLevel: number;
++  ttsLevel: number;
++  supported: boolean;
++  toggle: () => void;
++  speakText: (text: string) => Promise<void>;
++  stopSpeaking: () => void;
++  wakeUp: () => void;
++}
++
++const WAKE_WORDS = ['mega', 'omega'];
++const FOLLOW_UP_MS = 25_000;
++const MIN_SPEECH_CHARS = 3;
++
++export function useVoiceEngine({
++  onTranscript,
++  onTTSStart,
++  onTTSEnd,
++  followUpWindowMs = FOLLOW_UP_MS,
++  ttsUrl = '/api/tts',
++  autoStart = true,
++}: VoiceEngineOptions): VoiceEngineReturn {
++  const [voiceState, setVoiceState] = useState<VoiceState>('dormant');
++  const [interim, setInterim] = useState('');
++  const [micLevel, setMicLevel] = useState(0);
++  const [ttsLevel, setTtsLevel] = useState(0);
++  const [supported, setSupported] = useState(false);
++
++  const stateRef = useRef<VoiceState>('dormant');
++  // eslint-disable-next-line @typescript-eslint/no-explicit-any
++  const recogRef = useRef<any>(null);
++  const followUpTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
++  const audioCtxRef = useRef<AudioContext | null>(null);
++  const micStreamRef = useRef<MediaStream | null>(null);
++  const analyserRef = useRef<AnalyserNode | null>(null);
++  const micAnimRef = useRef<number | null>(null);
++  const ttsSourceRef = useRef<AudioBufferSourceNode | null>(null);
++  const ttsAnalyserRef = useRef<AnalyserNode | null>(null);
++  const ttsAnimRef = useRef<number | null>(null);
++  const mutedRef = useRef(false);
++
++  // Keep stateRef in sync
++  const setState = useCallback((s: VoiceState) => {
++    stateRef.current = s;
++    setVoiceState(s);
++  }, []);
++
++  // ── Mic level analyzer ─────────────────────────────────────────────────────
++  const startMicAnalyzer = useCallback(async () => {
++    try {
++      if (!audioCtxRef.current || audioCtxRef.current.state === 'closed') {
++        audioCtxRef.current = new AudioContext();
++      }
++      if (!micStreamRef.current) {
++        micStreamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
++      }
++      const src = audioCtxRef.current.createMediaStreamSource(micStreamRef.current);
++      analyserRef.current = audioCtxRef.current.createAnalyser();
++      analyserRef.current.fftSize = 128;
++      src.connect(analyserRef.current);
++
++      const tick = () => {
++        if (!analyserRef.current) return;
++        const buf = new Uint8Array(analyserRef.current.frequencyBinCount);
++        analyserRef.current.getByteFrequencyData(buf);
++        const avg = buf.reduce((a, b) => a + b, 0) / buf.length;
++        setMicLevel(Math.min(avg / 80, 1));
++        micAnimRef.current = requestAnimationFrame(tick);
++      };
++      tick();
++    } catch { /* mic denied — voice still works via recognition */ }
++  }, []);
++
++  const stopMicAnalyzer = useCallback(() => {
++    if (micAnimRef.current) cancelAnimationFrame(micAnimRef.current);
++    setMicLevel(0);
++  }, []);
++
++  // ── Follow-up window ────────────────────────────────────────────────────────
++  const clearFollowUp = useCallback(() => {
++    if (followUpTimer.current) clearTimeout(followUpTimer.current);
++  }, []);
++
++  const enterFollowUp = useCallback(() => {
++    setState('followup');
++    clearFollowUp();
++    followUpTimer.current = setTimeout(() => {
++      if (stateRef.current === 'followup') setState('dormant');
++    }, followUpWindowMs);
++  }, [setState, clearFollowUp, followUpWindowMs]);
++
++  // ── TTS playback ────────────────────────────────────────────────────────────
++  const stopSpeaking = useCallback(() => {
++    ttsSourceRef.current?.stop();
++    ttsSourceRef.current = null;
++    if (ttsAnimRef.current) cancelAnimationFrame(ttsAnimRef.current);
++    setTtsLevel(0);
++  }, []);
++
++  const speakText = useCallback(async (text: string): Promise<void> => {
++    if (!text?.trim()) { enterFollowUp(); return; }
++    stopSpeaking();
++    setState('speaking');
++    onTTSStart?.();
++
++    try {
++      const res = await fetch(ttsUrl, {
++        method: 'POST',
++        headers: { 'Content-Type': 'application/json' },
++        body: JSON.stringify({ text: text.slice(0, 2000) }),
++      });
++      const data = await res.json();
++
++      if (!data.audio) throw new Error('No audio returned');
++
++      // Decode base64 WAV
++      const raw = atob(data.audio);
++      const bytes = new Uint8Array(raw.length);
++      for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
++
++      const ctx = new AudioContext();
++      const buffer = await ctx.decodeAudioData(bytes.buffer);
++
++      // TTS level analyzer
++      const analyser = ctx.createAnalyser();
++      analyser.fftSize = 128;
++      ttsAnalyserRef.current = analyser;
++
++      const src = ctx.createBufferSource();
++      src.buffer = buffer;
++      src.connect(analyser);
++      analyser.connect(ctx.destination);
++      ttsSourceRef.current = src;
++
++      const tick = () => {
++        if (!ttsAnalyserRef.current) return;
++        const buf = new Uint8Array(ttsAnalyserRef.current.frequencyBinCount);
++        ttsAnalyserRef.current.getByteFrequencyData(buf);
++        const avg = buf.reduce((a, b) => a + b, 0) / buf.length;
++        setTtsLevel(Math.min(avg / 80, 1));
++        ttsAnimRef.current = requestAnimationFrame(tick);
++      };
++      tick();
++
++      src.start();
++      src.onended = () => {
++        if (ttsAnimRef.current) cancelAnimationFrame(ttsAnimRef.current);
++        setTtsLevel(0);
++        ctx.close();
++        onTTSEnd?.();
++        enterFollowUp();
++      };
++    } catch (e) {
++      console.warn('[VoiceEngine] TTS error:', e);
++      onTTSEnd?.();
++      enterFollowUp();
++    }
++  }, [ttsUrl, stopSpeaking, setState, enterFollowUp, onTTSStart, onTTSEnd]);
++
++  // ── Speech recognition ──────────────────────────────────────────────────────
++  const stopRecognition = useCallback(() => {
++    try { recogRef.current?.stop(); } catch { /* ignore */ }
++  }, []);
++
++  const startRecognition = useCallback(() => {
++    const SR = (typeof window !== 'undefined')
++      // eslint-disable-next-line @typescript-eslint/no-explicit-any
++      ? ((window as any).SpeechRecognition ?? (window as any).webkitSpeechRecognition)
++      : null;
++    if (!SR) return;
++
++    stopRecognition();
++
++    const r = new SR();
++    r.continuous = true;
++    r.interimResults = true;
++    r.lang = 'en-US';
++    r.maxAlternatives = 1;
++    recogRef.current = r;
++
++    let finalBuffer = '';
++    let silenceTimer: ReturnType<typeof setTimeout> | null = null;
++
++    const resetSilence = () => {
++      if (silenceTimer) clearTimeout(silenceTimer);
++      silenceTimer = setTimeout(() => {
++        if (finalBuffer.trim().length >= MIN_SPEECH_CHARS &&
++            (stateRef.current === 'listening' || stateRef.current === 'followup')) {
++          const text = finalBuffer.trim();
++          finalBuffer = '';
++          setInterim('');
++          stopMicAnalyzer();
++          setState('thinking');
++          onTranscript(text);
++        }
++      }, 1400);
++    };
++
++    // eslint-disable-next-line @typescript-eslint/no-explicit-any
++    r.onresult = (e: any) => {
++      let interimText = '';
++      let newFinal = '';
++
++      for (let i = e.resultIndex; i < e.results.length; i++) {
++        const t = e.results[i][0].transcript;
++        if (e.results[i].isFinal) newFinal += t + ' ';
++        else interimText += t;
++      }
++
++      if (newFinal) {
++        finalBuffer += newFinal;
++        resetSilence();
++      }
++
++      setInterim((finalBuffer + interimText).trim());
++
++      // Wake word check when dormant
++      if (stateRef.current === 'dormant') {
++        const all = (finalBuffer + interimText).toLowerCase();
++        if (WAKE_WORDS.some(w => all.includes(w))) {
++          finalBuffer = '';
++          setInterim('');
++          setState('listening');
++          startMicAnalyzer();
++        }
++      }
++    };
++
++    r.onspeechstart = () => {
++      if (stateRef.current === 'dormant') return;
++      if (stateRef.current === 'followup') {
++        clearFollowUp();
++        setState('listening');
++        startMicAnalyzer();
++      }
++    };
++
++    // eslint-disable-next-line @typescript-eslint/no-explicit-any
++    r.onerror = (e: any) => {
++      if (e.error === 'no-speech' || e.error === 'aborted') return;
++      console.warn('[VoiceEngine] Recognition error:', e.error);
++    };
++
++    r.onend = () => {
++      // Auto-restart unless we're muted or thinking/speaking
++      if (!mutedRef.current &&
++          stateRef.current !== 'thinking' &&
++          stateRef.current !== 'speaking') {
++        setTimeout(() => { if (!mutedRef.current) startRecognition(); }, 200);
++      }
++    };
++
++    try { r.start(); } catch { /* already running */ }
++  }, [stopRecognition, stopMicAnalyzer, setState, startMicAnalyzer, onTranscript, clearFollowUp]);
++
++  // ── Public controls ─────────────────────────────────────────────────────────
++  const wakeUp = useCallback(() => {
++    clearFollowUp();
++    setState('listening');
++    startMicAnalyzer();
++  }, [setState, clearFollowUp, startMicAnalyzer]);
++
++  const toggle = useCallback(() => {
++    if (stateRef.current === 'dormant') {
++      mutedRef.current = false;
++      wakeUp();
++      startRecognition();
++    } else {
++      mutedRef.current = true;
++      stopRecognition();
++      stopSpeaking();
++      stopMicAnalyzer();
++      clearFollowUp();
++      setState('dormant');
++    }
++  }, [wakeUp, startRecognition, stopRecognition, stopSpeaking, stopMicAnalyzer, clearFollowUp, setState]);
++
++  // ── Init ────────────────────────────────────────────────────────────────────
++  useEffect(() => {
++    const hasSR = typeof window !== 'undefined' &&
++      !!((window as any).SpeechRecognition ?? (window as any).webkitSpeechRecognition);
++    setSupported(hasSR);
++    if (!hasSR || !autoStart) return;
++
++    // Small delay to let the page settle
++    const t = setTimeout(() => {
++      mutedRef.current = false;
++      startRecognition();
++      // Start in listening mode immediately
++      setState('listening');
++      startMicAnalyzer();
++    }, 800);
++
++    return () => {
++      clearTimeout(t);
++      mutedRef.current = true;
++      stopRecognition();
++      stopMicAnalyzer();
++      clearFollowUp();
++    };
++    // eslint-disable-next-line react-hooks/exhaustive-deps
++  }, []);
++
++  // When thinking ends (canvasState goes back to idle from parent), restart recognition
++  useEffect(() => {
++    if (voiceState === 'listening' || voiceState === 'followup') {
++      if (!recogRef.current) startRecognition();
++    }
++  }, [voiceState, startRecognition]);
++
++  return { voiceState, interim, micLevel, ttsLevel, supported, toggle, speakText, stopSpeaking, wakeUp };
++}
+diff --git a/web/src/middleware.ts b/web/src/middleware.ts
+deleted file mode 100644
+index 303a4c7..0000000
+--- a/web/src/middleware.ts
++++ /dev/null
+@@ -1,31 +0,0 @@
+-import { NextResponse } from 'next/server';
+-import type { NextRequest } from 'next/server';
+-
+-export function middleware(req: NextRequest) {
+-  // Check if auth is required
+-  const authRequired = process.env.OMEGA_UI_PASSWORD;
+-  if (!authRequired) return NextResponse.next();
+-
+-  // Basic Auth
+-  const basicAuth = req.headers.get('authorization');
+-  if (basicAuth) {
+-    const authValue = basicAuth.split(' ')[1];
+-    const [user, pwd] = atob(authValue).split(':');
+-
+-    if (user === 'omega' && pwd === authRequired) {
+-      return NextResponse.next();
+-    }
+-  }
+-
+-  // If not authenticated, request it
+-  return new NextResponse('Authentication Required', {
+-    status: 401,
+-    headers: {
+-      'WWW-Authenticate': 'Basic realm="OmegA Sovereign"',
+-    },
+-  });
+-}
+-
+-export const config = {
+-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+-};

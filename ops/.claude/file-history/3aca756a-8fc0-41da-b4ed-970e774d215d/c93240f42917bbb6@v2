@@ -1,0 +1,92 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## What This Repo Is
+
+Canonical publication and architecture repository for OmegA — a four-layer formally specified architecture for sovereign, persistent, and governed AI agents. Also contains a reference runtime (Rust), Python SDK, and a Next.js web frontend.
+
+**DOI:** 10.5281/zenodo.19111653
+**Author:** R.W. Yett (Ryan Wayne Yett) — `github.com/Mega-Therion/OmegA-Architecture`
+
+## Architecture Overview
+
+OmegA is a concentric four-layer system (outermost → innermost):
+
+| Layer | Name | Role |
+|-------|------|------|
+| 1 | **AEGIS** | Model-agnostic governance shell — enforces policy at the API boundary |
+| 2 | **AEON** | Cognitive operating system — manages the Phylactery identity chain and task state |
+| 3 | **ADCCL** | Anti-drift cognitive control loop — claim budgets and self-tagging |
+| 4 | **MYELIN** | Path-dependent graph memory — hardens retrieval paths with use |
+
+Unified system state: `Ω_t = ⟨Φ_t, E_t, τ_t, B_t, S_t, G_t^mem⟩`
+
+## Repository Structure
+
+### `papers/` — Formal publications
+Per-layer papers (`MYELIN_Final_Paper.md`, `ADCCL_Final_Paper.md`, `AEON_Final_Paper.md`, `AEGIS_Final_Paper.md`), the unified paper, canonical symbol addendum, and sovereignty score framework.
+
+### `specs/` — Formal specifications
+Invariants, failure taxonomy, identity shell, memory system, orchestration, and teleodynamic observability specs.
+
+### `runtime/` — Rust workspace
+Eight crates: `omega-core`, `omega-provider`, `omega-gateway`, `omega-memory`, `omega-consensus`, `omega-identity`, `omega-trace`, `omega-cli`. Uses Axum, Tokio, Reqwest.
+
+```bash
+cd runtime
+make build      # cargo build --workspace
+make test       # cargo test --workspace
+make clippy     # cargo clippy --workspace -- -D warnings
+make fmt-check  # cargo fmt --all -- --check
+make run-gateway
+make run-cli ARGS="..."
+```
+
+### `omega/` — Python SDK
+Reference Python modules: `agent.py`, `drift.py`, `envelope.py`, `memory.py`, `phylactery.py`, `risk_gate.py`.
+
+### `web/` — Next.js 16 frontend (omega-web)
+Chat interface with Neon Serverless Postgres for history. React 19, Tailwind CSS.
+
+```bash
+cd web
+npm install
+npm run dev     # next dev
+npm run build   # next build
+npm run lint    # eslint
+```
+
+**Important:** This uses Next.js 16 which has breaking changes from earlier versions. Read `node_modules/next/dist/docs/` before writing code. Heed deprecation notices.
+
+Key frontend components: `OmegaCanvas`, `ConcentricCore`, `IdentityShell`, `SystemState`.
+API routes: `/api/chat` (main), `/api/chat/history/[sessionId]`.
+Backend connection: Neon Postgres via `@neondatabase/serverless`.
+
+### `tools/` — Python utilities
+Agent mesh, eval forge, harvester, persona linter, pub packager, repo cartographer, spec auditor, etc.
+
+### `evals/`, `distilled/`, `canon/` — Evaluation and canonical extracts
+
+## Key Files
+
+- `README.md` — full architecture overview with equations
+- `ORIGIN.md` — canonical origin document (the DeepSeek Challenge, Dec 31 2025)
+- `CITATION.cff` — citation metadata for academic use
+- `omega_equation_knowledge_graph.json` — graph of all formal equations and symbols
+- `omega_kg_explorer.py` — CLI tool for querying the knowledge graph
+- `verify.sh` — repo verification script
+- `vercel.json` — Vercel deployment config (routes to `web/`)
+
+## Knowledge Graph Explorer
+
+```bash
+python3 omega_kg_explorer.py <search_term>      # search nodes/labels
+python3 omega_kg_explorer.py --list-nodes       # list all nodes
+python3 omega_kg_explorer.py --list-edges       # list all edges
+python3 omega_kg_explorer.py --layer MYELIN     # filter by layer (MYELIN|ADCCL|AEON|AEGIS)
+```
+
+## Archive
+
+`/home/mega/ATTIC/OmegA-cutover-20260319-233802` is the pre-cutover archive. Consult only for historical recovery.

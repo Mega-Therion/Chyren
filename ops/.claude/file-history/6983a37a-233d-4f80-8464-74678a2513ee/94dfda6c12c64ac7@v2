@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -e
+cd /home/mega/.omega/runtime-src/omega-rust
+echo "Building omega-gateway..."
+cargo build --release -p omega-gateway 2>&1
+echo "Build complete. Copying binary..."
+sudo cp target/release/omega-gateway /usr/local/bin/omega-gateway
+echo "Restarting gateway..."
+sudo systemctl restart omega-gateway 2>/dev/null || \
+  (pkill -f omega-gateway; sleep 1; /usr/local/bin/omega-gateway &)
+sleep 2
+echo "Gateway status:"
+curl -s http://localhost:8787/health
+echo ""
+echo "Done."

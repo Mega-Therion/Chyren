@@ -1,0 +1,91 @@
+/**
+ * OmegA Health Check endpoint (#V7 — infrastructure health)
+ *
+ * GET /api/health — returns overall status + per-service checks
+ * Used by Vercel, uptime monitors, load balancers, and runbooks.
+ *
+ * Response shape:
+ *   { status: 'ok' | 'degraded' | 'down', checks: {...}, ts: ISO }
+ *
+ * Does NOT require auth — needs to be reachable by external monitors.
+ * Does NOT expose secrets — only checks presence, not values.
+ */
+
+import { NextResponse } from 'next/server';
+import { buildHealthStatus, getCircuitBreaker } from '@/lib/hardening';
+
+export async function GET() {
+  const checks: Record<string, boolean | { ok: boolean; detail?: string }> = {
+    // Core environment
+    database: {
+      ok: Boolean(process.env.DATABASE_URL),
+      detail: process.env.DATABASE_URL ? 'configured' : 'DATABASE_URL missing',
+    },
+
+    // LLM providers — at least one must be available
+    'provider:vercel-gateway': {
+      ok: Boolean(
+        process.env.AI_GATEWAY_API_KEY ||
+        process.env.VERCEL_AI_GATEWAY_KEY ||
+        process.env.VERCEL_OIDC_TOKEN,
+      ),
+      detail: 'Vercel AI Gateway auth',
+    },
+    'provider:openai': {
+      ok: Boolean(process.env.OPENAI_API_KEY),
+      detail: 'OpenAI key',
+    },
+    'provider:xai': {
+      ok: Boolean(process.env.XAI_API_KEY),
+      detail: 'xAI key',
+    },
+    'provider:': {
+      ok: Boolean(
+        process.env._API_KEY ||
+        process.env._API_KEY_2 ||
+        process.env._API_KEY_4,
+      ),
+      detail: ' key(s)',
+    },
+
+    // Voice stack
+    'voice:stt': {
+      ok: Boolean(process.env.OPENAI_API_KEY),
+      detail: 'Whisper via OpenAI key',
+    },
+    'voice:tts': {
+      ok: Boolean(
+        process.env.ELEVENLABS_API_KEY ||
+        process.env._API_KEY ||
+        process.env._API_KEY_2,
+      ),
+      detail: 'ElevenLabs or  TTS',
+    },
+
+    // Circuit breaker states
+    'circuit:whisper': {
+      ok: !getCircuitBreaker('whisper').isOpen,
+      detail: `state: ${getCircuitBreaker('whisper').status}`,
+    },
+    'circuit:elevenlabs': {
+      ok: !getCircuitBreaker('elevenlabs').isOpen,
+      detail: `state: ${getCircuitBreaker('elevenlabs').status}`,
+    },
+
+    // Auth
+    'auth:operator-token': {
+      ok: Boolean(process.env.OMEGA_OPERATOR_TOKEN),
+      detail: process.env.OMEGA_OPERATOR_TOKEN ? 'configured' : 'not set — all traffic is public mode',
+    },
+  };
+
+  const health = buildHealthStatus(checks);
+
+  return NextResponse.json(health, {
+    status: health.status === 'down' ? 503 : 200,
+    headers: {
+      // Allow uptime monitors to cache briefly
+      'Cache-Control': 'no-store',
+    },
+  });
+}

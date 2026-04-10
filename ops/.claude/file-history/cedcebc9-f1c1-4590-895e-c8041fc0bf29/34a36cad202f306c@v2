@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://omega-architecture.dev/schemas/reconciliation_event.schema.json",
+  "title": "OmegA Reconciliation Event",
+  "description": "Schema for a memory reconciliation audit event.",
+  "type": "object",
+  "required": ["event_id", "event_type", "decision"],
+  "properties": {
+    "event_id": { "type": "string", "format": "uuid" },
+    "event_type": {
+      "type": "string",
+      "enum": ["duplicate", "conflict", "stale", "promotion", "demotion", "superseded"]
+    },
+    "decision": {
+      "type": "string",
+      "enum": ["merge", "keep_existing", "keep_incoming", "promote", "demote", "archive", "flag_for_review"]
+    },
+    "node_ids": { "type": "array", "items": { "type": "string" } },
+    "doc_ids": { "type": "array", "items": { "type": "string" } },
+    "reason": { "type": "string" },
+    "details": { "type": "object" },
+    "timestamp": { "type": "number" },
+    "auto_resolved": { "type": "boolean", "default": false }
+  },
+  "additionalProperties": false
+}

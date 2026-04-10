@@ -1,0 +1,174 @@
+#!/usr/bin/env python3
+import sys
+import time
+import math
+import argparse
+import signal
+
+# --- Configuration ---
+# The Sovereign Palette: Cyan -> Deep Blue -> Purple -> Magenta -> Gold -> Orange -> Red -> Back to Cyan
+GRADIENT_STOPS = [
+    (0,   255, 255), # Cyan
+    (0,   120, 255), # Dodger Blue
+    (138, 43,  226), # Blue Violet
+    (255, 0,   255), # Magenta
+    (255, 215, 0),   # Gold
+    (255, 140, 0),   # Dark Orange
+    (255, 69,  0),   # Red Orange
+    (0,   255, 255)  # Loop back to Cyan
+]
+
+# Color Constants
+C_GREY = "\033[1;30m"
+C_RESET = "\033[0m"
+
+# 3D Omega Symbol - Detailed with depth and dimension
+OMEGA_SYMBOL = [
+    "        ╔═══════════════════════════╗",
+    "        ║   ╭──────────────────╮   ║",
+    "        ║   │   ▗━━━━━━━━━━▖   │   ║",
+    "        ║   │  ▗━╱          ╲━▖  │   ║",
+    "        ║   │ ╱  ┏━━━━━━━━━┓  ╲ │   ║",
+    "        ║   │╱   ┃ Ω OMEGA ┃   ╲│   ║",
+    "        ║   │    ┗━━━━━━━━━┛    │   ║",
+    "        ║   │  ╱            ╲  │   ║",
+    "        ║   │ ╱  ▝━━━━━━━━━━▞ ╲ │   ║",
+    "        ║   │ │  ▝╲      ╱▝  │ │   ║",
+    "        ║   │ │   ╰──────╯   │ │   ║",
+    "        ║   │ └────────────────┘ │   ║",
+    "        ║   │  ╔═════════════╗   │   ║",
+    "        ║   │ ╱  Sovereignty  ╲ │   ║",
+    "        ║   │╱     Realized    ╲│   ║",
+    "        ║   ╰──────────────────╯   ║",
+    "        ╚═══════════════════════════╝",
+]
+
+SUBTITLE = "RWFY — Sovereign Intelligence Engine"
+
+# --- Color Engine ---
+
+def interpolate_color(color1, color2, t):
+    """Linear interpolation between two RGB colors."""
+    r1, g1, b1 = color1
+    r2, g2, b2 = color2
+    return (
+        int(r1 + (r2 - r1) * t),
+        int(g1 + (g2 - g1) * t),
+        int(b1 + (b2 - b1) * t)
+    )
+
+def get_gradient_color(progress):
+    """Get color at a specific progress point (0.0 to 1.0) in the multi-stop gradient."""
+    progress = progress % 1.0
+    num_stops = len(GRADIENT_STOPS) - 1
+    segment_length = 1.0 / num_stops
+
+    segment_index = int(progress / segment_length)
+    segment_progress = (progress - (segment_index * segment_length)) / segment_length
+    segment_index = min(segment_index, num_stops - 1)
+
+    return interpolate_color(
+        GRADIENT_STOPS[segment_index],
+        GRADIENT_STOPS[segment_index + 1],
+        segment_progress
+    )
+
+def ansi_rgb(r, g, b):
+    return f"\033[38;2;{r};{g};{b}m"
+
+def reset_code():
+    return "\033[0m"
+
+# --- Rendering ---
+
+def render_line(text, y_index, time_offset, spread=0.03):
+    """Renders a single line with color gradient based on position and time."""
+    rendered = ""
+    r_ghost, g_ghost, b_ghost = (40, 45, 50)  # Dark phantom body
+
+    for x, char in enumerate(text):
+        if char == " ":
+            rendered += char
+            continue
+
+        # Solid blocks are the ghost body, everything else glows
+        if char in ['█', '▖', '▗', '▘', '▝', '▞', '▟']:
+             rendered += ansi_rgb(r_ghost, g_ghost, b_ghost) + char
+        else:
+             # Gradient logic for glowing elements
+             wave_pos = (x * spread) + (y_index * 0.05) + time_offset
+             r, g, b = get_gradient_color(wave_pos)
+             rendered += ansi_rgb(r, g, b) + char
+
+    return rendered + reset_code()
+
+def print_banner(time_offset=0.0):
+    output = []
+    output.append("")
+
+    # Main Omega Symbol
+    for i, line in enumerate(OMEGA_SYMBOL):
+        output.append(render_line(line, i, time_offset, spread=0.02))
+
+    output.append("")
+
+    # Subtitle with slow phase shift
+    sub_offset = time_offset + 0.5
+    sub_padding = " " * ((len(OMEGA_SYMBOL[0]) - len(SUBTITLE)) // 2)
+    sub_colored = render_line(SUBTITLE, len(OMEGA_SYMBOL)+1, sub_offset, spread=0.01)
+    output.append(f"{sub_padding}{sub_colored}")
+
+    output.append("")
+
+    return "\n".join(output)
+
+# --- Modes ---
+
+def run_once():
+    """Display banner once with current time-based color state."""
+    now = time.time()
+    offset = (now % 1000) * 0.1
+    print(print_banner(offset))
+
+def run_loop(speed=0.05):
+    """Display animated banner in infinite loop."""
+    sys.stdout.write("\033[?25l")  # Hide cursor
+
+    dummy_banner = print_banner(0)
+    line_count = dummy_banner.count('\n') + 4
+    print("\n" * line_count)
+
+    offset = 0.0
+    try:
+        while True:
+            sys.stdout.write(f"\033[{line_count}A")
+            banner = print_banner(offset)
+            hint = f"{C_GREY}Press Ctrl+C to exit...{C_RESET}"
+            padding = " " * ((len(OMEGA_SYMBOL[0]) - len("Press Ctrl+C to exit...")) // 2)
+            sys.stdout.write(banner + "\n" + padding + hint + "\n\n")
+            sys.stdout.flush()
+            offset += 0.01
+            time.sleep(speed)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        sys.stdout.write("\033[?25h")  # Show cursor
+        print()
+
+def handle_sigint(signum, frame):
+    sys.stdout.write("\033[?25h")
+    sys.exit(0)
+
+if __name__ == "__main__":
+    signal.signal(signal.SIGINT, handle_sigint)
+
+    parser = argparse.ArgumentParser(description="OmegA CLI Banner Generator")
+    parser.add_argument("--loop", action="store_true", help="Run in infinite animation loop")
+    parser.add_argument("--speed", type=float, default=0.05, help="Animation speed (lower = faster)")
+
+    args = parser.parse_args()
+
+    if args.loop:
+        run_loop(args.speed)
+    else:
+        run_once()

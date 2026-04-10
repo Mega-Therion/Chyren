@@ -1,0 +1,11 @@
+import path from "node:path";
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  turbopack: {
+    // Keep the workspace root pinned to the actual Next app instead of the wider home directory.
+    root: path.resolve(__dirname),
+  },
+};
+
+export default nextConfig;

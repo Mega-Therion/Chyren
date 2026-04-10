@@ -1,0 +1,18 @@
+"""
+Download a public MEGA folder to INBOX.
+Usage: python mega_download.py <mega_url>
+"""
+import sys, os
+from mega import Mega
+
+URL = "https://mega.nz/folder/3sYRBLpb#mSst9e8TFwUllk5kxPYZww"
+DEST = "/home/mega/OMEGA_WORKSPACE/INBOX"
+
+mega = Mega()
+m = mega.login()  # anonymous login for public links
+
+print(f"Downloading from: {URL}")
+print(f"Destination: {DEST}")
+
+m.download_url(URL, DEST)
+print("Download complete.")

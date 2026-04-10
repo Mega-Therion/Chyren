@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+output/
+.DS_Store
+mcp/node_modules/
+mcp/dist/
+.vercel
+runtime/crates/omega-memory/.fastembed_cache/
+.hypothesis/
+.pytest_cache/
+.venv/
+.docker-cache/
+.verify.lock/
+evals/transcripts/
+.omega_phylactery.json

@@ -1,0 +1,85 @@
+That skill isn't needed here. Here's exactly how to run it on your laptop:
+
+## Prerequisites
+
+You need **Python 3.11+** and **Ollama** installed. Check what you have first:
+
+```bash
+python3 --version
+ollama --version
+```
+
+If Ollama isn't installed yet:
+
+```bash
+# Linux / Ubuntu (your setup)
+curl -fsSL https://ollama.com/install.sh | sh
+```
+
+## Pull a Model
+
+```bash
+# Lightest option (1.9GB, fast)
+ollama pull llama3.2:3b
+
+# Or mid-tier (4.7GB, better quality)
+ollama pull mistral:7b
+```
+
+## Clone the Repo & Navigate
+
+```bash
+git clone https://github.com/Mega-Therion/OmegA-Architecture.git
+cd OmegA-Architecture
+```
+
+## Install Dependencies
+
+The upgraded CLI uses only stdlib Python **except** for one optional dependency for richer output. Check if your `omega/` package needs anything:
+
+```bash
+# Check if there's a requirements file
+cat requirements.txt 2>/dev/null || echo "No requirements.txt"
+
+# The new CLI itself needs zero extra deps — it's pure stdlib
+# But if the omega/ package needs installs:
+pip install -e .
+# or
+pip install -r requirements.txt
+```
+
+## Start Ollama (if not already running)
+
+```bash
+ollama serve &
+```
+
+## Run the CLI
+
+```bash
+# Auto-detects best available model
+python3 omega_chat.py
+
+# Specify a model
+python3 omega_chat.py mistral:7b
+
+# Admin control CLI
+python3 omegactl.py audit
+python3 omegactl.py eval
+```
+
+## First Time Flow
+
+When it launches you'll see the animated colorshift banner, then the session info panel showing your model, identity, doctrine, Phylactery chain length, and session ID . Then type anything to start chatting. The first response will show the spinner animation, then stream tokens in real time with the gradient palette.
+
+## Key Things to Try First
+
+```
+/dashboard           ← Full-screen status panel
+/read omega/agent.py ← Syntax-highlighted file viewer
+/search OmegaAgent   ← Grep your codebase
+/chain               ← See Phylactery integrity
+/state               ← Live state vector Ω_t
+```
+
+If Ollama isn't running when you launch, the CLI will detect it and print the setup steps rather than crashing . Sessions auto-save to `~/.omega/sessions/` so your history persists across runs.

@@ -1,0 +1,301 @@
+/// Bridge Layer — Python/Rust Cognitive Engine Integration
+///
+/// This module defines the protocol and client for communicating with the
+/// Python reference implementations of AEON, ADCCL, and MYELIN. The bridge
+/// allows the Rust gateway to orchestrate requests through the full four-layer
+/// architecture while keeping the cognitive engines running in Python.
+///
+/// Architecture:
+/// - Rust gateway maintains request lifecycle and unified state vector
+/// - Python sidecar process runs the cognitive engines (AEON, ADCCL, MYELIN)
+/// - Bridge communicates via HTTP + JSON (initial), upgradeable to gRPC
+/// - All state transitions go through the bridge
+
+use serde::{Deserialize, Serialize};
+use crate::state_vector::UnifiedStateVector;
+use std::sync::Arc;
+
+/// PythonBridgeClient — HTTP client to the Python cognitive engine sidecar
+pub struct PythonBridgeClient {
+    base_url: String,
+    http_client: reqwest::Client,
+}
+
+impl PythonBridgeClient {
+    pub fn new(base_url: &str) -> Self {
+        Self {
+            base_url: base_url.to_string(),
+            http_client: reqwest::Client::new(),
+        }
+    }
+
+    /// Call AEON.initialize to bootstrap the task state from a user prompt
+    ///
+    /// Input: raw prompt + goal valence preferences
+    /// Output: initialized TaskStateObject with anchor, skeleton, grounding
+    pub async fn aeon_initialize(
+        &self,
+        prompt: &str,
+        valence: serde_json::Value,
+    ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+        let request = serde_json::json!({
+            "prompt": prompt,
+            "valence": valence,
+        });
+
+        let response = self.http_client
+            .post(&format!("{}/aeon/initialize", self.base_url))
+            .json(&request)
+            .send()
+            .await?;
+
+        Ok(response.json().await?)
+    }
+
+    /// Call MYELIN.retrieve to search memory for relevant prior context
+    ///
+    /// Input: current task, query terms
+    /// Output: ranked list of memory entries + hardening updates
+    pub async fn myelin_retrieve(
+        &self,
+        task_id: &str,
+        query: &str,
+    ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+        let request = serde_json::json!({
+            "task_id": task_id,
+            "query": query,
+        });
+
+        let response = self.http_client
+            .post(&format!("{}/myelin/retrieve", self.base_url))
+            .json(&request)
+            .send()
+            .await?;
+
+        Ok(response.json().await?)
+    }
+
+    /// Call ADCCL.plan to generate anti-drift verified reasoning steps
+    ///
+    /// Input: task state + retrieved memory + LLM capabilities
+    /// Output: sequence of reasoning steps with drift annotations
+    pub async fn adccl_plan(
+        &self,
+        state: &UnifiedStateVector,
+        retrieved_context: &str,
+    ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+        let request = serde_json::json!({
+            "state": serde_json::to_value(state)?,
+            "retrieved_context": retrieved_context,
+        });
+
+        let response = self.http_client
+            .post(&format!("{}/adccl/plan", self.base_url))
+            .json(&request)
+            .send()
+            .await?;
+
+        Ok(response.json().await?)
+    }
+
+    /// Call ADCCL.verify to check if a generated response is safe to commit
+    ///
+    /// Input: proposed output + reasoning trace + verification criteria
+    /// Output: verification score + recommended actions (accept/revise/refuse)
+    pub async fn adccl_verify(
+        &self,
+        proposed_output: &str,
+        reasoning_trace: &str,
+        state: &UnifiedStateVector,
+    ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+        let request = serde_json::json!({
+            "proposed_output": proposed_output,
+            "reasoning_trace": reasoning_trace,
+            "state": serde_json::to_value(state)?,
+        });
+
+        let response = self.http_client
+            .post(&format!("{}/adccl/verify", self.base_url))
+            .json(&request)
+            .send()
+            .await?;
+
+        Ok(response.json().await?)
+    }
+
+    /// Call MYELIN.harden to record successful retrieval paths
+    ///
+    /// Input: memory paths used in this session + outcomes
+    /// Output: updated path-dependent weights
+    pub async fn myelin_harden(
+        &self,
+        paths_used: Vec<String>,
+        outcome: &str,
+    ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+        let request = serde_json::json!({
+            "paths_used": paths_used,
+            "outcome": outcome,
+        });
+
+        let response = self.http_client
+            .post(&format!("{}/myelin/harden", self.base_url))
+            .json(&request)
+            .send()
+            .await?;
+
+        Ok(response.json().await?)
+    }
+
+    /// Health check — ping the Python bridge
+    pub async fn health(&self) -> Result<bool, Box<dyn std::error::Error>> {
+        let response = self.http_client
+            .get(&format!("{}/health", self.base_url))
+            .send()
+            .await?;
+
+        Ok(response.status().is_success())
+    }
+}
+
+/// Bridge Request Envelope — wraps the unified state for transmission
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BridgeRequest {
+    pub state: UnifiedStateVector,
+    pub operation: String, // "initialize", "retrieve", "plan", "verify", "harden"
+    pub payload: serde_json::Value,
+}
+
+/// Bridge Response Envelope — returns updated state + operation results
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BridgeResponse {
+    pub state: UnifiedStateVector,
+    pub operation: String,
+    pub result: serde_json::Value,
+    pub success: bool,
+    pub error: Option<String>,
+}
+
+/// Request Lifecycle — the 8 stages that each request flows through
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RequestStage {
+    // Gate 1: AEGIS (governance)
+    AegisPolicy,
+
+    // Stage 2: AEON (task initialization)
+    AeonInitialize,
+
+    // Stage 3: MYELIN (memory retrieval)
+    MyelinRetrieve,
+
+    // Stage 4: ADCCL (anti-drift planning)
+    AdcclPlan,
+
+    // Stage 5: LLM generation
+    LlmGenerate,
+
+    // Stage 6: ADCCL (anti-drift verification)
+    AdcclVerify,
+
+    // Stage 7: MYELIN (path hardening)
+    MyelinHarden,
+
+    // Gate 8: AEGIS (final audit)
+    AegisAudit,
+}
+
+/// Request Lifecycle Manager — orchestrates the 8-stage flow
+pub struct RequestLifecycle {
+    pub stage: RequestStage,
+    pub state: UnifiedStateVector,
+    pub bridge: Arc<PythonBridgeClient>,
+}
+
+impl RequestLifecycle {
+    pub fn new(state: UnifiedStateVector, bridge: Arc<PythonBridgeClient>) -> Self {
+        Self {
+            stage: RequestStage::AegisPolicy,
+            state,
+            bridge,
+        }
+    }
+
+    /// Advance to the next stage, performing the appropriate action
+    pub async fn advance(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        match self.stage {
+            RequestStage::AegisPolicy => {
+                // Check governance constraints (law.json)
+                // TODO: wire to AEGIS policy check
+                self.stage = RequestStage::AeonInitialize;
+            }
+            RequestStage::AeonInitialize => {
+                // Initialize task state from the request
+                // TODO: call bridge.aeon_initialize()
+                self.stage = RequestStage::MyelinRetrieve;
+            }
+            RequestStage::MyelinRetrieve => {
+                // Retrieve relevant memory
+                // TODO: call bridge.myelin_retrieve()
+                self.stage = RequestStage::AdcclPlan;
+            }
+            RequestStage::AdcclPlan => {
+                // Generate anti-drift reasoning plan
+                // TODO: call bridge.adccl_plan()
+                self.stage = RequestStage::LlmGenerate;
+            }
+            RequestStage::LlmGenerate => {
+                // Call the LLM provider with the plan
+                // TODO: route through failover router
+                self.stage = RequestStage::AdcclVerify;
+            }
+            RequestStage::AdcclVerify => {
+                // Verify the output against drift and verification gates
+                // TODO: call bridge.adccl_verify()
+                self.stage = RequestStage::MyelinHarden;
+            }
+            RequestStage::MyelinHarden => {
+                // Harden the memory paths that were used
+                // TODO: call bridge.myelin_harden()
+                self.stage = RequestStage::AegisAudit;
+            }
+            RequestStage::AegisAudit => {
+                // Final governance audit before returning
+                // TODO: wire to AEGIS audit gate
+            }
+        }
+        Ok(())
+    }
+
+    /// Check if all gates are cleared for the current state
+    pub fn gates_cleared(&self) -> bool {
+        self.state.check_admissibility()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_request_lifecycle_initialization() {
+        let state = UnifiedStateVector::new();
+        let bridge = Arc::new(PythonBridgeClient::new("http://localhost:9000"));
+        let lifecycle = RequestLifecycle::new(state, bridge);
+
+        assert_eq!(lifecycle.stage, RequestStage::AegisPolicy);
+    }
+
+    #[tokio::test]
+    async fn test_request_lifecycle_advancement() {
+        let state = UnifiedStateVector::new();
+        let bridge = Arc::new(PythonBridgeClient::new("http://localhost:9000"));
+        let mut lifecycle = RequestLifecycle::new(state, bridge);
+
+        assert_eq!(lifecycle.stage, RequestStage::AegisPolicy);
+
+        lifecycle.advance().await.unwrap();
+        assert_eq!(lifecycle.stage, RequestStage::AeonInitialize);
+
+        lifecycle.advance().await.unwrap();
+        assert_eq!(lifecycle.stage, RequestStage::MyelinRetrieve);
+    }
+}

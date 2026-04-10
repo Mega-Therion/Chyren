@@ -1,0 +1,134 @@
+"""
+Ingest extended family research results into family_profiles.
+Updates existing rows; inserts new rows where not found.
+Run with: /home/mega/OMEGA_WORKSPACE/INGEST/venv/bin/python ingest_family_extended.py
+"""
+
+import psycopg2
+from datetime import datetime, timezone
+
+DB_URL = "postgresql://neondb_owner:npg_HbW1Zlkjd7NI@ep-sweet-glade-anvm0pwn.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require"
+
+# Research findings — only confirmed/plausible info; uncertain matches noted
+updates = [
+    # --- Existing rows to enrich ---
+    {
+        "name": "Jay",
+        "last_name": "Schwartz",
+        "aliases": ["Justin Schwartz", "Jay Schwartz"],
+        "occupation": "Tech professional — possibly co-founder/COO in technology brokerage (Savant Business Solutions / StrataCore background); unconfirmed match",
+        "notes_for_omega": "Research found a Jay Schwartz who is co-founder of Savant Business Solutions and formerly COO/General Counsel at StrataCore (major tech broker). Match unconfirmed — treat as possible lead.",
+    },
+    {
+        "name": "Suzanne",
+        "last_name": "Muldoon",
+        "location": "Pennsylvania (Pittsburgh / Indiana, PA area; possibly Hudson, NY area)",
+        "occupation": "Possibly CPA with 30+ years accounting experience (UHY Advisors NY); or academic advisor at Penn State Altoona. Match unconfirmed — multiple Suzanne Muldoons in PA.",
+        "notes_for_omega": "Research returned two PA-area Suzanne Muldoons: one CPA (UHY Advisors, Hudson NY, prior PA addresses), one academic advisor at Penn State Altoona. Relationship to RY: paternal aunt (Robo's sister, Lauren's mom).",
+    },
+    {
+        "name": "Trenda",
+        "last_name": "Drury",
+        "aliases": ["Trenda Yett", "Trenda Drury"],
+        "location": "Arkansas",
+        "notes_for_omega": "No public professional profile found. Maiden name Yett. RY's aunt (mom's younger sister). Research confirmed no match — data remains sparse.",
+    },
+    # --- New rows to insert ---
+    {
+        "name": "Lauren",
+        "last_name": "Muldoon",
+        "relationship": "cousin (Suzanne's daughter, Alye's sister)",
+        "location": "Pennsylvania (Greater Philadelphia area)",
+        "occupation": "Possibly Senior Manager of User Experience at Vanguard (B.S. Univ. of Delaware; background in pharma advertising UX, Cognizant, Infosys); or Senior Project Engineer at Gilbane Building Company. Multiple Lauren Muldoons in PA — match unconfirmed.",
+        "notes_for_omega": "Research found two strong Philadelphia-area Lauren Muldoons: one in UX at Vanguard, one in construction engineering at Gilbane. Alye's sister per RY's context.",
+    },
+    {
+        "name": "Melissa",
+        "last_name": "Scissom",
+        "relationship": "cousin (Arkansas)",
+        "location": "Russellville, Arkansas (last known: 501 E Holly St) — possibly relocated to Tennessee",
+        "birthday": "January 1984",
+        "occupation": "Possibly Manager at BlueCross BlueShield of Tennessee (Chattanooga) — ZoomInfo record; unconfirmed match",
+        "notes_for_omega": "People-search records show Melissa Richelle Scissom, DOB Jan 1984, last known Russellville AR. A ZoomInfo entry lists Melissa Scissom as manager at BCBS Tennessee. Match plausible but unconfirmed.",
+    },
+    {
+        "name": "Amy",
+        "last_name": "Smiley",
+        "relationship": "cousin (Arkansas, Hamilton family connection through Joe Wayne Hamilton)",
+        "location": "Arkansas",
+        "notes_for_omega": "No public info found. Joe Wayne Hamilton's obituary (d. 2017, Mount Ida AR) surfaced but did not name Amy Smiley. Data remains sparse — needs direct family confirmation.",
+    },
+    {
+        "name": "Savannah",
+        "last_name": "Harvey",
+        "relationship": "cousin (Arkansas)",
+        "location": "Arkansas",
+        "notes_for_omega": "No public info found. Name is too common without additional context to narrow results. Needs direct family confirmation.",
+    },
+    {
+        "name": "James",
+        "last_name": "Hamilton",
+        "relationship": "cousin (Arkansas)",
+        "location": "Arkansas",
+        "notes_for_omega": "Multiple James Hamiltons in Arkansas found. Notable matches: James Hamilton at UA (electrician), James Hamilton (Urban League AR CEO, energy policy background). None confirmed as RY's cousin — needs clarification.",
+    },
+    {
+        "name": "Randi",
+        "last_name": "Carr",
+        "relationship": "cousin (Arkansas)",
+        "location": "Arkansas",
+        "notes_for_omega": "No Arkansas-specific public profile confirmed. One Randi Carr found in Tennessee (early childhood educator). Needs direct family confirmation.",
+    },
+    {
+        "name": "Michael",
+        "last_name": "Barrett",
+        "relationship": "cousin (Arkansas)",
+        "location": "Arkansas",
+        "notes_for_omega": "Multiple Michael Barretts in Arkansas. Notable: Navy vet/pastor (Libertarian candidate 2018) and an advanced manufacturing educator in Jonesboro. Neither confirmed as RY's cousin.",
+    },
+]
+
+def upsert(cur, record):
+    name = record["name"]
+    # Check if row exists
+    cur.execute("SELECT id FROM family_profiles WHERE name = %s", (name,))
+    row = cur.fetchone()
+
+    if row:
+        # Build SET clause from provided fields (skip 'name')
+        fields = {k: v for k, v in record.items() if k != "name"}
+        if not fields:
+            print(f"  SKIP {name} — no fields to update")
+            return
+        set_clause = ", ".join(f"{k} = %s" for k in fields)
+        set_clause += ", updated_at = %s"
+        values = list(fields.values()) + [datetime.now(timezone.utc), name]
+        cur.execute(f"UPDATE family_profiles SET {set_clause} WHERE name = %s", values)
+        print(f"  UPDATE {name}")
+    else:
+        # Insert
+        fields = record.copy()
+        fields["created_at"] = datetime.now(timezone.utc)
+        fields["updated_at"] = datetime.now(timezone.utc)
+        cols = ", ".join(fields.keys())
+        placeholders = ", ".join(["%s"] * len(fields))
+        cur.execute(f"INSERT INTO family_profiles ({cols}) VALUES ({placeholders})", list(fields.values()))
+        print(f"  INSERT {name}")
+
+def main():
+    conn = psycopg2.connect(DB_URL)
+    cur = conn.cursor()
+    print(f"Connected. Processing {len(updates)} records...\n")
+    for rec in updates:
+        try:
+            upsert(cur, rec)
+        except Exception as e:
+            print(f"  ERROR {rec.get('name')}: {e}")
+            conn.rollback()
+            continue
+        conn.commit()
+    print("\nDone.")
+    conn.close()
+
+if __name__ == "__main__":
+    main()

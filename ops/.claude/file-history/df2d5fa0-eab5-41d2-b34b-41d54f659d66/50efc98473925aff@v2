@@ -1,0 +1,67 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { neon } from '@neondatabase/serverless';
+
+// Public read-only endpoint — no auth required.
+// Returns safe-to-share entries from the public_knowledge table.
+
+export async function GET(req: NextRequest) {
+  const dbUrl = process.env.DATABASE_URL;
+  if (!dbUrl) return NextResponse.json({ error: 'DB unavailable' }, { status: 503 });
+
+  const { searchParams } = new URL(req.url);
+  const category = searchParams.get('category') ?? null;
+  const tag      = searchParams.get('tag') ?? null;
+  const q        = searchParams.get('q') ?? null;
+  const limit    = Math.min(parseInt(searchParams.get('limit') ?? '20', 10), 100);
+  const offset   = parseInt(searchParams.get('offset') ?? '0', 10);
+
+  try {
+    const db = neon(dbUrl);
+
+    // Use a single query that handles all optional filters via COALESCE / null checks.
+    // This avoids dynamic SQL construction which doesn't work with neon tagged templates.
+    const rows = await db`
+      SELECT id, category, title, content, source_ns, importance, tags, published_at
+      FROM public_knowledge
+      WHERE (${category}::text IS NULL OR category = ${category})
+        AND (${tag}::text    IS NULL OR ${tag} = ANY(tags))
+        AND (${q}::text      IS NULL OR content ILIKE '%' || ${q} || '%')
+      ORDER BY importance DESC, published_at DESC
+      LIMIT ${limit} OFFSET ${offset}
+    `;
+
+    const countRows = await db`
+      SELECT count(*)::int AS total
+      FROM public_knowledge
+      WHERE (${category}::text IS NULL OR category = ${category})
+        AND (${tag}::text    IS NULL OR ${tag} = ANY(tags))
+        AND (${q}::text      IS NULL OR content ILIKE '%' || ${q} || '%')
+    `;
+
+    return NextResponse.json(
+      {
+        total:   countRows[0]?.total ?? 0,
+        limit,
+        offset,
+        results: rows,
+      },
+      {
+        headers: {
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+          'Access-Control-Allow-Origin': '*',
+        },
+      }
+    );
+  } catch (err) {
+    return NextResponse.json({ error: String(err) }, { status: 500 });
+  }
+}
+
+export async function OPTIONS() {
+  return new Response(null, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    },
+  });
+}

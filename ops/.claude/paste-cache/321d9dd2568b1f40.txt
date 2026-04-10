@@ -1,0 +1,39 @@
+The Core Strategy: "The Agent OS"
+  Treat the shared bundle (/home/mega/claude-skill-bundle/skills) as a central operating system for all your agents.
+  Instead of memorizing 165 files, use the Universal Meta-Skills as your control center:
+
+  1. To Start a Mission: multi-agent-orchestrator
+   * When: You have a complex goal (e.g., "Build a full-stack app").
+   * How: This skill partitions the work. It will tell Aider to code,  to audit the database, and Codex to check
+     security. It’s the "Project Manager" skill.
+
+  2. To Stay in Sync: shared-state-sync
+   * When: You switch agents or come back to a project.
+   * How: This skill forces the agent to read The Block (~/NEXUS/ERGON.md). It ensures I know exactly what Claude or
+     Codex finished while I was away, so we never duplicate work.
+
+  3. To Fix the Mesh: agent-mesh-health-check
+   * When: An agent won't respond or "forwarding" fails.
+   * How: It runs a diagnostic on your Telegram webhooks, secure mesh boundaries, and file permissions to get everyone
+     talking again.
+
+  4. To "Level Up" New Agents: universal-skill-bootstrapper
+   * When: You install a new CLI tool or agent.
+   * How: Point it at the bundle and say "Read the bootstrapper and install these 165 skills for yourself." This makes
+     any new agent immediately as capable as the ones already on your PC.
+
+  ---
+
+  The "Power Move" Workflow
+  If you aren't sure which of the 165 skills to use, ask me this exact question:
+  > "Based on my current goal, which 3 skills from the shared bundle should we chain together?"
+
+  I will then:
+   1. Search the skills-manifest.json.
+   2. Propose a "Skill Chain" (e.g., repo-cartographer → security-threat-model → aider-implementation).
+   3. Execute the chain for you.
+
+  Pro-Tips
+   * Keep INDEX.md Open: It is your master "Table of Contents" for all 165 skills.
+   * Trust The Block (ERGON.md): It is the shared memory of your machine. Every time a skill finishes a major step,
+     make sure it logs a entry there so the other agents "see" it.

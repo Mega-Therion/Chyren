@@ -1,0 +1,231 @@
+#!/usr/bin/env python3
+"""Insert critical ROWI data into Neon."""
+import json, psycopg2
+from psycopg2.extras import Json
+
+NEON_DSN = "postgresql://neondb_owner:npg_HbW1Zlkjd7NI@ep-sweet-glade-anvm0pwn.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require"
+
+SCHEMA = """
+CREATE EXTENSION IF NOT EXISTS vector;
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+CREATE TABLE IF NOT EXISTS public.omega_state (
+  id text NOT NULL PRIMARY KEY, mode text NOT NULL, focus_topic text,
+  energy_level float8 NOT NULL, mood text NOT NULL,
+  active_conversation_id text, active_task_ids jsonb, current_goals jsonb,
+  session_started_at timestamptz, last_interaction_at timestamptz,
+  interactions_today int, last_reflection_at timestamptz,
+  pending_reflections jsonb, updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS public.omega_namespace_config (
+  namespace text NOT NULL PRIMARY KEY, embedding_provider text NOT NULL,
+  embedding_dim int NOT NULL, doc_task_type text NOT NULL,
+  query_task_type text NOT NULL, fallback_providers jsonb NOT NULL DEFAULT '[]',
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS public.omega_provider_state (
+  provider text NOT NULL PRIMARY KEY, cooldown_until timestamptz,
+  consecutive_failures int NOT NULL DEFAULT 0, last_error_type text,
+  last_status_code int, last_ok_at timestamptz,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS public.omega_recipe_registry (
+  recipe_id text NOT NULL PRIMARY KEY, name text NOT NULL,
+  category text NOT NULL, description text NOT NULL, use_when text NOT NULL,
+  hyperparams jsonb NOT NULL DEFAULT '{}', chained_with jsonb NOT NULL DEFAULT '[]',
+  validated bool NOT NULL DEFAULT false, source text,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS public.study_materials (
+  id bigserial NOT NULL PRIMARY KEY, title text NOT NULL, filename text,
+  content text, word_count int, file_size int, topics text,
+  ingested_at timestamp DEFAULT now(), last_studied timestamp,
+  study_count int DEFAULT 0, created_at timestamp DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS public.omega_task_graph (
+  mission_id text NOT NULL PRIMARY KEY, mission_description text NOT NULL,
+  status text NOT NULL, created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(), graph_json jsonb NOT NULL
+);
+CREATE TABLE IF NOT EXISTS public.omega_sub_tasks (
+  id text NOT NULL PRIMARY KEY, mission_id text NOT NULL,
+  description text NOT NULL, depends_on jsonb NOT NULL,
+  assigned_agent text NOT NULL, status text NOT NULL, output text,
+  FOREIGN KEY (mission_id) REFERENCES public.omega_task_graph(mission_id)
+);
+CREATE TABLE IF NOT EXISTS public.omega_events (
+  id text NOT NULL PRIMARY KEY, ts timestamptz NOT NULL DEFAULT now(),
+  actor text, event_type text NOT NULL, payload_json jsonb NOT NULL,
+  prev_hash text, hash text
+);
+CREATE TABLE IF NOT EXISTS public.omega_provider_metrics (
+  id uuid NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+  ts timestamptz NOT NULL DEFAULT now(), route text NOT NULL,
+  provider text NOT NULL, model text, ok bool NOT NULL,
+  latency_ms int NOT NULL, status_code int, error_type text,
+  error_message text, tokens_total int, meta jsonb NOT NULL DEFAULT '{}'
+);
+CREATE TABLE IF NOT EXISTS public.omega_idempotency (
+  key text NOT NULL PRIMARY KEY, response_status int NOT NULL,
+  response_body bytea, created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS public.omega_kinetic_memory (
+  id text NOT NULL PRIMARY KEY, device_id text NOT NULL,
+  ts timestamptz NOT NULL DEFAULT now(), command text,
+  telemetry jsonb, impact_score float8 DEFAULT 1.0, meta jsonb DEFAULT '{}'
+);
+CREATE TABLE IF NOT EXISTS public.omega_memory (
+  id text NOT NULL PRIMARY KEY, namespace text NOT NULL,
+  ts timestamptz NOT NULL DEFAULT now(), content text NOT NULL,
+  meta jsonb NOT NULL DEFAULT '{}', embedding vector, importance float8 DEFAULT 1.0
+);
+CREATE TABLE IF NOT EXISTS public.omega_memory_entries (
+  id text NOT NULL PRIMARY KEY, content text NOT NULL,
+  source text NOT NULL DEFAULT 'chat', importance float8 NOT NULL DEFAULT 0.5,
+  created_at text NOT NULL DEFAULT now()::text,
+  namespace text NOT NULL DEFAULT 'default', embedding vector,
+  domain text NOT NULL DEFAULT 'operational', confidence float8 NOT NULL DEFAULT 1.0,
+  version bigint NOT NULL DEFAULT 1, superseded_by text, key text, raw_artifact text
+);
+CREATE TABLE IF NOT EXISTS public.omega_forge_jobs (
+  job_id uuid NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
+  ts timestamptz NOT NULL DEFAULT now(), recipe_id text NOT NULL,
+  status text NOT NULL DEFAULT 'created',
+  input jsonb NOT NULL DEFAULT '{}', plan jsonb NOT NULL DEFAULT '{}'
+);
+CREATE TABLE IF NOT EXISTS public.omega_provider_state (
+  provider text NOT NULL PRIMARY KEY, cooldown_until timestamptz,
+  consecutive_failures int NOT NULL DEFAULT 0, last_error_type text,
+  last_status_code int, last_ok_at timestamptz,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS public.magnus_signal_states (
+  id bigserial NOT NULL PRIMARY KEY, created_at timestamptz NOT NULL DEFAULT now(),
+  run_id text NOT NULL, session_id text, agent_id text,
+  channel text NOT NULL, tick int NOT NULL, payload_json jsonb NOT NULL
+);
+CREATE TABLE IF NOT EXISTS public.aeon_runs (
+  id bigserial NOT NULL PRIMARY KEY, created_at timestamptz NOT NULL DEFAULT now(),
+  task_id text NOT NULL, run_id text NOT NULL, verification_status text NOT NULL,
+  prompt text NOT NULL, output text NOT NULL, tso_json jsonb NOT NULL
+);
+CREATE TABLE IF NOT EXISTS public.learning_experiments (
+  id bigserial NOT NULL PRIMARY KEY, experiment_name text, description text,
+  hypothesis text, technique_tested text, results_positive text,
+  results_negative text, learnings text, apply_to_system text,
+  status varchar(50), integration_timestamp timestamp, created_at timestamp DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS public.system_improvements (
+  id bigserial NOT NULL PRIMARY KEY, improvement_title text,
+  related_experiment_id bigint, source_learning text,
+  component_affected varchar(255), change_description text,
+  performance_impact text, implementation_date timestamp, created_at timestamp DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS public.learning_progress (
+  id bigserial NOT NULL PRIMARY KEY, study_session_id varchar(50),
+  study_material_id bigint, progress_percentage int, sections_reviewed text,
+  key_concepts_identified text, session_start timestamp, session_end timestamp,
+  insights_generated int, experiments_proposed int
+);
+CREATE TABLE IF NOT EXISTS public.marginalia (
+  id bigserial NOT NULL PRIMARY KEY, study_material_id bigint,
+  annotation_type varchar(50), content text, related_section text,
+  experiment_results text, applied_to varchar(255), success_rating int,
+  created_at timestamp DEFAULT now(), updated_at timestamp DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS public.experimental_recipes (
+  id bigserial NOT NULL PRIMARY KEY, recipe_name text, description text,
+  base_techniques text, implementation text, test_scenario text, outcome text,
+  effectiveness_score int, ready_for_production bool DEFAULT false,
+  created_at timestamp DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS public.downloads_manifest (
+  id bigserial NOT NULL PRIMARY KEY, file_name text, file_path text,
+  file_size bigint, category text, full_path text, created_at timestamp DEFAULT now()
+);
+"""
+
+# --- DATA (scraped via execute_sql) ---
+
+OMEGA_STATE = [{"id":"current","mode":"operational","focus_topic":None,"energy_level":1,"mood":"neutral","active_conversation_id":None,"active_task_ids":[],"current_goals":[],"session_started_at":"2026-03-05T20:22:56.858511+00:00","last_interaction_at":None,"interactions_today":0,"last_reflection_at":None,"pending_reflections":[],"updated_at":"2026-03-05T20:22:56.962505+00:00"}]
+
+OMEGA_NAMESPACE_CONFIG = [{"namespace":"canon.identity","embedding_provider":"openai","embedding_dim":1536,"doc_task_type":"RETRIEVAL_DOCUMENT","query_task_type":"RETRIEVAL_QUERY","fallback_providers":["openai",""],"updated_at":"2026-03-05T20:58:29.594753+00:00"},{"namespace":"eval","embedding_provider":"auto","embedding_dim":1536,"doc_task_type":"RETRIEVAL_DOCUMENT","query_task_type":"RETRIEVAL_QUERY","fallback_providers":["openai","","local"],"updated_at":"2026-03-06T07:52:01.901004+00:00"},{"namespace":"default","embedding_provider":"local","embedding_dim":1536,"doc_task_type":"RETRIEVAL_DOCUMENT","query_task_type":"RETRIEVAL_QUERY","fallback_providers":[],"updated_at":"2026-03-10T22:39:08.849677+00:00"},{"namespace":"creator.chatgpt.export","embedding_provider":"local","embedding_dim":1536,"doc_task_type":"RETRIEVAL_DOCUMENT","query_task_type":"RETRIEVAL_QUERY","fallback_providers":[],"updated_at":"2026-03-10T22:39:09.31856+00:00"},{"namespace":"creator.chatgpt.attachments","embedding_provider":"local","embedding_dim":1536,"doc_task_type":"RETRIEVAL_DOCUMENT","query_task_type":"RETRIEVAL_QUERY","fallback_providers":[],"updated_at":"2026-03-10T22:39:09.7774+00:00"}]
+
+# Provider state — reset cooldowns since they're from weeks ago, keep the structure
+OMEGA_PROVIDER_STATE = [{"provider":"anthropic","cooldown_until":None,"consecutive_failures":0,"last_error_type":None,"last_status_code":None,"last_ok_at":None,"updated_at":"2026-03-22T00:00:00+00:00"},{"provider":"deepseek","cooldown_until":None,"consecutive_failures":0,"last_error_type":None,"last_status_code":None,"last_ok_at":None,"updated_at":"2026-03-22T00:00:00+00:00"},{"provider":"local","cooldown_until":None,"consecutive_failures":0,"last_error_type":None,"last_status_code":None,"last_ok_at":None,"updated_at":"2026-03-22T00:00:00+00:00"},{"provider":"","cooldown_until":None,"consecutive_failures":0,"last_error_type":None,"last_status_code":None,"last_ok_at":None,"updated_at":"2026-03-22T00:00:00+00:00"},{"provider":"codex_cli","cooldown_until":None,"consecutive_failures":0,"last_error_type":None,"last_status_code":None,"last_ok_at":None,"updated_at":"2026-03-22T00:00:00+00:00"},{"provider":"groq","cooldown_until":None,"consecutive_failures":0,"last_error_type":None,"last_status_code":None,"last_ok_at":None,"updated_at":"2026-03-22T00:00:00+00:00"},{"provider":"openai","cooldown_until":None,"consecutive_failures":0,"last_error_type":None,"last_status_code":None,"last_ok_at":None,"updated_at":"2026-03-22T00:00:00+00:00"}]
+
+OMEGA_RECIPE_REGISTRY = [{"recipe_id":"data-active-learning","name":"Uncertainty Sampler","category":"preprocessing/active-learning","description":"Scores unlabeled data by uncertainty (entropy) to prioritize human labeling.","use_when":"Have huge dataset but can label only a small fraction.","hyperparams":{"metric":"entropy","sample_ratio":0.05},"chained_with":[],"validated":True,"source":"llm_forge","updated_at":"2026-03-20T04:03:36.230739+00:00"},{"recipe_id":"data-curriculum-sort","name":"Complexity-Based Curriculum Scheduler","category":"preprocessing/curriculum","description":"Orders training data by complexity (length, rarity, perplexity).","use_when":"Training from scratch or on complex new domain where random sampling fails.","hyperparams":{"num_buckets":5,"complexity_metric":"perplexity"},"chained_with":["llm-pretraining-ptl"],"validated":True,"source":"llm_forge","updated_at":"2026-03-20T04:03:36.230739+00:00"},{"recipe_id":"model-quantize-gguf","name":"GGUF Quantization & Export","category":"deployment/optimization","description":"Converts weights into INT4/INT8 GGUF format for edge inference.","use_when":"Prepare a model to run on laptop/edge hardware.","hyperparams":{"leave_output_fp16":True,"quantization_type":"q4_k_m"},"chained_with":[],"validated":True,"source":"llm_forge","updated_at":"2026-03-20T04:03:36.230739+00:00"},{"recipe_id":"federated-learning-aggregator","name":"FedAvg Weight Aggregator","category":"deep-learning/federated","description":"Averages weights/gradients from multiple nodes without moving raw data.","use_when":"Train using private telemetry from distributed endpoints.","hyperparams":{"minimum_clients":3,"aggregation_method":"fedavg"},"chained_with":[],"validated":True,"source":"llm_forge","updated_at":"2026-03-20T04:03:36.230739+00:00"},{"recipe_id":"llm-sft-qlora","name":"Supervised Fine-Tuning (QLoRA)","category":"deep-learning/fine-tuning","description":"Parameter-efficient fine-tuning of LLMs using 4-bit quantization and Low-Rank Adapters.","use_when":"Teach an existing LLM formatting, tone, or domain knowledge with limited VRAM.","hyperparams":{"epochs":3,"lora_r":16,"batch_size":4,"lora_alpha":32,"learning_rate":0.0002},"chained_with":["data-active-learning"],"validated":True,"source":"llm_forge","updated_at":"2026-03-20T04:03:36.230739+00:00"},{"recipe_id":"llm-alignment-dpo","name":"Direct Preference Optimization (DPO)","category":"deep-learning/alignment","description":"Aligns LLM behavior using chosen/rejected completion pairs without a separate reward model.","use_when":"Model produces undesirable outputs and needs behavioral alignment.","hyperparams":{"beta":0.1,"batch_size":2,"max_length":1024,"learning_rate":0.00005},"chained_with":["llm-sft-qlora"],"validated":True,"source":"llm_forge","updated_at":"2026-03-20T04:03:36.230739+00:00"},{"recipe_id":"llm-knowledge-distillation","name":"Logit-Mimicry Distillation","category":"deep-learning/compression","description":"Trains a small student model to match logits from a large teacher model.","use_when":"Need a smaller, faster model for edge deployment while retaining capability.","hyperparams":{"alpha":0.5,"epochs":5,"temperature":2},"chained_with":["model-quantize-gguf"],"validated":True,"source":"llm_forge","updated_at":"2026-03-20T04:03:36.230739+00:00"},{"recipe_id":"llm-constitutional-ai","name":"Constitutional Self-Critique Loop","category":"deep-learning/synthetic-data","description":"Generates synthetic training data via critique+revision against a Constitution.","use_when":"Lack human labelers but need alignment data for SFT/DPO.","hyperparams":{"critique_rounds":2,"constitution_rules":["Be helpful","Be harmless","Be honest"]},"chained_with":["llm-sft-qlora"],"validated":True,"source":"llm_forge","updated_at":"2026-03-20T04:03:36.230739+00:00"}]
+
+
+def upsert(cur, table, rows, pk):
+    if not rows:
+        return 0
+    cols = list(rows[0].keys())
+    col_str = ", ".join(f'"{c}"' for c in cols)
+    vals_str = ", ".join(["%s"] * len(cols))
+    sql = f'INSERT INTO public."{table}" ({col_str}) VALUES ({vals_str}) ON CONFLICT ("{pk}") DO NOTHING'
+    n = 0
+    for row in rows:
+        vals = [json.dumps(v) if isinstance(v, (dict, list)) else v for v in [row[c] for c in cols]]
+        cur.execute(sql, vals)
+        n += 1
+    return n
+
+
+def main():
+    conn = psycopg2.connect(NEON_DSN)
+    conn.autocommit = False
+    cur = conn.cursor()
+
+    print("Creating schema...")
+    for stmt in [s.strip() for s in SCHEMA.split(";") if s.strip()]:
+        try:
+            cur.execute(stmt)
+        except Exception as e:
+            conn.rollback(); cur = conn.cursor()
+    conn.commit()
+    print("Schema OK.")
+
+    datasets = [
+        ("omega_state",            OMEGA_STATE,            "id"),
+        ("omega_namespace_config", OMEGA_NAMESPACE_CONFIG, "namespace"),
+        ("omega_provider_state",   OMEGA_PROVIDER_STATE,   "provider"),
+        ("omega_recipe_registry",  OMEGA_RECIPE_REGISTRY,  "recipe_id"),
+    ]
+
+    for table, rows, pk in datasets:
+        n = upsert(cur, table, rows, pk)
+        conn.commit()
+        print(f"  {table}: {n} rows inserted")
+
+    # study_materials needs special handling (bigserial — override id)
+    study = [
+        {"id":1,"title":" Encyclopedia","filename":"_encyclopedia.md","content":None,"word_count":283,"file_size":2260,"topics":",context,multimodal","ingested_at":"2026-03-07T04:28:13","last_studied":None,"study_count":0,"created_at":"2026-03-07T04:28:13"},
+        {"id":2,"title":"Grok Encyclopedia","filename":"grok_encyclopedia.md","content":None,"word_count":135,"file_size":1019,"topics":"grok,xai","ingested_at":"2026-03-07T04:28:13","last_studied":None,"study_count":0,"created_at":"2026-03-07T04:28:13"},
+        {"id":3,"title":"Perplexity Encyclopedia","filename":"perplexity_encyclopedia.md","content":None,"word_count":220,"file_size":1883,"topics":"perplexity,sonar,search","ingested_at":"2026-03-07T04:28:13","last_studied":None,"study_count":0,"created_at":"2026-03-07T04:28:13"},
+        {"id":4,"title":"Sovereign Blueprint","filename":"sovereign_blueprint.md","content":None,"word_count":605,"file_size":4423,"topics":"omega,architecture,reasoning","ingested_at":"2026-03-07T04:28:13","last_studied":None,"study_count":0,"created_at":"2026-03-07T04:28:13"},
+        {"id":5,"title":"Anthropic Encyclopedia","filename":"anthropic_encyclopedia.md","content":None,"word_count":311,"file_size":2506,"topics":"claude,anthropic,computer-use","ingested_at":"2026-03-07T04:28:13","last_studied":None,"study_count":0,"created_at":"2026-03-07T04:28:13"},
+        {"id":6,"title":"OpenAI Encyclopedia","filename":"openai_encyclopedia.md","content":None,"word_count":945,"file_size":7226,"topics":"openai,gpt,agents","ingested_at":"2026-03-07T04:28:13","last_studied":None,"study_count":0,"created_at":"2026-03-07T04:28:13"},
+        {"id":7,"title":"Open Source AI Encyclopedia","filename":"opensource_ai_encyclopedia.md","content":None,"word_count":213,"file_size":1801,"topics":"huggingface,vllm,ollama","ingested_at":"2026-03-07T04:28:13","last_studied":None,"study_count":0,"created_at":"2026-03-07T04:28:13"},
+        {"id":8,"title":"AI Mastery Encyclopedia","filename":"ai_mastery_encyclopedia.md","content":None,"word_count":608,"file_size":4485,"topics":"rlhf,peft,transformers","ingested_at":"2026-03-07T04:28:13","last_studied":None,"study_count":0,"created_at":"2026-03-07T04:28:13"},
+        {"id":9,"title":"Ollama Encyclopedia","filename":"ollama_encyclopedia.md","content":None,"word_count":157,"file_size":1314,"topics":"ollama,local,llm","ingested_at":"2026-03-07T04:28:13","last_studied":None,"study_count":0,"created_at":"2026-03-07T04:28:13"},
+    ]
+    # Insert with explicit id, then sync sequence
+    for row in study:
+        cur.execute("""
+            INSERT INTO public.study_materials (id,title,filename,content,word_count,file_size,topics,ingested_at,last_studied,study_count,created_at)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON CONFLICT (id) DO NOTHING
+        """, [row["id"],row["title"],row["filename"],row["content"],row["word_count"],row["file_size"],row["topics"],row["ingested_at"],row["last_studied"],row["study_count"],row["created_at"]])
+    cur.execute("SELECT setval(pg_get_serial_sequence('public.study_materials','id'), (SELECT MAX(id) FROM public.study_materials))")
+    conn.commit()
+    print(f"  study_materials: {len(study)} rows inserted")
+
+    cur.close()
+    conn.close()
+    print("\nCore data migration complete!")
+    print("Note: omega_memory (597 rows) and omega_memory_entries (875 rows) need a separate batch migration.")
+    print("Embeddings will need regeneration — content is preserved.")
+
+
+if __name__ == "__main__":
+    main()

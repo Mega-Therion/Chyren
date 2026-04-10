@@ -1,0 +1,285 @@
+2026-03-05T15:32:16.350Z [DEBUG] detectFileEncoding failed for expected reason: ENOENT
+2026-03-05T15:32:16.351Z [DEBUG] MDM settings load completed in 1ms
+2026-03-05T15:32:16.398Z [DEBUG] [init] configureGlobalMTLS starting
+2026-03-05T15:32:16.398Z [DEBUG] [init] configureGlobalMTLS complete
+2026-03-05T15:32:16.398Z [DEBUG] [init] configureGlobalAgents starting
+2026-03-05T15:32:16.398Z [DEBUG] [init] configureGlobalAgents complete
+2026-03-05T15:32:16.425Z [DEBUG] Applying permission update: Adding 99 allow rule(s) to destination 'userSettings': ["Bash(**)","Read(**)","Edit(**)","Write(**)","Glob(**)","Grep(**)","WebSearch","Bash(gh auth status:*)","Bash(gh repo list:*)","Bash(git config:*)","Bash(git --version)","Bash(~/.local/bin/gh auth status)","Bash(curl:*)","Bash(python3:*)","Bash(git clone:*)","Bash(ls:*)","Bash(if [ ! -d \"node_modules\" ])","Bash(then echo \"Installing dependencies...\")","Bash(npm install)","Bash(else echo \"Dependencies already installed\")","Bash(fi)","Bash(npm install:*)","Bash(gh api:*)","Bash(timeout 5 claude --help:*)","Bash(echo:*)","Bash(timeout 10 claude:*)","Bash(export ANTHROPIC_API_KEY=\"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\")","Bash(timeout 15 claude:*)","Bash(claude setup-token:*)","Bash(sh -s -- -y)","Bash(source \"$HOME/.cargo/env\")","Bash(pgrep:*)","Bash(ollama list:*)","Bash(cargo run:*)","Bash(ps:*)","Bash(ollama ps:*)","Bash(sync)","Bash(sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches')","Bash(pkill:*)","Bash(timeout 30 tail:*)","Bash(ollama pull:*)","Bash(cargo build:*)","Bash(chmod:*)","Bash(./install.sh:*)","Bash(~/.local/bin/omega:*)","Bash(du:*)","Bash(/home/mega/.cargo/bin/cargo build:*)","Bash(/home/mega/.cargo/bin/cargo install:*)","Bash(tee:*)","Bash(timeout:*)","Bash(sudo add-apt-repository:*)","Bash(megasync:*)","Bash(dpkg:*)","Bash(apt list:*)","Bash(pip install:*)","Bash(find:*)","Bash(cargo --version:*)","Bash(cargo new:*)","Bash(/home/mega/NEXUS/rust/target/release/nexus-pulse:*)","Bash(/home/mega/NEXUS/rust/target/release/nexus-memory briefing)","Bash(/home/mega/NEXUS/rust/target/release/nexus-warp status)","WebFetch(domain:chatgpt.com)","Bash(ss:*)","Bash(sudo systemctl:*)","Bash(systemctl restart:*)","Bash(systemctl status:*)","Bash(crontab:*)","Bash(printf:*)","Bash(sudo:*)","Bash(git check-ignore:*)","Bash(git add:*)","Bash(git commit:*)","Bash(git push:*)","Bash(:*)","Bash(codex:*)","Bash(npm show:*)","Bash(claude:*)","Bash(aider:*)","Bash(redis-server:*)","Bash(source:*)","Bash(python:*)","Bash(pip3 install:*)","Bash(journalctl:*)","Bash(systemctl:*)","Bash(kill 7273:*)","Bash(systemctl show:*)","Bash(kill 38138)","Bash(pm2 list:*)","Bash(lsof:*)","Bash(grep:*)","Bash(./scripts/sync-gateway-env.sh:*)","Bash(node:*)","Bash(/home/mega/NEXUS/ERGON.md:*)","Bash(kill 88373:*)","Bash(./venv/bin/pip show:*)","Bash(./venv/bin/pip install:*)","Bash(./venv/bin/python:*)","Bash(OMEGA_DB_URL=sqlite:///gateway.db ./venv/bin/python:*)","Bash(omega ask:*)"]
+2026-03-05T15:32:16.425Z [DEBUG] Applying permission update: Adding 99 allow rule(s) to destination 'projectSettings': ["Bash(**)","Read(**)","Edit(**)","Write(**)","Glob(**)","Grep(**)","WebSearch","Bash(gh auth status:*)","Bash(gh repo list:*)","Bash(git config:*)","Bash(git --version)","Bash(~/.local/bin/gh auth status)","Bash(curl:*)","Bash(python3:*)","Bash(git clone:*)","Bash(ls:*)","Bash(if [ ! -d \"node_modules\" ])","Bash(then echo \"Installing dependencies...\")","Bash(npm install)","Bash(else echo \"Dependencies already installed\")","Bash(fi)","Bash(npm install:*)","Bash(gh api:*)","Bash(timeout 5 claude --help:*)","Bash(echo:*)","Bash(timeout 10 claude:*)","Bash(export ANTHROPIC_API_KEY=\"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\")","Bash(timeout 15 claude:*)","Bash(claude setup-token:*)","Bash(sh -s -- -y)","Bash(source \"$HOME/.cargo/env\")","Bash(pgrep:*)","Bash(ollama list:*)","Bash(cargo run:*)","Bash(ps:*)","Bash(ollama ps:*)","Bash(sync)","Bash(sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches')","Bash(pkill:*)","Bash(timeout 30 tail:*)","Bash(ollama pull:*)","Bash(cargo build:*)","Bash(chmod:*)","Bash(./install.sh:*)","Bash(~/.local/bin/omega:*)","Bash(du:*)","Bash(/home/mega/.cargo/bin/cargo build:*)","Bash(/home/mega/.cargo/bin/cargo install:*)","Bash(tee:*)","Bash(timeout:*)","Bash(sudo add-apt-repository:*)","Bash(megasync:*)","Bash(dpkg:*)","Bash(apt list:*)","Bash(pip install:*)","Bash(find:*)","Bash(cargo --version:*)","Bash(cargo new:*)","Bash(/home/mega/NEXUS/rust/target/release/nexus-pulse:*)","Bash(/home/mega/NEXUS/rust/target/release/nexus-memory briefing)","Bash(/home/mega/NEXUS/rust/target/release/nexus-warp status)","WebFetch(domain:chatgpt.com)","Bash(ss:*)","Bash(sudo systemctl:*)","Bash(systemctl restart:*)","Bash(systemctl status:*)","Bash(crontab:*)","Bash(printf:*)","Bash(sudo:*)","Bash(git check-ignore:*)","Bash(git add:*)","Bash(git commit:*)","Bash(git push:*)","Bash(:*)","Bash(codex:*)","Bash(npm show:*)","Bash(claude:*)","Bash(aider:*)","Bash(redis-server:*)","Bash(source:*)","Bash(python:*)","Bash(pip3 install:*)","Bash(journalctl:*)","Bash(systemctl:*)","Bash(kill 7273:*)","Bash(systemctl show:*)","Bash(kill 38138)","Bash(pm2 list:*)","Bash(lsof:*)","Bash(grep:*)","Bash(./scripts/sync-gateway-env.sh:*)","Bash(node:*)","Bash(/home/mega/NEXUS/ERGON.md:*)","Bash(kill 88373:*)","Bash(./venv/bin/pip show:*)","Bash(./venv/bin/pip install:*)","Bash(./venv/bin/python:*)","Bash(OMEGA_DB_URL=sqlite:///gateway.db ./venv/bin/python:*)","Bash(omega ask:*)"]
+2026-03-05T15:32:16.425Z [DEBUG] Applying permission update: Adding 93 allow rule(s) to destination 'localSettings': ["Bash(gh auth status:*)","Bash(gh repo list:*)","Bash(git config:*)","Bash(git --version)","Bash(~/.local/bin/gh auth status)","Bash(curl:*)","Bash(python3:*)","Bash(git clone:*)","Bash(ls:*)","Bash(if [ ! -d \"node_modules\" ])","Bash(then echo \"Installing dependencies...\")","Bash(npm install)","Bash(else echo \"Dependencies already installed\")","Bash(fi)","Bash(npm install:*)","Bash(gh api:*)","Bash(timeout 5 claude --help:*)","Bash(echo:*)","Bash(timeout 10 claude:*)","Bash(export ANTHROPIC_API_KEY=\"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\")","Bash(timeout 15 claude:*)","Bash(claude setup-token:*)","Bash(sh -s -- -y)","Bash(source \"$HOME/.cargo/env\")","Bash(pgrep:*)","Bash(ollama list:*)","Bash(cargo run:*)","Bash(ps:*)","Bash(ollama ps:*)","Bash(sync)","Bash(sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches')","Bash(pkill:*)","Bash(timeout 30 tail:*)","Bash(ollama pull:*)","Bash(cargo build:*)","Bash(chmod:*)","Bash(./install.sh:*)","Bash(~/.local/bin/omega:*)","Bash(du:*)","Bash(/home/mega/.cargo/bin/cargo build:*)","Bash(/home/mega/.cargo/bin/cargo install:*)","Bash(tee:*)","WebSearch","Bash(timeout:*)","Bash(sudo add-apt-repository:*)","Bash(megasync:*)","Bash(dpkg:*)","Bash(apt list:*)","Bash(pip install:*)","Bash(find:*)","Bash(cargo --version:*)","Bash(cargo new:*)","Bash(/home/mega/NEXUS/rust/target/release/nexus-pulse:*)","Bash(/home/mega/NEXUS/rust/target/release/nexus-memory briefing)","Bash(/home/mega/NEXUS/rust/target/release/nexus-warp status)","WebFetch(domain:chatgpt.com)","Bash(ss:*)","Bash(sudo systemctl:*)","Bash(systemctl restart:*)","Bash(systemctl status:*)","Bash(crontab:*)","Bash(printf:*)","Bash(sudo:*)","Bash(git check-ignore:*)","Bash(git add:*)","Bash(git commit:*)","Bash(git push:*)","Bash(:*)","Bash(codex:*)","Bash(npm show:*)","Bash(claude:*)","Bash(aider:*)","Bash(redis-server:*)","Bash(source:*)","Bash(python:*)","Bash(pip3 install:*)","Bash(journalctl:*)","Bash(systemctl:*)","Bash(kill 7273:*)","Bash(systemctl show:*)","Bash(kill 38138)","Bash(pm2 list:*)","Bash(lsof:*)","Bash(grep:*)","Bash(./scripts/sync-gateway-env.sh:*)","Bash(node:*)","Bash(/home/mega/NEXUS/ERGON.md:*)","Bash(kill 88373:*)","Bash(./venv/bin/pip show:*)","Bash(./venv/bin/pip install:*)","Bash(./venv/bin/python:*)","Bash(OMEGA_DB_URL=sqlite:///gateway.db ./venv/bin/python:*)","Bash(omega ask:*)"]
+2026-03-05T15:32:16.427Z [DEBUG] [STARTUP] Loading MCP configs...
+2026-03-05T15:32:16.439Z [DEBUG] Git remote URL: null
+2026-03-05T15:32:16.439Z [DEBUG] No git remote URL found
+2026-03-05T15:32:16.449Z [DEBUG] Loaded 1 installed plugins from /home/mega/.claude/plugins/installed_plugins.json
+2026-03-05T15:32:16.517Z [DEBUG] [ToolSearch:optimistic] mode=tst-auto, ENABLE_TOOL_SEARCH=undefined, result=true
+2026-03-05T15:32:16.521Z [DEBUG] [STARTUP] Running setup()...
+2026-03-05T15:32:16.524Z [DEBUG] Loading skills from: managed=/etc/claude-code/.claude/skills, user=/home/mega/.claude/skills, project=[]
+2026-03-05T15:32:16.524Z [DEBUG] Error log sink initialized
+2026-03-05T15:32:16.533Z [DEBUG] Writing to temp file: /home/mega/.claude.json.tmp.460.1772724736533
+2026-03-05T15:32:16.533Z [DEBUG] Preserving file permissions: 100600
+2026-03-05T15:32:16.540Z [DEBUG] Temp file written successfully, size: 32036 bytes
+2026-03-05T15:32:16.540Z [DEBUG] Applied original permissions to temp file
+2026-03-05T15:32:16.540Z [DEBUG] Renaming /home/mega/.claude.json.tmp.460.1772724736533 to /home/mega/.claude.json
+2026-03-05T15:32:16.540Z [DEBUG] File /home/mega/.claude.json written atomically
+2026-03-05T15:32:16.545Z [DEBUG] Writing to temp file: /home/mega/.claude.json.tmp.460.1772724736545
+2026-03-05T15:32:16.545Z [DEBUG] Preserving file permissions: 100600
+2026-03-05T15:32:16.548Z [DEBUG] Temp file written successfully, size: 32037 bytes
+2026-03-05T15:32:16.548Z [DEBUG] Applied original permissions to temp file
+2026-03-05T15:32:16.548Z [DEBUG] Renaming /home/mega/.claude.json.tmp.460.1772724736545 to /home/mega/.claude.json
+2026-03-05T15:32:16.548Z [DEBUG] File /home/mega/.claude.json written atomically
+2026-03-05T15:32:16.568Z [DEBUG] Loading plugin rust-analyzer-lsp from source: "./plugins/rust-analyzer-lsp"
+2026-03-05T15:32:16.573Z [DEBUG] Acquired PID lock for 2.1.66 (PID 460)
+2026-03-05T15:32:16.578Z [DEBUG] Writing to temp file: /home/mega/.claude.json.tmp.460.1772724736578
+2026-03-05T15:32:16.578Z [DEBUG] Preserving file permissions: 100600
+2026-03-05T15:32:16.581Z [DEBUG] Temp file written successfully, size: 32038 bytes
+2026-03-05T15:32:16.581Z [DEBUG] Applied original permissions to temp file
+2026-03-05T15:32:16.582Z [DEBUG] Renaming /home/mega/.claude.json.tmp.460.1772724736578 to /home/mega/.claude.json
+2026-03-05T15:32:16.582Z [DEBUG] File /home/mega/.claude.json written atomically
+2026-03-05T15:32:16.583Z [DEBUG] Acquired PID lock on running version: /home/mega/.local/share/claude/versions/2.1.66
+2026-03-05T15:32:16.589Z [DEBUG] [STARTUP] setup() completed in 68ms
+2026-03-05T15:32:16.589Z [DEBUG] [STARTUP] Loading commands and agents...
+2026-03-05T15:32:16.597Z [DEBUG] Using provided version for rust-analyzer-lsp@claude-plugins-official: 1.0.0
+2026-03-05T15:32:16.598Z [DEBUG] Plugin rust-analyzer-lsp@claude-plugins-official version 1.0.0 already cached at /home/mega/.claude/plugins/cache/claude-plugins-official/rust-analyzer-lsp/1.0.0
+2026-03-05T15:32:16.598Z [DEBUG] Resolved local plugin rust-analyzer-lsp to versioned cache: /home/mega/.claude/plugins/cache/claude-plugins-official/rust-analyzer-lsp/1.0.0
+2026-03-05T15:32:16.612Z [DEBUG] Plugin rust-analyzer-lsp has no entry.skills defined
+2026-03-05T15:32:16.613Z [DEBUG] Found 1 plugins (1 enabled, 0 disabled)
+2026-03-05T15:32:16.613Z [DEBUG] getPluginSkills: Processing 1 enabled plugins
+2026-03-05T15:32:16.613Z [DEBUG] Checking plugin rust-analyzer-lsp: skillsPath=none, skillsPaths=0 paths
+2026-03-05T15:32:16.613Z [DEBUG] Total plugin skills loaded: 0
+2026-03-05T15:32:16.613Z [DEBUG] Total plugin commands loaded: 0
+2026-03-05T15:32:16.613Z [DEBUG] Registered 0 hooks from 1 plugins
+2026-03-05T15:32:16.613Z [DEBUG] Total plugin agents loaded: 0
+2026-03-05T15:32:16.615Z [DEBUG] [claudeai-mcp] Checking gate (cached)...
+2026-03-05T15:32:16.615Z [DEBUG] [claudeai-mcp] Gate returned: true
+2026-03-05T15:32:16.615Z [DEBUG] [claudeai-mcp] Fetching from https://api.anthropic.com/v1/mcp_servers?limit=1000
+2026-03-05T15:32:16.634Z [DEBUG] Writing to temp file: /home/mega/.claude.json.tmp.460.1772724736634
+2026-03-05T15:32:16.634Z [DEBUG] Preserving file permissions: 100600
+2026-03-05T15:32:16.637Z [DEBUG] Temp file written successfully, size: 32039 bytes
+2026-03-05T15:32:16.637Z [DEBUG] Applied original permissions to temp file
+2026-03-05T15:32:16.637Z [DEBUG] Renaming /home/mega/.claude.json.tmp.460.1772724736634 to /home/mega/.claude.json
+2026-03-05T15:32:16.637Z [DEBUG] File /home/mega/.claude.json written atomically
+2026-03-05T15:32:16.640Z [DEBUG] [claudeai-mcp] Fetch failed
+2026-03-05T15:32:16.657Z [DEBUG] Loaded 9 unique skills (9 unconditional, 0 conditional, managed: 0, user: 9, project: 0, additional: 0, legacy commands: 0)
+2026-03-05T15:32:16.657Z [DEBUG] getSkills returning: 9 skill dir commands, 0 plugin skills, 5 bundled skills
+2026-03-05T15:32:16.664Z [DEBUG] Writing to temp file: /home/mega/.claude.json.tmp.460.1772724736664
+2026-03-05T15:32:16.664Z [DEBUG] Preserving file permissions: 100600
+2026-03-05T15:32:16.667Z [DEBUG] Temp file written successfully, size: 32040 bytes
+2026-03-05T15:32:16.667Z [DEBUG] Applied original permissions to temp file
+2026-03-05T15:32:16.667Z [DEBUG] Renaming /home/mega/.claude.json.tmp.460.1772724736664 to /home/mega/.claude.json
+2026-03-05T15:32:16.667Z [DEBUG] File /home/mega/.claude.json written atomically
+2026-03-05T15:32:16.673Z [DEBUG] Writing to temp file: /home/mega/.claude.json.tmp.460.1772724736673
+2026-03-05T15:32:16.673Z [DEBUG] Preserving file permissions: 100600
+2026-03-05T15:32:16.675Z [DEBUG] Temp file written successfully, size: 32041 bytes
+2026-03-05T15:32:16.675Z [DEBUG] Applied original permissions to temp file
+2026-03-05T15:32:16.675Z [DEBUG] Renaming /home/mega/.claude.json.tmp.460.1772724736673 to /home/mega/.claude.json
+2026-03-05T15:32:16.676Z [DEBUG] File /home/mega/.claude.json written atomically
+2026-03-05T15:32:16.677Z [DEBUG] [STARTUP] Commands and agents loaded in 88ms
+2026-03-05T15:32:16.677Z [DEBUG] [LSP MANAGER] initializeLspServerManager() called
+2026-03-05T15:32:16.677Z [DEBUG] [LSP MANAGER] Created manager instance, state=pending
+2026-03-05T15:32:16.677Z [DEBUG] [LSP MANAGER] Starting async initialization (generation 1)
+2026-03-05T15:32:16.682Z [DEBUG] [STARTUP] MCP configs loaded in 255ms
+2026-03-05T15:32:16.745Z [DEBUG] All plugins already exist, skipping migration
+2026-03-05T15:32:16.745Z [DEBUG] Initialized versioned plugins system with 1 plugins
+2026-03-05T15:32:16.747Z [DEBUG] Fast mode unavailable: Fast mode is not available in the Agent SDK
+2026-03-05T15:32:16.788Z [DEBUG] [Perfetto] initializePerfettoTracing called, env value: undefined
+2026-03-05T15:32:16.788Z [DEBUG] [3P telemetry] isTelemetryEnabled=false (CLAUDE_CODE_ENABLE_TELEMETRY=undefined)
+2026-03-05T15:32:16.794Z [DEBUG] Writing to temp file: /home/mega/.claude.json.tmp.460.1772724736794
+2026-03-05T15:32:16.794Z [DEBUG] Preserving file permissions: 100600
+2026-03-05T15:32:16.797Z [DEBUG] Temp file written successfully, size: 32040 bytes
+2026-03-05T15:32:16.797Z [DEBUG] Applied original permissions to temp file
+2026-03-05T15:32:16.797Z [DEBUG] Renaming /home/mega/.claude.json.tmp.460.1772724736794 to /home/mega/.claude.json
+2026-03-05T15:32:16.798Z [DEBUG] File /home/mega/.claude.json written atomically
+2026-03-05T15:32:16.800Z [DEBUG] Grove: Using fresh cached config
+2026-03-05T15:32:16.829Z [DEBUG] Loaded 1 LSP server(s) from plugin: rust-analyzer-lsp
+2026-03-05T15:32:16.829Z [DEBUG] Total LSP servers loaded: 1
+2026-03-05T15:32:16.829Z [DEBUG] [LSP SERVER MANAGER] getAllLspServers returned 1 server(s)
+2026-03-05T15:32:16.829Z [DEBUG] Queued request handler for plugin:rust-analyzer-lsp:rust-analyzer.workspace/configuration (connection not ready)
+2026-03-05T15:32:16.829Z [DEBUG] Starting LSP server instance: plugin:rust-analyzer-lsp:rust-analyzer
+2026-03-05T15:32:16.839Z [DEBUG] LSP manager initialized with 1 servers
+2026-03-05T15:32:16.839Z [DEBUG] LSP server manager initialized successfully
+2026-03-05T15:32:16.839Z [DEBUG] Queued notification handler for plugin:rust-analyzer-lsp:rust-analyzer.textDocument/publishDiagnostics (connection not ready)
+2026-03-05T15:32:16.840Z [DEBUG] Registered diagnostics handler for plugin:rust-analyzer-lsp:rust-analyzer
+2026-03-05T15:32:16.841Z [DEBUG] LSP notification handlers registered successfully for all 1 server(s)
+2026-03-05T15:32:16.843Z [DEBUG] Applied queued notification handler for plugin:rust-analyzer-lsp:rust-analyzer.textDocument/publishDiagnostics
+2026-03-05T15:32:16.843Z [DEBUG] Applied queued request handler for plugin:rust-analyzer-lsp:rust-analyzer.workspace/configuration
+2026-03-05T15:32:16.843Z [DEBUG] LSP client started for plugin:rust-analyzer-lsp:rust-analyzer
+2026-03-05T15:32:16.845Z [DEBUG] [LSP PROTOCOL plugin:rust-analyzer-lsp:rust-analyzer] Sending request 'initialize - (0)'.
+2026-03-05T15:32:16.849Z [ERROR] Failed to fetch org fast mode status, defaulting to disabled: Error: ECONNREFUSED
+2026-03-05T15:32:16.850Z [ERROR] Error: [url=https://api.anthropic.com/api/oauth/account/settings] Error
+    at <anonymous> (/$bunfs/root/claude:79:11055)
+    at <anonymous> (/$bunfs/root/claude:93:10230)
+    at emitError (node:events:43:23)
+    at <anonymous> (/$bunfs/root/claude:92:3470)
+    at emitError (node:events:43:23)
+    at <anonymous> (node:_http_client:253:22)
+    at processTicksAndRejections (native:7:39)
+    at request (/$bunfs/root/claude:95:2149)
+    at processTicksAndRejections (native:7:39)
+2026-03-05T15:32:16.851Z [DEBUG] Failed to fetch Grove notice config: Error: ECONNREFUSED
+2026-03-05T15:32:17.215Z [DEBUG] Getting matching hook commands for SessionStart with query: startup
+2026-03-05T15:32:17.215Z [DEBUG] Found 0 hook matchers in settings
+2026-03-05T15:32:17.215Z [DEBUG] Matched 0 unique hooks for query "startup" (0 before deduplication)
+2026-03-05T15:32:17.218Z [DEBUG] installPluginsForHeadless: starting
+2026-03-05T15:32:17.219Z [DEBUG] All plugins already exist, skipping migration
+2026-03-05T15:32:17.219Z [DEBUG] Found 1 installed plugins
+2026-03-05T15:32:17.219Z [DEBUG] installPluginsForHeadless: no missing plugins or marketplaces configured
+2026-03-05T15:32:17.237Z [DEBUG] Total plugin output styles loaded: 0
+2026-03-05T15:32:17.257Z [DEBUG] Security messages are fresh (<1h old), skipping fetch
+2026-03-05T15:32:17.260Z [DEBUG] Watching for changes in skill/command directories: /home/mega/.claude/skills, /home/mega/.claude/skills...
+2026-03-05T15:32:17.263Z [DEBUG] Watching for changes in setting files /home/mega/.claude/settings.json, /home/mega/.claude/settings.local.json...
+2026-03-05T15:32:17.274Z [DEBUG] [LSP SERVER plugin:rust-analyzer-lsp:rust-analyzer] error: could not parse settings file: '/home/mega/.rustup/settings.toml': error parsing settings: TOML parse error at line 1, column 5
+  |
+1 | set -a
+  |     ^
+expected `.`, `=`
+2026-03-05T15:32:17.275Z [DEBUG] LSP server plugin:rust-analyzer-lsp:rust-analyzer connection closed
+2026-03-05T15:32:17.277Z [ERROR] Error: Error: LSP server plugin:rust-analyzer-lsp:rust-analyzer crashed with exit code 1
+    at <anonymous> (/$bunfs/root/claude:2715:21469)
+    at emit (node:events:98:22)
+    at #handleOnExit (node:child_process:520:14)
+    at processTicksAndRejections (native:7:39)
+2026-03-05T15:32:17.284Z [DEBUG] Writing to temp file: /home/mega/.claude.json.tmp.460.1772724737284
+2026-03-05T15:32:17.284Z [DEBUG] Preserving file permissions: 100600
+2026-03-05T15:32:17.287Z [DEBUG] Temp file written successfully, size: 32035 bytes
+2026-03-05T15:32:17.287Z [DEBUG] Applied original permissions to temp file
+2026-03-05T15:32:17.287Z [DEBUG] Renaming /home/mega/.claude.json.tmp.460.1772724737284 to /home/mega/.claude.json
+2026-03-05T15:32:17.287Z [DEBUG] File /home/mega/.claude.json written atomically
+2026-03-05T15:32:17.292Z [DEBUG] Writing to temp file: /home/mega/.claude.json.tmp.460.1772724737292
+2026-03-05T15:32:17.292Z [DEBUG] Preserving file permissions: 100600
+2026-03-05T15:32:17.294Z [DEBUG] Temp file written successfully, size: 32036 bytes
+2026-03-05T15:32:17.294Z [DEBUG] Applied original permissions to temp file
+2026-03-05T15:32:17.294Z [DEBUG] Renaming /home/mega/.claude.json.tmp.460.1772724737292 to /home/mega/.claude.json
+2026-03-05T15:32:17.295Z [DEBUG] File /home/mega/.claude.json written atomically
+2026-03-05T15:32:17.300Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2026-03-05T15:32:17.300Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2026-03-05T15:32:17.300Z [DEBUG] Hooks: Found 0 total hooks in registry
+2026-03-05T15:32:17.300Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2026-03-05T15:32:17.302Z [DEBUG] Sending 10 skills via attachment (initial, 10 total sent)
+2026-03-05T15:32:17.307Z [WARN] [3P telemetry] Event dropped (no event logger initialized): user_prompt
+2026-03-05T15:32:17.308Z [DEBUG] Getting matching hook commands for UserPromptSubmit with query: undefined
+2026-03-05T15:32:17.308Z [DEBUG] Found 0 hook matchers in settings
+2026-03-05T15:32:17.308Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2026-03-05T15:32:17.310Z [DEBUG] Fast mode unavailable: Fast mode is not available in the Agent SDK
+2026-03-05T15:32:17.319Z [DEBUG] Writing to temp file: /home/mega/.claude.json.tmp.460.1772724737319
+2026-03-05T15:32:17.319Z [DEBUG] Preserving file permissions: 100600
+2026-03-05T15:32:17.322Z [DEBUG] Temp file written successfully, size: 32037 bytes
+2026-03-05T15:32:17.322Z [DEBUG] Applied original permissions to temp file
+2026-03-05T15:32:17.322Z [DEBUG] Renaming /home/mega/.claude.json.tmp.460.1772724737319 to /home/mega/.claude.json
+2026-03-05T15:32:17.322Z [DEBUG] File /home/mega/.claude.json written atomically
+2026-03-05T15:32:17.326Z [DEBUG] autocompact: tokens=473 threshold=167000 effectiveWindow=180000
+2026-03-05T15:32:17.329Z [DEBUG] Writing to temp file: /home/mega/.claude.json.tmp.460.1772724737329
+2026-03-05T15:32:17.329Z [DEBUG] Preserving file permissions: 100600
+2026-03-05T15:32:17.331Z [DEBUG] Temp file written successfully, size: 32038 bytes
+2026-03-05T15:32:17.332Z [DEBUG] Applied original permissions to temp file
+2026-03-05T15:32:17.332Z [DEBUG] Renaming /home/mega/.claude.json.tmp.460.1772724737329 to /home/mega/.claude.json
+2026-03-05T15:32:17.332Z [DEBUG] File /home/mega/.claude.json written atomically
+2026-03-05T15:32:17.342Z [DEBUG] Writing to temp file: /home/mega/.claude.json.tmp.460.1772724737342
+2026-03-05T15:32:17.343Z [DEBUG] Preserving file permissions: 100600
+2026-03-05T15:32:17.344Z [DEBUG] Temp file written successfully, size: 32021 bytes
+2026-03-05T15:32:17.345Z [DEBUG] Applied original permissions to temp file
+2026-03-05T15:32:17.345Z [DEBUG] Renaming /home/mega/.claude.json.tmp.460.1772724737342 to /home/mega/.claude.json
+2026-03-05T15:32:17.345Z [DEBUG] File /home/mega/.claude.json written atomically
+2026-03-05T15:32:17.346Z [DEBUG] Auto tool search disabled: 0 tokens (threshold: 20000, 10% of context) [source: query]
+2026-03-05T15:32:17.400Z [DEBUG] attribution header x-anthropic-billing-header: cc_version=2.1.66.c3c; cc_entrypoint=sdk-cli; cch=00000;
+2026-03-05T15:32:17.401Z [DEBUG] Fast mode unavailable: Fast mode is not available in the Agent SDK
+2026-03-05T15:32:17.402Z [DEBUG] [API:request] Creating client, ANTHROPIC_CUSTOM_HEADERS present: false, has Authorization header: false
+2026-03-05T15:32:17.402Z [DEBUG] [API:auth] OAuth token check starting
+2026-03-05T15:32:17.406Z [DEBUG] Writing to temp file: /home/mega/.claude.json.tmp.460.1772724737406
+2026-03-05T15:32:17.406Z [DEBUG] Preserving file permissions: 100600
+2026-03-05T15:32:17.408Z [DEBUG] Temp file written successfully, size: 31944 bytes
+2026-03-05T15:32:17.408Z [DEBUG] Applied original permissions to temp file
+2026-03-05T15:32:17.408Z [DEBUG] Renaming /home/mega/.claude.json.tmp.460.1772724737406 to /home/mega/.claude.json
+2026-03-05T15:32:17.408Z [DEBUG] File /home/mega/.claude.json written atomically
+2026-03-05T15:32:17.409Z [DEBUG] Fast mode unavailable: Fast mode is not available in the Agent SDK
+2026-03-05T15:32:17.410Z [DEBUG] [API:auth] OAuth token check complete
+2026-03-05T15:32:17.412Z [DEBUG] Fast mode unavailable: Fast mode is not available in the Agent SDK
+2026-03-05T15:32:17.423Z [ERROR] API error (attempt 1/11): undefined Connection error.
+2026-03-05T15:32:17.469Z [DEBUG] SSH config check: code=255 configured=false
+2026-03-05T15:32:17.476Z [DEBUG] git pull: cwd=/home/mega/.claude/plugins/marketplaces/claude-plugins-official ref=default
+2026-03-05T15:32:17.535Z [WARN] git pull failed, will re-clone: Network error while updating marketplace. Please check your internet connection.
+
+Original error: fatal: unable to access 'https://github.com/anthropics/claude-plugins-official.git/': Could not resolve host: github.com
+2026-03-05T15:32:17.561Z [WARN] Found stale marketplace directory at /home/mega/.claude/plugins/marketplaces/claude-plugins-official, cleaning up to allow re-clone
+2026-03-05T15:32:17.562Z [DEBUG] git clone: url=https://github.com/anthropics/claude-plugins-official.git ref=default timeout=120000ms
+2026-03-05T15:32:17.600Z [WARN] git clone failed: url=https://github.com/anthropics/claude-plugins-official.git code=128 error=Command failed with exit code 128: /usr/bin/git -c core.sshCommand=ssh -o BatchMode=yes -o StrictHostKeyChecking=yes clone --depth 1 --recurse-submodules --shallow-submodules https://github.com/anthropics/claude-plugins-official.git /home/mega/.claude/plugins/marketplaces/claude-plugins-official stderr=Cloning into '/home/mega/.claude/plugins/marketplaces/claude-plugins-official'...
+fatal: unable to access 'https://github.com/anthropics/claude-plugins-official.git/': Could not resolve host: github.com
+2026-03-05T15:32:17.607Z [INFO] Marketplace refresh failed with HTTPS for anthropics/claude-plugins-official, falling back to SSH
+2026-03-05T15:32:17.614Z [DEBUG] git pull: cwd=/home/mega/.claude/plugins/marketplaces/claude-plugins-official ref=default
+2026-03-05T15:32:17.623Z [WARN] git pull failed, will re-clone:
+2026-03-05T15:32:17.624Z [DEBUG] git clone: url=git@github.com:anthropics/claude-plugins-official.git ref=default timeout=120000ms
+2026-03-05T15:32:17.657Z [WARN] git clone failed: url=git@github.com:anthropics/claude-plugins-official.git code=128 error=Command failed with exit code 128: /usr/bin/git -c core.sshCommand=ssh -o BatchMode=yes -o StrictHostKeyChecking=yes clone --depth 1 --recurse-submodules --shallow-submodules git@github.com:anthropics/claude-plugins-official.git /home/mega/.claude/plugins/marketplaces/claude-plugins-official stderr=Cloning into '/home/mega/.claude/plugins/marketplaces/claude-plugins-official'...
+ssh: Could not resolve hostname github.com: Name or service not known
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+2026-03-05T15:32:17.657Z [ERROR] Failed to refresh marketplace claude-plugins-official: Failed to clone marketplace repository: SSH authentication failed. Please ensure your SSH keys are configured for GitHub, or use an HTTPS URL instead.
+
+Original error: Cloning into '/home/mega/.claude/plugins/marketplaces/claude-plugins-official'...
+ssh: Could not resolve hostname github.com: Name or service not known
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+2026-03-05T15:32:17.657Z [WARN] Plugin autoupdate: failed to refresh marketplace claude-plugins-official: Failed to refresh marketplace 'claude-plugins-official': Failed to clone marketplace repository: SSH authentication failed. Please ensure your SSH keys are configured for GitHub, or use an HTTPS URL instead.
+
+Original error: Cloning into '/home/mega/.claude/plugins/marketplaces/claude-plugins-official'...
+ssh: Could not resolve hostname github.com: Name or service not known
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+2026-03-05T15:32:17.657Z [DEBUG] Plugin autoupdate: checking installed plugins
+2026-03-05T15:32:17.660Z [WARN] Plugin autoupdate: failed to update rust-analyzer-lsp@claude-plugins-official: Marketplace directory not found at /home/mega/.claude/plugins/marketplaces/claude-plugins-official
+2026-03-05T15:32:17.946Z [DEBUG] Fast mode unavailable: Fast mode is not available in the Agent SDK
+2026-03-05T15:32:17.955Z [ERROR] API error (attempt 2/11): undefined Connection error.
+2026-03-05T15:32:19.138Z [DEBUG] Fast mode unavailable: Fast mode is not available in the Agent SDK
+2026-03-05T15:32:19.145Z [ERROR] API error (attempt 3/11): undefined Connection error.
+2026-03-05T15:32:21.527Z [DEBUG] Fast mode unavailable: Fast mode is not available in the Agent SDK
+2026-03-05T15:32:21.534Z [ERROR] API error (attempt 4/11): undefined Connection error.
+2026-03-05T15:32:21.637Z [ERROR] Error: Error: 1P event logging: 42 events failed to export (code=FailedToOpenSocket, Was there a typo in the url or port?)
+    at queueFailedEvents (/$bunfs/root/claude:6263:2654)
+    at async doExport (/$bunfs/root/claude:6263:1561)
+    at processTicksAndRejections (native:7:39)
+2026-03-05T15:32:21.638Z [ERROR] Error: Error: {"message":"Failed to export 42 events (code=FailedToOpenSocket, Was there a typo in the url or port?)","originalLine":"6263","originalColumn":"1713","line":"6263","column":"1713","sourceURL":"/$bunfs/root/claude","stack":"Error: Failed to export 42 events (code=FailedToOpenSocket, Was there a typo in the url or port?)\n    at doExport (/$bunfs/root/claude:6263:1713)\n    at processTicksAndRejections (native:7:39)","name":"Error"}
+    at error (/$bunfs/root/claude:2401:25029)
+    at <anonymous> (/$bunfs/root/claude:119:92465)
+    at iE0 (/$bunfs/root/claude:119:93009)
+    at <anonymous> (/$bunfs/root/claude:120:17366)
+    at processTicksAndRejections (native:7:39)
+2026-03-05T15:32:21.638Z [ERROR] [3P telemetry] OTEL diag error: {"message":"Failed to export 42 events (code=FailedToOpenSocket, Was there a typo in the url or port?)","originalLine":"6263","originalColumn":"1713","line":"6263","column":"1713","sourceURL":"/$bunfs/root/claude","stack":"Error: Failed to export 42 events (code=FailedToOpenSocket, Was there a typo in the url or port?)\n    at doExport (/$bunfs/root/claude:6263:1713)\n    at processTicksAndRejections (native:7:39)","name":"Error"}
+2026-03-05T15:32:25.975Z [DEBUG] Fast mode unavailable: Fast mode is not available in the Agent SDK
+2026-03-05T15:32:25.980Z [ERROR] API error (attempt 5/11): undefined Connection error.
+2026-03-05T15:32:30.998Z [ERROR] Error: Error: 1P event logging: 2 events failed to export (code=ECONNREFUSED, ECONNREFUSED)
+    at queueFailedEvents (/$bunfs/root/claude:6263:2654)
+    at async doExport (/$bunfs/root/claude:6263:1561)
+    at processTicksAndRejections (native:7:39)
+2026-03-05T15:32:30.999Z [ERROR] Error: Error: {"message":"Failed to export 2 events (code=ECONNREFUSED, ECONNREFUSED)","originalLine":"6263","originalColumn":"1713","line":"6263","column":"1713","sourceURL":"/$bunfs/root/claude","stack":"Error: Failed to export 2 events (code=ECONNREFUSED, ECONNREFUSED)\n    at doExport (/$bunfs/root/claude:6263:1713)\n    at processTicksAndRejections (native:7:39)","name":"Error"}
+    at error (/$bunfs/root/claude:2401:25029)
+    at <anonymous> (/$bunfs/root/claude:119:92465)
+    at iE0 (/$bunfs/root/claude:119:93009)
+    at <anonymous> (/$bunfs/root/claude:120:17366)
+    at processTicksAndRejections (native:7:39)
+2026-03-05T15:32:30.999Z [ERROR] [3P telemetry] OTEL diag error: {"message":"Failed to export 2 events (code=ECONNREFUSED, ECONNREFUSED)","originalLine":"6263","originalColumn":"1713","line":"6263","column":"1713","sourceURL":"/$bunfs/root/claude","stack":"Error: Failed to export 2 events (code=ECONNREFUSED, ECONNREFUSED)\n    at doExport (/$bunfs/root/claude:6263:1713)\n    at processTicksAndRejections (native:7:39)","name":"Error"}
+2026-03-05T15:32:34.003Z [DEBUG] Fast mode unavailable: Fast mode is not available in the Agent SDK
+2026-03-05T15:32:34.010Z [ERROR] API error (attempt 6/11): undefined Connection error.
+2026-03-05T15:32:39.028Z [ERROR] Error: Error: 1P event logging: 2 events failed to export (code=FailedToOpenSocket, Was there a typo in the url or port?)
+    at queueFailedEvents (/$bunfs/root/claude:6263:2654)
+    at async doExport (/$bunfs/root/claude:6263:1561)
+    at processTicksAndRejections (native:7:39)
+2026-03-05T15:32:39.029Z [ERROR] Error: Error: {"message":"Failed to export 2 events (code=FailedToOpenSocket, Was there a typo in the url or port?)","originalLine":"6263","originalColumn":"1713","line":"6263","column":"1713","sourceURL":"/$bunfs/root/claude","stack":"Error: Failed to export 2 events (code=FailedToOpenSocket, Was there a typo in the url or port?)\n    at doExport (/$bunfs/root/claude:6263:1713)\n    at processTicksAndRejections (native:7:39)","name":"Error"}
+    at error (/$bunfs/root/claude:2401:25029)
+    at <anonymous> (/$bunfs/root/claude:119:92465)
+    at iE0 (/$bunfs/root/claude:119:93009)
+    at <anonymous> (/$bunfs/root/claude:120:17366)
+    at processTicksAndRejections (native:7:39)
+2026-03-05T15:32:39.029Z [ERROR] [3P telemetry] OTEL diag error: {"message":"Failed to export 2 events (code=FailedToOpenSocket, Was there a typo in the url or port?)","originalLine":"6263","originalColumn":"1713","line":"6263","column":"1713","sourceURL":"/$bunfs/root/claude","stack":"Error: Failed to export 2 events (code=FailedToOpenSocket, Was there a typo in the url or port?)\n    at doExport (/$bunfs/root/claude:6263:1713)\n    at processTicksAndRejections (native:7:39)","name":"Error"}
+2026-03-05T15:32:52.252Z [DEBUG] Fast mode unavailable: Fast mode is not available in the Agent SDK
+2026-03-05T15:32:52.259Z [ERROR] API error (attempt 7/11): undefined Connection error.
+2026-03-05T15:32:57.267Z [ERROR] Error: Error: {"message":"Dropped 2 events: max attempts (8) reached","originalLine":"6263","originalColumn":"1378","line":"6263","column":"1378","sourceURL":"/$bunfs/root/claude","stack":"Error: Dropped 2 events: max attempts (8) reached\n    at doExport (/$bunfs/root/claude:6263:1378)\n    at export (/$bunfs/root/claude:6263:887)\n    at <anonymous> (/$bunfs/root/claude:119:165449)\n    at <anonymous> (/$bunfs/root/claude:119:165389)\n    at new Promise (native:1:11)\n    at fG0 (/$bunfs/root/claude:119:165366)\n    at $ (/$bunfs/root/claude:120:17275)\n    at <anonymous> (/$bunfs/root/claude:120:16548)\n    at new Promise (native:1:11)\n    at _flushOneBatch (/$bunfs/root/claude:120:16508)","name":"Error"}
+    at error (/$bunfs/root/claude:2401:25029)
+    at <anonymous> (/$bunfs/root/claude:119:92465)
+    at iE0 (/$bunfs/root/claude:119:93009)
+    at <anonymous> (/$bunfs/root/claude:120:17366)
+    at processTicksAndRejections (native:7:39)
+2026-03-05T15:32:57.267Z [ERROR] [3P telemetry] OTEL diag error: {"message":"Dropped 2 events: max attempts (8) reached","originalLine":"6263","originalColumn":"1378","line":"6263","column":"1378","sourceURL":"/$bunfs/root/claude","stack":"Error: Dropped 2 events: max attempts (8) reached\n    at doExport (/$bunfs/root/claude:6263:1378)\n    at export (/$bunfs/root/claude:6263:887)\n    at <anonymous> (/$bunfs/root/claude:119:165449)\n    at <anonymous> (/$bunfs/root/claude:119:165389)\n    at new Promise (native:1:11)\n    at fG0 (/$bunfs/root/claude:119:165366)\n    at $ (/$bunfs/root/claude:120:17275)\n    at <anonymous> (/$bunfs/root/claude:120:16548)\n    at new Promise (native:1:11)\n    at _flushOneBatch (/$bunfs/root/claude:120:16508)","name":"Error"}

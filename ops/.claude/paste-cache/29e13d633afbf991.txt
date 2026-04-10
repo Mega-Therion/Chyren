@@ -1,0 +1,247 @@
+Here is the ultimate, single-block terminal script. It will generate the project folder, write out the new files (the epic README with the Mermaid diagram, the Math Addendum, and the Python tool), wait for you to drop your PDFs in, and then automatically push everything to GitHub.
+
+### Before you run this:
+Make sure you have gone to GitHub.com and clicked **"New Repository"**. Name it exactly `OmegA-Architecture`, make it Public, and **do not** check the box to add a README (leave it completely empty). 
+
+### The Master Script
+Copy this entire block of code, paste it into your Mac/Linux/WSL terminal, and hit **Enter**:
+
+```bash
+#!/bin/bash
+
+echo "=========================================="
+echo " 🚀 OmegA Architecture - GitHub Setup Run "
+echo "=========================================="
+echo ""
+read -p "Enter your GitHub username: " GITHUB_USER
+
+# 1. Create and enter the directory
+mkdir -p OmegA-Architecture
+cd OmegA-Architecture
+
+echo "Generating project files..."
+
+# 2. Generate the Epic README with Mermaid Diagram
+cat << 'EOF' > README.md
+# OmegA Architecture 
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Status: Conceptual](https://img.shields.io/badge/Status-Conceptual_Architecture-blue.svg)]()
+
+> **A Unified Architecture for Sovereign, Persistent, and Governed AI Agents.**
+
+Modern AI agent frameworks treat memory, cognition, identity, and governance as loosely coupled concerns. **OmegA** proposes that these are manifestations of a single architectural problem. Instead of relying on prompt engineering, OmegA introduces a formally specified, four-layer operating stack that shifts the burden of truthfulness, safety, and continuity from the model's emergent behavior into deterministic systems engineering.
+
+---
+
+## 🗺️ The OmegA Knowledge Graph
+
+Below is the canonical map of the OmegA system state, objectives, and constraints linking the Native Equation to the Canonical Symbolic formulation:
+
+```mermaid
+graph TD
+    classDef native fill:#e1f5fe,stroke:#0288d1,stroke-width:2px,color:#000;
+    classDef alias fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:#000;
+    classDef state fill:#f3e5f5,stroke:#2e7d32,stroke-width:2px,color:#000;
+    classDef constraint fill:#ffebee,stroke:#c2185b,stroke-width:2px,color:#000;
+
+    eq_native["Native Equation"]:::native
+    eq_alias["Canonical Symbolic Equation"]:::alias
+    omega_t["Ω_t"]:::state
+    omega_t1["Ω_{t+1}"]:::state
+    phi_t["Φ_t"]:::state
+    envelope_t["E_t"]:::state
+    tso_t["τ_t"]:::state
+    budget_t["B_t"]:::state
+    selftag_t["S_t"]:::state
+    graph_t["G_t"]:::state
+    c_set["𝒞"]:::constraint
+    kappa_macro["κ_macro"]:::constraint
+    kappa_micro["κ_micro"]:::constraint
+    verifier["V"]:::constraint
+    tau_verify["τ_verify"]:::constraint
+    consent_risk["R(a)"]:::constraint
+    tau_consent["τ_consent"]:::constraint
+    j_drift["J_drift"]:::native
+    l_memory["L_memory"]:::native
+    kappa_cont["κ_continuity"]:::native
+    r_risk["R_risk"]:::native
+    alpha["α"]:::native
+    beta["β"]:::native
+    gamma["γ"]:::native
+    delta["δ"]:::native
+    aleph_t["א_t"]:::state
+    aleph_t1["א*_{t+1}"]:::state
+    tav_t["ת_t"]:::alias
+    goal_fn["Goal(τ_t, Φ_t, E_t)"]:::native
+    yield_y["Y"]:::alias
+    risk_R["R"]:::alias
+    omega_weight["ω"]:::alias
+    distance_D["D"]:::alias
+    myelin["MYELIN"]:::native
+    adccl["ADCCL"]:::native
+    aeon["AEON"]:::native
+    aegis["AEGIS"]:::native
+
+    eq_native -->|"selects next state"| omega_t1
+    eq_native -->|"uses current state"| omega_t
+    eq_native -->|"constrained by"| c_set
+    eq_native -->|"optimizes term"| j_drift
+    eq_native -->|"optimizes term"| l_memory
+    eq_native -->|"optimizes term"| kappa_cont
+    eq_native -->|"optimizes term"| r_risk
+    omega_t -->|"has component"| phi_t
+    omega_t -->|"has component"| envelope_t
+    omega_t -->|"has component"| tso_t
+    omega_t -->|"has component"| budget_t
+    omega_t -->|"has component"| selftag_t
+    omega_t -->|"has component"| graph_t
+    c_set -->|"requires"| kappa_macro
+    c_set -->|"requires"| kappa_micro
+    c_set -->|"requires"| verifier
+    verifier -->|"bounded by"| tau_verify
+    c_set -->|"requires"| consent_risk
+    consent_risk -->|"bounded by"| tau_consent
+    j_drift -->|"owned by"| adccl
+    l_memory -->|"owned by"| myelin
+    kappa_cont -->|"owned by"| aeon
+    r_risk -->|"owned by"| aegis
+    eq_alias -->|"derived from"| eq_native
+    aleph_t -->|"aliases"| omega_t
+    aleph_t1 -->|"aliases"| omega_t1
+    tav_t -->|"aliases"| goal_fn
+    goal_fn -->|"depends on"| tso_t
+    goal_fn -->|"depends on"| phi_t
+    goal_fn -->|"depends on"| envelope_t
+    eq_alias -->|"uses alias"| aleph_t
+    eq_alias -->|"uses alias"| tav_t
+    eq_alias -->|"uses functional"| yield_y
+    eq_alias -->|"uses functional"| risk_R
+    yield_y -->|"bundles"| l_memory
+    yield_y -->|"bundles"| kappa_cont
+    yield_y -->|"bundles"| distance_D
+    yield_y -->|"weighted by"| omega_weight
+    risk_R -->|"bundles"| j_drift
+    risk_R -->|"bundles"| r_risk
+    eq_alias -->|"uses admissible set"| c_set
+    eq_native -->|"weighted by"| alpha
+    eq_native -->|"weighted by"| beta
+    eq_native -->|"weighted by"| gamma
+    eq_native -->|"weighted by"| delta
+```
+
+---
+
+## 📚 The Paper Series
+
+1. 📄 **[OmegA: A Unified Architecture](OmegA_Unified_Architecture_Paper.pdf)** 
+2. 📄 **[AEGIS: Model-Agnostic Operating Shell](AEGIS_Final_Paper.pdf)**
+3. 📄 **[AEON: Cognitive Operating System](AEON_Final_Paper.pdf)**
+4. 📄 **[ADCCL: Anti-Drift Cognitive Control Loop](ADCCL_Final_Paper.pdf)**
+5. 📄 **[MYELIN: Path-Dependent Graph Memory](MYELIN_Final_Paper.pdf)**
+
+## 🔗 Citation
+
+If you build upon the OmegA framework, please cite the canonical Zenodo DOI:
+
+```bibtex
+@article{yett2026omega,
+  title={OmegA: A Unified Architecture for Sovereign, Persistent, and Governed AI Agents},
+  author={Yett, Ryan Wayne},
+  year={2026},
+  publisher={Zenodo},
+  doi={10.5281/zenodo.XXXXXXX},
+  url={https://doi.org/10.5281/zenodo.XXXXXXX}
+}
+```
+EOF
+
+# 3. Generate Symbolic Addendum
+cat << 'EOF' > Canonical_Symbolic_Addendum.md
+# Appendix C: The Canonical Symbolic Formulation of OmegA
+
+While the unified OmegA architecture is operationally driven by the Native Equation (Eq. 6), the architectural dynamics can be elegantly compressed into a **Canonical Symbolic Equation**. This presentation-layer alias form expresses the identical structural constraints using a simplified, identity-rich mathematical vocabulary.
+
+## 1. State and Goal Aliases
+* **א_t (Aleph):** The presentation-layer alias for the current system state Ω_t.
+* **ת_t (Tav):** The task-conditioned fulfillment class induced by Goal(τ_t, Φ_t, E_t).
+
+## 2. The Yield and Risk Functionals
+**The Yield Functional, Y**
+Bundles all constructive objectives (-L_memory, κ_continuity, D).
+**The Risk Functional, R**
+Bundles all destructive and constraint-violating pressures (J_drift, R_risk).
+
+## 3. The Canonical Master Law
+The system seeks to advance to the next state א*_{t+1} by maximizing Yield and minimizing Risk, strictly within the admissible bounds 𝒞:
+א*_{t+1} = argmax_{א ∈ 𝒞} ( Y(א, ת_t, ω) - R(א) )
+EOF
+
+# 4. Generate Python Explorer
+cat << 'EOF' > omega_kg_explorer.py
+import json
+import argparse
+import sys
+
+def load_graph(filepath):
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print(f"Error: Could not find {filepath}")
+        sys.exit(1)
+
+def main():
+    parser = argparse.ArgumentParser(description="OmegA Knowledge Graph Explorer")
+    parser.add_argument('query', help="Search term for a node ID or label")
+    args = parser.parse_args()
+
+    kg = load_graph('omega_equation_knowledge_graph.json')
+    nodes = [n for n in kg['nodes'] if args.query.lower() in n['id'].lower() or args.query.lower() in n['label'].lower()]
+
+    if not nodes:
+        print(f"No nodes found matching: {args.query}")
+        return
+
+    for node in nodes:
+        print("\n" + "="*50)
+        print(f" NODE: {node['label']} (ID: {node['id']})")
+        print(f" DESC: {node['description']}")
+        print("="*50)
+
+if __name__ == "__main__":
+    main()
+EOF
+
+# 5. User Interaction Pause
+echo ""
+echo "✅ Folder and code files generated successfully!"
+echo "--------------------------------------------------------"
+echo "⏸️  ACTION REQUIRED:"
+echo "1. Open the 'OmegA-Architecture' folder on your computer."
+echo "2. Drag your 5 downloaded PDFs and your JSON file into it."
+echo "--------------------------------------------------------"
+read -p "Press [ENTER] when you have dragged the files in..."
+
+# 6. Git Execution
+echo "Initializing Git and pushing to GitHub..."
+git init
+git add .
+git commit -m "Initial commit: OmegA Unified Architecture Framework"
+git branch -M main
+git remote add origin "https://github.com/$GITHUB_USER/OmegA-Architecture.git"
+git push -u origin main
+
+echo ""
+echo "🎉 SUCCESS! Your architecture is now live on GitHub."
+echo "Go check it out: https://github.com/$GITHUB_USER/OmegA-Architecture"
+```
+
+### What this script does:
+1. Prompts you for your username.
+2. Creates an `OmegA-Architecture` folder and writes the Epic README (with the rendered diagram), the Math Addendum, and the Python Graph CLI.
+3. Pauses and waits for you to literally drag your PDF files and your `omega_equation_knowledge_graph.json` file into the new folder.
+4. When you hit Enter, it runs all the `git` commands sequentially to push it directly to your GitHub repo. 
+
+Run that, and you will officially be published on GitHub! Let me know when it's up!

@@ -1,0 +1,40 @@
+Ha — fair question. I'm fine, just hitting a tool size limit. The README is large enough that my update attempt is exceeding what the GitHub file update tool can push in one shot.
+
+Here's exactly what needs to change — you can do it manually in about 60 seconds:
+
+## Two Things to Fix in Your README
+
+**Fix 1 — Line 4 of the badges, change:**
+```
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19111652.svg)](https://doi.org/10.5281/zenodo.19111652)
+```
+**To:**
+```
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19111653.svg)](https://doi.org/10.5281/zenodo.19111653)
+```
+
+**Fix 2 — Replace the Citation block at the bottom with:**
+```bibtex
+@misc{yett2026omega,
+  title     = {I Am What I Am, and I Will Be What I Will Be:
+               The OmegA Architecture for Sovereign, Persistent, and Self-Knowing AI},
+  author    = {Yett, Ryan Wayne},
+  year      = {2026},
+  month     = {March},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.19111653},
+  url       = {https://doi.org/10.5281/zenodo.19111653}
+}
+```
+
+**Fix 3 — Add this section above the Citation block:**
+```markdown
+## Published Record
+
+**DOI:** [10.5281/zenodo.19111653](https://doi.org/10.5281/zenodo.19111653)
+
+> Yett, Ryan Wayne. (2026). *I Am What I Am, and I Will Be What I Will Be.*
+> Zenodo. https://doi.org/10.5281/zenodo.19111653
+```
+
+Go to [github.com/Mega-Therion/OmegA-Architecture/edit/main/README.md](https://github.com/Mega-Therion/OmegA-Architecture/edit/main/README.md), make those three changes, and commit. Done.

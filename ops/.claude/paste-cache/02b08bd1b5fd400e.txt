@@ -1,0 +1,98 @@
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• The release rebuild is underway. While that links, I’m looking for the next smallest live improvement, which is probably
+  trace visibility around consensus actions rather than a bigger architectural jump.
+
+• Waited for background terminal · cd /home/mega/.omega/runtime-src/omega-rust && cargo build -p omega-gateway --release
+
+• The rebuild is in the final compile stage. I’m waiting it out, then I’ll swap the binary immediately so these source changes
+  actually become runtime behavior.
+
+• Waited for background terminal · cd /home/mega/.omega/runtime-src/omega-rust && cargo build -p omega-gateway --release
+
+• Still linking. I’m not interrupting it; that’s the shortest path to getting the live gateway current.
+
+• Waited for background terminal · cd /home/mega/.omega/runtime-src/omega-rust && cargo build -p omega-gateway --release
+
+• One more wait on the linker, then I’ll install and verify.
+
+• Waited for background terminal · cd /home/mega/.omega/runtime-src/omega-rust && cargo build -p omega-gateway --release
+
+• The build is still alive, just in the long optimized link phase. I’m staying on it until the binary lands, because that’s the
+  gating step for pushing the new internal task-state paths live.
+
+⚠ Heads up, you have less than 5% of your 5h limit left. Run /status for a breakdown.
+
+• Waited for background terminal · cd /home/mega/.omega/runtime-src/omega-rust && cargo build -p omega-gateway --release
+
+• Ran cd /home/mega/.omega/runtime-src/omega-rust && cargo build -p omega-gateway --release
+  └ warning: associated function `parse_vec_literal` is never used
+      --> crates/omega-memory/src/pg.rs:99:8
+    … +22 lines
+    to apply 1 suggestion)
+        Finished `release` profile [optimized] target(s) in 4m 24s
+
+─ Worked for 4m 23s ───────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• The new release build is done. I’m installing it into the live service now, then I’ll do one quick verification pass and stop
+  there rather than burning time on lower-value extras.
+
+• Ran sudo bash /home/mega/bin/install-fixed-omega-gateway.sh
+  └ Installed:
+    fb4e7a833cb098bc485fff6ba69a338aca5db7b195b75449b3332fa72dc25814  /usr/local/bin/omega-gateway
+    … +25 lines
+    Mar 20 06:52:54 mega omega-gateway[695213]: 2026-03-20T11:52:54.741136Z  INFO omega_gateway: AR137 NAOMI — OmegA is
+    listening addr=0.0.0.0:8787
+
+• Waited for background terminal
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• The patched gateway is live. I’m doing one short verification from the CLI and then I’ll leave you with the highest-signal
+  result rather than spinning cycles on polish.
+
+• Ran omega trace | sed -n '1,24p'
+  └ no trace events
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• The trace store has restarted clean, which is expected because it’s still configured in-memory. I’m forcing one live request
+  through the fresh gateway, then checking the new trace output again so you have a verified post-restart runtime.
+
+• Waited for background terminal · omega "Reply with exactly LIVE_OK"
+
+• Ran omega "Reply with exactly LIVE_OK"
+  └ [mode: omega]
+    LIVE_OK
+
+• Ran omega trace | sed -n '1,24p'
+  └ [ACT] chat/omega
+    outcome=success amp=0.5 shear=0.5 canon=0.82 priority=0.78 shrink=0.12
+    predicted=RETRIEVAL
+    2026-03-20T11:53:18.280906541Z
+
+
+• Waited for background terminal
+
+───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+• I pushed the remaining changes live.
+
+  The gateway has been rebuilt and reinstalled again, so the internal autonomous paths now carry structured task_state data
+  too, not just the user-facing CLI. The updated live binary is /usr/local/bin/omega-gateway, and the service restarted
+  cleanly. I also verified post-restart behavior: omega "Reply with exactly LIVE_OK" returned LIVE_OK, and omega trace now
+  works against the fresh runtime again.
+
+  What’s materially better now:
+
+  - omega sends structured task intent on chat requests
+  - gateway traces persist the teleodynamic fields
+  - omega trace gives you an immediate human-readable view of those fields
+  - autonomous agency and dream gateway jobs now send objective/constraint/priority/authority metadata instead of empty task-
+    state payloads
+
+  One important runtime fact remains: the trace store is still configured as in-memory on gateway startup, so traces clear on
+  service restart. If you want the next highest-value fix, it should be making OMEGA_TRACE_DB_URL persistent so the
+  observability layer survives restarts instead of resetting each time.
+

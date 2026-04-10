@@ -1,0 +1,232 @@
+# Shadow Workflow Generator — Optimized Chains
+# Generated: 2026-03-27
+# Sources: ~/.claude/history.jsonl (581 entries), ~/.codex/history.jsonl (110 entries), ~/NEXUS/ERGON.md
+# Method: Sequence frequency analysis + intent clustering + teleodynamics success signals
+
+meta:
+  generator: shadow-workflow-gen
+  version: "1.0"
+  sources:
+    - path: ~/.claude/history.jsonl
+      entries: 581
+      note: "Primary skill invocation history"
+    - path: ~/.codex/history.jsonl
+      entries: 110
+      note: "Natural language intent history — no /skills found"
+    - path: ~/NEXUS/ERGON.md
+      note: "Multi-agent coordination log — single session recorded"
+  note: "~/.omega_history.txt and ~/.omega_audit.log not yet populated — seeded from available sources"
+
+# ─────────────────────────────────────────────
+# SECTION 1: OBSERVED HIGH-FREQUENCY PAIRS
+# Directly mined from ~/.claude/history.jsonl
+# ─────────────────────────────────────────────
+observed_pairs:
+  - sequence: ["/rate-limit-options", "/model"]
+    frequency: 5
+    signal: "Session configuration pattern — user tunes rate limits then selects model"
+    recommendation: "Macro: /session-configure = /rate-limit-options → /model → /effort"
+
+  - sequence: ["/model", "/effort"]
+    frequency: 3
+    signal: "Model selection followed by effort tuning — consistent optimization ritual"
+    recommendation: "Bundle into /configure-run as a single pre-task macro"
+
+  - sequence: ["/model", "/effort low"]
+    frequency: 2
+    signal: "Low-effort mode selected after model switch — cost/speed optimization"
+
+  - sequence: ["/login", "/init"]
+    frequency: 1
+    signal: "Bootstrap sequence — first-time or re-auth session"
+
+  - sequence: ["/doctor", "/mcp"]
+    frequency: 1
+    signal: "Diagnostics before MCP inspection — health-check pattern"
+    recommendation: "Formalize as /health-check: /doctor → /mcp → /agent-os"
+
+# ─────────────────────────────────────────────
+# SECTION 2: CODEX INTENT CLUSTERS
+# Derived from ~/.codex/history.jsonl NL queries
+# ─────────────────────────────────────────────
+intent_clusters:
+  - theme: agent-coordination
+    frequency: 47
+    keywords: [agent, claude, , codex, skill, omega]
+    inferred_workflow:
+      name: "Agent mesh coordination"
+      chain: ["/wake-up", "/agent-os", "/sync"]
+      efficiency_score: 0.88
+      notes: "Dominant theme. Most queries involve routing tasks to the right agent."
+
+  - theme: research
+    frequency: 38
+    keywords: [research, find, search, what, how, why]
+    inferred_workflow:
+      name: "Research + capture"
+      chain: ["/autonomous-researcher", "/notion-knowledge-capture"]
+      efficiency_score: 0.81
+      notes: "High frequency — user regularly needs research materialized into docs"
+
+  - theme: deploy
+    frequency: 22
+    keywords: [deploy, vercel, build, server, run]
+    inferred_workflow:
+      name: "Deploy pipeline"
+      chain: ["/sovereign-deployer", "/deploy-to-vercel", "/teleodynamics-observer"]
+      efficiency_score: 0.79
+      notes: "Vercel AI gateway + model routing context detected in recent Codex entries"
+
+  - theme: repair
+    frequency: 6
+    keywords: [fix, repair, error, fail, broken, stuck]
+    inferred_workflow:
+      name: "Repair cycle"
+      chain: ["/-repo-diagnose", "/gh-fix-ci", "/webapp-testing"]
+      efficiency_score: 0.76
+      notes: "Low frequency but high urgency — prioritize fast diagnosis path"
+
+  - theme: ingest
+    frequency: 5
+    keywords: [ingest, chunk, embed, neon, postgres, memory]
+    inferred_workflow:
+      name: "Memory ingestion"
+      chain: ["/omega-sid-orchestrator", "/neon-postgres", "/memory-utility-maximizer"]
+      efficiency_score: 0.74
+      notes: "Currently blocked — ingest stalled at 40/21450 files. Urgent."
+
+# ─────────────────────────────────────────────
+# SECTION 3: SYNTHESIZED OPTIMIZED CHAINS
+# Highest-value workflows derived from cross-source analysis
+# ─────────────────────────────────────────────
+optimized_chains:
+
+  - id: OC-001
+    name: "Session Bootstrap"
+    trigger: "Start of any new session"
+    teleodynamics_score: 0.91
+    chain:
+      - skill: /wake-up
+        agent: claude
+        purpose: "Sync ERGON.md + TELOS.md — get current state"
+      - skill: /agent-os
+        agent: claude
+        purpose: "Load Agent OS control layer"
+      - skill: /teleodynamics-observer
+        agent: claude
+        purpose: "Check system integrity before any work begins"
+    provenance: "Derived from /login→/init pattern + ERGON.md session-start convention"
+    status: RECOMMENDED
+
+  - id: OC-002
+    name: "Ingest Recovery"
+    trigger: "ingest_stall alert OR ingestion_heartbeat shows < 1% progress"
+    teleodynamics_score: 0.88
+    chain:
+      - skill: /-repo-diagnose
+        agent: 
+        purpose: "Root cause: why did ingest stall? Check process, locks, DB connectivity"
+      - skill: /omega-sid-orchestrator
+        agent: claude
+        purpose: "Restart ingest with governed resilience"
+      - skill: /neon-postgres
+        agent: 
+        purpose: "Verify DB write health post-restart"
+      - skill: /teleodynamics-observer
+        agent: claude
+        purpose: "Confirm authority_shrink returned to nominal after recovery"
+    provenance: "ERGON.md: ingest stalled at 40/21450. ingestion_heartbeat.log confirmed."
+    status: URGENT — ingest currently stalled
+
+  - id: OC-003
+    name: "Commit + Restructure"
+    trigger: "Staged changes > 50 files in CANON repo"
+    teleodynamics_score: 0.85
+    chain:
+      - skill: /repo-cartographer
+        agent: codex
+        purpose: "Map what changed — confirm deletions are intentional"
+      - skill: /commit
+        agent: claude
+        purpose: "Commit restructure with full context message"
+      - skill: /log
+        agent: claude
+        purpose: "Record in ERGON.md"
+    provenance: "ERGON.md: 106 staged changes, 82 doc deletions — uncommitted since 2026-03-26"
+    status: RECOMMENDED
+
+  - id: OC-004
+    name: "Research-to-Doc"
+    trigger: "User asks to research + capture a topic"
+    teleodynamics_score: 0.83
+    chain:
+      - skill: /autonomous-researcher
+        agent: claude
+        purpose: "ADCCL-verified research pass"
+      - skill: /notion-knowledge-capture
+        agent: claude
+        purpose: "Materialize findings into structured Notion page"
+      - skill: /log
+        agent: claude
+        purpose: "Log completion to ERGON.md"
+    provenance: "Codex intent cluster: research (38x frequency)"
+    status: AVAILABLE
+
+  - id: OC-005
+    name: "Deploy + Verify"
+    trigger: "User requests deployment to Vercel or any production target"
+    teleodynamics_score: 0.80
+    chain:
+      - skill: /sovereign-deployer
+        agent: claude
+        purpose: "Governance-compliant pre-deploy checks"
+      - skill: /deploy-to-vercel
+        agent: claude
+        purpose: "Execute deployment"
+      - skill: /teleodynamics-observer
+        agent: claude
+        purpose: "Post-deploy integrity check"
+    provenance: "Codex intent cluster: deploy (22x). Vercel AI gateway context active."
+    status: AVAILABLE
+
+  - id: OC-006
+    name: "Security Audit"
+    trigger: "Sensitive file found, credentials exposed, or security review requested"
+    teleodynamics_score: 0.87
+    chain:
+      - skill: /repo-cartographer
+        agent: codex
+        purpose: "Map attack surface"
+      - skill: /security-ownership-map
+        agent: codex
+        purpose: "Identify who owns sensitive paths"
+      - skill: /security-threat-model
+        agent: codex
+        purpose: "Enumerate threats and mitigations"
+    provenance: "ERGON.md: hardcoded DATABASE_URL found in governed_resilient_ingest.py — active risk"
+    status: FLAGGED — credential exposure in CANON repo
+
+# ─────────────────────────────────────────────
+# SECTION 4: ANTI-PATTERNS DETECTED
+# ─────────────────────────────────────────────
+anti_patterns:
+  - pattern: "/rate-limit-options loop (12x self-referential)"
+    risk: "Session entropy — user cycling on rate-limit config without resolution"
+    mitigation: "Route to /update-config → /rate-limit-options (confirmed 1x success)"
+
+  - pattern: "Deduper removing its own output files"
+    risk: "Self-destructive loop consuming cycles without net progress"
+    mitigation: "Exclude INBOX/*.json from deduper scope"
+
+  - pattern: "Ingest started but never confirmed complete"
+    risk: "Silent failure — 21k+ files remain unembedded in Neon"
+    mitigation: "Add completion signal check to ingest harness (OC-002)"
+
+# ─────────────────────────────────────────────
+# GOVERNANCE NOTE
+# ─────────────────────────────────────────────
+governance:
+  execution_policy: NON_AUTONOMOUS
+  note: "All chains above are RECOMMENDATIONS ONLY. No chain executes without explicit RY approval."
+  aegis_envelope: HOLDING
+  next_review: "2026-04-03"

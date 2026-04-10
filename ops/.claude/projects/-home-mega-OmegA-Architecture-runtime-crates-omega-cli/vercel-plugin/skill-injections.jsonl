@@ -1,0 +1,1 @@
+{"timestamp":"2026-04-01T04:04:07.873Z","event":"prompt-skill-injection","hookEvent":"UserPromptSubmit","matchedSkills":["investigation-mode","workflow","ai-sdk","vercel-functions"],"injectedSkills":["workflow","ai-sdk"],"summaryOnly":[],"droppedByCap":["vercel-functions","investigation-mode"],"droppedByBudget":[]}

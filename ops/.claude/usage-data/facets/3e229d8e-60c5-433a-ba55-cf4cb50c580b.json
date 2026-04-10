@@ -1,0 +1,17 @@
+{
+  "underlying_goal": "User was trying to check if Claude was available/responsive",
+  "goal_categories": {
+    "warmup_minimal": 1
+  },
+  "outcome": "not_achieved",
+  "user_satisfaction_counts": {
+    "frustrated": 1
+  },
+  "claude_helpfulness": "unhelpful",
+  "session_type": "quick_question",
+  "friction_counts": {},
+  "friction_detail": "Credit balance too low prevented any meaningful interaction.",
+  "primary_success": "none",
+  "brief_summary": "User tried to check if Claude was available but was blocked by low credit balance across multiple attempts.",
+  "session_id": "3e229d8e-60c5-433a-ba55-cf4cb50c580b"
+}

@@ -1,0 +1,28 @@
+#!/bin/bash
+set -e
+
+echo "=== Cache cleanup ==="
+rm -rf ~/.cache/mozilla
+rm -rf ~/.cache/google-chrome
+rm -rf ~/.cache/puppeteer
+rm -rf ~/.cache/node-gyp
+rm -rf ~/.cache/pip
+rm -rf ~/.local/share/Trash/*
+echo "Caches cleared."
+
+echo "=== npm cache ==="
+npm cache clean --force
+
+echo "=== pnpm store prune ==="
+pnpm store prune || true
+
+echo "=== google-cloud-sdk ==="
+rm -rf ~/google-cloud-sdk
+echo "google-cloud-sdk removed."
+
+echo "=== Archives ==="
+rm -rf ~/Archives
+echo "Archives removed."
+
+echo "=== Done. Disk usage ==="
+df -h /

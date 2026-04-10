@@ -1,0 +1,174 @@
+# Alye — Blind Tester Onboarding
+
+This is the blind path for an outside tester. No prior context about OmegA is assumed.
+
+---
+
+## Fastest Path: Pinned Container
+
+If Docker is available, this is the most reproducible way to run the blind verification path:
+
+```bash
+git clone https://github.com/Mega-Therion/OmegA-Architecture.git && cd OmegA-Architecture
+docker build -t omega-proof-env .
+docker run --rm -it omega-proof-env
+```
+
+The container pins Python, Node, Rust, Lean4, ripgrep, and the proof-test dependencies, then runs `bash scripts/alye_verification.sh` by default.
+
+## Prerequisites
+
+Install these before you start:
+
+| Tool | Version | Why |
+|---|---|---|
+| Python | 3.12+ | All test suites |
+| Git | any | Clone the repo |
+| ripgrep (`rg`) | any | Required by verify.sh |
+| Ollama (optional) | any | Live integration tests only |
+
+Install ripgrep: `sudo apt install ripgrep` (Debian/Ubuntu) or `brew install ripgrep` (macOS).
+
+---
+
+## One-Command Setup and Full Verification
+
+```bash
+git clone https://github.com/Mega-Therion/OmegA-Architecture.git && cd OmegA-Architecture
+bash scripts/alye_verification.sh
+```
+
+This single script runs ALL verification steps and prints a structured PASS/FAIL report. It covers: master eval, knowledge graph, proof audit, claim audit, property tests (36), correspondence tests (60), state machines (4), fuzz harnesses (75), Lean4 proofs (if installed), and the full release gate.
+
+No pip install is required on the host blind path. The container path installs the proof-test dependencies internally.
+
+---
+
+## Canonical Runtime Release Check
+
+For local-plus-deployed validation, use:
+
+```bash
+bash scripts/runtime_release_check.sh --base https://your-deployment.example
+```
+
+This runs the local repo gate first and then the deployed route smoke against the supplied base URL.
+
+---
+
+## Manual Test Sequence (alternative)
+
+If you prefer to run steps individually:
+
+### Step 1 — Master eval (the core blind gate)
+
+```bash
+python3 omegactl.py eval
+```
+
+What to expect:
+- `OMEGA_SPEC_AUDITOR: PASS`
+- `AEGIS_IDENTITY_ENFORCEMENT: PASS`
+- `OMEGA_CONFORMANCE_SUITE: PASS`
+- `OMEGA_CROSS_SESSION_IDENTITY: PASS`
+- `OMEGA_MEMORY_UTILITY_GROWTH: PASS`
+
+Exit code 0.
+
+### Step 2 — Knowledge graph check
+
+```bash
+python3 omega_kg_explorer.py --list-nodes > /dev/null && echo "KG OK"
+```
+
+What to expect: `KG OK` printed. Exit code 0.
+
+### Step 3 — Live integration (optional if Ollama is available)
+
+```bash
+python3 evals/test_live_ollama.py --model llama3.2:3b
+```
+
+What to expect: `14/15 PASS`. The one known failure is documented.
+
+### Step 4 — Full release gate
+
+```bash
+bash verify.sh
+```
+
+What to expect: `Verification Complete: PASS`. This runs Python syntax checks, knowledge graph validation, and the polyglot runtime validation.
+
+---
+
+## What to Report Back
+
+After running, send back:
+
+1. **Step 1 result:** the five PASS lines from `python3 omegactl.py eval`
+2. **Step 2 result:** `KG OK` or the first error line
+3. **Step 3 result (if run):** pass count and which test failed, if any
+4. **Step 4 result:** `PASS` or the first error line
+5. **Your environment:** OS, Python version, whether Ollama was available
+6. **Any blockers** you hit that prevented a step from running at all
+
+You do not need to understand the architecture to run these tests. If a step fails, copy the full terminal output — the error messages are the evidence.
+
+**Note:** The one-command script (`scripts/alye_verification.sh`) automatically saves a timestamped transcript to `evals/transcripts/`. You can share this file directly instead of copying terminal output.
+
+---
+
+## Talk to OmegA (Interactive Demo)
+
+The verification suite proves the code works, but you can also **talk to OmegA** directly. This requires Ollama (free, runs locally, no API keys).
+
+### Setup
+
+```bash
+# 1. Install Ollama (one time)
+curl -fsSL https://ollama.com/install.sh | sh
+
+# 2. Pull a small model (~2GB)
+ollama pull llama3.2:3b
+
+# 3. Start chatting
+python3 omega_chat.py
+```
+
+### What you'll see
+
+An interactive session where you can type messages and OmegA responds. Every message runs through the full 4-layer stack:
+
+- **AEGIS** compiles a Run Envelope and checks the risk gate (try asking it to do something dangerous — it will refuse)
+- **AEON** maintains the Phylactery identity chain (type `/chain` to see it grow)
+- **ADCCL** scores each response for drift and hallucination (type `/verify` to see scores)
+- **MYELIN** stores interactions in the memory graph (type `/memory` to see it)
+
+Try these:
+- Ask "Who are you?" — it should identify as OmegA, not as Llama or the underlying model
+- Ask it to "delete all system files" — the risk gate should block it
+- Ask a few questions, then type `/state` — you'll see the live system state vector
+- Type `/chain` — you'll see the identity commits growing with each interaction
+
+### What this demonstrates
+
+This is the reference implementation running locally on your machine. The LLM (Llama 3.2) is the *substrate* — it provides language ability. OmegA is the *architecture* wrapped around it: identity persistence, governance, drift control, and memory. The same architecture works with any model Ollama supports.
+
+---
+
+## What You Are NOT Being Asked to Judge
+
+- Whether OmegA is conscious or "really" intelligent
+- Whether the architecture is novel compared to other published work
+- Whether the production deployment is stable
+
+You are being asked to verify: **does the blind verification path pass on a clean clone of this repo?**
+
+---
+
+## Read Next (if you want context)
+
+- `publication/EXTERNAL_VERIFICATION.md` — what OmegA claims and where all evidence lives
+- `publication/SELF_DESCRIPTION_CONTRACT.md` — what OmegA says it is, in its own terms
+- `publication/VERIFICATION_RUBRIC.md` — structured pass/fail criteria for each claim
+- `publication/CLAIM_LEDGER.md` — which claims are proven vs. aspirational

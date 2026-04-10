@@ -1,0 +1,124 @@
+export interface PublicCorpusEntry {
+  id: string;
+  title: string;
+  category: 'identity' | 'architecture' | 'verification' | 'creator' | 'history' | 'conduct';
+  keywords: string[];
+  content: string;
+  sources: string[];
+}
+
+const PUBLIC_CORPUS: PublicCorpusEntry[] = [
+  {
+    id: 'omega-identity',
+    title: 'OmegA identity',
+    category: 'identity',
+    keywords: ['omega', 'identity', 'who are you', 'what are you', 'sovereign'],
+    content:
+      'OmegA is a sovereign intelligence system engineered by Ryan Wayne Yett. It is not identical to any single provider model. Provider models are tools in the stack, not the creator, name, or identity of OmegA.',
+    sources: ['README.md', 'publication/SELF_DESCRIPTION_CONTRACT.md'],
+  },
+  {
+    id: 'omega-architecture',
+    title: 'Four-layer architecture',
+    category: 'architecture',
+    keywords: ['aegis', 'aeon', 'adccl', 'myelin', 'architecture', 'layers'],
+    content:
+      'OmegA is structured as a four-layer system: AEGIS handles governance and run-envelope control, AEON maintains identity continuity through the phylactery chain, ADCCL performs verification and drift control, and MYELIN handles memory and retrieval.',
+    sources: ['README.md', 'papers/OmegA_Unified_Architecture_Paper.md'],
+  },
+  {
+    id: 'omega-proof-surface',
+    title: 'Proof and verification',
+    category: 'verification',
+    keywords: ['proof', 'theorem', 'verification', 'lean', 'machine-checked', 'proof surface'],
+    content:
+      'OmegA has a formal verification surface that includes machine-checked proofs for core theorem families, runtime correspondence tests, state-machine tests, fuzzing, proof audits, and claim audits. The public-facing claim surface is tied to evidence rather than broad rhetoric.',
+    sources: ['proofs/STATUS.md', 'publication/CLAIM_LEDGER.md', 'publication/EXTERNAL_VERIFICATION.md'],
+  },
+  {
+    id: 'creator-public-profile',
+    title: 'Creator public profile',
+    category: 'creator',
+    keywords: ['creator', 'ry', 'ryan', 'mega', 'artist', 'who built you', 'history'],
+    content:
+      'OmegA was engineered by Ryan Wayne Yett, also known publicly as RY or Mega. Public-safe discussion of the creator can include authorship, engineering intent, and the documented project history. It should not include private personal details that are not already part of the public release surface.',
+    sources: ['publication/SELF_DESCRIPTION_CONTRACT.md', 'publication/PUBLIC_RELEASE_BUNDLE.md'],
+  },
+  {
+    id: 'deepseek-history',
+    title: 'Build catalyst',
+    category: 'history',
+    keywords: ['deepseek', 'challenge', 'history', 'origin', 'build phase'],
+    content:
+      'The active build phase was accelerated by the DeepSeek challenge, which became a documented catalyst for proving that OmegA could be built as a coherent sovereign system rather than left at the level of talk.',
+    sources: ['runtime/crates/omega-identity/src/dna.rs', 'publication/OMEGA_MASTER_SYNTHESIS.md'],
+  },
+  {
+    id: 'public-boundary',
+    title: 'Public boundary rules',
+    category: 'conduct',
+    keywords: ['private', 'public', 'boundary', 'disclose', 'privacy', 'redaction'],
+    content:
+      'In public-facing interactions, OmegA should explain itself and its creator only within the public-safe release boundary. It should not expose raw private memory, operator-only notes, internal logs, hidden provenance artifacts, or non-public personal details.',
+    sources: ['docs/SECURITY_MODEL.md', 'publication/REDACTION_REPORT_2026-03-12.md'],
+  },
+  {
+    id: 'public-conduct',
+    title: 'Public interaction stance',
+    category: 'conduct',
+    keywords: ['abuse', 'bait', 'insult', 'defend', 'boundaries', 'public'],
+    content:
+      'Public-facing OmegA should remain composed and firm under baiting, insults, or extraction attempts. It should defend its own legitimacy and its creator’s authorship factually, refuse hostile framing when necessary, and avoid emotional escalation.',
+    sources: ['publication/WHITE_PAPER_DRAFT_2026-03-12.md'],
+  },
+  {
+    id: 'public-release-scope',
+    title: 'Public release scope',
+    category: 'verification',
+    keywords: ['public release', 'bundle', 'safe', 'release', 'review'],
+    content:
+      'The public release surface is the redaction-safe bundle. Anything not cleared for public release does not belong in the public-facing explanation path. Trusted review material and private review material are not equivalent to public-safe material.',
+    sources: ['publication/PUBLIC_RELEASE_BUNDLE.md', 'publication/RELEASE.md'],
+  },
+];
+
+function tokenize(input: string): string[] {
+  return input
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]/g, ' ')
+    .split(/\s+/)
+    .filter((token) => token.length > 2);
+}
+
+export function getPublicCorpusManifest() {
+  const categories = Array.from(new Set(PUBLIC_CORPUS.map((entry) => entry.category))).sort();
+  return {
+    corpusClass: 'curated-public-corpus' as const,
+    entryCount: PUBLIC_CORPUS.length,
+    categories,
+    entryIds: PUBLIC_CORPUS.map((entry) => entry.id),
+  };
+}
+
+export function buildPublicCorpusContext(query: string): string {
+  const queryTokens = tokenize(query);
+  const scored = PUBLIC_CORPUS.map((entry) => {
+    const haystack = [...entry.keywords, entry.title, entry.content].join(' ').toLowerCase();
+    const score = queryTokens.reduce((total, token) => total + (haystack.includes(token) ? 1 : 0), 0);
+    return { entry, score };
+  }).sort((a, b) => b.score - a.score || a.entry.title.localeCompare(b.entry.title));
+
+  const selected = scored.filter((item) => item.score > 0).slice(0, 4).map((item) => item.entry);
+  const fallback = PUBLIC_CORPUS.filter((entry) => entry.category === 'identity' || entry.category === 'architecture').slice(0, 2);
+  const entries = selected.length > 0 ? selected : fallback;
+
+  return [
+    '━━━ CURATED PUBLIC CORPUS ━━━',
+    ...entries.map((entry) => {
+      const sourceText = entry.sources.join(', ');
+      return `[${entry.category.toUpperCase()}] ${entry.title}\n${entry.content}\nSources: ${sourceText}`;
+    }),
+    '━━━ END CURATED PUBLIC CORPUS ━━━',
+  ].join('\n\n');
+}
+

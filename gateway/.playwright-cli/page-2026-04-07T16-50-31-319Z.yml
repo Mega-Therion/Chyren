@@ -1,0 +1,10 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "Chyren" [level=1] [ref=e5]
+  - main [ref=e6]:
+    - generic [ref=e7]: Hello! I'm Chyren. How can I help you today?
+  - contentinfo [ref=e8]:
+    - generic [ref=e9]:
+      - button "🎤" [ref=e10]
+      - textbox "Type a message..." [ref=e11]
+      - button "➤" [ref=e12]

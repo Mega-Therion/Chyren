@@ -1,0 +1,21 @@
+import asyncio
+
+class VoiceConversationService:
+    def __init__(self, config):
+        self.config = config
+        self.is_active = False
+
+    async def start(self):
+        self.is_active = True
+        print('[VoiceService] Voice pipeline initialized.')
+
+    async def handle_user_utterance(self, audio_bytes):
+        if not self.is_active: return None
+        # Simulation: Analyze the bytes, process through local Whisper/Ollama (placeholder)
+        print(f"[VoiceService] Handling {len(audio_bytes)} bytes of audio...")
+        # Simulate voice response bytes
+        return b"voice_response_simulated"
+
+    async def stop(self):
+        self.is_active = False
+        print('[VoiceService] Voice pipeline shutdown.')

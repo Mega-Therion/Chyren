@@ -1,0 +1,146 @@
+"""
+Ingest hidden CLI agent data: Codex sessions,  plans, Claude history,
+aider chat history, bash history, aider input history, codex memories.
+"""
+import os, json, psycopg2, logging, gc
+from sentence_transformers import SentenceTransformer
+
+logging.basicConfig(filename='/home/mega/rovi_hidden_ingest.log', level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s')
+console = logging.StreamHandler()
+console.setLevel(logging.INFO)
+logging.getLogger('').addHandler(console)
+
+DB_URI     = "postgresql://neondb_owner:npg_HbW1Zlkjd7NI@ep-sweet-glade-anvm0pwn-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require"
+CHECKPOINT = '/home/mega/rovi_hidden_checkpoint.txt'
+CHUNK_SIZE = 50_000
+
+def load_ckpt():
+    if os.path.exists(CHECKPOINT):
+        with open(CHECKPOINT) as f: return set(l.strip() for l in f)
+    return set()
+
+def save_ckpt(key):
+    with open(CHECKPOINT, 'a') as f: f.write(key + '\n')
+
+def insert(cur, content, source_label, namespace, importance):
+    labeled = f"[Source: {source_label}]\n\n{content}"
+    emb = model.encode(content[:10000]).tolist()
+    cur.execute(
+        "INSERT INTO public.omega_memory_entries (id,content,embedding,source,namespace,domain,importance,created_at,version,confidence) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+        (os.urandom(8).hex(), labeled, emb, 'mega_hidden_sync', namespace, 'operational', importance, '2026-03-25', 1, 1.0)
+    )
+
+def collect_plain_files():
+    """Plain text files to ingest as-is (chunked if large)."""
+    return [
+        # (path, namespace, importance)
+        ('/home/mega/.aider.chat.history.md',        'aider_history',  0.85),
+        ('/home/mega/.aider.input.history',           'aider_history',  0.7),
+        ('/home/mega/.bash_history',                  'bash_history',   0.6),
+        ('/home/mega/.claude/history.jsonl',          'claude_history', 0.9),
+        ('/home/mega/.codex/history.jsonl',           'codex_history',  0.9),
+        ('/home/mega/./.md',              '_config',  0.7),
+        ('/home/mega/recent_chat_logs_20260313_205407/.aider.chat.history.md', 'aider_history', 0.85),
+    ]
+
+def collect_codex_sessions():
+    """All codex session jsonl files."""
+    results = []
+    base = '/home/mega/.codex/sessions'
+    for root, _, files in os.walk(base):
+        for f in files:
+            if f.endswith('.jsonl'):
+                results.append((os.path.join(root, f), 'codex_sessions', 0.9))
+    return results
+
+def collect__plans():
+    """All  tmp plan markdown files."""
+    results = []
+    base = '/home/mega/./tmp'
+    for root, _, files in os.walk(base):
+        for f in files:
+            if f.endswith('.md'):
+                results.append((os.path.join(root, f), '_plans', 0.8))
+    return results
+
+def collect_codex_memories():
+    base = '/home/mega/.codex/memories'
+    results = []
+    for root, _, files in os.walk(base):
+        for f in files:
+            results.append((os.path.join(root, f), 'codex_memories', 0.85))
+    return results
+
+model = None
+
+def main():
+    global model
+    logging.info("Starting hidden agent ingest...")
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+    logging.info("Model loaded.")
+
+    done = load_ckpt()
+    conn = psycopg2.connect(DB_URI)
+    cur  = conn.cursor()
+    logging.info("DB connected.")
+
+    all_targets = (
+        collect_plain_files() +
+        collect_codex_sessions() +
+        collect__plans() +
+        collect_codex_memories()
+    )
+
+    total_inserted = 0
+
+    for fp, namespace, importance in all_targets:
+        if not os.path.exists(fp):
+            logging.warning(f"Not found: {fp}")
+            continue
+
+        filesize = os.path.getsize(fp)
+        if filesize == 0:
+            continue
+
+        fname = os.path.basename(fp)
+        logging.info(f"Processing {fp} ({filesize:,} bytes)")
+
+        try:
+            with open(fp, 'r', encoding='utf-8', errors='ignore') as f:
+                content = f.read().replace('\x00', '')
+        except Exception as e:
+            logging.error(f"Read error {fp}: {e}")
+            continue
+
+        # Split into chunks
+        chunks = [content[i:i+CHUNK_SIZE] for i in range(0, len(content), CHUNK_SIZE)]
+        logging.info(f"  → {len(chunks)} chunk(s)")
+
+        for idx, chunk in enumerate(chunks):
+            ck_key = f"{fp}::chunk_{idx}"
+            if ck_key in done or not chunk.strip():
+                save_ckpt(ck_key)
+                continue
+
+            label = f"{fname} chunk {idx+1}/{len(chunks)}"
+            try:
+                insert(cur, chunk, label, namespace, importance)
+                total_inserted += 1
+                if total_inserted % 20 == 0:
+                    conn.commit()
+                    logging.info(f"  Committed {total_inserted} total")
+                    gc.collect()
+                save_ckpt(ck_key)
+            except Exception as e:
+                logging.error(f"Insert error {fp} chunk {idx}: {e}")
+                conn.rollback()
+                save_ckpt(ck_key)
+
+    conn.commit()
+    cur.close()
+    conn.close()
+    logging.info(f"Hidden ingest complete. {total_inserted} entries inserted.")
+
+if __name__ == '__main__':
+    main()

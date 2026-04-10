@@ -1,0 +1,9 @@
+{
+  "id": "4",
+  "subject": "Build TypeScript ADCCL drift control for web",
+  "description": "Port verification scoring (hallucination signals, hedge detection, goal relevance, V score) to TypeScript, score every response",
+  "activeForm": "Building ADCCL drift control",
+  "status": "pending",
+  "blocks": [],
+  "blockedBy": []
+}

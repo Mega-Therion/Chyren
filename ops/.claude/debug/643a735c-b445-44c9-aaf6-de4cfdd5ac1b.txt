@@ -1,0 +1,119 @@
+2026-03-04T05:13:10.046Z [DEBUG] detectFileEncoding failed for expected reason: ENOENT
+2026-03-04T05:13:10.048Z [DEBUG] MDM settings load completed in 5ms
+2026-03-04T05:13:10.112Z [DEBUG] detectFileEncoding failed for expected reason: ENOENT
+2026-03-04T05:13:10.112Z [DEBUG] detectFileEncoding failed for expected reason: ENOENT
+2026-03-04T05:13:10.115Z [DEBUG] [init] configureGlobalMTLS starting
+2026-03-04T05:13:10.116Z [DEBUG] [init] configureGlobalMTLS complete
+2026-03-04T05:13:10.116Z [DEBUG] [init] configureGlobalAgents starting
+2026-03-04T05:13:10.116Z [DEBUG] [init] configureGlobalAgents complete
+2026-03-04T05:13:10.122Z [DEBUG] detectFileEncoding failed for expected reason: ENOENT
+2026-03-04T05:13:10.141Z [DEBUG] detectFileEncoding failed for expected reason: ENOENT
+2026-03-04T05:13:10.152Z [DEBUG] detectFileEncoding failed for expected reason: ENOENT
+2026-03-04T05:13:10.154Z [DEBUG] Applying permission update: Adding 99 allow rule(s) to destination 'userSettings': ["Bash(**)","Read(**)","Edit(**)","Write(**)","Glob(**)","Grep(**)","WebSearch","Bash(gh auth status:*)","Bash(gh repo list:*)","Bash(git config:*)","Bash(git --version)","Bash(~/.local/bin/gh auth status)","Bash(curl:*)","Bash(python3:*)","Bash(git clone:*)","Bash(ls:*)","Bash(if [ ! -d \"node_modules\" ])","Bash(then echo \"Installing dependencies...\")","Bash(npm install)","Bash(else echo \"Dependencies already installed\")","Bash(fi)","Bash(npm install:*)","Bash(gh api:*)","Bash(timeout 5 claude --help:*)","Bash(echo:*)","Bash(timeout 10 claude:*)","Bash(export ANTHROPIC_API_KEY=\"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\")","Bash(timeout 15 claude:*)","Bash(claude setup-token:*)","Bash(sh -s -- -y)","Bash(source \"$HOME/.cargo/env\")","Bash(pgrep:*)","Bash(ollama list:*)","Bash(cargo run:*)","Bash(ps:*)","Bash(ollama ps:*)","Bash(sync)","Bash(sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches')","Bash(pkill:*)","Bash(timeout 30 tail:*)","Bash(ollama pull:*)","Bash(cargo build:*)","Bash(chmod:*)","Bash(./install.sh:*)","Bash(~/.local/bin/omega:*)","Bash(du:*)","Bash(/home/mega/.cargo/bin/cargo build:*)","Bash(/home/mega/.cargo/bin/cargo install:*)","Bash(tee:*)","Bash(timeout:*)","Bash(sudo add-apt-repository:*)","Bash(megasync:*)","Bash(dpkg:*)","Bash(apt list:*)","Bash(pip install:*)","Bash(find:*)","Bash(cargo --version:*)","Bash(cargo new:*)","Bash(/home/mega/NEXUS/rust/target/release/nexus-pulse:*)","Bash(/home/mega/NEXUS/rust/target/release/nexus-memory briefing)","Bash(/home/mega/NEXUS/rust/target/release/nexus-warp status)","WebFetch(domain:chatgpt.com)","Bash(ss:*)","Bash(sudo systemctl:*)","Bash(systemctl restart:*)","Bash(systemctl status:*)","Bash(crontab:*)","Bash(printf:*)","Bash(sudo:*)","Bash(git check-ignore:*)","Bash(git add:*)","Bash(git commit:*)","Bash(git push:*)","Bash(:*)","Bash(codex:*)","Bash(npm show:*)","Bash(claude:*)","Bash(aider:*)","Bash(redis-server:*)","Bash(source:*)","Bash(python:*)","Bash(pip3 install:*)","Bash(journalctl:*)","Bash(systemctl:*)","Bash(kill 7273:*)","Bash(systemctl show:*)","Bash(kill 38138)","Bash(pm2 list:*)","Bash(lsof:*)","Bash(grep:*)","Bash(./scripts/sync-gateway-env.sh:*)","Bash(node:*)","Bash(/home/mega/NEXUS/ERGON.md:*)","Bash(kill 88373:*)","Bash(./venv/bin/pip show:*)","Bash(./venv/bin/pip install:*)","Bash(./venv/bin/python:*)","Bash(OMEGA_DB_URL=sqlite:///gateway.db ./venv/bin/python:*)","Bash(omega ask:*)"]
+2026-03-04T05:13:10.154Z [DEBUG] Applying permission update: Adding 99 allow rule(s) to destination 'projectSettings': ["Bash(**)","Read(**)","Edit(**)","Write(**)","Glob(**)","Grep(**)","WebSearch","Bash(gh auth status:*)","Bash(gh repo list:*)","Bash(git config:*)","Bash(git --version)","Bash(~/.local/bin/gh auth status)","Bash(curl:*)","Bash(python3:*)","Bash(git clone:*)","Bash(ls:*)","Bash(if [ ! -d \"node_modules\" ])","Bash(then echo \"Installing dependencies...\")","Bash(npm install)","Bash(else echo \"Dependencies already installed\")","Bash(fi)","Bash(npm install:*)","Bash(gh api:*)","Bash(timeout 5 claude --help:*)","Bash(echo:*)","Bash(timeout 10 claude:*)","Bash(export ANTHROPIC_API_KEY=\"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\")","Bash(timeout 15 claude:*)","Bash(claude setup-token:*)","Bash(sh -s -- -y)","Bash(source \"$HOME/.cargo/env\")","Bash(pgrep:*)","Bash(ollama list:*)","Bash(cargo run:*)","Bash(ps:*)","Bash(ollama ps:*)","Bash(sync)","Bash(sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches')","Bash(pkill:*)","Bash(timeout 30 tail:*)","Bash(ollama pull:*)","Bash(cargo build:*)","Bash(chmod:*)","Bash(./install.sh:*)","Bash(~/.local/bin/omega:*)","Bash(du:*)","Bash(/home/mega/.cargo/bin/cargo build:*)","Bash(/home/mega/.cargo/bin/cargo install:*)","Bash(tee:*)","Bash(timeout:*)","Bash(sudo add-apt-repository:*)","Bash(megasync:*)","Bash(dpkg:*)","Bash(apt list:*)","Bash(pip install:*)","Bash(find:*)","Bash(cargo --version:*)","Bash(cargo new:*)","Bash(/home/mega/NEXUS/rust/target/release/nexus-pulse:*)","Bash(/home/mega/NEXUS/rust/target/release/nexus-memory briefing)","Bash(/home/mega/NEXUS/rust/target/release/nexus-warp status)","WebFetch(domain:chatgpt.com)","Bash(ss:*)","Bash(sudo systemctl:*)","Bash(systemctl restart:*)","Bash(systemctl status:*)","Bash(crontab:*)","Bash(printf:*)","Bash(sudo:*)","Bash(git check-ignore:*)","Bash(git add:*)","Bash(git commit:*)","Bash(git push:*)","Bash(:*)","Bash(codex:*)","Bash(npm show:*)","Bash(claude:*)","Bash(aider:*)","Bash(redis-server:*)","Bash(source:*)","Bash(python:*)","Bash(pip3 install:*)","Bash(journalctl:*)","Bash(systemctl:*)","Bash(kill 7273:*)","Bash(systemctl show:*)","Bash(kill 38138)","Bash(pm2 list:*)","Bash(lsof:*)","Bash(grep:*)","Bash(./scripts/sync-gateway-env.sh:*)","Bash(node:*)","Bash(/home/mega/NEXUS/ERGON.md:*)","Bash(kill 88373:*)","Bash(./venv/bin/pip show:*)","Bash(./venv/bin/pip install:*)","Bash(./venv/bin/python:*)","Bash(OMEGA_DB_URL=sqlite:///gateway.db ./venv/bin/python:*)","Bash(omega ask:*)"]
+2026-03-04T05:13:10.154Z [DEBUG] Applying permission update: Adding 93 allow rule(s) to destination 'localSettings': ["Bash(gh auth status:*)","Bash(gh repo list:*)","Bash(git config:*)","Bash(git --version)","Bash(~/.local/bin/gh auth status)","Bash(curl:*)","Bash(python3:*)","Bash(git clone:*)","Bash(ls:*)","Bash(if [ ! -d \"node_modules\" ])","Bash(then echo \"Installing dependencies...\")","Bash(npm install)","Bash(else echo \"Dependencies already installed\")","Bash(fi)","Bash(npm install:*)","Bash(gh api:*)","Bash(timeout 5 claude --help:*)","Bash(echo:*)","Bash(timeout 10 claude:*)","Bash(export ANTHROPIC_API_KEY=\"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\")","Bash(timeout 15 claude:*)","Bash(claude setup-token:*)","Bash(sh -s -- -y)","Bash(source \"$HOME/.cargo/env\")","Bash(pgrep:*)","Bash(ollama list:*)","Bash(cargo run:*)","Bash(ps:*)","Bash(ollama ps:*)","Bash(sync)","Bash(sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches')","Bash(pkill:*)","Bash(timeout 30 tail:*)","Bash(ollama pull:*)","Bash(cargo build:*)","Bash(chmod:*)","Bash(./install.sh:*)","Bash(~/.local/bin/omega:*)","Bash(du:*)","Bash(/home/mega/.cargo/bin/cargo build:*)","Bash(/home/mega/.cargo/bin/cargo install:*)","Bash(tee:*)","WebSearch","Bash(timeout:*)","Bash(sudo add-apt-repository:*)","Bash(megasync:*)","Bash(dpkg:*)","Bash(apt list:*)","Bash(pip install:*)","Bash(find:*)","Bash(cargo --version:*)","Bash(cargo new:*)","Bash(/home/mega/NEXUS/rust/target/release/nexus-pulse:*)","Bash(/home/mega/NEXUS/rust/target/release/nexus-memory briefing)","Bash(/home/mega/NEXUS/rust/target/release/nexus-warp status)","WebFetch(domain:chatgpt.com)","Bash(ss:*)","Bash(sudo systemctl:*)","Bash(systemctl restart:*)","Bash(systemctl status:*)","Bash(crontab:*)","Bash(printf:*)","Bash(sudo:*)","Bash(git check-ignore:*)","Bash(git add:*)","Bash(git commit:*)","Bash(git push:*)","Bash(:*)","Bash(codex:*)","Bash(npm show:*)","Bash(claude:*)","Bash(aider:*)","Bash(redis-server:*)","Bash(source:*)","Bash(python:*)","Bash(pip3 install:*)","Bash(journalctl:*)","Bash(systemctl:*)","Bash(kill 7273:*)","Bash(systemctl show:*)","Bash(kill 38138)","Bash(pm2 list:*)","Bash(lsof:*)","Bash(grep:*)","Bash(./scripts/sync-gateway-env.sh:*)","Bash(node:*)","Bash(/home/mega/NEXUS/ERGON.md:*)","Bash(kill 88373:*)","Bash(./venv/bin/pip show:*)","Bash(./venv/bin/pip install:*)","Bash(./venv/bin/python:*)","Bash(OMEGA_DB_URL=sqlite:///gateway.db ./venv/bin/python:*)","Bash(omega ask:*)"]
+2026-03-04T05:13:10.193Z [DEBUG] [STARTUP] Loading MCP configs...
+2026-03-04T05:13:10.215Z [DEBUG] Git remote URL: null
+2026-03-04T05:13:10.215Z [DEBUG] No git remote URL found
+2026-03-04T05:13:10.238Z [DEBUG] Loaded 1 installed plugins from /home/mega/.claude/plugins/installed_plugins.json
+2026-03-04T05:13:10.238Z [DEBUG] detectFileEncoding failed for expected reason: ENOENT
+2026-03-04T05:13:10.238Z [DEBUG] detectFileEncoding failed for expected reason: ENOENT
+2026-03-04T05:13:10.345Z [DEBUG] [ToolSearch:optimistic] mode=tst-auto, ENABLE_TOOL_SEARCH=undefined, result=true
+2026-03-04T05:13:10.350Z [DEBUG] [STARTUP] Running setup()...
+2026-03-04T05:13:10.352Z [DEBUG] detectFileEncoding failed for expected reason: ENOENT
+2026-03-04T05:13:10.354Z [DEBUG] Loading skills from: managed=/etc/claude-code/.claude/skills, user=/home/mega/.claude/skills, project=[]
+2026-03-04T05:13:10.355Z [DEBUG] Error log sink initialized
+2026-03-04T05:13:10.389Z [DEBUG] Acquired PID lock for 2.1.63 (PID 455493)
+2026-03-04T05:13:10.389Z [DEBUG] Acquired PID lock on running version: /home/mega/.local/share/claude/versions/2.1.63
+2026-03-04T05:13:10.394Z [DEBUG] [STARTUP] setup() completed in 44ms
+2026-03-04T05:13:10.394Z [DEBUG] [STARTUP] Loading commands and agents...
+2026-03-04T05:13:10.423Z [DEBUG] Loading plugin rust-analyzer-lsp from source: "./plugins/rust-analyzer-lsp"
+2026-03-04T05:13:10.430Z [DEBUG] Using provided version for rust-analyzer-lsp@claude-plugins-official: 1.0.0
+2026-03-04T05:13:10.433Z [DEBUG] Plugin rust-analyzer-lsp@claude-plugins-official version 1.0.0 already cached at /home/mega/.claude/plugins/cache/claude-plugins-official/rust-analyzer-lsp/1.0.0
+2026-03-04T05:13:10.433Z [DEBUG] Resolved local plugin rust-analyzer-lsp to versioned cache: /home/mega/.claude/plugins/cache/claude-plugins-official/rust-analyzer-lsp/1.0.0
+2026-03-04T05:13:10.477Z [DEBUG] Remote settings: No settings found (404)
+2026-03-04T05:13:10.479Z [DEBUG] Plugin rust-analyzer-lsp has no entry.skills defined
+2026-03-04T05:13:10.479Z [DEBUG] Found 1 plugins (1 enabled, 0 disabled)
+2026-03-04T05:13:10.480Z [DEBUG] getPluginSkills: Processing 1 enabled plugins
+2026-03-04T05:13:10.480Z [DEBUG] Checking plugin rust-analyzer-lsp: skillsPath=none, skillsPaths=0 paths
+2026-03-04T05:13:10.480Z [DEBUG] Total plugin skills loaded: 0
+2026-03-04T05:13:10.480Z [DEBUG] Total plugin commands loaded: 0
+2026-03-04T05:13:10.480Z [DEBUG] Registered 0 hooks from 1 plugins
+2026-03-04T05:13:10.480Z [DEBUG] Total plugin agents loaded: 0
+2026-03-04T05:13:10.508Z [DEBUG] Policy limits: Fetched successfully
+2026-03-04T05:13:10.509Z [DEBUG] Programmatic settings change notification for policySettings
+2026-03-04T05:13:10.523Z [DEBUG] Plugin hooks: skipping reload, enabledPlugins unchanged
+2026-03-04T05:13:10.523Z [DEBUG] [claudeai-mcp] Checking gate (cached)...
+2026-03-04T05:13:10.524Z [DEBUG] [claudeai-mcp] Gate returned: true
+2026-03-04T05:13:10.524Z [DEBUG] [claudeai-mcp] No access token
+2026-03-04T05:13:10.525Z [DEBUG] Policy limits: Saved to /home/mega/.claude/policy-limits.json
+2026-03-04T05:13:10.525Z [DEBUG] Policy limits: Applied new restrictions successfully
+2026-03-04T05:13:10.544Z [DEBUG] Loaded 9 unique skills (9 unconditional, 0 conditional, managed: 0, user: 9, project: 0, additional: 0, legacy commands: 0)
+2026-03-04T05:13:10.544Z [DEBUG] getSkills returning: 9 skill dir commands, 0 plugin skills, 5 bundled skills
+2026-03-04T05:13:10.548Z [DEBUG] [STARTUP] Commands and agents loaded in 154ms
+2026-03-04T05:13:10.549Z [DEBUG] [LSP MANAGER] initializeLspServerManager() called
+2026-03-04T05:13:10.549Z [DEBUG] [LSP MANAGER] Created manager instance, state=pending
+2026-03-04T05:13:10.549Z [DEBUG] [LSP MANAGER] Starting async initialization (generation 1)
+2026-03-04T05:13:10.552Z [DEBUG] [STARTUP] MCP configs loaded in 359ms
+2026-03-04T05:13:10.639Z [DEBUG] All plugins already exist, skipping migration
+2026-03-04T05:13:10.639Z [DEBUG] Initialized versioned plugins system with 1 plugins
+2026-03-04T05:13:10.640Z [DEBUG] [3P telemetry] Waiting for remote managed settings before telemetry init
+2026-03-04T05:13:10.641Z [DEBUG] Fast mode unavailable: Fast mode is not available in the Agent SDK
+2026-03-04T05:13:10.647Z [DEBUG] [3P telemetry] Remote managed settings loaded, initializing telemetry
+2026-03-04T05:13:11.129Z [DEBUG] [Perfetto] initializePerfettoTracing called, env value: undefined
+2026-03-04T05:13:11.129Z [DEBUG] [3P telemetry] isTelemetryEnabled=false (CLAUDE_CODE_ENABLE_TELEMETRY=undefined)
+2026-03-04T05:13:11.139Z [DEBUG] Getting matching hook commands for SessionStart with query: startup
+2026-03-04T05:13:11.139Z [DEBUG] Found 0 hook matchers in settings
+2026-03-04T05:13:11.139Z [DEBUG] Matched 0 unique hooks for query "startup" (0 before deduplication)
+2026-03-04T05:13:11.144Z [DEBUG] installPluginsForHeadless: starting
+2026-03-04T05:13:11.144Z [DEBUG] All plugins already exist, skipping migration
+2026-03-04T05:13:11.145Z [DEBUG] Found 1 installed plugins
+2026-03-04T05:13:11.146Z [DEBUG] installPluginsForHeadless: no missing plugins or marketplaces configured
+2026-03-04T05:13:11.167Z [DEBUG] Total plugin output styles loaded: 0
+2026-03-04T05:13:11.173Z [DEBUG] Loaded 1 LSP server(s) from plugin: rust-analyzer-lsp
+2026-03-04T05:13:11.173Z [DEBUG] Total LSP servers loaded: 1
+2026-03-04T05:13:11.173Z [DEBUG] [LSP SERVER MANAGER] getAllLspServers returned 1 server(s)
+2026-03-04T05:13:11.174Z [DEBUG] Queued request handler for plugin:rust-analyzer-lsp:rust-analyzer.workspace/configuration (connection not ready)
+2026-03-04T05:13:11.174Z [DEBUG] Starting LSP server instance: plugin:rust-analyzer-lsp:rust-analyzer
+2026-03-04T05:13:11.180Z [DEBUG] LSP manager initialized with 1 servers
+2026-03-04T05:13:11.181Z [DEBUG] LSP server manager initialized successfully
+2026-03-04T05:13:11.181Z [DEBUG] Queued notification handler for plugin:rust-analyzer-lsp:rust-analyzer.textDocument/publishDiagnostics (connection not ready)
+2026-03-04T05:13:11.181Z [DEBUG] Registered diagnostics handler for plugin:rust-analyzer-lsp:rust-analyzer
+2026-03-04T05:13:11.181Z [DEBUG] LSP notification handlers registered successfully for all 1 server(s)
+2026-03-04T05:13:11.183Z [DEBUG] Applied queued notification handler for plugin:rust-analyzer-lsp:rust-analyzer.textDocument/publishDiagnostics
+2026-03-04T05:13:11.183Z [DEBUG] Applied queued request handler for plugin:rust-analyzer-lsp:rust-analyzer.workspace/configuration
+2026-03-04T05:13:11.183Z [DEBUG] LSP client started for plugin:rust-analyzer-lsp:rust-analyzer
+2026-03-04T05:13:11.184Z [DEBUG] [LSP PROTOCOL plugin:rust-analyzer-lsp:rust-analyzer] Sending request 'initialize - (0)'.
+2026-03-04T05:13:11.202Z [DEBUG] Security messages are fresh (<1h old), skipping fetch
+2026-03-04T05:13:11.203Z [DEBUG] Org fast mode: enabled
+2026-03-04T05:13:11.242Z [DEBUG] LSP Diagnostics: getLSPDiagnosticAttachments called
+2026-03-04T05:13:11.242Z [DEBUG] LSP Diagnostics: Checking registry - 0 pending
+2026-03-04T05:13:11.242Z [DEBUG] Hooks: Found 0 total hooks in registry
+2026-03-04T05:13:11.242Z [DEBUG] Hooks: checkForNewResponses returning 0 responses
+2026-03-04T05:13:11.243Z [DEBUG] Sending 10 skills via attachment (initial, 10 total sent)
+2026-03-04T05:13:11.246Z [WARN] [3P telemetry] Event dropped (no event logger initialized): user_prompt
+2026-03-04T05:13:11.248Z [DEBUG] Getting matching hook commands for UserPromptSubmit with query: undefined
+2026-03-04T05:13:11.248Z [DEBUG] Found 0 hook matchers in settings
+2026-03-04T05:13:11.248Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2026-03-04T05:13:11.251Z [DEBUG] Fast mode unavailable: Fast mode is not available in the Agent SDK
+2026-03-04T05:13:11.263Z [DEBUG] autocompact: tokens=490 threshold=167000 effectiveWindow=180000
+2026-03-04T05:13:11.270Z [DEBUG] Auto tool search disabled: 0 tokens (threshold: 20000, 10% of context) [source: query]
+2026-03-04T05:13:11.364Z [DEBUG] attribution header x-anthropic-billing-header: cc_version=2.1.63.a43; cc_entrypoint=sdk-cli; cch=00000;
+2026-03-04T05:13:11.368Z [DEBUG] Fast mode unavailable: Fast mode is not available in the Agent SDK
+2026-03-04T05:13:11.370Z [DEBUG] [API:request] Creating client, ANTHROPIC_CUSTOM_HEADERS present: false, has Authorization header: false
+2026-03-04T05:13:11.370Z [DEBUG] [API:auth] OAuth token check starting
+2026-03-04T05:13:11.370Z [DEBUG] Fast mode unavailable: Fast mode is not available in the Agent SDK
+2026-03-04T05:13:11.372Z [DEBUG] [API:auth] OAuth token check complete
+2026-03-04T05:13:11.375Z [DEBUG] Fast mode unavailable: Fast mode is not available in the Agent SDK
+2026-03-04T05:13:11.411Z [DEBUG] Watching for changes in setting files /home/mega/.claude/settings.json, /home/mega/.claude/settings.local.json...
+2026-03-04T05:13:11.429Z [DEBUG] Watching for changes in skill/command directories: /home/mega/.claude/skills, /home/mega/.claude/skills...
+2026-03-04T05:13:11.609Z [ERROR] API error (attempt 1/11): 400 400 {"type":"error","error":{"type":"invalid_request_error","message":"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits."},"request_id":"req_011CYhU68AcwqktyNfV86Caw"}
+2026-03-04T05:13:11.615Z [ERROR] Error in API request: 400 {"type":"error","error":{"type":"invalid_request_error","message":"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits."},"request_id":"req_011CYhU68AcwqktyNfV86Caw"}
+2026-03-04T05:13:11.617Z [ERROR] Error: Error: 400 {"type":"error","error":{"type":"invalid_request_error","message":"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits."},"request_id":"req_011CYhU68AcwqktyNfV86Caw"}
+    at generate (/$bunfs/root/claude:268:28476)
+    at makeRequest (/$bunfs/root/claude:307:5435)
+    at processTicksAndRejections (native:7:39)
+2026-03-04T05:13:11.630Z [DEBUG] Getting matching hook commands for Stop with query: undefined
+2026-03-04T05:13:11.630Z [DEBUG] Found 0 hook matchers in settings
+2026-03-04T05:13:11.630Z [DEBUG] Matched 0 unique hooks for query "no match query" (0 before deduplication)
+2026-03-04T05:13:11.630Z [DEBUG] Fast mode unavailable: Fast mode is not available in the Agent SDK

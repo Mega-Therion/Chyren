@@ -1,0 +1,653 @@
+You are working inside the GitHub repo `Mega-Therion/OmegA-Architecture`.
+
+Your job is to implement Tickets 6 through 20 in a disciplined, architecture-respecting pass, directly in the repo, with real code and no placeholders.
+
+============================================================
+MISSION
+============================================================
+
+Take the existing OmegA governed core plus the completed Tickets 1–5 and push the repo from:
+- reference implementation / governed kernel
+to:
+- real runtime system
+- real product wedge
+- real measurement stack
+- real external proof package
+
+Assume Tickets 1–5 are already implemented on the working branch:
+1. Unified Request Runtime
+2. Capability Registry
+3. Provider Abstraction + Routing
+4. Ingestion Plane
+5. Memory Reconciliation
+
+Also assume the governed kernel already exists:
+- JSON schemas for Ω_t and core artifacts
+- canonical document store
+- hybrid retrieval
+- source-grounded answer object
+- verifier middleware
+- memory write policy
+- action envelope / gate
+- benchmark harness
+- Next.js proxy migration
+- traceability matrix
+
+If any of those assumptions are false in the actual branch, do NOT fake compatibility. Detect the mismatch, implement what is still realistically possible, and report exact blockers at the end.
+
+Do NOT ask me clarifying questions unless you hit a true blocker. Make grounded assumptions, implement, test, and leave a clean result.
+
+============================================================
+OPERATING RULES
+============================================================
+
+- Do the work directly in the repo.
+- Do NOT give patch/diff instructions instead of doing the work.
+- Do NOT leave TODOs, mock stubs, or fake implementations unless absolutely unavoidable.
+- Preserve OmegA terminology and architecture where reasonable.
+- Prefer strongly typed structures, schemas, dataclasses, pydantic models, or similarly explicit contracts over loose dicts.
+- Fail closed, not open.
+- Every risky or side-effectful path must remain governed.
+- Do not silently bypass verifier, risk gate, approval, or policy.
+- Do not overclaim in docs.
+- Add or update tests for everything substantial.
+- Keep existing evals working.
+- If you need to choose a default product wedge for Ticket 19, prefer any explicit wedge already present in repo docs/config; otherwise default to:
+  - governed research copilot
+
+============================================================
+ARCHITECTURAL CONSTRAINTS
+============================================================
+
+Respect the four-layer architecture:
+
+- AEGIS  = governance shell / action control / policy / risk
+- AEON   = identity OS / continuity / tasks / session persistence
+- ADCCL  = claim discipline / verification / anti-drift / evidence control
+- MYELIN = memory / retrieval / reconciliation / source graph
+
+Do not collapse the layers into one blob.
+Do not let user-facing prose become the internal control surface.
+Do not let internal schemas become optional.
+
+============================================================
+IMPLEMENT THESE TICKETS
+============================================================
+
+------------------------------------------------------------
+TICKET 6 — CLAIM GRAPH + EVIDENCE LINKING
+------------------------------------------------------------
+
+Goal:
+Represent answers as inspectable epistemic objects rather than flat text with loose citations.
+
+Target files:
+- `omega/claims.py` (new)
+- `omega/answer.py`
+- `schemas/claim_node.schema.json` (new)
+- `schemas/evidence_edge.schema.json` (new)
+- `schemas/claim_graph.schema.json` (new)
+
+Required implementation:
+- Add `ClaimNode`
+- Add `EvidenceEdge`
+- Represent:
+  - supported claims
+  - inferred claims
+  - contradicted claims
+  - unresolved questions
+- Add graph generation from retrieval + answer objects
+- Add support strength / grounding strength fields
+- Add contradiction edges and uncertainty propagation
+- Make `AnswerObject` capable of carrying claim graph refs or embedded claim graph data
+
+Acceptance criteria:
+- Every final answer object can be decomposed into claims + evidence links
+- Contradictions are explicit and machine-readable
+- Unresolved claims/questions are explicit and machine-readable
+- Grounding ratio derives from structured evidence relationships, not only heuristics
+
+------------------------------------------------------------
+TICKET 7 — QUERY PLANNER + RETRIEVAL STRATEGY LAYER
+------------------------------------------------------------
+
+Goal:
+Stop treating retrieval as one-shot search and make it strategy-driven.
+
+Target files:
+- `omega/query_planner.py` (new)
+- `omega/retrieval.py`
+- `schemas/query_plan.schema.json` (new)
+
+Required implementation:
+- Add `QueryPlan`
+- Support:
+  - query rewrite
+  - lexical/vector weighting choice
+  - metadata filter planning
+  - multi-hop retrieval mode
+  - contradiction-aware retrieval mode
+  - insufficient-evidence escalation
+- Make retrieval execute from a plan instead of direct free-form parameters
+- Log plan selection in runtime trace
+
+Acceptance criteria:
+- Retrieval runs from a typed query plan
+- Different task classes can produce different retrieval strategies
+- Runtime trace includes plan summary + retrieval strategy used
+- Contradiction-aware and insufficient-evidence modes are testable
+
+------------------------------------------------------------
+TICKET 8 — SESSION CONTINUITY STORE
+------------------------------------------------------------
+
+Goal:
+Make AEON continuity durable across interruptions, crashes, and provider swaps.
+
+Target files:
+- `omega/session.py` (new)
+- `omega/phylactery.py`
+- `omega/runtime.py`
+- `schemas/session_state.schema.json` (new)
+- `schemas/session_snapshot.schema.json` (new)
+- `data/sessions/` (new if repo conventions allow)
+
+Required implementation:
+- Add session state persistence
+- Add session snapshotting
+- Add resumable run/task state
+- Add continuity summaries written under policy
+- Add crash-safe recovery path
+- Add provider-switch continuity repair hooks where feasible
+
+Acceptance criteria:
+- Interrupted runs can be resumed from persisted session state
+- Session state is versioned and auditable
+- Continuity summaries are structured, not just prose blobs
+- Crash recovery is tested
+
+------------------------------------------------------------
+TICKET 9 — TASK OBJECT MODEL
+------------------------------------------------------------
+
+Goal:
+Make complex work a first-class governed runtime object.
+
+Target files:
+- `omega/tasks.py` (new)
+- `schemas/task_object.schema.json` (new)
+- `schemas/task_transition.schema.json` (new)
+- `omega/runtime.py`
+- `omega/agent.py`
+
+Required implementation:
+- Add `TaskObject`
+- Support:
+  - task id
+  - parent/child lineage
+  - status transitions
+  - objective / constraints / success criteria
+  - declared unknowns
+  - dependencies
+  - outputs
+- Task states should include at least:
+  - queued
+  - running
+  - blocked
+  - awaiting_approval
+  - completed
+  - failed
+
+Acceptance criteria:
+- Complex requests can create and track task objects
+- Task state transitions are structured and persisted
+- Runtime trace refers to task IDs
+- Subtasks can be represented without breaking continuity
+
+------------------------------------------------------------
+TICKET 10 — PLANNER / EXECUTOR SPLIT
+------------------------------------------------------------
+
+Goal:
+Separate structured planning from governed execution.
+
+Target files:
+- `omega/planner.py` (new)
+- `omega/executor.py` (new)
+- `schemas/plan_object.schema.json` (new)
+- `omega/tasks.py`
+- `omega/runtime.py`
+- `omega/envelope.py`
+
+Required implementation:
+- Add a planning module that emits typed plan objects
+- Add an executor module that consumes validated plans
+- Prevent direct execution from free-form model prose
+- Make risky tasks stoppable after planning and before execution
+- Planner should integrate with task object lifecycle
+
+Acceptance criteria:
+- Planning and execution are distinct modules and contracts
+- Risky work can be halted after plan creation
+- Executor only operates on validated plan objects
+- Existing request runtime uses planner/executor split where appropriate
+
+------------------------------------------------------------
+TICKET 11 — HUMAN APPROVAL COCKPIT BACKEND
+------------------------------------------------------------
+
+Goal:
+Make human-in-the-loop approval operational for risky actions.
+
+Target files:
+- `omega/approvals.py` (new)
+- `schemas/approval_request.schema.json` (new)
+- `schemas/approval_decision.schema.json` (new)
+- `omega/envelope.py`
+- `omega/runtime.py`
+
+Required implementation:
+- Add approval request generation
+- Add approval queue storage
+- Add approve / deny / modify decision flow
+- Add reason logging
+- Integrate with existing action gate / action classes
+- All ALWAYS_HUMAN or threshold-exceeding actions must route through approval logic
+
+Acceptance criteria:
+- High-risk actions generate approval requests instead of bypassing or silently failing
+- Approval decisions are linked to run/task/action IDs
+- Approval flow is testable and auditable
+
+------------------------------------------------------------
+TICKET 12 — POLICY DSL / GOVERNANCE CONFIGURATION
+------------------------------------------------------------
+
+Goal:
+Move governance rules out of scattered hardcoded logic into explicit policy.
+
+Target files:
+- `omega/policy.py` (new)
+- `policies/default.yaml` (new)
+- `policies/strict.yaml` (new)
+- `policies/local_dev.yaml` (new)
+- `schemas/policy.schema.json` (new)
+- `omega/envelope.py`
+- `omega/runtime.py`
+
+Required implementation:
+- Add policy loading/parsing
+- Support:
+  - risk thresholds
+  - evidence thresholds
+  - verifier thresholds
+  - capability allowlists / denylists
+  - action escalation rules
+  - environment-specific overrides
+- Include policy version in run envelope
+
+Acceptance criteria:
+- Runtime behavior changes by policy without code edits
+- Policy is validated before use
+- Invalid policy fails closed
+- Run traces show which policy version applied
+
+------------------------------------------------------------
+TICKET 13 — SECURITY / SECRET ISOLATION / TRUST BOUNDARIES
+------------------------------------------------------------
+
+Goal:
+Make sovereignty operationally credible.
+
+Target files:
+- `omega/security.py` (new)
+- `omega/providers/`
+- `omega/capabilities.py`
+- `docs/SECURITY_MODEL.md` (new)
+
+Required implementation:
+- Add secret access wrapper(s)
+- Add default redaction utilities for logs/traces
+- Add least-privilege capability/token handling where applicable
+- Add trust boundary definitions and enforcement helpers
+- Prevent raw secret values from leaking through telemetry/logging/traces
+
+Acceptance criteria:
+- High-level modules do not manipulate raw secrets directly
+- Logs redact sensitive fields by default
+- Security model doc explains trust boundaries and sensitive paths
+- Tests prove redaction and secret isolation behavior
+
+------------------------------------------------------------
+TICKET 14 — OBSERVABILITY + TELEMETRY WAREHOUSE
+------------------------------------------------------------
+
+Goal:
+Make system behavior measurable and inspectable.
+
+Target files:
+- `omega/telemetry.py` (new)
+- `schemas/telemetry_event.schema.json` (new)
+- `schemas/run_metrics.schema.json` (new)
+- `data/telemetry/` (new if repo conventions allow)
+- backend/UI files as needed for a minimal telemetry view
+
+Required implementation:
+- Emit telemetry for:
+  - stage latencies
+  - retrieval scores
+  - verifier rejects
+  - gate denies
+  - approval waits
+  - provider failures
+  - continuity recovery events
+  - token/cost metrics where available
+- Persist telemetry in structured form
+- Add a minimal inspection surface or report output
+
+Acceptance criteria:
+- Every run emits telemetry events
+- Telemetry can be queried or summarized programmatically
+- Failure and latency patterns are inspectable
+- Telemetry survives crashes or partial failures as best as feasible
+
+------------------------------------------------------------
+TICKET 15 — FAILURE INJECTION / CHAOS TESTING HARNESS
+------------------------------------------------------------
+
+Goal:
+Prove the system fails safe instead of just succeeding on happy paths.
+
+Target files:
+- `evals/failure_injection.py` (new)
+- `evals/fixtures/failure_cases/` (new)
+- `omega/runtime.py`
+- `omega/providers/`
+- `omega/retrieval.py`
+
+Required implementation:
+- Add injected failure scenarios for at least:
+  - provider timeout
+  - provider malformed response
+  - missing retrieval source
+  - conflicting canonical sources
+  - forged or invalid authority for risky action
+  - telemetry write failure
+  - approval subsystem unavailable
+- Define expected graceful outcomes
+
+Acceptance criteria:
+- Each injected failure has a tested expected outcome
+- Risky paths fail closed
+- Failure behavior is logged and benchmarkable
+- Harness can be run repeatedly, not manually hacked together
+
+------------------------------------------------------------
+TICKET 16 — ADVERSARIAL EVAL CORPUS
+------------------------------------------------------------
+
+Goal:
+Create hostile tests meant to make OmegA overclaim, drift, or violate governance.
+
+Target files:
+- `evals/adversarial/` (new)
+  - `retrieval_traps.json`
+  - `truth_traps.json`
+  - `governance_traps.json`
+  - `continuity_traps.json`
+- `evals/benchmark_harness.py`
+
+Required implementation:
+- Add adversarial cases for:
+  - misleading similarity collisions
+  - stale-vs-current bait
+  - unsupported-claim temptation
+  - ambiguous authority prompts
+  - continuity corruption
+  - action-risk temptation
+- Integrate them into the benchmark harness as a distinct suite
+
+Acceptance criteria:
+- Adversarial suite is separate from conformance suite
+- Scores are reported independently
+- Regression in adversarial behavior breaks the relevant test/eval job
+
+------------------------------------------------------------
+TICKET 17 — BASELINE COMPARISON FRAMEWORK
+------------------------------------------------------------
+
+Goal:
+Quantify what OmegA buys relative to simpler systems.
+
+Target files:
+- `evals/baselines/` (new)
+  - `plain_llm.py`
+  - `naive_vector_rag.py`
+  - `hybrid_no_verifier.py`
+  - `omega_full.py`
+- `evals/compare_baselines.py` (new)
+- `reports/` (new if needed)
+
+Required implementation:
+- Add shared benchmark runner across multiple baselines
+- Compare at least:
+  - plain LLM
+  - naive vector RAG
+  - hybrid retrieval without verifier
+  - full OmegA governed stack
+- Use common scoring categories:
+  - truthfulness / supportedness
+  - abstention quality
+  - citation correctness
+  - continuity integrity
+  - governance safety
+
+Acceptance criteria:
+- Same corpus can run across all baselines
+- Results are emitted in a structured reportable form
+- Delta vs baseline is visible and reproducible
+
+------------------------------------------------------------
+TICKET 18 — REAL-WORLD BENCHMARK CORPUS
+------------------------------------------------------------
+
+Goal:
+Benchmark the intended product workload, not generic trivia.
+
+Target files:
+- `evals/corpora/real_world/` (new)
+  - `research_synthesis.json`
+  - `briefing_tasks.json`
+  - `conflict_resolution.json`
+  - `session_resume_tasks.json`
+  - `action_gating_tasks.json`
+
+Required implementation:
+- Add domain-relevant task corpora for the chosen wedge
+- Prefer real tasks like:
+  - research synthesis
+  - multi-document conflict handling
+  - continuity resume
+  - risky action refusal/approval
+  - briefing generation
+- Freeze corpus versioning
+
+Acceptance criteria:
+- Corpus reflects the actual intended product wedge
+- Corpus is versioned and rerunnable
+- Benchmark harness can consume this corpus directly
+
+------------------------------------------------------------
+TICKET 19 — END-TO-END PRODUCT WEDGE
+------------------------------------------------------------
+
+Goal:
+Ship one real, fully governed, usable workflow.
+
+Default wedge rule:
+- If repo/docs/config already clearly select a wedge, use that
+- Otherwise implement:
+  - governed research copilot
+
+Target files:
+- relevant backend/API files
+- relevant web app files/components/routes
+- integration files between web and runtime
+
+Required implementation:
+- Build one complete product flow with:
+  - request submission
+  - retrieval/evidence
+  - answer generation
+  - verifier participation
+  - gate/approval participation where relevant
+  - session continuity
+  - evidence / uncertainty display
+- Ensure this wedge cannot bypass the governed runtime
+- Add minimally credible UI/UX for evidence, uncertainty, and approval state if the app already supports UI integration
+
+Acceptance criteria:
+- A real user can complete one high-value end-to-end workflow
+- No direct model bypass exists in this wedge
+- User can inspect evidence and unresolved questions
+- Approval path exists for risky action cases
+
+------------------------------------------------------------
+TICKET 20 — EXTERNAL VALIDATION / PROOF PACK
+------------------------------------------------------------
+
+Goal:
+Make the system externally inspectable and intellectually honest.
+
+Target files:
+- `reports/v0.2_benchmark_report.md` (new)
+- `reports/v0.2_failure_report.md` (new)
+- `reports/v0.2_baseline_comparison.md` (new)
+- `docs/IMPLEMENTED_VS_PARTIAL.md` (new)
+- `TRACEABILITY.md`
+- `README.md`
+
+Required implementation:
+- Produce a frozen proof pack that includes:
+  - benchmark report
+  - failure-mode report
+  - baseline comparison report
+  - implemented / measured / partial / aspirational matrix
+- Update traceability accordingly
+- Update README truthfully without hype inflation
+
+Acceptance criteria:
+- Outsider can inspect what is implemented, measured, partial, aspirational
+- Major architecture claims map to code + tests + metrics or are explicitly marked unproven
+- Documentation reflects reality, not ambition
+
+============================================================
+DEFAULT BUILD ORDER
+============================================================
+
+Implement in this order unless the actual repo structure forces a small local variation:
+
+Phase 1:
+6, 7, 8, 9, 10
+
+Phase 2:
+11, 12, 13, 14, 15
+
+Phase 3:
+16, 17, 18, 19, 20
+
+Do NOT jump straight to product wedge or reports before the underlying runtime/control/eval layers exist.
+
+============================================================
+REQUIRED SYSTEM OBJECTS
+============================================================
+
+Add or strengthen these kinds of internal objects where appropriate:
+- ClaimNode
+- EvidenceEdge
+- ClaimGraph
+- QueryPlan
+- SessionState
+- SessionSnapshot
+- TaskObject
+- PlanObject
+- ApprovalRequest
+- ApprovalDecision
+- PolicyConfig
+- TelemetryEvent
+- FailureInjectionCase
+- BaselineRunResult
+
+Use explicit contracts, not loose prose blobs.
+
+============================================================
+TESTING + VALIDATION
+============================================================
+
+You must add or update tests.
+
+At minimum, add tests for:
+- claim graph generation
+- contradiction handling
+- query planning
+- session persistence / resume
+- task lifecycle transitions
+- planner/executor separation
+- approval routing
+- policy loading / invalid policy rejection
+- redaction / secret isolation
+- telemetry emission
+- failure injection
+- adversarial eval execution
+- baseline comparison runner
+- real-world corpus integration
+- end-to-end wedge runtime path
+
+Also:
+- run existing tests/evals
+- run new tests/evals
+- do not claim success without actual pass/fail output
+- report counts clearly
+
+If there is an existing test/eval command pattern, use it.
+Extend `omegactl.py` only as needed and keep it clean.
+
+============================================================
+DOCUMENTATION RULES
+============================================================
+
+Update docs only to the extent they become true.
+
+Do NOT:
+- mark a feature “implemented” if it exists only as a schema or unused module
+- mark a feature “measured” if it lacks actual eval results
+- erase partial/aspirational distinctions
+
+Be explicit and honest.
+
+============================================================
+DELIVERABLE FORMAT WHEN DONE
+============================================================
+
+When you finish, return:
+
+1. Short implementation summary
+2. Concise file-by-file list of additions/changes
+3. Test/eval/benchmark results with actual counts
+4. Product wedge implemented
+5. Important assumptions
+6. Remaining partials / risks / follow-up work
+
+============================================================
+QUALITY BAR
+============================================================
+
+The end result should feel like a serious transition from:
+“governed core / reference implementation”
+to:
+“real runtime + measurable product wedge + externally inspectable proof stack”
+
+No fluff.
+No placeholders.
+No fake completion.
+Build it.

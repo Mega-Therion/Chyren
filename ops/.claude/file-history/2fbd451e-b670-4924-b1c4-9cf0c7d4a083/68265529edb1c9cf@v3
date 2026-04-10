@@ -1,0 +1,190 @@
+"""
+OmegA DB Registry — single source of truth for all Neon DB connections.
+All ingest scripts and query layers import from here.
+When a new DB is added (per SOP_DATABASE_EXPANSION.md), add it to DB_REGISTRY.
+"""
+import os
+import psycopg2
+
+DB_REGISTRY = {
+    'db1': {
+        'uri': os.getenv("OMEGA_DB_URL") or os.getenv("DATABASE_URL"),
+        'namespaces': {
+            # DB1 is at ~87% capacity — existing namespaces only, no new writes
+            'personal', 'social_facebook', 'social_instagram', 'social_linkedin',
+            'omega_brain', 'fresh_downloads', 'fresh_downloads_2', 'home_full',
+            'rovi_convos_v1', 'rovi_sweep2', 'final_sweep', 'codex_sessions',
+            'omega_architecture', 'social_linkedin', 'aider_history', 'bash_history',
+            'claude_history', '_plans', 'biography.ry', 'creator.ry',
+            'code', 'default',
+        },
+        'label': 'omega-personal-db',
+        'capacity_mb': 512,
+    },
+    'db2': {
+        'uri': os.getenv("OMEGA_DB2_URL"),
+        'namespaces': {
+            # DB2 is at ~10% — all new ingest routes here
+            'omega_architecture', 'omega_docs', 'omega_code',
+            'system', 'skill_bundle', 'claude_skills', 'agent_skills', 'cli_agents',
+            # New INBOX namespaces routed to DB2
+            'google_takeout', 'omega_sovereign', 'aeon_system', 'magnus_spec',
+            'documents', 'safa_data', 'omega_mcp', 'inbox',
+            # Publications and identity — high importance, goes to DB2
+            'publications.aeon', 'publications.renew', 'publications.ess',
+            'publications.identity', 'publications.patent', 'publications.one',
+            'legal.court',
+        },
+        'label': 'omega-technical-db',
+        'capacity_mb': 512,
+    },
+    # DB3+ added here when DB2 hits 90% — follow SOP_DATABASE_EXPANSION.md
+}
+
+# Default DB for any namespace not explicitly mapped — DB2 has 462 MB free
+DEFAULT_DB = 'db2'
+
+
+def get_db_for_namespace(namespace: str) -> str:
+    """Return the DB key for a given namespace."""
+    for db_key, info in DB_REGISTRY.items():
+        if namespace in info['namespaces']:
+            return db_key
+    return DEFAULT_DB
+
+
+def get_conn_for_namespace(namespace: str):
+    """Return an open psycopg2 connection for the DB that owns this namespace."""
+    db_key = get_db_for_namespace(namespace)
+    return psycopg2.connect(DB_REGISTRY[db_key]['uri'])
+
+
+def get_all_conns():
+    """Return list of (label, connection) for all registered DBs."""
+    return [(info['label'], psycopg2.connect(info['uri'])) for info in DB_REGISTRY.values()]
+
+
+PRUNE_THRESHOLD  = 90   # % — prune importance < 0.60 to reclaim space (updated from 0.5 — all entries > 0.5)
+EXPAND_THRESHOLD = 99   # % — create new DB if still above this after pruning
+WARN_THRESHOLD   = 85   # % — soft warning
+
+
+def check_all_health(verbose=True):
+    """Print storage usage for all DBs. Returns dict of {db_key: pct_used}."""
+    health = {}
+    for db_key, info in DB_REGISTRY.items():
+        try:
+            conn = psycopg2.connect(info['uri'])
+            cur = conn.cursor()
+            cur.execute("SELECT pg_database_size('neondb')")
+            size_bytes = cur.fetchone()[0]
+            pct = (size_bytes / (info['capacity_mb'] * 1024 * 1024)) * 100
+            size_mb = size_bytes / 1024 / 1024
+            if pct >= EXPAND_THRESHOLD:
+                status = "🚨 EXPAND NOW"
+            elif pct >= PRUNE_THRESHOLD:
+                status = "⚠️  PRUNE NOW"
+            elif pct >= WARN_THRESHOLD:
+                status = "🔶 WATCH"
+            else:
+                status = "✅ OK"
+            if verbose:
+                print(f"  {info['label']}: {size_mb:.1f} MB / {info['capacity_mb']} MB ({pct:.1f}%) {status}")
+            health[db_key] = pct
+            cur.close(); conn.close()
+        except Exception as e:
+            if verbose:
+                print(f"  {db_key}: ERROR — {e}")
+            health[db_key] = -1
+    return health
+
+
+def prune_db(db_key: str, importance_threshold: float = 0.60):
+    """Delete low-importance entries and VACUUM to reclaim space."""
+    info = DB_REGISTRY[db_key]
+    conn = psycopg2.connect(info['uri'])
+    cur = conn.cursor()
+    cur.execute("DELETE FROM public.omega_memory_entries WHERE importance <= %s", (importance_threshold,))
+    deleted = cur.rowcount
+    conn.commit()
+    conn.autocommit = True
+    cur.execute("VACUUM FULL public.omega_memory_entries")
+    cur.execute("SELECT pg_database_size('neondb')")
+    size_mb = cur.fetchone()[0] / 1024 / 1024
+    cur.close(); conn.close()
+    print(f"  Pruned {deleted} entries from {info['label']}. Now: {size_mb:.1f} MB")
+    return deleted
+
+
+def guard(namespace: str):
+    """
+    Call before inserting to a namespace. If its DB is >= PRUNE_THRESHOLD:
+      - prune first
+      - if still >= EXPAND_THRESHOLD after pruning: print SOP alert and raise
+    Safe to call on every insert loop iteration (cached after first check per run).
+    """
+    db_key = get_db_for_namespace(namespace)
+    info = DB_REGISTRY[db_key]
+    conn = psycopg2.connect(info['uri'])
+    cur = conn.cursor()
+    cur.execute("SELECT pg_database_size('neondb')")
+    pct = (cur.fetchone()[0] / (info['capacity_mb'] * 1024 * 1024)) * 100
+    cur.close(); conn.close()
+    if pct >= PRUNE_THRESHOLD:
+        print(f"  ⚠️  {info['label']} at {pct:.1f}% — auto-pruning...")
+        prune_db(db_key)
+        # Re-check after prune
+        conn = psycopg2.connect(info['uri'])
+        cur = conn.cursor()
+        cur.execute("SELECT pg_database_size('neondb')")
+        pct = (cur.fetchone()[0] / (info['capacity_mb'] * 1024 * 1024)) * 100
+        cur.close(); conn.close()
+        if pct >= EXPAND_THRESHOLD:
+            raise RuntimeError(
+                f"🚨 {info['label']} still at {pct:.1f}% after pruning. "
+                f"Create a new Neon project and follow: "
+                f"/home/mega/OMEGA_WORKSPACE/DOCS/SOP_DATABASE_EXPANSION.md"
+            )
+
+
+def query_all(embedding_list: list, top_k: int = 10) -> list:
+    """
+    Fan-out semantic search across all registered DBs.
+    Returns top_k results merged and re-ranked by similarity.
+    """
+    results = []
+    emb_str = '[' + ','.join(str(x) for x in embedding_list) + ']'
+    for db_key, info in DB_REGISTRY.items():
+        try:
+            conn = psycopg2.connect(info['uri'])
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT content, source, namespace, importance,
+                       1 - (embedding <=> %s::vector) AS similarity
+                FROM public.omega_memory_entries
+                ORDER BY embedding <=> %s::vector
+                LIMIT %s
+            """, (emb_str, emb_str, top_k))
+            for row in cur.fetchall():
+                results.append({
+                    'content':    row[0],
+                    'source':     row[1],
+                    'namespace':  row[2],
+                    'importance': row[3],
+                    'similarity': row[4],
+                    'db':         info['label'],
+                })
+            cur.close(); conn.close()
+        except Exception as e:
+            print(f"Query error on {info['label']}: {e}")
+    results.sort(key=lambda x: x['similarity'], reverse=True)
+    return results[:top_k]
+
+
+if __name__ == '__main__':
+    print("OmegA DB Health Check:")
+    health = check_all_health()
+    for db_key, pct in health.items():
+        if pct >= 90:
+            print(f"\n🚨 ACTION REQUIRED: {db_key} is at {pct:.1f}%")
+            print("   Follow: /home/mega/OMEGA_WORKSPACE/DOCS/SOP_DATABASE_EXPANSION.md")

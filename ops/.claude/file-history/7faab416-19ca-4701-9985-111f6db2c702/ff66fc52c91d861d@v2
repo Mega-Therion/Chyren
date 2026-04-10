@@ -1,0 +1,236 @@
+# OmegA CLI Enhancement Prompt (Part 3/4)
+
+## Implementation Roadmap
+
+### Sprint 1 (Week 1): Core UX Fixes
+**Effort**: 16 hours | **Blocker**: None
+
+1. **Banner Colorshifting** (1h)
+   - Status: ✓ DONE (already implemented in this session)
+   - File: `/home/mega/OMEGA_WORKSPACE/CODE/bin/omega` line 166
+
+2. **Error 500 Better Diagnostics** (2h)
+   - Status: ✓ DONE (already implemented in this session)
+   - Detects payload size, suggests chunking
+   - File: `/home/mega/OMEGA_WORKSPACE/CODE/bin/omega` line 238
+
+3. **Smart Command Suggestions** (4h)
+   - Read `~/.omega/cli/history`
+   - Query skill manifest
+   - Filter by relevance (fuzzy match + context)
+   - Implement with `prompt_toolkit.auto_suggest`
+
+4. **Rich Response Rendering** (4h)
+   - Detect markdown, code blocks, tables, JSON
+   - Use `rich.syntax.Syntax` for code
+   - Use `rich.table.Table` for structured data
+   - Handle large responses with pagination
+
+5. **Session State Display** (3h)
+   - Show `[tokens: X / cost: $Y]` in status
+   - Add `/session stats` command
+   - Persist metrics to session file
+
+6. **Testing** (2h)
+   - Unit tests for new features
+   - Smoke test: `/test smoke`
+
+### Sprint 2 (Week 2): Agentic & Skill Integration
+**Effort**: 20 hours | **Blocker**: Skill manifest finalized
+
+1. **Skill Invocation** (5h)
+   - Parse `/home/mega/claude-skill-bundle/skills/skills-manifest.json`
+   - Add `/skill <name> [args]` command
+   - Stream skill output to CLI
+   - Error handling for missing skills
+
+2. **Agent Delegation** (5h)
+   - Add `/delegate <agent> <task>` command
+   - Route to agent OS
+   - Stream results back
+   - Save to session
+
+3. **Workflow Chaining** (5h)
+   - Parse `/chain skill1 → skill2 → skill3` syntax
+   - Build dependency DAG
+   - Validate before execution
+   - Variable substitution: `{prev.output}`
+
+4. **Memory Integration** (3h)
+   - Connect to `OMEGA_DB2_URL`
+   - Query for context embeddings
+   - Show related memories on prompt
+   - Append interactions to memory
+
+5. **Testing** (2h)
+   - Integration tests with agent OS
+   - Mock skill responses
+
+### Sprint 3 (Week 3): Advanced Features
+**Effort**: 18 hours | **Blocker**: DB monitoring tools
+
+1. **Real-Time Monitoring Dashboard** (6h)
+   - Create `/monitor` command
+   - Display DB1/DB2 utilization
+   - API health, session metrics
+   - Use `rich.live.Live` for updates
+   - Refresh interval configurable
+
+2. **File-Based Prompt Management** (4h)
+   - `/prompt-file <path>` loader
+   - `/prompt-save <name>` saver
+   - `/prompt-template` library
+   - File size warnings and chunking advice
+
+3. **Git Integration** (4h)
+   - `/git status`, `/git-diff`, `/git-commit`
+   - `/push-pr <title>` (auto-generate description)
+   - Real-time diff display with syntax highlight
+
+4. **Multi-Modal Input** (3h)
+   - `/voice` mode (optional: requires mic library)
+   - `/image <path>` for vision analysis
+   - `/paste` for multi-line input
+   - `/code <language>` for code blocks
+
+5. **Testing** (1h)
+   - Test file I/O and parsing
+   - Mock git commands
+
+### Sprint 4 (Week 4): Architecture & Polish
+**Effort**: 16 hours | **Blocker**: None
+
+1. **Event-Driven Architecture** (4h)
+   - Internal event bus
+   - Handler registration: `on("event")`
+   - Webhook receiver on localhost:8765
+   - Telemetry to ERGON.md
+
+2. **Configuration System** (3h)
+   - `~/.omega/cli/config.toml` (TOML parser)
+   - `~/.omega/cli/theme.json` (color themes)
+   - `~/.omega/cli/aliases.txt` (command aliases)
+   - `/config edit` for interactive editing
+
+3. **Plugin System** (3h)
+   - Plugin directory: `~/.omega/cli/plugins/`
+   - Plugin interface class
+   - `/plugin reload`, `/plugin install`
+   - Hot-reload mechanism
+
+4. **Audit & Compliance** (3h)
+   - Append to ERGON.md after each command
+   - Checksum hashing for integrity
+   - `/audit` command to review history
+   - Format: timestamp, action, user, exit_code, duration, hash
+
+5. **Documentation & Testing** (3h)
+   - README.md with feature guide
+   - Architecture doc
+   - API reference for plugins
+   - Full test coverage (80%+)
+
+---
+
+## Development Guidelines
+
+### File Structure
+```
+/home/mega/OMEGA_WORKSPACE/CODE/bin/
+├── omega                        # Main CLI entry point
+├── omega_cli/                   # Package directory
+│   ├── __init__.py
+│   ├── core.py                  # Core CLI logic
+│   ├── commands.py              # Command handlers (@cli.command)
+│   ├── renderers.py             # Rich rendering functions
+│   ├── agents.py                # Agent delegation
+│   ├── skills.py                # Skill invocation
+│   ├── monitoring.py            # DB/API monitoring
+│   ├── config.py                # Configuration management
+│   ├── plugins.py               # Plugin system
+│   └── audit.py                 # ERGON.md logging
+├── tests/
+│   ├── test_commands.py
+│   ├── test_agents.py
+│   ├── test_skills.py
+│   ├── test_renderers.py
+│   └── conftest.py
+├── plugins/
+│   ├── example_plugin.py
+│   └── README.md
+├── requirements.txt             # Dependencies
+├── VERSION                      # Version file (e.g., "2.1.0")
+└── CHANGELOG.md
+```
+
+### Dependencies to Add
+```
+rich>=13.0.0            # (already present)
+prompt-toolkit>=3.0.0   # (already present)
+httpx>=0.24.0           # (already present)
+psycopg2-binary>=2.9    # For DB monitoring
+python-dotenv>=0.19.0   # For config .env files
+toml>=0.10.0            # For config.toml
+pydantic>=1.9.0         # For config validation
+typer>=0.6.0            # (optional) easier CLI framework
+```
+
+### Code Quality Standards
+- Type hints on all functions
+- Docstrings for public APIs
+- Error handling with actionable messages
+- Logging to both console and ERGON.md
+- No hardcoded secrets (use VAULT/)
+
+### Testing Requirements
+- 80%+ coverage for new code
+- Unit tests for all commands
+- Integration tests with mocked API
+- Smoke tests for happy paths
+
+---
+
+## Critical Decisions
+
+### Decision 1: Async vs Sync
+**Chosen**: Keep async (httpx.AsyncClient already in place)
+- Rationale: Non-blocking I/O for streamed responses
+- Alternative: Switch to sync (simpler, but slower)
+
+### Decision 2: CLI Framework
+**Chosen**: Stick with prompt_toolkit + custom commands (no typer)
+- Rationale: Full control, minimal dependencies, existing patterns
+- Alternative: Migrate to Typer (simpler, less flexible)
+
+### Decision 3: Database Querying
+**Chosen**: Direct psycopg2 for monitoring, no ORM
+- Rationale: Simple queries, minimal overhead
+- Alternative: Use SQLAlchemy (overkill for this use case)
+
+### Decision 4: Plugin Architecture
+**Chosen**: Dynamic import + class registration
+- Rationale: Simple, Pythonic, hot-reload capable
+- Alternative: Pkg resources, entry points (more complex)
+
+---
+
+## Success Criteria
+
+✓ All existing functionality preserved (backward compatible)
+✓ Colorshifting banner renders correctly on all terminals
+✓ Error 500 provides actionable diagnostics
+✓ Smart suggestions work without slowing prompt response
+✓ Skill invocation works with all 165 skills
+✓ Agent delegation routes correctly to /Codex/Aider
+✓ DB monitoring refreshes every 10 seconds without lag
+✓ File prompts chunk automatically above 100KB
+✓ All tests pass, coverage >80%
+✓ Plugin system allows custom extensions
+✓ ERGON.md audit log includes all CLI actions
+✓ Performance: response latency <500ms for 95th percentile
+
+---
+
+**Part 4 coming next: Detailed implementation notes and quick-start guide.**
+
+**Ready to proceed to Part 4?** (This completes the feature spec and roadmap. Part 4 has implementation snippets.)

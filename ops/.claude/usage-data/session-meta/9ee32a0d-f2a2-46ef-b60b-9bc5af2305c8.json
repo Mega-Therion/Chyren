@@ -1,0 +1,42 @@
+{
+  "session_id": "9ee32a0d-f2a2-46ef-b60b-9bc5af2305c8",
+  "project_path": "/home/mega",
+  "start_time": "2026-03-27T00:44:26.125Z",
+  "duration_minutes": 0,
+  "user_message_count": 6,
+  "assistant_message_count": 0,
+  "tool_counts": {},
+  "languages": {},
+  "git_commits": 0,
+  "git_pushes": 0,
+  "input_tokens": 0,
+  "output_tokens": 0,
+  "first_prompt": "No prompt",
+  "user_interruptions": 0,
+  "user_response_times": [],
+  "tool_errors": 0,
+  "tool_error_categories": {},
+  "uses_task_agent": false,
+  "uses_mcp": false,
+  "uses_web_search": false,
+  "uses_web_fetch": false,
+  "lines_added": 0,
+  "lines_removed": 0,
+  "files_modified": 0,
+  "message_hours": [
+    19,
+    19,
+    19,
+    19,
+    19,
+    19
+  ],
+  "user_message_timestamps": [
+    "2026-03-27T00:44:26.125Z",
+    "2026-03-27T00:44:26.125Z",
+    "2026-03-27T00:44:26.125Z",
+    "2026-03-27T00:44:54.450Z",
+    "2026-03-27T00:44:54.449Z",
+    "2026-03-27T00:44:54.449Z"
+  ]
+}

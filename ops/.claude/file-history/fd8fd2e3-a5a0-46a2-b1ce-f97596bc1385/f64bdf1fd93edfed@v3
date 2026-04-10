@@ -1,0 +1,6 @@
+VERCEL_AI_GATEWAY_KEY=vck_3dNWFbWnpJMf36z4wozI9B188aiEM1w4SzV7Vv5ydrFUi13SbZ2NR1Zr
+XAI_API_KEY=xai-SMNyWru32Yk30sMxcSaTS8nxs2Y8AETkG3PKOLdSkqvkn8w0aqBSe8ba87F54OUSHWbM1TKO8DV31eKi
+_API_KEY=AIzaSyBb9r424wzrxBVJZU090evpRG_mO4GnYJI
+_API_KEY_2=AIzaSyCI_W8ptn0zBUfTXeKGPmtCbpjVi3mZhj0
+_API_KEY_4=AIzaSyDuZx_ixpHtKL4vyICuEcNWuSDAPGsIY50
+DATABASE_URL=postgresql://neondb_owner:npg_HbW1Zlkjd7NI@ep-sweet-glade-anvm0pwn-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require

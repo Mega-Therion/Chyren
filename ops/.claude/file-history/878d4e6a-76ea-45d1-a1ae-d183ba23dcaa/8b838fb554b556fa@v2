@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+import psycopg2
+from psycopg2 import sql
+
+DATABASE_URL = "postgresql://neondb_owner:npg_HbW1Zlkjd7NI@ep-sweet-glade-anvm0pwn-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require"
+
+try:
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+
+    # Check if family_profiles table exists
+    cur.execute("""
+        SELECT EXISTS (
+            SELECT FROM information_schema.tables
+            WHERE table_schema = 'public'
+            AND table_name = 'family_profiles'
+        );
+    """)
+    table_exists = cur.fetchone()[0]
+
+    if table_exists:
+        print("✓ family_profiles table EXISTS")
+
+        # Get column info
+        cur.execute("""
+            SELECT column_name, data_type, is_nullable
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+            AND table_name = 'family_profiles'
+            ORDER BY ordinal_position;
+        """)
+        print("\nColumns:")
+        for col_name, data_type, nullable in cur.fetchall():
+            print(f"  {col_name}: {data_type} (nullable: {nullable})")
+
+        # Count records
+        cur.execute("SELECT COUNT(*) FROM family_profiles;")
+        count = cur.fetchone()[0]
+        print(f"\nRecords in table: {count}")
+
+        if count > 0:
+            cur.execute("SELECT name, last_name FROM family_profiles ORDER BY name;")
+            print("\nCurrent records:")
+            for name, last_name in cur.fetchall():
+                print(f"  - {name} {last_name}")
+    else:
+        print("✗ family_profiles table DOES NOT EXIST")
+        print("→ Table will be created on first script run")
+
+    cur.close()
+    conn.close()
+
+except Exception as e:
+    print(f"Error: {e}")

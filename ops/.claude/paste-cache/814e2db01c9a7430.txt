@@ -1,0 +1,214 @@
+    ██████╗     ██╗    ██╗    ███████╗    ██╗   ██╗
+    ██╔══██╗    ██║    ██║    ██╔════╝    ╚██╗ ██╔╝
+    ██████╔╝    ██║ █╗ ██║    █████╗       ╚████╔╝
+    ██╔══██╗    ██║███╗██║    ██╔══╝        ╚██╔╝
+    ██║  ██║    ╚███╔███╔╝    ██║            ██║
+    ╚═╝  ╚═╝     ╚══╝╚══╝     ╚═╝            ╚═╝
+
+      THE OMEGA SOVEREIGN MONOGRAM
+           (YETTRAGRAMMATON)
+        Press Ctrl+C to enter the system...
+
+^C
+mega@mega:~$  bash /home/mega/pc_optimize.sh 2>&1 | tee /home/mega/pc_optimize.log
+=== PC Optimization Started: Wed Mar 25 03:17:44 AM CDT 2026 ===
+
+### 1. Removing Ollama service, binary, and models ###
+[sudo] password for mega:
+Removed "/etc/systemd/system/default.target.wants/ollama.service".
+Ollama removed.
+
+### 2. Disabling unused/unnecessary services ###
+  Disabled: libvirtd
+  Disabled: libvirt-guests
+  Disabled: virtlockd
+  Disabled: virtlogd
+  Disabled: qemu-kvm
+  Disabled: cups-browsed
+  Disabled: ModemManager
+  Disabled: avahi-daemon
+  Disabled: bolt
+  Disabled: kerneloops
+  Disabled: atop
+  Disabled: atopacct
+  Disabled: ubuntu-fan
+  Disabled: casper
+  Disabled: casper-md5check
+  Disabled: openvpn
+Services disabled.
+
+### 3. Cleaning up Docker (stopped containers, dangling images) ###
+Deleted Containers:
+bb677b72ddbee67946d4eaaa7255ad50fabe5587c19e692585e2e357d17b7235
+
+Total reclaimed space: 0B
+Deleted Volumes:
+96730ed2dbad37cfc2bbd86e2793b0f645bda85a7b14726d6aca9e01bbe7263b
+d11de91974db756ea4f9cc39a04fe13645788f6d25987ccbeb0110e4b643a181
+fe1773161e511b259789250e1087d956557dd0c97cf0335a435b57ee83df48b0
+
+Total reclaimed space: 0B
+Deleted Networks:
+omega-trinity_default
+omega-is_default
+services_default
+omega-network
+
+Total reclaimed space: 0B
+Docker pruned.
+
+### 4. Removing duplicate archives and junk ###
+Duplicates and junk removed.
+
+### 5. APT cache and orphan package cleanup ###
+Reading package lists...
+Building dependency tree...
+Reading state information...
+0 upgraded, 0 newly installed, 0 to remove and 3 not upgraded.
+Reading package lists...
+Building dependency tree...
+Reading state information...
+Del google-chrome-stable 146.0.7680.153-1 [128 MB]
+Del libexiv2-27 0.27.6-1ubuntu0.1 [845 kB]
+APT cleaned.
+
+### 6. Trimming systemd journal logs (keep last 100MB) ###
+Vacuuming done, freed 0B of archived journals from /var/log/journal.
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@e7e071e7755c45399418d239ca6aade7-0000000000995bd7-00064c8e9d3a5671.journal (54.6M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@e7e071e7755c45399418d239ca6aade7-00000000009be56d-00064c921678da6a.journal (54.3M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@e7e071e7755c45399418d239ca6aade7-00000000009be56e-00064c92167dc58c.journal (32.8M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@00064cb058713b89-5155faf34cb780bc.journal~ (40.0M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@00064cb058b1d0ff-15b4945263a6e96d.journal~ (24.0M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@25663d5991294d1089332ff3595c52cc-00000000009ff302-00064cb0586f6887.journal (5.9M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@25663d5991294d1089332ff3595c52cc-00000000009ffe0c-00064cb058b1cb33.journal (3.9M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@93be2af404de4f04808b926a592edab3-0000000000a00679-00064cb06709f42b.journal (4.8M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@00064cb879149291-11cd8d18e20a5e9f.journal~ (16.0M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@00064cb8793ee7d9-06a1dd4fb2728eb1.journal~ (24.0M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@27375d3ae43d437b8b6c339e54f7e525-0000000000a0b5a9-00064cb879136cba.journal (6.1M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@27375d3ae43d437b8b6c339e54f7e525-0000000000a0c065-00064cb8793ee3c7.journal (4.7M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@dd826229294d48d0a501ed1b2f6253d1-0000000000a0d0a6-00064cb9d7cc432c.journal (4.8M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@dd826229294d48d0a501ed1b2f6253d1-0000000000a0db5f-00064cb9d80ddf57.journal (14.7M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@dd826229294d48d0a501ed1b2f6253d1-0000000000a0db60-00064cb9d80ef2fe.journal (8.0M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@7b84aa3daf3141d2a270afa2e09075a1-0000000000a15efa-00064cc190ecfd66.journal (4.8M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@7b84aa3daf3141d2a270afa2e09075a1-0000000000a169c1-00064cc191185986.journal (28.2M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@7b84aa3daf3141d2a270afa2e09075a1-0000000000a169c2-00064cc1911a3b93.journal (35.0M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@9c82c96a361f430292da491b2a25812e-0000000000a2f703-00064ccb86a93289.journal (4.8M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@9c82c96a361f430292da491b2a25812e-0000000000a301dd-00064ccb86edb3d1.journal (47.1M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@9c82c96a361f430292da491b2a25812e-0000000000a301de-00064ccb86ef3ea6.journal (11.8M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@ff4ef77f913b4e8c91c3f78095f79780-0000000000a46b32-00064cd8c618ace8.journal (4.8M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@ff4ef77f913b4e8c91c3f78095f79780-0000000000a475ff-00064cd8c65dae6e.journal (38.2M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@ff4ef77f913b4e8c91c3f78095f79780-0000000000a47601-00064cd8c65f42e6.journal (8.9M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@3abb81d13a644dbca103e56aa8cda46e-0000000000a58a7c-00064cece7a63f6d.journal (4.8M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@3abb81d13a644dbca103e56aa8cda46e-0000000000a59550-00064cece7e9c92b.journal (74.4M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@3abb81d13a644dbca103e56aa8cda46e-0000000000a59551-00064cece7eb4fde.journal (14.4M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@3abb81d13a644dbca103e56aa8cda46e-0000000000a7fa62-00064cfe22643cb7.journal (7.3M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@3abb81d13a644dbca103e56aa8cda46e-0000000000a7fa64-00064cfe2267e370.journal (5.2M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@debb3de665804672bec9d56d7f63d492-0000000000a81f45-00064cff960a19fa.journal (4.8M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@debb3de665804672bec9d56d7f63d492-0000000000a82a1e-00064cff96367a33.journal (4.3M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@debb3de665804672bec9d56d7f63d492-0000000000a82a1f-00064cff9637c2a5.journal (4.9M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@969bad9ee36c42b3bd29b02d50d2abb3-0000000000a83709-00064cffb1a78e4c.journal (4.8M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@969bad9ee36c42b3bd29b02d50d2abb3-0000000000a841e7-00064cffb1d402e2.journal (6.6M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@969bad9ee36c42b3bd29b02d50d2abb3-0000000000a841e8-00064cffb1d4fc4e.journal (5.1M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@6ca89b7941e64bd4956d5c95fb14ee5c-0000000000a86260-00064d02c81a87c0.journal (4.9M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@6ca89b7941e64bd4956d5c95fb14ee5c-0000000000a86d7f-00064d02c86b7146.journal (62.6M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@6ca89b7941e64bd4956d5c95fb14ee5c-0000000000a86d80-00064d02c86cb671.journal (13.9M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@6ca89b7941e64bd4956d5c95fb14ee5c-0000000000aa8588-00064d1f041cc235.journal (8.3M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@6ca89b7941e64bd4956d5c95fb14ee5c-0000000000aa8592-00064d1f04865bfc.journal (4.7M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@ce4d5a7e018948c2a92265d56ab14b6a-0000000000aaacf4-00064d284c9a5ca4.journal (4.8M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@ce4d5a7e018948c2a92265d56ab14b6a-0000000000aab7d8-00064d284cde60ea.journal (52.5M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@ce4d5a7e018948c2a92265d56ab14b6a-0000000000aab7d9-00064d284ce049df.journal (10.8M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@d7dcd7fadde44b7c9ccd52033f776770-0000000000ac67b0-00064d4b5d85b097.journal (4.8M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@d7dcd7fadde44b7c9ccd52033f776770-0000000000ac72a8-00064d4b5dc6e19f.journal (19.0M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@d7dcd7fadde44b7c9ccd52033f776770-0000000000ac72a9-00064d4b5dc89444.journal (6.1M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@cf19af12a4284d96b960ae787e8cf630-0000000000acfed2-00064d5675ddf71e.journal (4.9M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@00064d6cbb5afc14-72e978151c56e3a5.journal~ (16.0M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@00064d6cbb85e62c-3d2c4bc2c7e81469.journal~ (56.0M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@554346cd76e048f59fae52e54f92d675-0000000000ae911b-00064d6cbb58a61e.journal (13.9M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@554346cd76e048f59fae52e54f92d675-0000000000ae9bf5-00064d6cbb85df55.journal (42.0M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@e7a0bcf1da07460599654c8edea80e9d-0000000000b00109-00064d7bc806fe5c.journal (4.9M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@e7a0bcf1da07460599654c8edea80e9d-0000000000b00c1b-00064d7bc848689c.journal (54.9M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@e7a0bcf1da07460599654c8edea80e9d-0000000000b00c1c-00064d7bc84a2f0c.journal (45.2M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@e7a0bcf1da07460599654c8edea80e9d-0000000000b294f0-00064d917c6554c8.journal (16.0M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@e7a0bcf1da07460599654c8edea80e9d-0000000000b29508-00064d917c800b71.journal (14.2M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@c5dd19a429204b0d8d2b17f15759898f-0000000000b3296d-00064da4e79e7afb.journal (4.8M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@c5dd19a429204b0d8d2b17f15759898f-0000000000b33455-00064da4e7de723e.journal (54.3M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@c5dd19a429204b0d8d2b17f15759898f-0000000000b33456-00064da4e7e04a74.journal (41.1M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@c5dd19a429204b0d8d2b17f15759898f-0000000000b593f8-00064da98fc3b4e6.journal (52.3M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@c5dd19a429204b0d8d2b17f15759898f-0000000000b593fd-00064da98fdd20ee.journal (34.3M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@c5dd19a429204b0d8d2b17f15759898f-0000000000b7acb4-00064dad2e94ed1e.journal (52.0M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@c5dd19a429204b0d8d2b17f15759898f-0000000000b7acbb-00064dad2ea06377.journal (34.4M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@c5dd19a429204b0d8d2b17f15759898f-0000000000b9babc-00064dbc8995252f.journal (18.1M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@c5dd19a429204b0d8d2b17f15759898f-0000000000b9bac9-00064dbc89ba8966.journal (13.1M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@8791216e49c84b9894c8848edfa95397-0000000000ba54b8-00064dc550ddb905.journal (4.8M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/user-1000@8791216e49c84b9894c8848edfa95397-0000000000ba5faa-00064dc551283106.journal (13.9M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@8791216e49c84b9894c8848edfa95397-0000000000ba5fab-00064dc5512ae5ad.journal (54.1M).
+Deleted archived journal /var/log/journal/1363e46d1a04499bb194fb6591719691/system@8791216e49c84b9894c8848edfa95397-0000000000bc086f-00064dcc4bebe92a.journal (42.1M).
+Vacuuming done, freed 1.4G of archived journals from /var/log/journal/1363e46d1a04499bb194fb6591719691.
+Vacuuming done, freed 0B of archived journals from /run/log/journal.
+Journal trimmed.
+
+### 7. Clearing thumbnail and misc caches ###
+Caches cleared.
+
+### 8. NPM dedup in ~/node_modules ###
+NPM dedup done.
+
+### 9. Reloading systemd daemon ###
+
+### 10. Final state report ###
+--- Disk usage ---
+Filesystem               Size  Used Avail Use% Mounted on
+/dev/mapper/vgmint-root  230G  124G   94G  57% /
+--- RAM ---
+               total        used        free      shared  buff/cache   available
+Mem:           7.1Gi       3.5Gi       668Mi       435Mi       3.8Gi       3.6Gi
+Swap:          9.9Gi       2.7Gi       7.2Gi
+--- Running services ---
+  accounts-daemon.service               loaded active running Accounts Service
+  auto-cpufreq.service                  loaded active running auto-cpufreq - Automatic CPU speed & power optimizer for Linux
+  bluetooth.service                     loaded active running Bluetooth service
+  colord.service                        loaded active running Manage, Install and Generate Color Profiles
+  containerd.service                    loaded active running containerd container runtime
+  cron.service                          loaded active running Regular background program processing daemon
+  cups.service                          loaded active running CUPS Scheduler
+  dbus.service                          loaded active running D-Bus System Message Bus
+  docker.service                        loaded active running Docker Application Container Engine
+  fwupd.service                         loaded active running Firmware update daemon
+  getty@tty1.service                    loaded active running Getty on tty1
+  irqbalance.service                    loaded active running irqbalance daemon
+  libvirtd.service                      loaded active running libvirt legacy monolithic daemon
+  lightdm.service                       loaded active running Light Display Manager
+  me.proton.vpn.split_tunneling.service loaded active running Proton VPN Daemon
+  NetworkManager.service                loaded active running Network Manager
+  omega-gateway.service                 loaded active running OmegA Rust Gateway (LLM Proxy)
+  polkit.service                        loaded active running Authorization Manager
+  redis-server.service                  loaded active running Advanced key-value store
+  rsyslog.service                       loaded active running System Logging Service
+  rtkit-daemon.service                  loaded active running RealtimeKit Scheduling Policy Service
+  ssh.service                           loaded active running OpenBSD Secure Shell server
+  switcheroo-control.service            loaded active running Switcheroo Control Proxy service
+  systemd-journald.service              loaded active running Journal Service
+  systemd-logind.service                loaded active running User Login Management
+  systemd-machined.service              loaded active running Virtual Machine and Container Registration Service
+  systemd-resolved.service              loaded active running Network Name Resolution
+  systemd-timesyncd.service             loaded active running Network Time Synchronization
+  systemd-udevd.service                 loaded active running Rule-based Manager for Device Events and Files
+  tailscaled.service                    loaded active running Tailscale node agent
+  thermald.service                      loaded active running Thermal Daemon Service
+  touchegg.service                      loaded active running Touchégg Daemon
+  udisks2.service                       loaded active running Disk Manager
+  upower.service                        loaded active running Daemon for power management
+  user@1000.service                     loaded active running User Manager for UID 1000
+  wpa_supplicant.service                loaded active running WPA supplicant
+Legend: LOAD   → Reflects whether the unit definition was properly loaded.
+        ACTIVE → The high-level unit activation state, i.e. generalization of SUB.
+        SUB    → The low-level unit activation state, values depend on unit type.
+36 loaded units listed.
+--- Ollama check ---
+Ollama binary: not found (good)
+inactive
+Ollama service: inactive (good)
+
+=== PC Optimization Complete: Wed Mar 25 03:18:23 AM CDT 2026 ===
+Log saved to: /home/mega/pc_optimize.log
+mega@mega:~$

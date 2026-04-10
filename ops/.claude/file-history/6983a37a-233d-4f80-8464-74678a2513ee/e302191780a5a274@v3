@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -e
+NEW=/home/mega/.omega/runtime-src/omega-rust/target/release/omega-gateway
+echo "Stopping gateway..."
+sudo systemctl stop omega-gateway
+echo "Installing new binary..."
+sudo cp "$NEW" /usr/local/bin/omega-gateway
+echo "Starting gateway..."
+sudo systemctl start omega-gateway
+sleep 3
+echo "Health check:"
+curl -s http://localhost:8787/health
+echo ""
+echo "Done."

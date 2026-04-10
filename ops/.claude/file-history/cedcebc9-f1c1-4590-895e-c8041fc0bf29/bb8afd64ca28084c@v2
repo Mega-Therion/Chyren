@@ -1,0 +1,25 @@
+"""
+OmegA — Sovereign, Persistent, and Self-Knowing AI Architecture
+
+Four-layer reference implementation:
+  AEGIS  → Governance shell (risk gate, run envelope, action gating, capability registry)
+  AEON   → Identity OS (Phylactery, TSO lifecycle, MUSE, continuity)
+  ADCCL  → Cognitive control loop (drift penalty, verification, claim budgets)
+  MYELIN → Graph memory (document store, hybrid retrieval, edge hardening, reconciliation)
+"""
+
+__version__ = "0.3.0"
+
+from omega.phylactery import Phylactery
+from omega.envelope import RunEnvelope, ActionEnvelope, ActionGate, ActionClass
+from omega.risk_gate import RiskGate
+from omega.drift import DriftController, ClaimBudget, VerifierMiddleware, GoalContract
+from omega.memory import MemoryGraph, WritePolicy
+from omega.docstore import DocumentStore, DocumentRecord, DocFormat
+from omega.retrieval import HybridRetriever, RetrievalMethod, RetrievalResult
+from omega.answer import AnswerObject, AnswerBuilder, AnswerMode, Citation
+from omega.capabilities import CapabilityRegistry, CapabilityManifest, RiskClass
+from omega.ingest import IngestPlane, IngestJob, IngestResult, IngestSource
+from omega.reconcile import MemoryReconciler, ReconciliationEvent, ReconciliationType
+from omega.runtime import RuntimeOrchestrator, RuntimeResult, RunTrace
+from omega.agent import OmegaAgent

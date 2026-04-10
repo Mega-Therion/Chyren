@@ -1,0 +1,229 @@
+'use client';
+
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import dynamic from 'next/dynamic';
+import { Send, Loader2, AlertCircle } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+
+const NeuralBrain = dynamic(() => import('@/components/NeuralBrain'), { ssr: false });
+
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+// Handles Vercel AI SDK text stream (0:"chunk") and plain-text streams
+function parseChunk(chunk: string): string {
+  let out = '';
+  for (const line of chunk.split('\n')) {
+    if (line.startsWith('0:')) {
+      try {
+        const delta = JSON.parse(line.slice(2));
+        if (typeof delta === 'string') out += delta;
+      } catch { /* skip malformed */ }
+    } else if (
+      line.trim() &&
+      !line.startsWith('e:') &&
+      !line.startsWith('d:') &&
+      !line.startsWith('data:') &&
+      !line.startsWith('f:') &&
+      !line.startsWith('8:') &&
+      !line.startsWith('2:')
+    ) {
+      out += line;
+    }
+  }
+  return out;
+}
+
+export default function ChatPage() {
+  const [messages, setMessages]       = useState<Message[]>([]);
+  const [input, setInput]             = useState('');
+  const [isStreaming, setIsStreaming]  = useState(false);
+  const [error, setError]             = useState<string | null>(null);
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const abortRef       = useRef<AbortController | null>(null);
+  const textareaRef    = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  useEffect(() => {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, 140) + 'px';
+  }, [input]);
+
+  const sendMessage = useCallback(async (text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed || isStreaming) return;
+
+    setError(null);
+    setInput('');
+
+    const userMsg: Message = { id: `u-${Date.now()}`, role: 'user', content: trimmed };
+    const history = [...messages, userMsg];
+    setMessages(history);
+    setIsStreaming(true);
+
+    const assistantId = `a-${Date.now()}`;
+    setMessages(prev => [...prev, { id: assistantId, role: 'assistant', content: '' }]);
+
+    try {
+      abortRef.current?.abort();
+      const abort = new AbortController();
+      abortRef.current = abort;
+
+      const res = await fetch('/api/chat/stream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history.map(m => ({ role: m.role, content: m.content })) }),
+        signal: abort.signal,
+      });
+
+      if (!res.ok) {
+        const body = await res.text().catch(() => '');
+        throw new Error(`HTTP ${res.status}: ${body.slice(0, 120)}`);
+      }
+
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      let accumulated = '';
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const delta = parseChunk(decoder.decode(value, { stream: true }));
+          if (delta) {
+            accumulated += delta;
+            setMessages(prev =>
+              prev.map(m => m.id === assistantId ? { ...m, content: accumulated } : m)
+            );
+          }
+        }
+      }
+    } catch (err) {
+      if ((err as Error).name !== 'AbortError') {
+        const msg = (err as Error).message;
+        setError(msg.includes('quota') ? 'AI quota exhausted — check provider config' : `Neural link error: ${msg}`);
+        setMessages(prev => prev.filter(m => m.id !== assistantId));
+      }
+    } finally {
+      setIsStreaming(false);
+      abortRef.current = null;
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, isStreaming]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage(input);
+    }
+  };
+
+  const isEmpty = messages.length === 0;
+  const lastMsg = messages[messages.length - 1];
+
+  return (
+    <div className="omega-root">
+      <div className="omega-bg">
+        <NeuralBrain isActive={isStreaming} />
+      </div>
+
+      <header className="omega-header">
+        <div className="omega-logo">
+          <span className="omega-symbol">Ω</span>
+        </div>
+        <span className="omega-brand">Chyren</span>
+
+        <div className="omega-header-status">
+          <span className={`omega-status-dot ${isStreaming ? 'omega-status-active' : ''}`} />
+          <span className="omega-status-label">
+            {isStreaming ? 'PROCESSING' : 'SOVEREIGN'}
+          </span>
+        </div>
+      </header>
+
+      <main className="omega-main">
+        {isEmpty ? (
+          <div className="omega-idle">
+            <div className="omega-idle-title">
+              <span className="omega-idle-omega">Ω</span>
+              <span className="omega-idle-name">Chyren</span>
+            </div>
+            <p className="omega-idle-sub">SOVEREIGN INTELLIGENCE ORCHESTRATOR</p>
+            <p className="omega-idle-desc">
+              High-integrity cognitive processing and neural telemetry. Type to initiate a session.
+            </p>
+          </div>
+        ) : (
+          <div className="omega-messages">
+            {messages.map(msg => (
+              <div key={msg.id} className={`omega-msg omega-msg-${msg.role}`}>
+                <div className="omega-msg-label">
+                  {msg.role === 'user' ? '▸ OPERATOR' : 'Ω CHYREN'}
+                </div>
+                <div className="omega-msg-content">
+                  {msg.role === 'assistant' ? (
+                    <>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                      {isStreaming && msg === lastMsg && <span className="omega-cursor" />}
+                    </>
+                  ) : (
+                    <p>{msg.content}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+        )}
+
+        {error && (
+          <div className="omega-error">
+            <AlertCircle size={13} />
+            <span>{error}</span>
+            <button className="omega-error-dismiss" onClick={() => setError(null)}>✕</button>
+          </div>
+        )}
+      </main>
+
+      <footer className="omega-footer">
+        <div className="omega-input-wrap">
+          <textarea
+            ref={textareaRef}
+            className="omega-textarea"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="▸  transmit cognitive intent..."
+            rows={1}
+            disabled={isStreaming}
+          />
+
+          <button
+            className="omega-send-btn"
+            onClick={() => sendMessage(input)}
+            disabled={isStreaming || !input.trim()}
+            aria-label="Send"
+          >
+            {isStreaming ? <Loader2 size={17} className="omega-spin" /> : <Send size={17} />}
+          </button>
+        </div>
+
+        <div className="omega-footer-meta">
+          <span className="omega-footer-label">NEURAL LINK</span>
+          <span className={`omega-footer-dot ${isStreaming ? 'omega-footer-dot-active' : ''}`} />
+          <span className="omega-footer-label">{isStreaming ? 'ACTIVE' : 'STANDBY'}</span>
+        </div>
+      </footer>
+    </div>
+  );
+}

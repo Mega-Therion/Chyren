@@ -1,0 +1,334 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500&family=Instrument+Serif:ital@0;1&display=swap');
+
+.root {
+  position: fixed;
+  inset: 0;
+  background: #020202;
+  color: white;
+  overflow: hidden;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+}
+
+.canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.92;
+}
+
+.backLink {
+  position: fixed;
+  top: 1.3rem;
+  left: 1.4rem;
+  z-index: 30;
+  font-size: 0.68rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.32);
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+
+.backLink:hover {
+  color: rgba(255, 255, 255, 0.74);
+}
+
+.initOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  border: 0;
+  background: #020202;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.initLabel {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.68rem;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  animation: pulseLabel 2s ease-in-out infinite;
+}
+
+.interfaceLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.85rem;
+  padding: 1.5rem;
+  pointer-events: none;
+}
+
+.feedback {
+  min-height: 1rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
+  pointer-events: none;
+}
+
+.omegaWrapper {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.omegaGlow {
+  position: absolute;
+  inset: -40px;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.18;
+  transition: opacity 0.4s ease, background 0.8s ease;
+  background: linear-gradient(45deg, rgba(139, 92, 246, 0.65), rgba(99, 102, 241, 0.35));
+}
+
+.omegaSymbol {
+  position: relative;
+  z-index: 2;
+  font-size: 7rem;
+  line-height: 1;
+  color: white;
+  user-select: none;
+  text-shadow: 0 0 22px rgba(255, 255, 255, 0.45);
+}
+
+.transcriptWrap {
+  width: min(1000px, calc(100vw - 2rem));
+  min-height: 8.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.transcript {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem 0.65rem;
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(2rem, 4.2vw, 3.2rem);
+  line-height: 1.08;
+  text-align: center;
+  font-style: italic;
+  text-shadow: 0 0 30px rgba(255, 255, 255, 0.18);
+}
+
+.word {
+  display: inline-block;
+  opacity: 0;
+  filter: blur(10px);
+  transform: translateY(10px);
+  transition: opacity 0.55s cubic-bezier(0.1, 0.9, 0.2, 1), transform 0.55s cubic-bezier(0.1, 0.9, 0.2, 1), filter 0.55s ease;
+}
+
+.wordVisible {
+  opacity: 1;
+  filter: blur(0);
+  transform: translateY(0);
+}
+
+.wordDim {
+  opacity: 0.18;
+  filter: blur(3px);
+}
+
+.runtimePanel {
+  width: min(880px, calc(100vw - 2rem));
+  background: rgba(6, 6, 12, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 1.15rem 1.3rem;
+  backdrop-filter: blur(22px);
+  pointer-events: auto;
+}
+
+.runtimeHeader {
+  margin-bottom: 0.9rem;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.62rem;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+}
+
+.runtimeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.78rem 1rem;
+}
+
+.runtimeItem,
+.runtimeItemWide {
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+}
+
+.runtimeItemWide {
+  grid-column: 1 / -1;
+}
+
+.runtimeLabel {
+  color: rgba(255, 255, 255, 0.34);
+  font-size: 0.56rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.runtimeValue {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.8rem;
+}
+
+.runtimeMono {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.72rem;
+  word-break: break-all;
+}
+
+.manifestation {
+  width: min(720px, calc(100vw - 2rem));
+  max-height: 32vh;
+  overflow: auto;
+  padding: 1rem 1.5rem;
+  background: rgba(5, 5, 8, 0.74);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 22px;
+  backdrop-filter: blur(20px);
+  pointer-events: auto;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.7rem;
+  pointer-events: auto;
+}
+
+.actionButton,
+.actionButtonGhost {
+  border-radius: 999px;
+  padding: 0.72rem 1.35rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+
+.actionButton {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.actionButtonGhost {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.46);
+}
+
+.actionButton:hover,
+.actionButtonGhost:hover {
+  transform: translateY(-1px);
+}
+
+.actionButton:hover {
+  border-color: rgba(255, 255, 255, 0.42);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.actionButtonGhost:hover {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.actionButtonActive {
+  border-color: rgba(255, 153, 0, 0.65);
+  background: rgba(255, 102, 0, 0.14);
+  color: rgba(255, 228, 190, 0.96);
+}
+
+.actionButton:disabled,
+.actionButtonGhost:disabled {
+  opacity: 0.34;
+  cursor: not-allowed;
+}
+
+.stateListening .omegaGlow {
+  opacity: 0.78;
+  background: linear-gradient(45deg, #ff0000, #ffcc00);
+  animation: pulseResonance 2s infinite ease-in-out;
+}
+
+.stateProcessing .omegaGlow {
+  opacity: 0.95;
+  background: linear-gradient(45deg, #00ff88, #0066ff);
+  animation: pulseResonance 0.65s infinite ease-in-out;
+}
+
+.stateSpeaking .omegaGlow {
+  opacity: 0.95;
+  background: linear-gradient(45deg, #8b5cf6, #f472b6);
+  animation: pulseResonance 1.4s infinite ease-in-out;
+}
+
+@keyframes pulseResonance {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.42;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.92;
+  }
+}
+
+@keyframes pulseLabel {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.62;
+  }
+}
+
+@media (max-width: 720px) {
+  .interfaceLayer {
+    gap: 1.35rem;
+    padding: 1rem;
+  }
+
+  .omegaWrapper {
+    width: 148px;
+    height: 148px;
+  }
+
+  .omegaSymbol {
+    font-size: 5.5rem;
+  }
+
+  .runtimeGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .actionButton,
+  .actionButtonGhost {
+    width: 100%;
+  }
+}

@@ -1,0 +1,393 @@
+'use client';
+
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import dynamic from 'next/dynamic';
+import { Send, Mic, MicOff, Volume2, VolumeX, Loader2, AlertCircle } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+
+const NeuralBrain = dynamic(() => import('@/components/NeuralBrain'), { ssr: false });
+
+// ── types ──────────────────────────────────────────────────────────────────
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+}
+
+// ── speech helpers ─────────────────────────────────────────────────────────
+type SpeechRecognitionInstance = {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  onresult: ((e: SpeechRecognitionEvent) => void) | null;
+  onerror: ((e: Event) => void) | null;
+  onend: (() => void) | null;
+  start(): void;
+  stop(): void;
+};
+
+type SpeechRecognitionEvent = {
+  results: SpeechRecognitionResultList;
+};
+
+type SpeechRecognitionResultList = {
+  length: number;
+  [index: number]: SpeechRecognitionResult;
+};
+
+type SpeechRecognitionResult = {
+  isFinal: boolean;
+  [index: number]: SpeechRecognitionAlternative;
+};
+
+type SpeechRecognitionAlternative = {
+  transcript: string;
+};
+
+function getSpeechRecognition(): (new () => SpeechRecognitionInstance) | null {
+  if (typeof window === 'undefined') return null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const w = window as any;
+  return w.SpeechRecognition || w.webkitSpeechRecognition || null;
+}
+
+function speak(text: string) {
+  if (typeof window === 'undefined' || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 1.0;
+  utter.pitch = 1.0;
+  utter.volume = 1.0;
+  // Prefer a neutral English voice
+  const voices = window.speechSynthesis.getVoices();
+  const preferred = voices.find(v =>
+    v.name.toLowerCase().includes('google') && v.lang.startsWith('en')
+  ) || voices.find(v => v.lang.startsWith('en'));
+  if (preferred) utter.voice = preferred;
+  window.speechSynthesis.speak(utter);
+}
+
+// ── component ──────────────────────────────────────────────────────────────
+export default function ChatPage() {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(true);
+  const [transcript, setTranscript] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [voiceMode, setVoiceMode] = useState(false);
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+
+  // Auto-scroll
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Voices load async in some browsers
+  useEffect(() => {
+    window.speechSynthesis?.getVoices();
+  }, []);
+
+  // ── send message ─────────────────────────────────────────────────────────
+  const sendMessage = useCallback(async (text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed || isStreaming) return;
+
+    setError(null);
+    setInput('');
+    setTranscript('');
+
+    const userMsg: Message = {
+      id: `u-${Date.now()}`,
+      role: 'user',
+      content: trimmed,
+      timestamp: new Date(),
+    };
+
+    const history = [...messages, userMsg];
+    setMessages(history);
+    setIsStreaming(true);
+
+    const assistantId = `a-${Date.now()}`;
+    setMessages(prev => [
+      ...prev,
+      { id: assistantId, role: 'assistant', content: '', timestamp: new Date() },
+    ]);
+
+    try {
+      const abort = new AbortController();
+      abortRef.current = abort;
+
+      const res = await fetch('/api/chat/stream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: history.map(m => ({ role: m.role, content: m.content })),
+        }),
+        signal: abort.signal,
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      let accumulated = '';
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+
+          // Handle Vercel AI SDK data stream format
+          for (const line of chunk.split('\n')) {
+            if (line.startsWith('0:')) {
+              // Text delta: 0:"chunk"
+              try {
+                const delta = JSON.parse(line.slice(2));
+                if (typeof delta === 'string') {
+                  accumulated += delta;
+                  setMessages(prev =>
+                    prev.map(m =>
+                      m.id === assistantId ? { ...m, content: accumulated } : m
+                    )
+                  );
+                }
+              } catch { /* non-JSON line */ }
+            } else if (!line.startsWith('data:') && !line.startsWith('e:') && !line.startsWith('d:') && line.trim()) {
+              // Plain text stream (firebase path)
+              accumulated += line;
+              setMessages(prev =>
+                prev.map(m =>
+                  m.id === assistantId ? { ...m, content: accumulated } : m
+                )
+              );
+            }
+          }
+        }
+      }
+
+      // TTS
+      if (isSpeaking && accumulated) {
+        speak(accumulated);
+      }
+    } catch (err) {
+      if ((err as Error).name !== 'AbortError') {
+        setError('Neural link interrupted. Retrying...');
+        setMessages(prev => prev.filter(m => m.id !== assistantId));
+      }
+    } finally {
+      setIsStreaming(false);
+      abortRef.current = null;
+    }
+  }, [messages, isStreaming, isSpeaking]);
+
+  // ── voice input ──────────────────────────────────────────────────────────
+  const startListening = useCallback(() => {
+    const SR = getSpeechRecognition();
+    if (!SR) { setError('Speech recognition not supported in this browser'); return; }
+
+    const rec = new SR();
+    rec.lang = 'en-US';
+    rec.continuous = false;
+    rec.interimResults = true;
+
+    rec.onresult = (e: SpeechRecognitionEvent) => {
+      let interim = '';
+      let final = '';
+      for (let i = 0; i < e.results.length; i++) {
+        const r = e.results[i];
+        if (r.isFinal) final += r[0].transcript;
+        else interim += r[0].transcript;
+      }
+      setTranscript(final || interim);
+      if (final) {
+        setIsListening(false);
+        sendMessage(final);
+      }
+    };
+    rec.onerror = () => { setIsListening(false); setError('Microphone access denied or error'); };
+    rec.onend = () => setIsListening(false);
+
+    rec.start();
+    recognitionRef.current = rec;
+    setIsListening(true);
+    setError(null);
+  }, [sendMessage]);
+
+  const stopListening = useCallback(() => {
+    recognitionRef.current?.stop();
+    setIsListening(false);
+  }, []);
+
+  const toggleVoice = () => {
+    if (isListening) stopListening();
+    else startListening();
+  };
+
+  const toggleTTS = () => {
+    if (isSpeaking) window.speechSynthesis?.cancel();
+    setIsSpeaking(s => !s);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage(input);
+    }
+  };
+
+  const isEmpty = messages.length === 0;
+
+  return (
+    <div className="omega-root">
+      {/* Neural background */}
+      <div className="omega-bg">
+        <NeuralBrain isActive={isStreaming || isListening} />
+      </div>
+
+      {/* Header */}
+      <header className="omega-header">
+        <div className="omega-logo">
+          <span className="omega-symbol">Ω</span>
+        </div>
+        <span className="omega-brand">OmegA</span>
+        <div className="omega-header-status">
+          {isStreaming && (
+            <span className="omega-status-dot omega-status-active" />
+          )}
+          <span className="omega-status-label">
+            {isStreaming ? 'PROCESSING' : isListening ? 'LISTENING' : 'SOVEREIGN'}
+          </span>
+        </div>
+        <div className="omega-header-actions">
+          <button
+            onClick={toggleTTS}
+            className="omega-icon-btn"
+            title={isSpeaking ? 'Mute voice' : 'Enable voice'}
+          >
+            {isSpeaking ? <Volume2 size={16} /> : <VolumeX size={16} />}
+          </button>
+        </div>
+      </header>
+
+      {/* Main */}
+      <main className="omega-main">
+        {isEmpty ? (
+          /* ── Idle state ── */
+          <div className="omega-idle">
+            <div className="omega-idle-title">
+              <span className="omega-idle-omega">Ω</span>
+              <span className="omega-idle-name">OmegA</span>
+            </div>
+            <p className="omega-idle-sub">SOVEREIGN COGNITIVE ENVIRONMENT</p>
+            <p className="omega-idle-desc">
+              High-integrity cognitive processing and neural telemetry. Transmit intent below or activate voice input.
+            </p>
+
+            {/* Central voice orb */}
+            <button
+              className={`omega-orb ${isListening ? 'omega-orb-active' : ''}`}
+              onClick={toggleVoice}
+              disabled={isStreaming}
+            >
+              <div className="omega-orb-ring omega-orb-ring-1" />
+              <div className="omega-orb-ring omega-orb-ring-2" />
+              <div className="omega-orb-ring omega-orb-ring-3" />
+              <div className="omega-orb-core">
+                {isListening ? <MicOff size={28} /> : <Mic size={28} />}
+              </div>
+            </button>
+
+            <p className="omega-orb-label">
+              {isListening ? 'LISTENING — SPEAK NOW' : 'INITIALIZE NEURAL INTENT'}
+            </p>
+            {transcript && (
+              <p className="omega-transcript">{transcript}</p>
+            )}
+          </div>
+        ) : (
+          /* ── Messages ── */
+          <div className="omega-messages">
+            {messages.map(msg => (
+              <div key={msg.id} className={`omega-msg omega-msg-${msg.role}`}>
+                <div className="omega-msg-label">
+                  {msg.role === 'user' ? '▸ OPERATOR' : 'Ω CHYREN'}
+                </div>
+                <div className="omega-msg-content">
+                  {msg.role === 'assistant' ? (
+                    <>
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                      {isStreaming && msg === messages[messages.length - 1] && (
+                        <span className="omega-cursor">█</span>
+                      )}
+                    </>
+                  ) : (
+                    <p>{msg.content}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+        )}
+
+        {/* Error */}
+        {error && (
+          <div className="omega-error">
+            <AlertCircle size={14} />
+            <span>{error}</span>
+          </div>
+        )}
+
+        {/* Transcript overlay while listening */}
+        {!isEmpty && isListening && transcript && (
+          <div className="omega-transcript-bar">{transcript}</div>
+        )}
+      </main>
+
+      {/* Input */}
+      <footer className="omega-footer">
+        <div className="omega-input-wrap">
+          <button
+            className={`omega-voice-btn ${isListening ? 'omega-voice-btn-active' : ''}`}
+            onClick={toggleVoice}
+            disabled={isStreaming}
+            title="Voice input"
+          >
+            {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+          </button>
+
+          <textarea
+            className="omega-textarea"
+            value={isListening ? transcript || '...' : input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="▸  transmit cognitive intent..."
+            rows={1}
+            disabled={isStreaming || isListening}
+          />
+
+          <button
+            className="omega-send-btn"
+            onClick={() => sendMessage(input)}
+            disabled={isStreaming || isListening || !input.trim()}
+            title="Send"
+          >
+            {isStreaming ? <Loader2 size={18} className="omega-spin" /> : <Send size={18} />}
+          </button>
+        </div>
+        <div className="omega-footer-meta">
+          <span className="omega-footer-label">NEURAL LINK</span>
+          <span className={`omega-footer-dot ${isStreaming ? 'omega-footer-dot-active' : ''}`} />
+          <span className="omega-footer-label">{isStreaming ? 'ACTIVE' : 'STANDBY'}</span>
+        </div>
+      </footer>
+    </div>
+  );
+}

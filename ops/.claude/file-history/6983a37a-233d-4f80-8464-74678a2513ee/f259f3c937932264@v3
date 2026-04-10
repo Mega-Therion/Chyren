@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -e
+cd /home/mega/OmegA-Architecture/web
+
+TOKEN=$(grep OMEGA_API_BEARER_TOKEN /home/mega/.omega/one-true.env | cut -d"'" -f2)
+TUNNEL_URL="https://sensor-design-routing-document.trycloudflare.com"
+
+echo "=== Logging into Vercel ==="
+npx vercel login
+
+echo "=== Deploying to Vercel ==="
+npx vercel deploy --prod \
+  --yes \
+  --name omega-sovereign \
+  -e NEXT_PUBLIC_OMEGA_API_URL="$TUNNEL_URL" \
+  -e NEXT_PUBLIC_OMEGA_BEARER_TOKEN="$TOKEN" \
+  2>&1 | tee /tmp/vercel_deploy.log
+
+echo ""
+echo "=== Your public URL ==="
+grep -o "https://[a-z0-9-]*\.vercel\.app" /tmp/vercel_deploy.log | tail -1

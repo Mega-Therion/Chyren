@@ -1,0 +1,22 @@
+23:28:22.683 1774326502682    addons.xpi    WARN    Checking /usr/lib/firefox/distribution/extensions for addons
+23:28:23.991 Window.fullScreen attribute is deprecated and will be removed in the future. browser-customtitlebar.js:68:7
+23:28:34.025 Console.maxLogLevelPref used with a non-existing pref: Off
+23:28:34.025 NetworkGeolocationProvider: startup called. NetworkGeolocationProvider.sys.mjs:202:14
+23:28:34.029 NetworkGeolocationProvider: watch called NetworkGeolocationProvider.sys.mjs:223:14
+23:28:34.029 NetworkGeolocationProvider: onStatus called.wifi-timeout NetworkGeolocationProvider.sys.mjs:284:14
+23:28:34.029 NetworkGeolocationProvider: Use request cache:false reason:No cached data NetworkGeolocationProvider.sys.mjs:334:14
+23:28:34.029 NetworkGeolocationProvider: Sending IP-address-based geolocation request to network service: https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyB0mAay6Zu8JTU8XTQtXJLri9eY9wISq6o&solution_channel=Linux NetworkGeolocationProvider.sys.mjs:351:14
+23:28:34.030 NetworkGeolocationProvider: onStatus called.xhr-start NetworkGeolocationProvider.sys.mjs:284:14
+23:28:34.150 NetworkGeolocationProvider: Use request cache:false reason:No cached data NetworkGeolocationProvider.sys.mjs:334:14
+23:28:34.151 NetworkGeolocationProvider: Sending IP-address-based geolocation request with wifi APs to network service: https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyB0mAay6Zu8JTU8XTQtXJLri9eY9wISq6o&solution_channel=Linux NetworkGeolocationProvider.sys.mjs:351:14
+23:28:34.151 NetworkGeolocationProvider: onStatus called.xhr-start NetworkGeolocationProvider.sys.mjs:284:14
+23:28:34.195 NetworkGeolocationProvider: geo provider reported: -92.4159308:34.7778204 NetworkGeolocationProvider.sys.mjs:363:16
+23:28:34.279 NetworkGeolocationProvider: geo provider reported: -93.5196346:34.6996511 NetworkGeolocationProvider.sys.mjs:363:16
+23:28:35.988 NetworkGeolocationProvider: shutdown called NetworkGeolocationProvider.sys.mjs:230:14
+23:28:36.899 Referrer Policy: Ignoring the less restricted referrer policy “origin-when-cross-origin” for the cross-site request: https://js.stripe.com/v3/m-outer-3437aaddcdf6922d623e172c2d6f9278.html#url=https%3A%2F%2Fvercel.com%2Fmegas-projects-1fcf4ba6%2Fomega-sovereign&title=omega-sovereign%20-%20Overview%20%E2%80%93%20Vercel&referrer=&muid=b1900e42-0af1-43a9-a0b4-b3ddd22abd547591da&sid=ad5547aa-c5af-4d29-86b6-0f6015684fc2cf3863&version=6&preview=false&__shared_params__[version]=basil m-outer-3437aaddcdf6922d623e172c2d6f9278.html
+23:29:23.703 Missing resource in locale en-CA: devtools/client/toolbox.ftl
+23:29:23.708 Missing resource in locale en-GB: devtools/client/toolbox.ftl
+23:29:40.025 httpFailedOpeningRequest triggered on non-nsIHttpChannel for uri: jar:file:///usr/lib/firefox/omni.ja!/chrome/toolkit/skin/classic/global/global.css network-events-content.js:84:15
+23:29:40.028 httpFailedOpeningRequest triggered on non-nsIHttpChannel for uri: jar:file:///usr/lib/firefox/omni.ja!/chrome/toolkit/content/global/elements/menupopup.css network-events-content.js:84:15
+23:29:40.031 httpFailedOpeningRequest triggered on non-nsIHttpChannel for uri: jar:file:///usr/lib/firefox/omni.ja!/chrome/toolkit/skin/classic/global/toolbarbutton.css network-events-content.js:84:15
+23:29:40.031 httpFailedOpeningRequest triggered on non-nsIHttpChannel for uri: jar:file:///usr/lib/firefox/omni.ja!/chrome/toolkit/skin/classic/global/arrowscrollbox.css network-events-content.js:84:15

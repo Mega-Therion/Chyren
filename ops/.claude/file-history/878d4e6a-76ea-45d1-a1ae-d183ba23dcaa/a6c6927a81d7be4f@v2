@@ -1,0 +1,197 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+**OmegA Web** is a Next.js 16 + React 19 frontend application for an AI chat interface with voice support. It integrates with a backend API gateway (default: `http://localhost:8787`) to deliver streaming chat responses, conversation management, voice-to-text transcription, and telemetry tracking.
+
+The app is deployed to Vercel and connects to a Neon PostgreSQL database for session and message persistence.
+
+**Stack:**
+- **Framework:** Next.js 16.2.1 (App Router)
+- **Runtime:** React 19.2.4
+- **Language:** TypeScript 5 (strict mode)
+- **Build:** Turbopack
+- **Styling:** Tailwind CSS
+- **Deployment:** Vercel
+
+## Development Commands
+
+```bash
+# Start dev server on http://localhost:3000
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+
+# Run ESLint on all files
+npm run lint
+```
+
+## Architecture
+
+### Folder Structure
+
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── page.tsx           # Root page (main Index component)
+│   ├── layout.tsx         # Root layout
+│   └── api/
+│       └── chat/route.ts  # POST /api/chat (proxies to backend)
+│
+├── components/
+│   └── omega/             # OmegA UI components
+│       ├── OmegaHeader.tsx            # Top header with nav
+│       ├── ChatView.tsx               # Message display area
+│       ├── ChatComposer.tsx           # Text input + voice button
+│       ├── ConversationSidebar.tsx    # Left sidebar (conversations)
+│       ├── TelemetryPanel.tsx         # Right sidebar (system state)
+│       ├── VoiceMode.tsx              # Voice modal overlay
+│       ├── SettingsModal.tsx          # Settings dialog
+│       ├── SystemStateDrawer.tsx      # Debug drawer
+│       ├── OmegaMessage.tsx           # Individual message
+│       └── ActionSheet.tsx            # Bottom sheet menu
+│
+├── hooks/
+│   ├── useOmegaChat.ts         # Chat state + API integration
+│   ├── useVoiceEngine.ts       # Web Speech API wrapper
+│   └── useIsMobile.ts          # Responsive detection (768px breakpoint)
+│
+└── lib/
+    └── api.ts                  # API client utilities + typed endpoints
+```
+
+### Core Patterns
+
+**1. State Management via Hooks**
+
+All state is centralized in three custom hooks, each with a single responsibility:
+
+- **`useOmegaChat()`** — Chat state + Neon database integration
+  - Manages: conversations, activeConvoId, messages, systemState, streaming, error
+  - Methods: sendMessage, createConversation, switchConversation, deleteConversation, retry, clearError
+  - Integrates with /api/sessions (load/create/delete), /api/chat (stream messages), /api/messages (load history)
+  - Uses AbortController for cancellation; ReadableStream for real-time message handling
+
+- **`useVoiceEngine()`** — Web Speech API wrapper
+  - Manages: voiceState, transcript, interimTranscript, isListening
+  - Methods: startListening, stopListening, interruptSpeech, exitVoiceMode, updateSettings
+  - Settings: language (default 'en-US'), volume (0-1), interruptible (boolean)
+
+- **`useIsMobile()`** — Responsive detection
+  - Returns: isMobile (boolean)
+  - Uses window resize listener, 768px breakpoint
+
+**2. Component Composition**
+
+All UI components live in `src/components/omega/` and follow a consistent pattern:
+- Receive props only from parent (no direct state management)
+- Use Tailwind CSS for styling
+- Event handlers passed as props
+- Modal components render as fixed overlays with z-layer management
+- Responsive behavior via conditional rendering and `useIsMobile` hook
+
+**3. 3-Column Layout**
+
+`src/app/page.tsx` orchestrates the main layout:
+- **Left:** ConversationSidebar (conversations list, collapsible on mobile)
+- **Middle:** OmegaHeader + ChatView + ChatComposer (main chat area)
+- **Right:** TelemetryPanel (system state, collapsible on mobile)
+- **Overlays:** VoiceMode, SettingsModal, SystemStateDrawer
+
+**4. API Integration**
+
+All backend communication flows through `src/lib/api.ts`:
+- Typed request/response interfaces
+- Automatic error handling with descriptive messages
+- Bearer token auth from environment
+- Three main endpoints:
+  - `/api/v1/chat` — Chat messages with streaming support
+  - `/api/v1/providers` — List available LLM providers
+  - `/api/v1/memory/query` — Query vector memory (26k+ entries in Neon)
+
+## Environment Variables
+
+**Frontend (.env.local or Vercel project settings):**
+```
+NEXT_PUBLIC_OMEGA_API_URL=http://localhost:8787  # Backend gateway
+NEXT_PUBLIC_OMEGA_BEARER_TOKEN=                  # Auth token
+```
+
+**Server-only (route.ts handlers):**
+```
+OMEGA_API_URL=http://localhost:8787  # Backend gateway (server-side)
+OMEGA_BEARER_TOKEN=                  # Auth token (server-side)
+```
+
+**Database (managed by useOmegaChat hook):**
+The hook interfaces with `/api/chat`, `/api/sessions`, `/api/messages` endpoints which handle all Neon persistence. No direct database credentials in frontend.
+
+## Key Architectural Decisions
+
+1. **Hooks-first state management** — Each hook encapsulates one concern (chat, voice, responsive). Easier to test, compose, and reason about than scattered component state.
+
+2. **API gateway abstraction** — Frontend points to a backend gateway (default: localhost:8787), not Vercel Functions directly. Allows flexibility: gateway can proxy to multiple backends, handle auth, rate limiting, caching.
+
+3. **Streaming chat responses** — `/api/chat` returns streaming responses via ReadableStream, allowing real-time message display without waiting for full completion.
+
+4. **Voice-to-message automation** — `useOmegaChat` includes a lifecycle effect that auto-sends finalized voice transcripts as messages, eliminating extra user interaction.
+
+5. **Responsive collapsing** — Sidebar and telemetry auto-collapse below 768px. A floating button on mobile provides access to system state debugging.
+
+## Next.js 16 Notes
+
+**Read AGENTS.md** before modifying Next.js patterns. Version 16 has breaking changes from earlier versions:
+- App Router (not Pages Router)
+- Streaming responses via ReadableStream
+- Turbopack for faster builds
+- React Server Components (RSC) — `'use client'` required for interactivity
+
+## Deployment
+
+**Vercel:**
+1. Set environment variables in Vercel project settings:
+   - `NEXT_PUBLIC_OMEGA_API_URL`
+   - `NEXT_PUBLIC_OMEGA_BEARER_TOKEN`
+   - `OMEGA_API_URL` (server-side)
+   - `OMEGA_BEARER_TOKEN` (server-side)
+
+2. Push to main branch — Vercel auto-deploys.
+
+3. Neon database connection happens server-side in the backend gateway, not in Vercel Functions directly.
+
+## Voice & Telecommute Features
+
+- **Voice capture:** Web Speech API via `useVoiceEngine` hook. Respects browser permissions.
+- **Interim transcript display:** ChatComposer shows real-time partial speech recognition results.
+- **Auto-send on completion:** When user stops talking, transcript auto-sends as message (configurable via "interruptible" setting).
+- **State machine:** Voice has 5 states — `idle`, `listening`, `thinking`, `followup`, `error` — each with distinct UI (VoiceMode modal).
+
+## Testing & Debugging
+
+**System State Drawer:**
+- On desktop: Click the ⚙️ button in header to toggle SystemStateDrawer
+- On mobile: Floating ⚙️ button in bottom-right corner
+- Shows live JSON dump of chat state, voice state, session ID, message count, streaming status
+
+**Local gateway testing:**
+```bash
+# Start local backend on port 8787 (required for dev)
+# Then run:
+npm run dev
+
+# Open http://localhost:3000
+# System State Drawer will show real-time API responses
+```
+
+## Important Notes
+
+- **No direct Neon client in frontend** — All database ops go through backend API. Frontend is stateless except for UI state.
+- **Bearer token security** — `NEXT_PUBLIC_*` variables are exposed to browser. Use read-only auth tokens or configure gateway to validate request origin.
+- **Streaming chat must use AbortController** — The `useOmegaChat` hook uses AbortController for request cancellation. Important for cleanup and preventing memory leaks.
+- **Mobile detection is 768px breakpoint** — Matches Tailwind's `md` breakpoint. Adjust in `useIsMobile.ts` if needed.

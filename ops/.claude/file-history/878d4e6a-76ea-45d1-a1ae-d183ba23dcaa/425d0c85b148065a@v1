@@ -1,0 +1,20 @@
+'use client';
+import { useVoice } from '../hooks/useVoice';
+
+export default function Home() {
+  const { isRecording, startVoice, stopVoice } = useVoice();
+
+  return (
+    <main className='flex min-h-screen flex-col items-center justify-between p-24'>
+      <div className='z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex'>
+        <h1 className='text-4xl font-bold'>OmegA V2V</h1>
+        <button 
+          onClick={isRecording ? stopVoice : startVoice}
+          className={'px-4 py-2 rounded ' + (isRecording ? 'bg-red-500' : 'bg-green-500')}
+        >
+          {isRecording ? 'Stop Voice' : 'Start Voice'}
+        </button>
+      </div>
+    </main>
+  );
+}
