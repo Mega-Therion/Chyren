@@ -7,7 +7,7 @@ import { ChatMessage } from '@/components/ChatMessage'
 import { ChatInput } from '@/components/ChatInput'
 import { startHeartbeat, stopHeartbeat } from '@/lib/haptics-ry'
 import { clearDraft } from '@/lib/draft-ry'
-import { createTtsEngine, type TtsEngine } from '@/lib/tts-ry'
+import { createTtsEngine, type TtsEngine, playLatencyChime } from '@/lib/tts-ry'
 
 const NeuralBrain = dynamic(() => import('@/components/NeuralBrain'), { ssr: false })
 
@@ -133,6 +133,10 @@ export default function ChatPage() {
     const assistantId = `a-${Date.now()}`
     setStreamingId(assistantId)
     setMessages(prev => [...prev, { id: assistantId, role: 'assistant', content: '', timestamp: new Date() }])
+
+    if (ttsEnabled) {
+      playLatencyChime()
+    }
 
     try {
       const res = await fetch(`/api/chat/stream?session=${sessionId}`, {
