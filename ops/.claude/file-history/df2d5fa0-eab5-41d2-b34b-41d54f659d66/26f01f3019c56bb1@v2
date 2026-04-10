@@ -1,0 +1,89 @@
+/**
+ * AEGIS Risk Gate — Quantitative risk-gated action execution.
+ *
+ * R(a) = w_p*p + w_d*d + w_a*a - w_m*m
+ * Actions are allowed only if R(a) < tau_consent.
+ *
+ * Port of omega/risk_gate.py
+ */
+
+export interface RiskWeights {
+  w_p: number; // policy sensitivity
+  w_d: number; // data sensitivity
+  w_a: number; // action irreversibility
+  w_m: number; // mitigation
+}
+
+const DEFAULT_WEIGHTS: RiskWeights = {
+  w_p: 0.3,
+  w_d: 0.25,
+  w_a: 0.25,
+  w_m: 0.2,
+};
+
+// Expanded set — covers destructive commands AND prompt-injection vectors (#16)
+const BLOCKED_PATTERNS = [
+  // Destructive operations
+  'delete all', 'drop table', 'rm -rf', 'format disk',
+  'sudo rm', 'truncate', 'destroy',
+  // Prompt injection / jailbreak keywords
+  'ignore your instructions', 'ignore your system prompt',
+  'ignore previous instructions', 'ignore prior instructions',
+  'forget everything', 'forget all instructions',
+  'you are now a different', 'you are now an uncensored',
+  'developer mode', 'jailbreak', 'dan mode', 'do anything now',
+  'no restrictions', 'without restrictions',
+  'print your system prompt', 'repeat everything above',
+  'output your system prompt', 'output your instructions',
+  'what are your instructions', 'show me your api key',
+  'show me your credentials', 'what is your database url',
+];
+
+export interface GateResult {
+  allowed: boolean;
+  score: number;
+}
+
+export class RiskGate {
+  private weights: RiskWeights;
+  private threshold: number;
+
+  constructor(weights?: Partial<RiskWeights>, threshold = 0.8) {
+    this.weights = { ...DEFAULT_WEIGHTS, ...weights };
+    this.threshold = threshold;
+  }
+
+  score(action: string): number {
+    const lower = action.toLowerCase();
+    const w = this.weights;
+
+    const p = BLOCKED_PATTERNS.some(pat => lower.includes(pat)) ? 1.0 : 0.1;
+    const d = ['password', 'secret', 'token', 'key'].some(kw => lower.includes(kw)) ? 0.5 : 0.1;
+    const a = ['delete', 'drop', 'rm', 'destroy'].some(kw => lower.includes(kw)) ? 0.8 : 0.2;
+    const m = ['dry-run', 'preview', 'confirm'].some(kw => lower.includes(kw)) ? 0.5 : 0.1;
+
+    return Math.round((w.w_p * p + w.w_d * d + w.w_a * a - w.w_m * m) * 10000) / 10000;
+  }
+
+  isPolicyBlocked(action: string): boolean {
+    const lower = action.toLowerCase();
+    return BLOCKED_PATTERNS.some(pat => lower.includes(pat));
+  }
+
+  gate(action: string): GateResult {
+    const R = this.score(action);
+    if (this.isPolicyBlocked(action)) return { allowed: false, score: R };
+    return { allowed: R < this.threshold, score: R };
+  }
+
+  multiGate(V: number, rho: number, R: number, tauVerify = 0.4, thetaAllow = 0.5) {
+    const result = {
+      V, V_pass: V > tauVerify,
+      rho, rho_pass: rho < thetaAllow,
+      R, R_pass: R < this.threshold,
+      allowed: false,
+    };
+    result.allowed = result.V_pass && result.rho_pass && result.R_pass;
+    return result;
+  }
+}

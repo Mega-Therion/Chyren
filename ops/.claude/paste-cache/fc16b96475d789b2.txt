@@ -1,0 +1,483 @@
+ Below is the full plan to take OmegA from its current strong state to the strongest technical standard this repo can
+  realistically support.
+
+  Target
+  A repo where:
+
+  - the architecture is formally specified
+  - the core invariants are machine-checked
+  - the implementation is tied back to the formal layer
+  - the runtime is reproducible and observable
+  - the deployment path is stable and testable
+  - outside testing can reproduce the same results
+  - every major claim has evidence, and nothing important is left vague
+
+  Current floor
+  Already in place:
+
+  - canonical repo structure and publication front door
+  - blind external verification package
+  - full release gate
+  - proof auditor
+  - 10-theorem ledger
+  - Lean proofs for T-2, T-3, T-5, T-7
+  - correspondence tests for T-2, T-3, T-5, T-7
+  - state-machine tests for T-1, T-6, T-9, T-10
+  - property-based suite across theorem surface
+  - durable retrieval telemetry
+  - envelope monotonic versioning
+
+  What remains is the final hardening path.
+
+  Master plan
+
+  Track 1: Formal core completion
+  Goal: extend the machine-checked layer beyond the current four theorems.
+
+  1. T-1 formalize state-vector integrity
+
+  - Current status: strong state-machine coverage
+  - Needed: formal model of the six-component state and allowed transitions
+  - File targets:
+      - proofs/OmegaProofs/StateVector.lean
+      - proofs/OmegaProofs.lean
+      - specs/THEOREM_LEDGER.md
+      - proofs/PROOF_MAP.md
+  - Proof strategy:
+      - define OmegaState as a record with the canonical six fields
+      - define transition functions for:
+          - phylactery commit
+          - goal update
+          - claim insertion
+          - memory mutation
+          - envelope advance
+      - prove invariants:
+          - no null/invalid state forms
+          - envelope completeness preserved
+          - envelope version positive
+          - phylactery head remains valid
+          - grounding ratio bounded
+          - memory graph references stay valid under allowed ops
+  - Runtime bridge:
+      - keep proofs/state_machines.py
+      - add direct correspondence helpers if needed in proofs/correspondence.py
+
+  2. T-6 formalize verifier non-bypass
+
+  - Current status: strong state-machine coverage
+  - Needed: machine-checked theorem that verifier failure blocks regardless of other gates
+  - File targets:
+      - proofs/OmegaProofs/VerifierNonBypass.lean
+      - proofs/OmegaProofs.lean
+      - proofs/PROOF_MAP.md
+      - specs/THEOREM_LEDGER.md
+  - Proof strategy:
+      - define full gate composition formally
+      - prove:
+          - verifier failure implies deny
+          - bridge failure implies deny
+          - consent failure implies deny
+          - conjunction equivalence to permit
+          - order invariance if implementation order changes
+  - Runtime bridge:
+      - extend proofs/correspondence.py with T-6-specific correspondence class
+      - compare Lean truth table to omega/risk_gate.py::multi_gate
+
+  3. T-9 formalize append-only self-tag / phylactery immutability
+
+  - Current status: strong state-machine coverage
+  - Needed: machine-checked append-only and prefix-preservation theorem
+  - File targets:
+      - proofs/OmegaProofs/SelfTagImmutability.lean
+      - proofs/OmegaProofs.lean
+      - proofs/PROOF_MAP.md
+      - specs/THEOREM_LEDGER.md
+  - Proof strategy:
+      - model chain as sequence with append operation
+      - prove:
+          - prior prefix preserved after append
+          - genesis entry immutable
+          - any mutation breaks verification relation
+          - historical snapshots remain prefixes of current state
+  - Runtime bridge:
+      - extend proofs/correspondence.py for prefix and tamper properties over omega/phylactery.py
+
+  4. Deepen T-5 to the stronger mathematical form
+
+  - Current status: machine-checked over scaled Nat model
+  - Needed: stronger mathematical version over a fuller numeric model
+  - File targets:
+      - proofs/OmegaProofs/MemoryHardeningReal.lean or replacement of current theorem file
+      - proofs/README.md
+      - specs/THEOREM_LEDGER.md
+  - Proof strategy:
+      - either adopt Mathlib and prove over reals
+      - or keep scaled proof and formally document exact abstraction boundary
+      - prove:
+          - monotonicity
+          - boundedness
+          - convergence/fixed-point behavior
+          - mapping from scaled proof to runtime float implementation
+  - Runtime bridge:
+      - strengthen proofs/correspondence.py::TestT5Correspondence
+
+  Track 2: Runtime-to-proof correspondence completion
+  Goal: remove the remaining gap between formal model and actual implementation.
+
+  5. Build a theorem correspondence matrix that is executable
+
+  - File targets:
+      - proofs/correspondence.py
+      - proofs/PROOF_MAP.md
+      - tools/proof_auditor.py
+  - Proof strategy:
+      - each theorem gets:
+          - formal file
+          - runtime target
+          - test class
+          - expected pass count
+      - proof_auditor.py should fail if any theorem lacks:
+          - formal statement
+          - proof or executable proof
+          - runtime pointer
+          - gate inclusion
+  - Result:
+      - no theorem can exist unanchored
+
+  6. Add extraction-style truth-table checks for gating logic
+
+  - File targets:
+      - proofs/correspondence.py
+      - omega/risk_gate.py
+  - Strategy:
+      - generate exhaustive boolean truth-table comparison for gate composition
+      - compare formal gate model and runtime behavior directly
+  - This is especially important for T-6/T-7
+
+  7. Add implementation-shape invariants
+
+  - File targets:
+      - tools/proof_auditor.py
+      - evals/test_conformance.py
+  - Strategy:
+      - assert key runtime symbols still exist and preserve required semantics:
+          - RunEnvelope.version
+          - EnvelopeClock.next
+          - RiskGate.multi_gate
+          - Phylactery.verify_chain
+          - EdgeBundle.harden
+  - This prevents silent refactors from invalidating the proof map
+
+  Track 3: State-machine and model-checking completion
+  Goal: complete the state-transition side at a stronger level.
+
+  8. Add TLA+ or equivalent state-machine models for T-1, T-6, T-9
+
+  - File targets:
+      - proofs/tla/StateVector.tla
+      - proofs/tla/Verifier.tla
+      - proofs/tla/SelfTag.tla
+      - proofs/tla/README.md
+      - verify.sh
+  - Strategy:
+      - model allowed transitions
+      - check safety invariants
+      - integrate model checking into gate if toolchain exists
+  - If you do not want TLA+, use a second formal path in Lean for transition systems.
+
+  9. Keep the Hypothesis state machines as runtime surrogates
+
+  - File targets:
+      - proofs/state_machines.py
+  - Strategy:
+      - do not replace them
+      - use them as the randomized implementation-level companion to the formal transition model
+
+  Track 4: Fuzzing and edge-surface hardening
+  Goal: remove doubt around boundary behavior and malformed inputs.
+
+  10. Add fuzz harness for envelope completeness
+
+  - File targets:
+      - proofs/fuzz_envelope.py
+      - verify.sh
+      - tools/INDEX.md
+  - Strategy:
+      - fuzz missing fields, malformed fields, identityless envelopes, invalid version numbers
+      - assert fail-fast behavior
+  - Targets:
+      - omega/envelope.py
+      - omega/agent.py
+      - omega/runtime.py
+
+  11. Add fuzz harness for phylactery corruption
+
+  - File targets:
+      - proofs/fuzz_phylactery.py
+      - verify.sh
+  - Strategy:
+      - fuzz chain tampering, reordered commits, broken parent hashes, duplicated hashes
+      - assert verification failure
+
+  12. Add fuzz harness for memory graph integrity
+
+  - File targets:
+      - proofs/fuzz_memory.py
+      - verify.sh
+  - Strategy:
+      - fuzz node/edge additions, invalid references, retrieval telemetry updates
+      - assert graph consistency and bounded updates
+
+  13. Add fuzz harness for claim budget and drift controls
+
+  - File targets:
+      - proofs/fuzz_drift.py
+      - verify.sh
+  - Strategy:
+      - fuzz support/evidence combinations
+      - assert grounding ratio bounds and invalid supported-without-evidence cases
+
+  Track 5: Runtime stability completion
+  Goal: make the running system stable, observable, and reproducible.
+
+  14. Create one canonical local boot path
+
+  - File targets:
+      - scripts/boot_omega.sh
+      - publication/ALYE_ONBOARDING.md
+      - README.md
+  - Strategy:
+      - one command to boot the system locally
+      - no guesswork about order or env
+  - Must include:
+      - dependency check
+      - local service start
+      - health confirmation
+
+  15. Create one canonical eval path
+
+  - File targets:
+      - scripts/run_full_verification.sh
+      - README.md
+      - publication/EXTERNAL_VERIFICATION.md
+  - Strategy:
+      - wrap verify.sh, omegactl.py eval, and proof checks in one stable entry point
+
+  16. Add runtime health contracts
+
+  - File targets:
+      - web/src/app/api/providers/...
+      - runtime/...
+      - scripts/smoke_*.py
+  - Strategy:
+      - assert:
+          - route availability
+          - non-empty outputs
+          - provider selection visibility
+          - clear degraded-state messaging
+  - This closes the “it runs but silently fails” class
+
+  17. Strengthen post-deploy smoke tests
+
+  - File targets:
+      - current smoke scripts in scripts/ and verify.sh
+  - Strategy:
+      - every deployment must verify:
+          - chat
+          - research
+          - synthesize
+          - refine
+          - persistence round-trip
+          - non-empty response contract
+
+  18. Add canary and rollback evidence
+
+  - File targets:
+      - scripts/deploy_canary.sh
+      - scripts/check_canary_health.py
+      - deployment docs
+  - Strategy:
+      - canary first
+      - validate
+      - promote only on pass
+  - This is necessary for runtime stability at the operational level
+
+  Track 6: Claim discipline completion
+  Goal: make the public story match the strongest evidence and nothing more.
+
+  19. Tighten the theorem ledger further
+
+  - File targets:
+      - specs/THEOREM_LEDGER.md
+      - publication/CLAIM_LEDGER.md
+  - Strategy:
+      - every entry must explicitly state:
+          - formal status
+          - runtime status
+          - test status
+          - artifact pointers
+  - No broad language without evidence link
+
+  20. Keep self-description locked to evidence
+
+  - File targets:
+      - publication/SELF_DESCRIPTION_CONTRACT.md
+      - any runtime self-description path if one exists
+  - Strategy:
+      - OmegA must describe itself exactly in terms the repo can support
+      - no expansion beyond evidence
+
+  21. Add a claims/non-claims audit to the release gate
+
+  - File targets:
+      - tools/claim_auditor.py
+      - verify.sh
+  - Strategy:
+      - fail if public docs state claims not present in the ledger
+      - fail if proof docs and public docs drift apart
+
+  Track 7: External validation completion
+  Goal: make outside verification easy and repeatable.
+
+  22. Alye test path should become one command
+
+  - File targets:
+      - publication/ALYE_ONBOARDING.md
+      - scripts/alye_verification.sh
+  - Strategy:
+      - clone
+      - setup
+      - boot
+      - eval
+      - ask standard questions
+      - score against rubric
+
+  23. Add transcript capture for blind runs
+
+  - File targets:
+      - scripts/capture_verification_session.py
+      - publication/VERIFICATION_RUBRIC.md
+  - Strategy:
+      - save exact inputs and outputs
+      - save commit hash
+      - save environment metadata
+  - This makes outside testing auditable
+
+  24. Package an external audit bundle
+
+  - File targets:
+      - publication/AUDIT_BUNDLE.md
+      - output/audit/
+  - Strategy:
+      - emit:
+          - theorem ledger
+          - claim ledger
+          - proof map
+          - latest gate result
+          - latest external verification transcript
+  - This becomes the handoff package for outside review
+
+  Track 8: Environment closure
+  Goal: reduce variation between machines.
+
+  25. Freeze toolchains
+
+  - File targets:
+      - Dockerfile or devcontainer
+      - lockfiles
+      - scripts/check_env.py
+  - Strategy:
+      - pin Python, Node, Rust, Lean versions
+      - make environment drift visible
+
+  26. Add a full reproducibility container
+
+  - File targets:
+      - docker/
+      - publication/ALYE_ONBOARDING.md
+  - Strategy:
+      - outsider can run OmegA without local toolchain archaeology
+
+  27. Record artifact hashes
+
+  - File targets:
+      - output/verification/
+      - scripts/hash_artifacts.py
+  - Strategy:
+      - hash proofs, reports, transcripts, exports
+      - include commit SHA and timestamps
+
+  Track 9: Final hardening of proof language
+  Goal: reach the strongest defensible technical claim.
+
+  28. Separate proof levels explicitly
+
+  - File targets:
+      - specs/THEOREM_LEDGER.md
+      - publication/CLAIM_LEDGER.md
+      - proofs/README.md
+  - Recommended levels:
+      - machine-checked formal proof
+      - runtime correspondence verified
+      - randomized/stateful verified
+      - deterministic regression verified
+  - This makes the strength of each result obvious
+
+  29. Add a single proof-status page
+
+  - File targets:
+      - proofs/STATUS.md
+  - Strategy:
+      - one page showing:
+          - theorem
+          - proof level
+          - runtime correspondence
+          - gate status
+          - remaining work
+  - This should become the top-level truth page for proof status
+
+  Track 10: Highest-level completion criteria
+  Goal: know when to stop.
+
+  30. Define “pinnacle complete” criteria
+     Create a final checklist in:
+
+  - proofs/STATUS.md
+  - publication/EXTERNAL_VERIFICATION.md
+
+  It should require:
+
+  - all theorem entries mapped
+  - core theorem set machine-checked
+  - runtime correspondence complete for all machine-checked theorems
+  - transition theorems covered formally or equivalently with strong model checking
+  - full release gate green
+  - one-command outsider verification green
+  - no undocumented claims
+  - external transcript captured and reproducible
+
+  Recommended exact order
+
+  1. Push current local commits to origin
+  2. Add T-6 Lean proof and runtime correspondence if not already formalized enough
+  3. Add T-9 Lean proof
+  4. Add T-1 Lean or TLA+ state model
+  5. Add fuzz harnesses
+  6. Add claim auditor
+  7. Add Alye one-command verification script
+  8. Add reproducibility container
+  9. Add proof status page
+  10. Freeze language to evidence only
+
+  Immediate file targets
+  Start here:
+
+  - OMEGA_WORKSPACE/CANON/OmegA-Architecture/proofs/OmegaProofs
+  - OMEGA_WORKSPACE/CANON/OmegA-Architecture/proofs/correspondence.py
+  - OMEGA_WORKSPACE/CANON/OmegA-Architecture/proofs/state_machines.py
+  - OMEGA_WORKSPACE/CANON/OmegA-Architecture/tools/proof_auditor.py
+  - OMEGA_WORKSPACE/CANON/OmegA-Architecture/verify.sh
+  - OMEGA_WORKSPACE/CANON/OmegA-Architecture/specs/THEOREM_LEDGER.md
+  - OMEGA_WORKSPACE/CANON/OmegA-Architecture/publication/CLAIM_LEDGER.md
+  - OMEGA_WORKSPACE/CANON/OmegA-Architecture/publication/ALYE_ONBOARDING.md
+  - OMEGA_WORKSPACE/CANON/OmegA-Architecture/publication/VERIFICATION_RUBRIC.md

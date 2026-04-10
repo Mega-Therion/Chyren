@@ -1,0 +1,15 @@
+{
+  "underlying_goal": "User was configuring Claude settings and loading a senior-frontend skill but hit rate limits before any work began",
+  "goal_categories": {
+    "warmup_minimal": 1
+  },
+  "outcome": "not_achieved",
+  "user_satisfaction_counts": {},
+  "claude_helpfulness": "unhelpful",
+  "session_type": "single_task",
+  "friction_counts": {},
+  "friction_detail": "Session ended due to rate limit before any meaningful interaction occurred",
+  "primary_success": "none",
+  "brief_summary": "User configured model/effort settings and loaded a frontend skill but hit rate limits before Claude could respond.",
+  "session_id": "6f2954d2-2b0b-45df-b8fa-5bb0f50ce629"
+}

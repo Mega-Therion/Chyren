@@ -1,0 +1,5 @@
+#!/bin/bash
+gh pr merge 4 --merge --repo Mega-Therion/OmegA-Architecture
+gh pr merge 3 --merge --repo Mega-Therion/OmegA-Architecture
+gh pr merge 2 --merge --repo Mega-Therion/OmegA-Architecture
+gh pr merge 1 --merge --repo Mega-Therion/OmegA-Architecture

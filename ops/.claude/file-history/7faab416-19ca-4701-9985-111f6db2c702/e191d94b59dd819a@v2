@@ -1,0 +1,121 @@
+"""
+OmegA CLI Events — Event-driven architecture with handlers and hooks.
+"""
+
+from typing import Callable, List, Dict, Any, Optional
+from datetime import datetime
+
+
+class Event:
+    """Represents an event."""
+
+    def __init__(self, event_type: str, data: Optional[Dict[str, Any]] = None):
+        """Initialize event."""
+        self.event_type = event_type
+        self.data = data or {}
+        self.timestamp = datetime.now().isoformat()
+
+    def __repr__(self) -> str:
+        return f"Event({self.event_type}, {self.data})"
+
+
+class EventBus:
+    """Central event bus for the CLI."""
+
+    def __init__(self):
+        """Initialize event bus."""
+        self.handlers: Dict[str, List[Callable]] = {}
+        self.event_history: List[Event] = []
+
+    def on(self, event_type: str, handler: Callable) -> None:
+        """
+        Register an event handler.
+
+        Args:
+            event_type: Type of event to listen for
+            handler: Callable that takes an Event object
+        """
+        if event_type not in self.handlers:
+            self.handlers[event_type] = []
+
+        self.handlers[event_type].append(handler)
+
+    def off(self, event_type: str, handler: Callable) -> None:
+        """Unregister an event handler."""
+        if event_type in self.handlers:
+            if handler in self.handlers[event_type]:
+                self.handlers[event_type].remove(handler)
+
+    def emit(self, event: Event) -> None:
+        """
+        Emit an event to all registered handlers.
+
+        Args:
+            event: Event to emit
+        """
+        # Record event
+        self.event_history.append(event)
+
+        # Call handlers
+        if event.event_type in self.handlers:
+            for handler in self.handlers[event.event_type]:
+                try:
+                    handler(event)
+                except Exception as e:
+                    print(f"Error in event handler: {e}")
+
+    def emit_with_type(self, event_type: str, data: Optional[Dict[str, Any]] = None) -> None:
+        """Shorthand to emit an event with just a type and data."""
+        self.emit(Event(event_type, data))
+
+    def get_history(self, event_type: Optional[str] = None, limit: int = 100) -> List[Event]:
+        """Get event history, optionally filtered by type."""
+        if event_type:
+            return [e for e in self.event_history[-limit:] if e.event_type == event_type]
+        return self.event_history[-limit:]
+
+
+# Global event bus instance
+_event_bus: Optional[EventBus] = None
+
+
+def get_event_bus() -> EventBus:
+    """Get the global event bus instance."""
+    global _event_bus
+    if _event_bus is None:
+        _event_bus = EventBus()
+    return _event_bus
+
+
+# Common event types
+class EventTypes:
+    """Standard event types."""
+    # CLI events
+    SESSION_START = "session.start"
+    SESSION_END = "session.end"
+    COMMAND_EXECUTED = "command.executed"
+    ERROR_OCCURRED = "error.occurred"
+
+    # API events
+    API_REQUEST = "api.request"
+    API_RESPONSE = "api.response"
+    API_ERROR = "api.error"
+
+    # Database events
+    DB_QUERY = "db.query"
+    DB_ERROR = "db.error"
+    DB_ALERT = "db.alert"
+
+    # Ingest events
+    INGEST_START = "ingest.start"
+    INGEST_PROGRESS = "ingest.progress"
+    INGEST_COMPLETE = "ingest.complete"
+    INGEST_ERROR = "ingest.error"
+
+    # Skill events
+    SKILL_INVOKED = "skill.invoked"
+    SKILL_COMPLETE = "skill.complete"
+
+    # Agent events
+    AGENT_DELEGATED = "agent.delegated"
+    AGENT_COMPLETE = "agent.complete"

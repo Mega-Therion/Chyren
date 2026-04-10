@@ -1,0 +1,68 @@
+'use client'
+
+import React, { lazy, Suspense } from 'react'
+import { useChat } from '@ai-sdk/react'
+import { DefaultChatTransport } from 'ai'
+import { ChatInput } from '@/components/ChatInput'
+import { MessageList } from '@/components/MessageList'
+import { useBrainState } from '@/hooks/useBrainState'
+import { NeuralSynapseCanvas } from '@/components/NeuralSynapseCanvas'
+
+const ChyrenBrain = lazy(() => import('@/components/ChyrenBrain'))
+
+export default function ChatPage() {
+  const { brainState, activeStage, activate } = useBrainState()
+
+  const { messages, status, sendMessage } = useChat({
+    transport: new DefaultChatTransport({ api: '/api/chat/stream' }),
+  })
+
+  const isLoading = status === 'streaming' || status === 'submitted'
+
+  const handleSend = (text: string) => {
+    if (!text.trim()) return
+    activate()
+    sendMessage({ text })
+  }
+
+  const displayMessages = messages.map((m) => ({
+    id: m.id,
+    role: m.role as 'user' | 'assistant',
+    content: m.parts?.map((p: { type: string; text?: string }) =>
+      p.type === 'text' ? (p.text ?? '') : ''
+    ).join('') ?? '',
+    timestamp: new Date(),
+    isStreaming: isLoading && m.role === 'assistant' && m === messages[messages.length - 1],
+  }))
+
+  return (
+    <div className="h-screen flex flex-col overflow-hidden relative">
+      <div className="absolute inset-0 z-0 opacity-40">
+        <NeuralSynapseCanvas isActive={isLoading} />
+      </div>
+
+      <header className="glass-panel m-4 mb-0 flex-shrink-0 px-5 py-3 flex items-center justify-between z-20">
+        <div className="flex items-center gap-4">
+          <span className="font-mono text-base font-medium omega-glow text-indigo-400">Ω</span>
+          <span className="font-mono text-xs tracking-[0.2em] text-indigo-100 uppercase">CHYREN</span>
+        </div>
+      </header>
+
+      <div className="flex flex-1 overflow-hidden z-10 p-4 pt-0 gap-4">
+        <aside className="glass-panel hidden lg:flex flex-col w-64 flex-shrink-0">
+          <Suspense fallback={<div className="h-full flex items-center justify-center font-mono text-xs text-indigo-900">SYNCING...</div>}>
+            <ChyrenBrain state={brainState} />
+          </Suspense>
+        </aside>
+
+        <div className="flex flex-col flex-1 glass-panel overflow-hidden">
+          <MessageList messages={displayMessages} isLoading={isLoading} />
+
+          <div className="flex-shrink-0 px-4 py-3 border-t border-indigo-900/30">
+            <ChatInput onSend={handleSend} disabled={isLoading} isLoading={isLoading} />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

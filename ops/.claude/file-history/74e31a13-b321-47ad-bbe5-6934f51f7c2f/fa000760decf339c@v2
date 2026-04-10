@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+OMEGA_GATEWAY_URL="${OMEGA_GATEWAY_URL:-http://127.0.0.1:8787}"
+export OMEGA_GATEWAY_URL
+
+load_env_file() {
+  local file="$1"
+  if [[ -f "$file" ]]; then
+    # shellcheck disable=SC1090
+    set -a
+    . "$file"
+    set +a
+  fi
+}
+
+first_nonempty() {
+  local value
+  for value in "$@"; do
+    if [[ -n "${value:-}" ]]; then
+      printf '%s' "$value"
+      return 0
+    fi
+  done
+  return 1
+}
+
+read_env_value_from_file() {
+  local file="$1"
+  local key="$2"
+  [[ -f "$file" ]] || return 1
+  awk -F= -v key="$key" '
+    $1 == key {
+      $1 = ""
+      sub(/^=/, "", $0)
+      gsub(/^'\''|'\''$/, "", $0)
+      print
+      exit
+    }
+  ' "$file"
+}
+
+load_env_file "$HOME/.omega_keys.env"
+load_env_file "$HOME/.omega/one-true.env"
+load_env_file "$HOME/OMEGA_WORKSPACE/VAULT/one-true.env"
+
+if [[ -z "${OMEGA_API_BEARER_TOKEN:-}" ]]; then
+  OMEGA_API_BEARER_TOKEN="$(
+    first_nonempty \
+      "${OMEGA_API_BEARER_TOKEN:-}" \
+      "$(read_env_value_from_file "$HOME/OMEGA_WORKSPACE/VAULT/one-true.env" OMEGA_API_BEARER_TOKEN 2>/dev/null || true)" \
+      "${OMEGA_OPERATOR_TOKEN:-}" \
+      "${BEARER_TOKEN:-}" \
+      || true
+  )"
+  export OMEGA_API_BEARER_TOKEN
+fi
+
+if ! curl -fsS "${OMEGA_GATEWAY_URL%/}/health" >/dev/null 2>&1; then
+  if command -v omega-gateway >/dev/null 2>&1; then
+    nohup omega-gateway --host 127.0.0.1 --port 8787 >/tmp/omega-gateway.log 2>&1 &
+    sleep 1
+  fi
+fi
+
+gateway_chat() {
+  local mode="${1:-gemini}"
+  shift || true
+  local prompt="$*"
+  if [[ -z "$prompt" ]]; then
+    echo "omega: prompt cannot be empty" >&2
+    return 1
+  fi
+
+  local payload
+  payload=$(printf '%s' "$prompt" | jq -Rsa --arg mode "$mode" '{user: ., mode: $mode, temperature: 0.4}')
+
+  local curl_args=(
+    -fsS
+    -H 'Content-Type: application/json'
+    -d "$payload"
+    "${OMEGA_GATEWAY_URL%/}/api/v1/chat"
+  )
+
+  if [[ -n "${OMEGA_API_BEARER_TOKEN:-}" ]]; then
+    curl_args=(-fsS -H "Authorization: Bearer ${OMEGA_API_BEARER_TOKEN}" -H 'Content-Type: application/json' -d "$payload" "${OMEGA_GATEWAY_URL%/}/api/v1/chat")
+  fi
+
+  local response
+  response="$(curl "${curl_args[@]}")"
+  local reply
+  reply="$(printf '%s' "$response" | jq -r '.reply // .message // .detail // empty')"
+
+  if [[ -n "$reply" ]]; then
+    printf '%s\n' "$reply"
+  else
+    printf '%s\n' "$response"
+  fi
+}
+
+OMEGA_CLI="${HOME}/OMEGA_WORKSPACE/CANON/OmegA-Architecture/runtime/target/release/omega-cli"
+
+if [[ ! -f "$OMEGA_CLI" ]]; then
+  echo "Error: OmegA CLI not found at $OMEGA_CLI" >&2
+  echo "Please rebuild: cd \$OMEGA_WORKSPACE/CANON/OmegA-Architecture/runtime && cargo build --release" >&2
+  exit 1
+fi
+
+exec "$OMEGA_CLI" "$@"

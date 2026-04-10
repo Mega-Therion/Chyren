@@ -1,0 +1,226 @@
+  ## The standard we should aim for
+
+  Not “looks convincing.”
+
+  Not “passes a few tests.”
+
+  The target is:
+
+  - every important claim has a formal statement
+  - every formal statement has a proof artifact or an
+    executable surrogate
+  - every executable claim has a reproducible test
+  - every test has a fixed environment and a recorded
+    result
+  - every result is traceable to a commit, a config, and a
+    log
+
+  If a statement cannot be backed, it gets downgraded to:
+
+  - conditional
+  - demonstrable
+  - or not claimed
+
+  That is how we remove speculation.
+
+  ## The two proof tracks
+
+  ### 1. Mathematical proof track
+
+  This is for the architecture itself.
+
+  What it must prove:
+
+  - the state vector is well-formed
+  - identity continuity holds under the modeled
+    transitions
+  - governance gates fail closed
+  - claim budgets cannot exceed their allowed bounds
+  - memory hardening behaves monotonically under the model
+  - the system cannot silently bypass its own verifier
+
+  What this usually looks like:
+
+  - a formal invariant file
+  - a theorem inventory
+  - machine-checked proofs for the core invariants
+  - refinement mapping from proof model to implementation
+  - property-based tests for anything too operational to
+    prove directly
+
+  Best-fit tools for this:
+
+  - Lean or Coq for core algebraic and identity invariants
+  - TLA+ for state-machine and transition guarantees
+  - property-based testing for implementation
+    correspondence
+
+  ### 2. Runtime proof track
+
+  This is for the actual runnable system.
+
+  What it must prove:
+
+  - one-command setup works
+  - blind tester can run the system without hidden help
+  - runtime answers match the claim ledger
+  - live deployment is deterministic enough to reproduce
+  - release gate blocks bad builds
+  - logs and artifacts are archived automatically
+
+  What this usually looks like:
+
+  - pinned dependencies
+  - containerized or otherwise frozen environment
+  - one canonical boot command
+  - one canonical eval command
+  - one canonical release command
+  - signed or hashed artifacts
+  - exact versioned logs in ERGON.md
+  - a blind external protocol for Alye
+
+  ## What “academic grade” means in practice
+
+  An academic-grade system is not one that makes the
+  biggest claim.
+
+  It is one that:
+
+  - states claims narrowly
+  - proves what it can prove
+  - marks the rest honestly
+  - exposes the method
+  - allows replication
+  - and does not blur evidence with rhetoric
+
+  So the goal is not “everything is magical and
+  universally true.”
+
+  The goal is:
+
+  - “everything important is either proven, reproducible,
+    or explicitly out of claim.”
+
+  ## The concrete work we still need
+
+  ### A. Freeze the claim ledger into a theorem ledger
+
+  Every important claim should become one of:
+
+  - theorem
+  - lemma
+  - executable invariant
+  - empirical claim
+  - conditional claim
+  - out-of-scope claim
+
+  If it is important and not in that ledger, it is not
+  part of the proof surface.
+
+  ### B. Build a formal invariant package
+
+  Create a dedicated formal area for:
+
+  - identity continuity
+  - governance fail-closed
+  - memory utility monotonicity
+  - claim-budget bounds
+  - state-vector integrity
+  - provider fallback safety
+
+  ### C. Map proofs to code
+
+  For each theorem or invariant:
+
+  - identify the code path it corresponds to
+  - identify the test that backs it
+  - identify the runtime artifact that proves it
+  - identify the log entry that records it
+
+  ### D. Make the release gate proof-aware
+
+  The gate should not just say “build passed.”
+
+  It should say:
+
+  - formal invariants passed
+  - runtime invariants passed
+  - blind tester path passed
+  - live path is either green or explicitly conditional
+  - logs were written
+  - artifacts were stamped
+
+  ### E. Add an external audit bundle
+
+  Alye should be able to:
+
+  - clone the repo
+  - run one setup command
+  - run one proof/eval command
+  - read one self-description document
+  - score the result against a rubric
+  - reproduce the same evidence
+
+  ## The hard line we should take
+
+  If a claim is not proven, we do not keep pretending it
+  is.
+
+  We either:
+
+  - prove it,
+  - bound it,
+  - or remove it from the claim surface.
+
+  That is how we make the system airtight.
+
+  ## My recommended next phase plan
+
+  ### Phase 1: Formalize
+
+  - write a theorem inventory
+  - classify every claim
+  - create the proof/spec directory
+
+  ### Phase 2: Prove the core
+
+  - identity continuity
+  - fail-closed governance
+  - state integrity
+  - memory hardening
+  - claim-budget safety
+
+  ### Phase 3: Lock runtime correspondence
+
+  - one-command boot
+  - one-command eval
+  - one-command release
+  - signed logs and artifacts
+
+  ### Phase 4: Externalize
+
+  - Alye blind protocol
+  - reproducibility bundle
+  - pass/fail rubric
+  - independent evidence package
+
+  ### Phase 5: Seal the language
+
+  - anything not proven becomes conditional or not claimed
+  - update README, publication docs, and self-description
+    so the public claim surface matches proof
+
+  ## The honest endpoint
+
+  You can get very close to “universally verifiable” in
+  the practical academic sense.
+
+  You cannot make every future observer accept it
+  automatically.
+
+  But you can make the system so explicit, formal, and
+  reproducible that a skeptical outsider has very little
+  room to dispute it without disputing the proof process
+  itself.
+
+  That is the right standard.

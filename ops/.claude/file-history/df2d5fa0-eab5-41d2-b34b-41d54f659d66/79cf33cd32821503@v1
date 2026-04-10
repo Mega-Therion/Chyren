@@ -1,0 +1,10 @@
+DATABASE_URL=postgresql://neondb_owner:npg_HbW1Zlkjd7NI@ep-sweet-glade-anvm0pwn-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require
+DIRECT_URL=postgresql://neondb_owner:npg_HbW1Zlkjd7NI@ep-sweet-glade-anvm0pwn.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require
+OMEGA_UI_PASSWORD=y{*iN]BY3^E5qjDfUyqp
+XAI_API_KEY=xai-SMNyWru32Yk30sMxcSaTS8nxs2Y8AETkG3PKOLdSkqvkn8w0aqBSe8ba87F54OUSHWbM1TKO8DV31eKi
+GROK_API_KEY=xai-SMNyWru32Yk30sMxcSaTS8nxs2Y8AETkG3PKOLdSkqvkn8w0aqBSe8ba87F54OUSHWbM1TKO8DV31eKi
+_API_KEY=AIzaSyBb9r424wzrxBVJZU090evpRG_mO4GnYJI
+OMEGA_API_BEARER_TOKEN=OMLU0T0f83FWC4gRz9tavLM9plx-JdgK2G1-MIJjqGs
+
+OMEGA_OPERATOR_TOKEN=f169e28a8cf6453c50dd84189f989cec307c97968a1d9c16b046a9bcfa218bde
+ELEVENLABS_API_KEY=sk_4249b83ff0ba12268ec38b646fc7dc06889bc7a0dc1b6d95

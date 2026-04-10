@@ -1,0 +1,134 @@
+"""
+OmegA CLI Multimodal — Support for voice, images, code, and multi-line input.
+"""
+
+import base64
+import os
+import sys
+from pathlib import Path
+from typing import Optional, Tuple
+
+
+class MultimodalInput:
+    """Handles multi-modal input (voice, image, code, paste)."""
+
+    @staticmethod
+    def read_multiline(prompt: str = "[PASTE] Enter content (Ctrl+D to end):\n") -> str:
+        """Read multi-line input until Ctrl+D."""
+        print(prompt)
+        lines = []
+        try:
+            while True:
+                line = input()
+                lines.append(line)
+        except EOFError:
+            pass
+        return "\n".join(lines)
+
+    @staticmethod
+    def read_code(language: str = "python") -> str:
+        """Read a code block with the specified language."""
+        prompt = f"[CODE] {language.upper()} mode. Type code, end with Ctrl+D:\n"
+        return MultimodalInput.read_multiline(prompt)
+
+    @staticmethod
+    def load_image(file_path: str) -> Optional[Tuple[str, str]]:
+        """
+        Load an image file and return (base64_data, mime_type).
+
+        Args:
+            file_path: Path to image file
+
+        Returns:
+            (base64_data, mime_type) or None if file doesn't exist
+        """
+        path = Path(file_path).expanduser()
+
+        if not path.exists():
+            return None
+
+        # Determine MIME type
+        suffix = path.suffix.lower()
+        mime_types = {
+            ".jpg": "image/jpeg",
+            ".jpeg": "image/jpeg",
+            ".png": "image/png",
+            ".gif": "image/gif",
+            ".webp": "image/webp",
+        }
+
+        mime_type = mime_types.get(suffix, "image/png")
+
+        try:
+            with open(path, "rb") as f:
+                data = f.read()
+                encoded = base64.b64encode(data).decode()
+                return encoded, mime_type
+        except Exception:
+            return None
+
+    @staticmethod
+    def load_file_as_text(file_path: str) -> Optional[str]:
+        """Load a file as text."""
+        path = Path(file_path).expanduser()
+
+        if not path.exists():
+            return None
+
+        try:
+            return path.read_text()
+        except Exception:
+            return None
+
+    @staticmethod
+    def format_code_block(code: str, language: str = "python") -> str:
+        """Format code as a markdown code block."""
+        return f"```{language}\n{code}\n```"
+
+    @staticmethod
+    def format_image_reference(file_path: str) -> str:
+        """Format an image file reference for sending."""
+        return f"[IMAGE] {file_path}"
+
+
+class VoiceInput:
+    """Handles voice/speech-to-text input (optional)."""
+
+    @staticmethod
+    def is_available() -> bool:
+        """Check if speech-to-text is available."""
+        try:
+            import speech_recognition as sr
+            return True
+        except ImportError:
+            return False
+
+    @staticmethod
+    def listen_and_transcribe() -> Optional[str]:
+        """
+        Listen to microphone and transcribe speech to text.
+
+        Returns:
+            Transcribed text or None if unavailable/failed
+        """
+        try:
+            import speech_recognition as sr
+
+            recognizer = sr.Recognizer()
+
+            with sr.Microphone() as source:
+                print("[VOICE] Listening... (speak now)")
+                audio = recognizer.listen(source, timeout=30)
+
+            try:
+                text = recognizer.recognize_google(audio)
+                return text
+            except sr.UnknownValueError:
+                return None
+            except sr.RequestError as e:
+                return None
+
+        except ImportError:
+            return None
+        except Exception:
+            return None

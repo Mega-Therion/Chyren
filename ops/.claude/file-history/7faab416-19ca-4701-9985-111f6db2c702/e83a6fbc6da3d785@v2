@@ -1,0 +1,114 @@
+"""
+OmegA CLI Commands — Command handlers and workflow chaining.
+"""
+
+import re
+from typing import List, Dict, Any, Optional
+from dataclasses import dataclass
+
+
+@dataclass
+class WorkflowStep:
+    """Represents a step in a workflow chain."""
+    step_type: str  # "skill" or "agent"
+    name: str
+    args: Optional[List[str]] = None
+    input_var: Optional[str] = None  # e.g., "{prev.output}"
+
+
+class WorkflowParser:
+    """Parse and execute workflow chains."""
+
+    @staticmethod
+    def parse_chain(chain_str: str) -> List[WorkflowStep]:
+        """
+        Parse a workflow chain like: skill1 → skill2 → agent:claude
+
+        Args:
+            chain_str: Chain definition string
+
+        Returns:
+            List of WorkflowStep objects
+        """
+        steps = []
+        parts = chain_str.split("→")
+
+        for part in parts:
+            part = part.strip()
+            if not part:
+                continue
+
+            # Parse: type:name [args]
+            if part.startswith("agent:"):
+                step_type = "agent"
+                name = part.replace("agent:", "").strip()
+                args = []
+            elif part.startswith("skill:"):
+                step_type = "skill"
+                name = part.replace("skill:", "").strip()
+                args = []
+            else:
+                # Default to skill
+                step_type = "skill"
+                name = part
+                args = []
+
+            steps.append(WorkflowStep(
+                step_type=step_type,
+                name=name,
+                args=args,
+            ))
+
+        return steps
+
+    @staticmethod
+    def validate_chain(steps: List[WorkflowStep]) -> tuple[bool, Optional[str]]:
+        """
+        Validate a workflow chain before execution.
+
+        Args:
+            steps: List of workflow steps
+
+        Returns:
+            (is_valid, error_message)
+        """
+        if not steps:
+            return False, "Empty chain"
+
+        for i, step in enumerate(steps):
+            if not step.name:
+                return False, f"Step {i}: missing name"
+
+            if step.step_type not in ("skill", "agent"):
+                return False, f"Step {i}: invalid type '{step.step_type}'"
+
+        return True, None
+
+
+def parse_command_with_args(user_input: str) -> tuple[str, List[str]]:
+    """
+    Parse user input into command and arguments.
+
+    Args:
+        user_input: Raw user input (e.g., "/skill npm-test-fixer --dry-run")
+
+    Returns:
+        (command, args_list)
+    """
+    parts = user_input.strip().split(maxsplit=1)
+    command = parts[0] if parts else ""
+    args = (parts[1].split() if len(parts) > 1 else [])
+
+    return command, args
+
+
+def is_workflow_chain(user_input: str) -> bool:
+    """Check if input looks like a workflow chain (contains →)."""
+    return "→" in user_input
+
+
+def parse_memory_reference(user_input: str) -> Optional[str]:
+    """Extract memory query from input (e.g., "#conversation history")."""
+    if user_input.startswith("#"):
+        return user_input[1:].strip()
+    return None

@@ -1,0 +1,82 @@
+import { createOpenAI } from '@ai-sdk/openai'
+import { createGoogleGenerativeAI } from '@ai-sdk/google'
+import { streamText } from 'ai'
+import { NextRequest } from 'next/server'
+
+export const runtime = 'nodejs'
+
+const SYSTEM_PROMPT = `You are Chyren — a sovereign intelligence orchestrator. \
+You operate with precision, no stubs, and no hallucinations. \
+You route tasks through verified AI providers with integrity checks. \
+Be concise, direct, and authoritative.`
+
+function getGeminiModel() {
+  const google = createGoogleGenerativeAI({
+    apiKey: process.env.GEMINI_API_KEY ?? '',
+  })
+  return google(process.env.GEMINI_MODEL ?? 'gemini-2.0-flash')
+}
+
+function getOllamaModel() {
+  const ollamaBase = process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434/v1'
+  const ollama = createOpenAI({ baseURL: ollamaBase, apiKey: 'ollama' })
+  return ollama(process.env.OLLAMA_MODEL ?? 'gemma4:e2b')
+}
+
+async function isOllamaAvailable(): Promise<boolean> {
+  // Ollama is never reachable from Vercel serverless — skip the check entirely
+  if (process.env.VERCEL) return false
+  const base = (process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434/v1')
+    .replace('/v1', '')
+  try {
+    const res = await fetch(`${base}/api/tags`, { signal: AbortSignal.timeout(2000) })
+    if (!res.ok) return false
+    const data = await res.json() as { models?: { name: string }[] }
+    const model = process.env.OLLAMA_MODEL ?? 'gemma4:e2b'
+    return (data.models ?? []).some((m) => m.name === model)
+  } catch {
+    return false
+  }
+}
+
+export async function POST(req: NextRequest) {
+  const { messages = [], message } = await req.json().catch(() => ({}))
+
+  const chatMessages = messages.length
+    ? messages
+    : [{ role: 'user' as const, content: message ?? '' }]
+
+  if (!chatMessages.length || !chatMessages[chatMessages.length - 1]?.content) {
+    return new Response(JSON.stringify({ error: 'Message is required' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
+  // Prefer Gemma 4 locally; fall back to Gemini if Ollama is unavailable
+  const useOllama = await isOllamaAvailable()
+  const model = useOllama ? getOllamaModel() : getGeminiModel()
+  console.log(`[chat/stream] provider=${useOllama ? 'ollama/gemma4' : 'gemini'}`)
+
+  try {
+    const result = streamText({ model, system: SYSTEM_PROMPT, messages: chatMessages })
+    return result.toUIMessageStreamResponse()
+  } catch (primaryError) {
+    // If Ollama was chosen but failed mid-stream, retry once with Gemini
+    if (useOllama) {
+      console.error('[chat/stream] Ollama failed, falling back to Gemini:', primaryError)
+      try {
+        const result = streamText({ model: getGeminiModel(), system: SYSTEM_PROMPT, messages: chatMessages })
+        return result.toUIMessageStreamResponse()
+      } catch (fallbackError) {
+        console.error('[chat/stream] Gemini fallback also failed:', fallbackError)
+      }
+    } else {
+      console.error('[chat/stream] Gemini error:', primaryError)
+    }
+    return new Response(JSON.stringify({ error: 'All providers failed' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+}

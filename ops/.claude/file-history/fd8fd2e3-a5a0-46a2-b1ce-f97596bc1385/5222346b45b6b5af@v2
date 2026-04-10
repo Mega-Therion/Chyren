@@ -1,0 +1,3 @@
+NEXT_PUBLIC_OMEGA_API_URL=http://localhost:8787
+NEXT_PUBLIC_OMEGA_BEARER_TOKEN=your_bearer_token_here
+VERCEL_AI_GATEWAY_KEY=your_vercel_ai_gateway_key_here

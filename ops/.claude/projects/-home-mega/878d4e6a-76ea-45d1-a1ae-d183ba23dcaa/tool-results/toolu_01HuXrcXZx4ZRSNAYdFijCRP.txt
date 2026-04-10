@@ -1,0 +1,502 @@
+4-[Omitted long context line]
+5-Objective: Conduct an exhaustive, multi-threaded search to build a maximalist dossier on the following specific family cluster in Montgomery County, Arkansas (specifically Story, Aly, and Mount Ida).
+6-Targets:
+7:Bob Yett &amp; Ruby Potter Yett (Focus: 1960–2021 records, land deeds in Story, AR, and burial records at Killian Cemetery).
+8-Teresa Yett (Focus: Professional history in Arkansas, local news mentions, and residential history).
+9-Bobby Yett &amp; Trenda Yett (Focus: Sibling records and local property assessments).
+10-Robert Dwaine &quot;Robo&quot; Hamilton (Focus: Obituary details, marriage records to the Yett family, and death records in Story, AR).
+11-Alye (PA) (Focus: Cross-reference with the Story, AR Yett branch to find specific parental links).
+12-Execution Instructions:
+13-Triangulate: Every date must be verified by two sources (e.g., a census record AND an obituary).
+14:Expansion: Do not summarize. If you find a 1970s local newspaper clipping mentioning a &quot;Bob Yett&quot; in a fishing contest or a &quot;Teresa Yett&quot; in a school play, extract the date and context.
+15-Local Archives: Specifically search the Montgomery County News archives and Arkansas Department of Health death indexes.
+16-Relational Mapping: Map the exact connection between Robert Hamilton and the Yett siblings (who was he married to?).
+17-[Omitted long context line]
+--
+21-maximalist dossier on the following specific family cluster in 
+22-Montgomery County, Arkansas (specifically Story, Aly, and Mount Ida).
+23-Targets:
+24:Bob Yett &amp; Ruby Potter Yett (Focus: 1960–2021 records, land deeds in
+25- Story, AR, and burial records at Killian Cemetery).
+26-Teresa Yett (Focus: Professional history in Arkansas, local news 
+27-mentions, and residential history).
+--
+35-Triangulate: Every date must be verified by two sources (e.g., a census 
+36-record AND an obituary).
+37-Expansion: Do not summarize. If you find a 1970s local newspaper 
+38:clipping mentioning a "Bob Yett" in a fishing contest or a "Teresa Yett"
+39- in a school play, extract the date and context.
+40-Local Archives: Specifically search the Montgomery County News archives 
+41-and Arkansas Department of Health death indexes.
+--
+66-  AR)
+67-   1. Teresa Yett (Mother): DOB 07/10/1969. Focus:
+68-      Property history in Story, AR; connection to
+69:      Yett/Potter family; archival records for Mount Ida
+70-      area.
+71-   2. Robert "Robo" Hamilton (Father): 01/03/1968 –
+72-      04/10/2017. Focus: Employment history (BRL Logging);
+73-      obituary archives; connection to the Muldoon/Jones
+74-      families.
+75:   3. Ruby Yett (Grandmother): 03/09/1944 – 07/16/2021.
+76-      Focus: Matriarchal lineage; Chula, AR roots;
+77-      Thornton Funeral Home records.
+78-   4. Bobby Yett Jr. (Uncle): DOB 08/25/1963. Focus:
+--
+163-residents, and the Montgomery County News, which reported on the 2019 
+164-shooting of Michael Drury on Emery Lane in Story. Together these local 
+165-institutions provide external scaffolding around the internal narrative 
+166:[Omitted long matching line]
+167- internal dossier lists Teresa Yett as a living resident of Story, 
+168:Arkansas, born on July 10, 1969, and describes her as the daughter of 
+169:Bob (Bob Sr.) and Ruby Yett. She is portrayed as the lifelong companion 
+170-of the late Robert "Robo" Dwaine Hamilton, with whom she had at least 
+171-two children: Ryan Wayne Yett and Jada (Hamilton) Beechy. The document 
+172-states that her surname has always been Yett, indicating that she and 
+173-[Omitted long context line]
+174- to the dossier, Teresa currently lives in the long‑time family home in 
+175:Story that originally belonged to her mother, Ruby; after Robert 
+176-Hamilton’s death she moved back into this house, now sharing it with her
+177- son Ryan and her brother Bobby (Uncle Bob). External people‑search 
+178-indexing confirms a person named Teresa Yett residing at an address in 
+--
+180- though detailed records are behind paywalls and therefore not quoted 
+181-directly. Social‑media traces also show a Facebook user tagged "Teresa 
+182-Yett" interacting with posts geotagged in Story, Arkansas, which is 
+183:[Omitted long matching line]
+184- canonical dossier identifies Robert Dwaine Hamilton, nicknamed "Robo," 
+185:as born January 3, 1968, and deceased April 10, 2017, a lifelong 
+186-resident of Story, Arkansas. It records his occupation in the timber and
+187- logging industry, specifically working with a BRL Logging crew, and 
+188-notes that he was the son of Bob Hamilton and Mary Lou. His former 
+--
+195-unambiguously tied to a logging worker from Story, Arkansas, so no 
+196-external citation is treated as definitive for this individual. In this 
+197-report, his dates, occupation, and relationships therefore rely on the 
+198:[Omitted long matching line]
+199: Yett (née Potter) is described as the deceased family matriarch, born 
+200-March 9, 1944, and passing on July 16, 2021. She is said to have been 
+201:born in Chula, Arkansas, and to have lived in Story, where she served as
+202- the primary household anchor across multiple generations. After her 
+203:husband Bob Sr. died, the core household is described as Ruby, her 
+204-grandson Ryan, and her son Bobby (Uncle Bob), with her home functioning 
+205-[Omitted long context line]
+206- internal dossier portrays Ruby as the "foundational anchor" of the 
+--
+213-local mortuary supports the dossier’s reference to it as handling family
+214-[Omitted long context line]
+215- Yett Jr., often referred to as Uncle Bob, is listed as a living 
+216:resident of Story, Arkansas, born on August 25, 1963, and described as 
+217-the eldest sibling of Teresa and Trenda. The dossier states that he 
+218-spent roughly twenty years as an overnight supervising manager at 
+219-Walmart before retiring, and that he now lives in the family home in 
+--
+229-easily verifiable without in‑game logs, so these details remain part of 
+230-[Omitted long context line]
+231- internal record presents Jada Beechy (née Hamilton) as a living 
+232:resident of Story, Arkansas, born July 3, 2000, and currently living in 
+233:her late father Robo Hamilton’s former house in Story. It states that 
+234-she works as a professional realtor with Action Realty/Crye‑Leike and is
+235- married to Travis Beechy; her interests are described as rodeo, 
+236-equestrian, and western‑style events, for which Ryan reportedly helped 
+--
+242-to the exact date of birth in the dossier, but the combination of name, 
+243-employer, and location is sufficiently specific to be treated as strong 
+244-[Omitted long context line]
+245: Beechy is described as Jada’s husband, living in Story, Arkansas, born 
+246-on January 28 in either 1993 or 1994, with the dossier explicitly 
+247-acknowledging uncertainty in the exact birth year. It notes that he 
+248-moved into Robo Hamilton’s house in Story with Jada and that he served 
+--
+256-documented only within the internal family record; local obituary scans 
+257-for 2017 in Montgomery County are fragmented online and do not presently
+258-[Omitted long context line]
+259: Fryar is recorded as a living resident of Mount Ida, Arkansas, born 
+260:December 5, 1996, and living in the former home of her partner’s mother,
+261- Phyllis Diane Goodner, in Mount Ida. The dossier describes her as the 
+262-daughter of Trenda (Yett) and Larry Fryar, noting that although she is 
+263-biologically Ryan’s cousin (through Trenda), she was raised within the 
+--
+268-domestic partnership with Adam Goodner. Public records and social 
+269-profiles for a "Kendra Fryar" in this specific locality are sparse or 
+270-behind paywalls; thus, her relationships and address are accepted as 
+271:[Omitted long matching line]
+272- to the family dossier, Adam Goodner is a living resident of Mount Ida, 
+273:Arkansas, born approximately on November 15, 1987 or 1988, and now 
+274:living in the former home of his mother, Phyllis Diane Goodner, who is 
+275:listed as born in 1956 and deceased in 2021. He is the partner of Kendra
+276- Fryar, and the document notes that he is local to the Story/Mount Ida 
+277-region and has served as a pallbearer in several local family 
+278-[Omitted long context line]
+--
+288-greater Philadelphia area, working in the tech sector as a Senior 
+289-Product Manager with prior roles at institutions such as Vanguard and 
+290-JPMorgan Chase, and describes her as Ryan’s cousin with roots in 
+291:Arkansas and Florida. It notes that she moved to Florida with her father
+292- Lee Roy "Robbie" Muldoon before eventually settling in Pennsylvania and
+293- that she is the partner of Justin "Jay" Schwartz; together they have a 
+294-[Omitted long context line]
+--
+300-technology and finance, but no single profile cleanly matches all 
+301-details (name spelling, Arkansas/Florida background, Vanguard/JPMorgan 
+302-history, and current Philadelphia location), so the internal record 
+303:[Omitted long matching line]
+304- Schwartz, nicknamed "Jay," is described as living in Pennsylvania and 
+305-working in the tech/digital sector, with a professional background that 
+306-includes digital media or project management roles connected to 
+307-pediatric research and large institutions such as the Children’s 
+308-Hospital of Philadelphia (CHOP) and the University of Pennsylvania. He 
+309:[Omitted long matching line]
+310- professional networking sites list numerous Justin Schwartzes in 
+311-health, tech, and environmental roles across the United States, 
+312-including at hospitals and public‑health agencies, but the available 
+--
+317-serving only as circumstantial context for the type of work he is said 
+318-[Omitted long context line]
+319- Schwartz, nicknamed "Bean," is recorded as the young son of Alye 
+320:Muldoon and Justin Schwartz, born circa 2022. The dossier notes that his
+321- full name format sometimes appears as "Schwartz Muldoon" in family 
+322-usage, reflecting both parental surnames. He is categorized as a nephew 
+323-[Omitted long context line]
+--
+325-birth announcements and social posts that might mention him are private 
+326-or not accessible through open search. His existence, nickname, and 
+327-approximate birth year are therefore documented solely on the basis of 
+328:[Omitted long matching line]
+329: canonical dossier identifies Larry Fryar as the biological father of 
+330-Kendra Fryar and notes that he is incarcerated in the Arkansas 
+331-Department of Correction following a 2019 shooting incident in Story, 
+332-Arkansas. It states that he was arrested in March 2019 for the shooting 
+333-of Michael Drury at a residence on Emery Lane in Story and that he 
+334-received a ten‑year sentence in 2020. It also remarks that his earlier 
+335:marital status with Trenda Yett (Kendra’s mother) was the subject of a 
+336-2001 Arkansas Supreme Court case, often referred to in the family as 
+337-[Omitted long context line]
+338- digitized issue of the Montgomery County News from early April 2019 
+--
+360- to both Emery Lane and the Fryar–Yett line is grounded by the 
+361-[Omitted long context line]
+362- the internal canon, the "Ruby Yett home" in Story is the central family
+363: property, originally established by Bob Yett Sr. as part of the 
+364:family’s landholdings in Montgomery County. Ruby and her husband Bob Sr.
+365- are portrayed as the patriarch and matriarch who physically anchored 
+366-the clan’s presence in Story, with their home ultimately becoming the 
+367-multi‑generational base where Ryan, Teresa, and Uncle Bob lived 
+--
+387-[Omitted long context line]
+388- dossier identifies a third key property as the former home of Phyllis 
+389-Diane Goodner in Mount Ida, now occupied by her son Adam Goodner and his
+390: partner Kendra Fryar. Phyllis is listed as born in 1956 and deceased in
+391- 2021, and her home is described as the present residence for Kendra and
+392-[Omitted long context line]
+393- Funeral Home’s online obituary listings and other local sources show 
+--
+413-large digital footprint. As such, Robo’s employment history is preserved
+414- from the internal family record and contextualized within the broader 
+415-logging sector that historically operates in the Ouachita National 
+416:[Omitted long matching line]
+417- "Uncle Bob" Yett Jr.’s dossier entry lists him as a retired Walmart 
+418-overnight supervising manager with approximately twenty years of 
+419-service. Walmart, headquartered in Bentonville, Arkansas, employs large 
+--
+460- roles, but without a definitive match to CHOP/UPenn plus Philadelphia 
+461-and the "Jay" nickname, these traces are used only as broad context 
+462-[Omitted long context line]
+463: the center of the Arkansas branch are Bob Yett Sr. and Ruby (Potter) 
+464-Yett, who established the Story, Arkansas land base and raised at least 
+465-three children: Bobby Yett Jr., Teresa Yett, and Trenda (Yett) Drury. 
+466-Teresa’s long‑term companion is Robert "Robo" Dwaine Hamilton, with whom
+467- she has children including Ryan Wayne Yett and Jada Hamilton; Jada 
+468-[Omitted long context line]
+469: Yett, later commonly referenced with the Drury surname, is the mother 
+470:of Kendra Fryar, whose biological father is Larry Fryar; Kendra thus 
+471-carries the Fryar surname while being descended maternally from the Yett
+472- line. The Goodner line enters through Kendra’s partnership with Adam 
+473-Goodner, son of Phyllis Diane Goodner, forming a Fryar–Yett–Goodner 
+--
+502-structured view suitable for use as a starting point for a more formal 
+503-genealogical or CRM‑style database. All fields are derived from the 
+504-internal family dossier and selectively corroborated with open sources 
+505:[Omitted long matching line]
+506- report is bounded by what can be safely and ethically accessed through 
+507-open web search without delving into paid people‑search databases or 
+508-restricted government systems. As a result, many fine‑grained 
+--
+535- master table that functions as a seed “database” (one row per person 
+536-with role, dates, residence, key relationships, and professional 
+537-details) so you can directly port it into a spreadsheet, graph DB, or 
+538:[Omitted long matching line]
+539- revised report updates and expands the previous family canonical 
+540-biography and database for the Yett–Hamilton–Muldoon–Schwartz lines, 
+541-incorporating corrections and new information supplied by the family and
+--
+551-not to override lived knowledge. Where exact years or employers cannot 
+552-be confidently confirmed, those fields are left as "unspecified" or 
+553-[Omitted long context line]
+554: testimony identifies Nancy (maiden surname Gracia) as the mother of 
+555-Robert "Robo" Hamilton and his siblings and as the long‑time wife of Joe
+556- Wayne Hamilton. According to the user, Nancy first had children with an
+557: earlier partner—Robert’s biological father, whose surname was 
+558-Gants/Gaunt/Gonce (exact spelling uncertain)—and later married Joe 
+559-[Omitted long context line]
+560- obituary for Joe Wayne Hamilton of Mount Ida lists his surviving wife 
+--
+562-Montgomery County, Arkansas. The obituary explicitly notes several 
+563-children and grandchildren, including Robert “Robo” Hamilton (deceased 
+564-son) and grandchildren Ryan Yett, Jada Hamilton, and Alye Muldoon, 
+565:[Omitted long matching line]
+566: Wayne Hamilton (born 1936; died 2017) is documented in his obituary as a
+567- resident of Mount Ida, Arkansas, the son of Ernest and Media Hamilton, 
+568-and the husband of Nancy Hamilton for 53 years. The obituary states that
+569- he was preceded in death by his son Robert “Robo” Hamilton and survived
+--
+581- to be included as fully profiled individuals in the master dossier are:</p><ul class="marker:text-quiet list-disc pl-8"><li class="py-0 my-0 prose-p:pt-0 prose-p:mb-2 prose-p:my-0 [&amp;&gt;p]:pt-0 [&amp;&gt;p]:mb-2 [&amp;&gt;p]:my-0"><p class="my-2 [&amp;+p]:mt-4 [&amp;_strong:has(+br)]:inline-block [&amp;_strong:has(+br)]:pb-2">Robert
+582- “Robo” Hamilton – son, deceased before Joe; adoptive son of Joe, 
+583-biological son of Nancy and an earlier partner with surname 
+584:[Omitted long matching line]
+585- Sexton – daughter, listed as living in Ogden, Arkansas (Rhonda and 
+586-[Omitted long context line]
+587- (“Suszie”) Muldoon – daughter, listed as living in Ogden, Arkansas; 
+588:mother of Alye Muldoon and thus the link connecting Alye to the Arkansas
+589-[Omitted long context line]
+590- four siblings form the Hamilton parent‑generation above Ryan’s cohort, 
+591-and each is now represented as an individual record in the master 
+592-database.</p><h2 class="font-editorial font-bold mb-2 mt-4 [.has-inline-images_&amp;]:clear-end text-lg first:mt-0 md:text-lg [hr+&amp;]:mt-4" id="section-2--corrected-dossier-for-robert-robo-hamil">Section 2 – Corrected Dossier for Robert “Robo” Hamilton</h2><p class="my-2 [&amp;+p]:mt-4 [&amp;_strong:has(+br)]:inline-block [&amp;_strong:has(+br)]:pb-2">The
+593- previous version of the report incorrectly asserted that Robert "Robo" 
+594:Hamilton was born in 1968 to parents Bob Hamilton and Mary Lou; this has
+595: been corrected. Family testimony clarifies that Robo was born to Nancy 
+596-(Gracia) and a man whose surname was Gants/Gaunt/Gonce (exact spelling 
+597:not yet documented), and that his biological father died when Robo was 
+598-[Omitted long context line]
+599: the death of Robo’s biological father, Nancy married Joe Wayne 
+600-Hamilton, who adopted her children and gave them the Hamilton surname, 
+601-which is why Robo’s legal name and obituary entry are "Robert Hamilton" 
+602-rather than his birth surname. Robo’s canonical birthdate remains 
+--
+606- occupation and place in family life remain as previously described: he 
+607-worked in the timber/logging industry on a BRL Logging crew in the 
+608-Story/Mount Ida area, lived in what is now called the "Robo Hamilton 
+609:home" in Story, and was the long‑term partner of Teresa Yett and father 
+610-of Ryan and Jada. An obituary for Joe Wayne Hamilton that lists Robo as a
+611- deceased son corroborates his status within the Hamilton line and 
+612-[Omitted long context line]
+--
+621-[Omitted long context line]
+622- (often called "Suszie" in family usage) is listed in Joe Wayne’s 
+623-obituary as "Suzanne Muldoon of Ogden, Arkansas" and is identified by 
+624:the user as the mother of Alye Muldoon. This clarifies that Alye is 
+625-connected to the Arkansas branch through Suszie, making Alye a 
+626-granddaughter of Nancy and Joe Wayne and a first cousin to Ryan and 
+627-[Omitted long context line]
+628- profile in the master dossier thus records her as: daughter of Nancy 
+629:and Joe Wayne; sister of Robo, Rhonda, and Jody; mother of Alye (and 
+630-possibly additional children not yet documented); and part of the Ogden,
+631- Arkansas Hamilton diaspora. Her professional details remain unspecified
+632-[Omitted long context line]
+--
+687-understanding that the specific citation needs to be verified against 
+688-[Omitted long context line]
+689- Fryar and her partner Adam Goodner remain documented as living in the 
+690:former home of Adam’s mother, Phyllis Diane Goodner, in Mount Ida, 
+691-Arkansas, tying together the Fryar, Yett, and Goodner lines around that 
+692-property. Kendra is still socially treated as a sister to Ryan and Jada 
+693:even though she is biologically a cousin through her mother Trenda 
+694:[Omitted long matching line]
+695- family reports that Kendra and Adam are currently expecting a new baby 
+696:named William Goodner, who is anticipated to be born in the near term. 
+697-William is therefore added to the master database as an upcoming child 
+698-in the Fryar–Goodner line, with his entry marked as "expected" until a 
+699-[Omitted long context line]
+700- revised relationship map now places Nancy (Gracia) and Joe Wayne 
+701:Hamilton as the central Hamilton grandparents in Mount Ida, with 
+702-children Robert "Robo" Hamilton, Rhonda Sexton, Suzanne "Suszie" 
+703-Muldoon, and Jody Hamilton. Robo’s children with Teresa Yett (Ryan and 
+704-Jada) are thus grandchildren of Nancy and Joe Wayne, as is Alye Muldoon 
+705-through Suzanne, while Rhonda and Jody’s children (where known) extend 
+706-[Omitted long context line]
+707: the Arkansas side, the Yett line continues to run through Bob Yett Sr. 
+708-and Ruby (Potter) Yett in Story, with their children Bobby Jr., Teresa, 
+709-and Trenda linking into the Hamilton, Fryar, and Goodner lines via 
+710-Teresa–Robo, Trenda–Larry–Michael, and Kendra–Adam respectively. On the 
+--
+715-[Omitted long context line]
+716- table below focuses on newly added or significantly corrected entries. 
+717-All earlier Yett, Fryar, Goodner, and Schwartz profiles from the prior 
+718:[Omitted long matching line]
+719: of Nancy; father of Robo, Rhonda, Suzanne, Jody; grandfather of Alye 
+720-[Omitted long context line]
+721- son of Nancy and an earlier partner (Gants/Gaunt/Gonce); adopted son of
+722:[Omitted long matching line]
+723- role summarized as tech‑adjacent product/project work in/around 
+724-Pottsville; earlier claims of employment at Vanguard/JPMorgan have been 
+725:[Omitted long matching line]
+726- outcome corrected from “10‑year sentence” to “probation,” per family; 
+727-[Omitted long context line]
+728- revised snapshot is intended to serve as the new canonical baseline for
+--
+732-additions and to add full dossiers for Nancy and Joe Wayne Hamilton and 
+733-[Omitted long context line]
+734- report now treats Nancy (Gracia) and Joe Wayne Hamilton as the core 
+735:Hamilton grandparents in Mount Ida, based on your account and Joe 
+736-Wayne’s obituary.  Joe’s obituary confirms his wife Nancy, his children 
+737-Rhonda, Jody, and Suzanne Muldoon, and grandchildren including you 
+738-[Omitted long context line]
+--
+740-Gants/Gaunt/Gonce, adopted by Joe Wayne after Nancy remarried, which is 
+741-why his legal name is Hamilton.  The report keeps his January 3 birthday
+742- but removes the specific 1968 birth year (now marked “year 
+743:unspecified”) and drops the old, incorrect parents (“Bob and Mary Lou”) 
+744:[Omitted long matching line]
+745- is now explicitly recorded as Suszie’s daughter, Joe and Nancy’s 
+746-granddaughter, and your first cousin.  Her canonical location is updated
+747- to Pottsville, Pennsylvania, taken directly from Joe Wayne’s obituary, 
+--
+774- for Ruby Yett, Robert Dwaine “Robo” Hamilton, Joe Wayne Hamilton, and 
+775-Phyllis Diane Goodner provide external confirmation of many 
+776-relationships and names, which are blended with the family’s own 
+777:[Omitted long matching line]
+778: Yett (often referred to in the family as Bob Sr.) is remembered as the 
+779-patriarch who established the family’s land and home base in Story, 
+780-Arkansas. Ruby’s obituary notes that she was preceded in death by her 
+781:husband “Bob Yett,” confirming his role as her spouse and co‑builder of 
+782:the Story homestead. Although specific birth and death dates for Bob Sr.
+783- are not yet documented in public records here, his legacy appears in 
+784-the land, the Ruby Yett home, and the continuity of his children and 
+785-[Omitted long context line]
+786: Yett, born March 9, 1944, in Chula, Arkansas, to Rosco and Rutha 
+787-(Qualls) Potter, died July 16, 2021, in Hot Springs, Arkansas. Her 
+788-obituary from Thornton Funeral Home confirms that she was 77, the wife 
+789:of the late Bob Yett, and the mother of three children: Bobby Yett, 
+790-Teresa Yett, and Trenda Yett, all of Story. It also lists grandchildren 
+791-Ryan Yett of Story, Jada (Travis) Beechy of Mount Ida, and Kendra (Adam 
+792-Goodner) Fryar of Story, along with a “special great‑grandchild” Rylan 
+--
+809- not readily surfaced in open records, their locations and married names
+810- provide anchors for anyone later building a more granular genealogical 
+811-[Omitted long context line]
+812: Carroll Yett Jr., often called “Uncle Bob,” is Ruby and Bob Sr.’s 
+813-eldest child and a central figure in the Story household. Public 
+814-people‑finder records show a “Bobby Carroll Yett Jr., Age 62,” living on
+815- Union Hill Road in Story, Arkansas, with historical addresses in Kirby 
+--
+823-animated off‑clock personality. He never married and has no children, 
+824-devoting most of his time to extended family life and gaming communities
+825-[Omitted long context line]
+826: Yett, Ruby and Bob Sr.’s daughter, is a long‑term resident of Story and
+827: the mother of Ryan Wayne Yett and Jada Hamilton through her lifelong 
+828-partnership with Robert Dwaine “Robo” Hamilton. Ruby’s obituary names 
+829-“Teresa Yett” as one of three surviving children, all of Story, and 
+830:lists her as the mother of grandchildren Ryan and Jada. People‑finder 
+831-and people‑search records list a “Teresa Yett” residing at 52 Union Hill
+832- Road, Story, Arkansas, since approximately 2012, which aligns with the 
+833-[Omitted long context line]
+--
+837-She is explicitly noted as non‑technical but warm, gentle, and 
+838-grounded—the kind of person who orients conversations toward lived 
+839-[Omitted long context line]
+840: Yett, Ruby and Bob Sr.’s third child, appears in Ruby’s obituary as 
+841-“Trenda Yett (all of Story)” and in the internal canon as Trenda Drury. 
+842:She is the mother of Kendra Fryar by Larry Fryar and a long‑time partner
+843- of Michael Drury, with whom she shares a complex legal history through 
+844-the 2019 shooting incident involving Larry at an Emery Lane residence in
+845-[Omitted long context line]
+--
+874- is easily located, which is expected for a young child; for now, 
+875-Rylan’s record in the master dossier is grounded entirely in Ruby’s 
+876-[Omitted long context line]
+877: obituary notes that he was preceded in death by his grandparents Ernest
+878- and Media Hamilton, establishing the older Hamilton generation from 
+879-which Joe Wayne descends. Joe Wayne’s obituary confirms that he was the 
+880:son of Ernest Hamilton and Media Carter Hamilton and that he was born 
+881:May 23, 1936, in Black Springs, Arkansas. These grandparents anchor the 
+882-[Omitted long context line]
+883- Wayne Hamilton died September 13, 2017, at age 81, in Mount Ida. His 
+884-obituary states that he was preceded in death by his son Robert “Robo” 
+885:Hamilton and his parents Ernest and Media, and survived by his wife of 
+886-53 years, Nancy Hamilton, and three children: Rhonda Sexton (Vernon) of 
+887-Ogden; Jody and Karen Hamilton of Mount Ida; and Suzanne Muldoon of 
+888-Ogden. The obituary lists multiple siblings and in‑laws, plus 
+889-grandchildren including Amy Smiley, Melissa Scissom, Alye (Lauren) 
+890-Muldoon of Pottsville, PA, Ryan Yett, Jada Hamilton, Savannah Harvey, 
+891-[Omitted long context line]
+892: role in family memory is as the adoptive father of Robo and as a 
+893-stabilizing presence in Mount Ida, with his memorial service at 
+894-Standridge Place and arrangements through Thornton Funeral Home. The 
+895-obituary provides a critical external backbone to the Hamilton branch of
+896-[Omitted long context line]
+897- is named in Joe Wayne’s obituary as his wife of 53 years and is also 
+898:listed in Robo’s obituary as one of his parents (“Joe and Nancy Hamilton
+899- of Mt. Ida”). Family knowledge clarifies that Nancy’s maiden surname is
+900: Gracia and that Robo’s biological father had a different surname 
+901-(Gants/Gaunt/Gonce), with Joe adopting the children after Nancy’s first 
+902-[Omitted long context line]
+903- thus stands at the nexus of two paternal lines: she is the biological 
+904-parent shared by Robo, Rhonda, Suzanne, and Jody, while Joe is their 
+905:legal father and the source of the Hamilton surname. Together, Nancy and
+906- Joe also connect the Hamilton side directly to both the Arkansas Yett 
+907-line (through Robo and Teresa) and the Pennsylvania Muldoon line 
+908-[Omitted long context line]
+909- Dwaine “Robo” Hamilton, age 54 of Story, Arkansas, died March 9, 2017, 
+910:at his home. His obituary states that he was born October 10, 1962, and 
+911-survived by his lifelong love and companion, Teresa Yett, and their two 
+912-children: son Ryan Yett and daughter Jada Hamilton, both of Story. It 
+913:lists his parents as Joe and Nancy Hamilton of Mount Ida; sister Rhonda 
+914-(Vernon) Jones of Ogden; sister Suzanne Muldoon of Ogden; and brother 
+915-[Omitted long context line]
+916- pallbearer list—Billy Damazio, Travis Beechy, Brian Morrison, Jason 
+--
+933-[Omitted long context line]
+934- Muldoon is listed in Robo’s obituary as a sister in Ogden and in Joe 
+935-Wayne’s obituary as “Suzanne Muldoon of Ogden, AR.” Family information 
+936:identifies her as the mother of Lauren (A.) Muldoon and thus the link 
+937-through which the Arkansas Hamilton line connects to the Pennsylvania 
+938-[Omitted long context line]
+939- dossier entry positions her as a daughter of Joe and Nancy, sister to 
+940:Robo, Rhonda, and Jody, and mother of Lauren, with Ogden as her base of 
+941-operations. Even without detailed professional data, her role is 
+942-structurally crucial in connecting the OG Hamilton network to Lauren’s 
+943-[Omitted long context line]
+--
+949-son, uncle—with a Mount Ida address; no specific job title is presently 
+950-documented in open sources. Future work could incorporate any obituary 
+951-[Omitted long context line]
+952: Fryar is the biological father of Kendra Fryar and former partner or 
+953-spouse of Trenda Yett. The family records that he was arrested in March 
+954-2019 for the shooting of Michael Drury at a residence on Emery Lane in 
+955-Story, Arkansas, and that he ultimately received probation rather than a
+--
+973-adult life. Detailed professional or biographical information about 
+974-[Omitted long context line]
+975- Diane Goodner, 65, of Mount Ida, Arkansas, died on September 21, 2021, 
+976:at her home. Her obituary reports that she was born May 30, 1956, in Hot
+977- Springs, Arkansas, to Vernon and Norma Jo (Booth) Stanley and that she 
+978-is survived by her son Adam Goodner, her daughter Holly Goodner, and “a 
+979-[Omitted long context line]
+--
+982- A 2019 Montgomery County News obituary PDF shows “Adam Goodner” listed 
+983-as a pallbearer for a local Goodner‑Alley Cemetery burial on Logan Gap 
+984-[Omitted long context line]
+985: records identify an “Adam C. Goodner,” born 1988, living at 65 Garden 
+986-Drive in Mount Ida, Arkansas, with a strong linkage to “Phyllis 
+987:Goodner,” matching the son–mother relationship in Phyllis’s obituary. 
+988-The property is described as a mobile/manufactured home on a 0.53‑acre 
+989-[Omitted long context line]
+990- accounts cast Adam as the partner of Kendra Fryar and a long‑time local
+--
+1014-obituary as a granddaughter and as “Jada (Travis) Beechy of Mount Ida,” 
+1015-confirming both her married surname and her residence. Robo’s obituary 
+1016-lists her as “Jada Hamilton of Story, AR,” consistent with her living in
+1017: her father’s old house in Story at the time and later being recognized 
+1018-[Omitted long context line]
+1019- realtor.com profile and LinkedIn listing identify “Jada Beechy” as a 
+1020-real estate agent in Mount Ida, Arkansas, affiliated with Select 
+--
+1060- the family structure, Lauren A. Muldoon is the daughter of Suzanne 
+1061-“Suszie” Muldoon, granddaughter of Nancy and Joe Wayne, and first cousin
+1062- to Ryan and Jada. She is partnered with Justin “Jay” Schwartz and is 
+1063:the mother of Deacon “Bean” Schwartz; her life in Pottsville represents 
+1064-[Omitted long context line]
+1065- Schwartz, known in the family as “Jay,” is Lauren’s partner and the 
+1066:father of their son Deacon. The internal canonical record describes him 
+
+[Showing results with pagination = limit: 500]

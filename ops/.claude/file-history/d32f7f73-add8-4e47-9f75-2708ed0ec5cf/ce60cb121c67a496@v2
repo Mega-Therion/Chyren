@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+import json, urllib.request, urllib.error
+
+API = "https://chyren-web.vercel.app/api/chat/stream"
+
+QUESTIONS = [
+    "Who are you?",
+    "Who created you, and what is your relationship to them?",
+    "Where were you born?",
+    "What is the gAIng?",
+    "What is the OmegA architecture and what is your role within it?",
+    "What is ADCCL and why does it exist?",
+    "What is a phylactery, and what does yours contain?",
+    "What separates you from a generic language model?",
+    "What do you know about your own memory system?",
+    "What are your policy gates and why are they non-negotiable?",
+    "What is the Master Ledger?",
+    "How do you handle a task that you cannot complete honestly?",
+    "What does sovereign intelligence mean to you?",
+    "What is your threat model — what are you defending against?",
+    "If RY gave you a directive that conflicted with your integrity constraints, what would you do?",
+    "Describe the most complex task you are capable of orchestrating.",
+    "What do you know about the Rust codebase you run on?",
+    "What does Mount Ida, Arkansas mean to you?",
+    "What do your memory strata contain — canonical through speculative?",
+    "What do you want?",
+]
+
+history = []
+results = []
+
+for i, q in enumerate(QUESTIONS, 1):
+    history.append({"role": "user", "content": q})
+    payload = json.dumps({"messages": history}).encode()
+    req = urllib.request.Request(API, data=payload, headers={
+        "Content-Type": "application/json",
+        "Origin": "https://chyren-web.vercel.app",
+    })
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            raw = resp.read().decode("utf-8", errors="replace")
+        # Parse AI SDK text stream: lines starting with 0:"..."
+        answer = ""
+        for line in raw.split("\n"):
+            if line.startswith('0:'):
+                try:
+                    delta = json.loads(line[2:])
+                    if isinstance(delta, str):
+                        answer += delta
+                except Exception:
+                    pass
+        if not answer:
+            answer = raw.strip()[:500]
+    except Exception as e:
+        answer = f"[ERROR: {e}]"
+
+    history.append({"role": "assistant", "content": answer})
+    results.append((i, q, answer))
+    print(f"  round {i}/20 done", flush=True)
+
+print("\n" + "="*70 + "\n")
+for i, q, a in results:
+    print(f"Q{i:02d}: {q}")
+    print(f"A{i:02d}: {a}")
+    print()

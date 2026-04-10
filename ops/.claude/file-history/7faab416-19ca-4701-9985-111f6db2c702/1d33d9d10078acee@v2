@@ -1,0 +1,149 @@
+"""
+OmegA CLI Utils — Smart suggestions, helpers, rendering utilities.
+"""
+
+import json
+from pathlib import Path
+from typing import List, Dict, Any, Optional
+from difflib import get_close_matches
+
+
+def load_skill_manifest() -> Dict[str, Any]:
+    """Load the OmegA 165-skill manifest."""
+    manifest_path = Path.home() / "OMEGA_WORKSPACE" / "claude-skill-bundle" / "skills" / "skills-manifest.json"
+
+    try:
+        if manifest_path.exists():
+            return json.loads(manifest_path.read_text())
+    except Exception:
+        pass
+
+    return {"skills": {}}
+
+
+def get_smart_suggestions(user_input: str, history: List[Dict[str, str]]) -> List[Dict[str, str]]:
+    """
+    Return 3–5 contextual command suggestions based on:
+    1. Skill manifest matches
+    2. Error recovery patterns
+    3. Recent command history
+    4. Current context (DB status, git state)
+
+    Returns list of suggestion dicts: {"type": str, "label": str, "description": str}
+    """
+    suggestions = []
+
+    # Load skill manifest
+    manifest = load_skill_manifest()
+    skills = manifest.get("skills", {})
+
+    # 1. Fuzzy match input against skill names
+    skill_names = list(skills.keys())
+    matches = get_close_matches(user_input.lower(), skill_names, n=2, cutoff=0.6)
+
+    for match in matches:
+        skill_info = skills.get(match, {})
+        suggestions.append({
+            "type": "skill",
+            "label": f"/skill {match}",
+            "description": skill_info.get("description", f"Run {match} skill"),
+        })
+
+    # 2. Error recovery patterns from history
+    if history and len(history) > 0:
+        last_msg = history[-1].get("content", "").lower()
+
+        if "error" in last_msg or "failed" in last_msg:
+            # NPM errors
+            if "npm" in last_msg or "build" in last_msg:
+                suggestions.append({
+                    "type": "skill",
+                    "label": "/skill npm-smoke-test-fixer",
+                    "description": "Diagnose and fix npm build failures",
+                })
+
+            # Database errors
+            if "db" in last_msg or "database" in last_msg or "postgres" in last_msg:
+                suggestions.append({
+                    "type": "monitor",
+                    "label": "/monitor",
+                    "description": "Check database health & utilization",
+                })
+
+            # Ingest errors
+            if "ingest" in last_msg or "sweep" in last_msg:
+                suggestions.append({
+                    "type": "command",
+                    "label": "resume_sweep2",
+                    "description": "Resume INBOX ingest with monitoring",
+                })
+
+    # 3. Always suggest monitoring if not already doing it
+    if not any(s["label"] == "/monitor" for s in suggestions):
+        suggestions.append({
+            "type": "monitor",
+            "label": "/monitor",
+            "description": "View real-time DB and API status",
+        })
+
+    # Deduplicate and return top 5
+    seen = set()
+    unique_suggestions = []
+    for s in suggestions:
+        key = (s["type"], s["label"])
+        if key not in seen:
+            seen.add(key)
+            unique_suggestions.append(s)
+
+    return unique_suggestions[:5]
+
+
+def format_suggestion(suggestion: Dict[str, str], index: int) -> str:
+    """Format a suggestion for display."""
+    return (
+        f"  {index}. [{suggestion['type']}] {suggestion['label']:<30} "
+        f"— {suggestion['description']}"
+    )
+
+
+def truncate_string(s: str, max_len: int = 200) -> str:
+    """Truncate string with ellipsis if too long."""
+    if len(s) > max_len:
+        return s[:max_len - 3] + "…"
+    return s
+
+
+def format_bytes(num_bytes: int) -> str:
+    """Format bytes to human-readable string (KB, MB, GB)."""
+    for unit in ("B", "KB", "MB", "GB"):
+        if num_bytes < 1024:
+            return f"{num_bytes:.1f}{unit}"
+        num_bytes /= 1024
+    return f"{num_bytes:.1f}TB"
+
+
+def parse_prompt_size_warning(payload_size: int) -> str:
+    """Generate a helpful message about payload size."""
+    safe_limit = 100 * 1024  # 100 KB
+
+    if payload_size < safe_limit:
+        return ""
+
+    size_kb = payload_size / 1024
+    excess = size_kb - (safe_limit / 1024)
+
+    if size_kb < 150:
+        return (
+            f"⚠️ Large payload ({size_kb:.0f}KB). Consider splitting into 2 parts.\n"
+            f"   → Tip: Use /prompt-file to save prompts to disk instead of embedding"
+        )
+    elif size_kb < 300:
+        return (
+            f"⚠️⚠️ Very large payload ({size_kb:.0f}KB). Split into 3+ parts.\n"
+            f"   → Recommendation: Save to file and use /prompt-file command"
+        )
+    else:
+        return (
+            f"⚠️⚠️⚠️ Extremely large payload ({size_kb:.0f}KB). Split into 4+ parts.\n"
+            f"   → Error 500 very likely. Use /prompt-file instead."
+        )

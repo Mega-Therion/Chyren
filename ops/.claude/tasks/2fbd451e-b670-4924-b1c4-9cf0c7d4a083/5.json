@@ -1,0 +1,9 @@
+{
+  "id": "5",
+  "subject": "Wire all 4 layers into /api/chat route",
+  "description": "Integrate AEGIS gate, AEON chain update, ADCCL scoring into the main chat flow so every voice/text interaction runs the full OmegA stack",
+  "activeForm": "Wiring 4-layer stack into chat route",
+  "status": "pending",
+  "blocks": [],
+  "blockedBy": []
+}

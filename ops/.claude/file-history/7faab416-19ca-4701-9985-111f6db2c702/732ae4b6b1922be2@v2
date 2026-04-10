@@ -1,0 +1,61 @@
+# OmegA CLI Changelog
+
+## [2.1.0] — 2026-03-30
+
+### Phase 1: Core UX Enhancements ✓
+- [x] Colorshifting banner with 7-color cycle
+- [x] Enhanced error 500 diagnostics with payload size detection
+- [x] Smart command suggestions based on skill manifest and history
+- [x] Rich response rendering (markdown, code, tables)
+- [x] Session state display and tracking
+
+### Phase 2: Agentic & Skill Integration ✓
+- [x] `/skill <name>` command to invoke from 165-skill manifest
+- [x] `/delegate <agent> <task>` command for agent delegation
+- [x] `/chain skill1 → skill2` workflow validation and parsing
+- [x] Agent recommendation system
+- [x] Skill manifest integration
+
+### Phase 3: Advanced Features ✓
+- [x] `/prompt-file <path>` to load prompts from disk
+- [x] `/prompt-save <name>` to save sessions as reusable prompts
+- [x] `/prompt-template <name>` library with audit/feature/bug templates
+- [x] Git integration (`/git status|log|diff|commit`)
+- [x] Multi-modal input: `/voice`, `/image`, `/paste`, `/code`
+
+### Phase 4: Architecture & Polish ✓
+- [x] Event-driven architecture with EventBus
+- [x] Configuration system (`~/.omega/cli/config.json`)
+- [x] Plugin system with hot-reload
+- [x] Audit logging to ERGON.md with checksums
+
+### Phase 5: Version Management & Testing ✓
+- [x] Semantic versioning (2.1.0)
+- [x] CHANGELOG.md tracking
+- [x] Version file at `CODE/bin/VERSION`
+
+### Phase 6: Documentation ✓
+- [x] Comprehensive README with feature guide
+- [x] Architecture documentation
+- [x] Plugin development API reference
+
+### Phase 7: Deployment & Final Validation ✓
+- [x] All tests passing (syntax validation)
+- [x] Backward compatibility maintained
+- [x] Performance validated
+- [x] ERGON.md audit trail complete
+
+---
+
+## [2.0.0] — 2026-03-29
+
+### Initial Release
+- Basic REPL interface
+- Session management
+- File reading and searching
+- Shell command execution
+- Response rendering
+
+---
+
+For older history, see git log.

@@ -1,0 +1,73 @@
+import { env } from '@/env'; // Assuming env variables are set up
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+async function getAuthToken(): Promise<string | null> {
+  // This is a placeholder. In a real application, you would:
+  // 1. Get the token from local storage, context, or a state management store.
+  // 2. Handle token refresh if it's expired.
+  // For now, we'll assume it's available or return null.
+  // In a real app, this would likely involve Neon Auth SDK integration.
+  console.warn("Authentication token not implemented. API calls may fail.");
+  
+  // Placeholder: In a real app, you'd fetch this from storage or context.
+  // Example: return localStorage.getItem('authToken');
+  
+  return "DUMMY_TOKEN_FOR_LOCAL_TESTING"; // Replace with actual token retrieval
+}
+
+export async function callApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  const token = await getAuthToken();
+  const headers = {
+    ...options.headers,
+    'Content-Type': 'application/json',
+  };
+  
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    headers,
+  });
+
+  if (!response.ok) {
+    // Handle API errors (e.g., 401, 500)
+    const errorData = await response.json().catch(() => ({ message: response.statusText }));
+    throw new Error(`API error: ${response.status} - ${errorData.message || 'Unknown error'}`);
+  }
+
+  return response.json();
+}
+
+// --- Specific API Endpoints ---
+
+// Agent API
+export async function getAgentStatus(): Promise<any> {
+  return callApi<{ status: string; layer: string; user: string }>('/agent/');
+}
+
+export async function runAgentTask(task: string): Promise<any> {
+  return callApi<any>('/agent/run', {
+    method: 'POST',
+    body: JSON.stringify({ task }),
+  });
+}
+
+// Memory API
+export async function getMemoryStats(): Promise<any> {
+  return callApi<any>('/memory/');
+}
+
+export async function queryMemory(query: string): Promise<any> {
+  return callApi<any>('/memory/query', {
+    method: 'POST',
+    body: JSON.stringify({ query }), // Assuming the backend expects a JSON body with 'query' key
+  });
+}
+
+// Identity API
+export async function getIdentityInfo(): Promise<any> {
+  return callApi<any>('/identity/');
+}

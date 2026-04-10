@@ -1,0 +1,193 @@
+"""
+OmegA Local Voice Loop
+──────────────────────
+Push-to-talk voice assistant that uses:
+  • faster-whisper  → local STT (auto-downloads tiny model ~75 MB on first run)
+  •  Flash    → LLM response
+  •  TTS      → Charon voice synthesis
+  • sounddevice     → mic capture + playback
+
+Usage:
+  Press ENTER to start recording, press ENTER again to stop and send.
+  Say 'quit' or 'exit' to stop.
+"""
+
+import os, sys, io, struct, base64, json, time, tempfile, subprocess
+import numpy as np
+import sounddevice as sd
+import scipy.io.wavfile as wavfile
+import requests
+from pathlib import Path
+
+# ── Load env ──────────────────────────────────────────────────────────────────
+VAULT = Path('/home/mega/OMEGA_WORKSPACE/VAULT/one-true.env')
+if VAULT.exists():
+    for line in VAULT.read_text().splitlines():
+        line = line.strip()
+        if line and not line.startswith('#') and '=' in line:
+            k, _, v = line.partition('=')
+            v = v.strip().strip("'\"")
+            if k.strip() not in os.environ:
+                os.environ[k.strip()] = v
+
+_KEYS = [
+    os.environ.get('_API_KEY_4'),
+    os.environ.get('_API_KEY_2'),
+    os.environ.get('_API_KEY'),
+    os.environ.get('OMEGA__API_KEY'),
+]
+_KEYS = [k for k in _KEYS if k]
+
+if not _KEYS:
+    print('[ERROR] No  API key found in vault. Add _API_KEY to one-true.env')
+    sys.exit(1)
+
+# ── Audio config ──────────────────────────────────────────────────────────────
+SAMPLE_RATE = 16000
+CHANNELS    = 1
+
+# ── STT: faster-whisper ───────────────────────────────────────────────────────
+def load_whisper():
+    from faster_whisper import WhisperModel
+    print('[STT] Loading Whisper tiny model (downloads ~75 MB on first run)...')
+    model = WhisperModel('tiny', device='cpu', compute_type='int8')
+    print('[STT] Whisper ready.')
+    return model
+
+def transcribe(model, audio_np: np.ndarray) -> str:
+    buf = io.BytesIO()
+    wavfile.write(buf, SAMPLE_RATE, audio_np)
+    buf.seek(0)
+    segments, _ = model.transcribe(buf, language='en', beam_size=1)
+    text = ' '.join(s.text for s in segments).strip()
+    return text
+
+# ── LLM:  Flash ─────────────────────────────────────────────────────────
+def chat(text: str, history: list) -> str:
+    for key in _KEYS:
+        try:
+            messages = []
+            for h in history[-6:]:  # last 3 exchanges
+                messages.append({'role': h['role'], 'parts': [{'text': h['text']}]})
+
+            payload = {
+                'system_instruction': {'parts': [{'text': (
+                    'You are OmegA (Ω). You are speaking aloud via text-to-speech. '
+                    'Keep responses under 3 sentences. No markdown. No bullet points. '
+                    'Direct, intelligent, voice-first.'
+                )}]},
+                'contents': messages + [{'role': 'user', 'parts': [{'text': text}]}],
+                'generationConfig': {'temperature': 0.85, 'maxOutputTokens': 512},
+            }
+            r = requests.post(
+                f'https://generativelanguage.googleapis.com/v1beta/models/-2.0-flash:generateContent?key={key}',
+                json=payload, timeout=30
+            )
+            r.raise_for_status()
+            return r.json()['candidates'][0]['content']['parts'][0]['text'].strip()
+        except Exception as e:
+            print(f'[LLM] Key failed: {e}')
+    return 'I could not reach my reasoning core.'
+
+# ── TTS:  Charon ────────────────────────────────────────────────────────
+def speak(text: str):
+    for key in _KEYS:
+        try:
+            payload = {
+                'contents': [{'parts': [{'text': text}]}],
+                'generationConfig': {
+                    'responseModalities': ['AUDIO'],
+                    'speechConfig': {
+                        'voiceConfig': {'prebuiltVoiceConfig': {'voiceName': 'Charon'}}
+                    },
+                },
+            }
+            r = requests.post(
+                f'https://generativelanguage.googleapis.com/v1beta/models/-2.5-flash-preview-tts:generateContent?key={key}',
+                json=payload, timeout=30
+            )
+            r.raise_for_status()
+            data = r.json()
+            part = next((p for p in data['candidates'][0]['content']['parts'] if 'inlineData' in p), None)
+            if not part:
+                continue
+            pcm_bytes = base64.b64decode(part['inlineData']['data'])
+            # Write WAV to temp file and play via aplay (reliable on Linux)
+            with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as f:
+                tmp = f.name
+                pcm_arr = np.frombuffer(pcm_bytes, dtype=np.int16)
+                wavfile.write(tmp, 24000, pcm_arr)
+            subprocess.run(['aplay', '-q', tmp], check=False)
+            os.unlink(tmp)
+            return
+        except Exception as e:
+            print(f'[TTS] Key failed: {e}')
+    print('[TTS] Could not synthesize audio.')
+
+# ── Recording ─────────────────────────────────────────────────────────────────
+def record_push_to_talk() -> np.ndarray:
+    print('\n  [ Press ENTER to start recording ]')
+    input()
+    frames = []
+    stream = sd.InputStream(samplerate=SAMPLE_RATE, channels=CHANNELS, dtype='int16')
+    stream.start()
+    print('  ● Recording... (press ENTER to stop)')
+    import threading
+    stop_event = threading.Event()
+    def wait_enter():
+        input()
+        stop_event.set()
+    t = threading.Thread(target=wait_enter, daemon=True)
+    t.start()
+    while not stop_event.is_set():
+        chunk, _ = stream.read(1024)
+        frames.append(chunk.copy())
+    stream.stop()
+    stream.close()
+    print('  ■ Stopped.')
+    return np.concatenate(frames, axis=0).flatten()
+
+# ── Main loop ─────────────────────────────────────────────────────────────────
+def main():
+    print('━' * 60)
+    print('  OmegA Voice Loop')
+    print('  STT: faster-whisper (tiny) | LLM:  Flash | TTS: Charon')
+    print('━' * 60)
+
+    model = load_whisper()
+    history = []
+
+    while True:
+        try:
+            audio = record_push_to_talk()
+            if len(audio) < SAMPLE_RATE * 0.3:  # < 0.3s → skip
+                print('  (too short, try again)')
+                continue
+
+            print('  Transcribing...')
+            text = transcribe(model, audio)
+            if not text:
+                print('  (nothing heard)')
+                continue
+
+            print(f'\n  You: {text}')
+
+            if text.lower().strip().rstrip('.') in ('quit', 'exit', 'stop'):
+                print('  Goodbye.')
+                break
+
+            print('  Thinking...')
+            reply = chat(text, history)
+            print(f'  OmegA: {reply}\n')
+
+            history.append({'role': 'user', 'text': text})
+            history.append({'role': 'model', 'text': reply})
+
+            speak(reply)
+
+        except KeyboardInterrupt:
+            print('\n  Interrupted. Goodbye.')
+            break
+
+if __name__ == '__main__':
+    main()

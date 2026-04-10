@@ -1,0 +1,373 @@
+#!/usr/bin/env python3
+"""
+OmegA Interactive Chat — talk to OmegA locally.
+
+Prerequisites:
+  1. Install Ollama: https://ollama.com
+  2. Pull a model: ollama pull llama3.2:3b
+  3. Run: python3 omega_chat.py
+
+OmegA runs the full 4-layer stack on every message:
+  AEGIS (governance) -> AEON (identity) -> ADCCL (drift control) -> MYELIN (memory)
+
+Type 'quit' or Ctrl-C to exit.
+Type '/state' to see the current system state vector.
+Type '/chain' to see the Phylactery identity chain.
+Type '/memory' to see the memory graph.
+Type '/verify' to run the verification score on the last response.
+"""
+
+import sys
+import os
+import json
+import time
+import urllib.request
+import urllib.error
+
+sys.path.insert(0, os.path.dirname(__file__))
+
+from omega.agent import OmegaAgent
+
+# =============================================================================
+# RWFY Sovereign Palette — colorshifting engine
+# Cyan -> Deep Blue -> Purple -> Magenta -> Gold -> Orange -> Red -> Cyan
+# =============================================================================
+
+GRADIENT_STOPS = [
+    (0,   255, 255),  # Cyan
+    (0,   120, 255),  # Dodger Blue
+    (138, 43,  226),  # Blue Violet
+    (255, 0,   255),  # Magenta
+    (255, 215, 0),    # Gold
+    (255, 140, 0),    # Dark Orange
+    (255, 69,  0),    # Red Orange
+    (0,   255, 255),  # Loop back to Cyan
+]
+
+GHOST_COLOR = (40, 45, 50)  # Dark phantom body
+
+
+def _interp(c1, c2, t):
+    return (int(c1[0] + (c2[0] - c1[0]) * t),
+            int(c1[1] + (c2[1] - c1[1]) * t),
+            int(c1[2] + (c2[2] - c1[2]) * t))
+
+
+def gradient_at(p):
+    p = p % 1.0
+    n = len(GRADIENT_STOPS) - 1
+    seg = 1.0 / n
+    i = min(int(p / seg), n - 1)
+    t = (p - i * seg) / seg
+    return _interp(GRADIENT_STOPS[i], GRADIENT_STOPS[i + 1], t)
+
+
+def _rgb(r, g, b):
+    return f"\033[38;2;{r};{g};{b}m"
+
+
+_RESET = "\033[0m"
+
+
+def render_line(text, y, t_offset, spread=0.03):
+    out = []
+    rg, gg, bg = GHOST_COLOR
+    for x, ch in enumerate(text):
+        if ch == " ":
+            out.append(ch)
+        elif ch == "\u2588":  # full block
+            out.append(_rgb(rg, gg, bg) + ch)
+        else:
+            p = x * spread + y * 0.05 + t_offset
+            r, g, b = gradient_at(p)
+            out.append(_rgb(r, g, b) + ch)
+    out.append(_RESET)
+    return "".join(out)
+
+
+# =============================================================================
+# Banner art — Omega symbol + RWFY monogram
+# =============================================================================
+
+OMEGA_LINES = [
+    "     ██████╗ ███╗   ███╗███████╗ ██████╗  █████╗ ",
+    "    ██╔═══██╗████╗ ████║██╔════╝██╔════╝ ██╔══██╗",
+    "    ██║   ██║██╔████╔██║█████╗  ██║  ███╗███████║",
+    "    ██║   ██║██║╚██╔╝██║██╔══╝  ██║   ██║██╔══██║",
+    "    ╚██████╔╝██║ ╚═╝ ██║███████╗╚██████╔╝██║  ██║",
+    "     ╚═════╝ ╚═╝     ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝",
+]
+
+OMEGA_SYMBOL_LINES = [
+    "              ████████████████              ",
+    "          ████╔══════════════╗████          ",
+    "        ██╔══╝              ╚══╗██         ",
+    "      ██╔╝                      ╚╗██       ",
+    "     ██║                          ║██      ",
+    "    ██║                            ║██     ",
+    "    ██║                            ║██     ",
+    "    ██║                            ║██     ",
+    "     ██║                          ║██      ",
+    "      ██╚╗                      ╔╝██       ",
+    "       ██║╚╗                  ╔╝║██        ",
+    "    ████╔╝  ╚╗              ╔╝  ╚╗████     ",
+    "    ██╔═╝    ╚══════╗╔══════╝    ╚═╗██     ",
+    "    ████████████████║║████████████████      ",
+]
+
+RWFY_LINES = [
+    "    ██████╗     ██╗    ██╗    ███████╗    ██╗   ██╗",
+    "    ██╔══██╗    ██║    ██║    ██╔════╝    ╚██╗ ██╔╝",
+    "    ██████╔╝    ██║ █╗ ██║    █████╗       ╚████╔╝ ",
+    "    ██╔══██╗    ██║███╗██║    ██╔══╝        ╚██╔╝  ",
+    "    ██║  ██║    ╚███╔███╔╝    ██║            ██║   ",
+    "    ╚═╝  ╚═╝     ╚══╝╚══╝     ╚═╝            ╚═╝   ",
+]
+
+
+def render_banner():
+    t = (time.time() % 1000) * 0.1
+    lines = []
+
+    lines.append("")
+
+    # Omega symbol
+    for i, line in enumerate(OMEGA_SYMBOL_LINES):
+        lines.append(render_line(line, i, t, spread=0.025))
+
+    lines.append("")
+
+    # OmegA text
+    base_y = len(OMEGA_SYMBOL_LINES) + 1
+    for i, line in enumerate(OMEGA_LINES):
+        lines.append(render_line(line, base_y + i, t, spread=0.03))
+
+    lines.append("")
+
+    # Subtitle
+    sub_y = base_y + len(OMEGA_LINES) + 1
+    subtitle = "THE SOVEREIGN ARCHITECTURE"
+    lines.append("      " + render_line(subtitle, sub_y, t + 0.5, spread=0.015))
+
+    lines.append("")
+
+    # RWFY monogram (smaller, beneath)
+    rwfy_y = sub_y + 2
+    for i, line in enumerate(RWFY_LINES):
+        lines.append(render_line(line, rwfy_y + i, t + 0.3, spread=0.03))
+
+    lines.append("")
+
+    return "\n".join(lines)
+
+
+# =============================================================================
+# Utility
+# =============================================================================
+
+def check_ollama(url: str = "http://localhost:11434") -> list[str]:
+    try:
+        req = urllib.request.Request(f"{url}/api/tags")
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read().decode())
+        return [m["name"] for m in data.get("models", [])]
+    except (urllib.error.URLError, TimeoutError, OSError):
+        return []
+
+
+def pick_model(available: list[str]) -> str:
+    preferred = ["llama3.2:3b", "llama3.2:1b", "llama3.1:8b", "llama3:8b",
+                 "mistral:7b", "phi3:mini", "gemma2:2b"]
+    for model in preferred:
+        if model in available:
+            return model
+    return available[0] if available else "llama3.2:3b"
+
+
+def print_session_info(model: str, agent: OmegaAgent):
+    # Colorshift the info lines too
+    t = (time.time() % 1000) * 0.1
+    dim = "\033[2m"
+
+    info_lines = [
+        f"  Model:    {model}",
+        f"  Identity: {agent.name}",
+        f"  Doctrine: {agent.phylactery.doctrine[:55]}...",
+        f"  Chain:    {len(agent.phylactery)} commits",
+        f"  Envelope: v{agent.envelope_clock.version}",
+    ]
+
+    for i, line in enumerate(info_lines):
+        r, g, b = gradient_at(i * 0.12 + t)
+        print(f"  {_rgb(r, g, b)}{line}{_RESET}")
+
+    print()
+    print(f"  {dim}Commands: /state  /chain  /memory  /verify  /help  quit{_RESET}")
+    print()
+
+
+def print_state(agent: OmegaAgent):
+    state = agent.state_vector
+    print("\n  System State Vector: Omega_t = <Phi, E, tau, B, S, G>")
+    print(f"  Phi_t (identity head): {state['Phi_t'][:16]}...")
+    print(f"  E_t (envelope):        {state['E_t']}")
+    print(f"  tau_t (last TSO):      {state['tau_t'][:16] + '...' if state['tau_t'] else 'None'}")
+    print(f"  S_t (self-tag):        {state['S_t']}")
+    print(f"  G_t^mem (memory):      {state['G_t_mem']}")
+    print()
+
+
+def print_chain(agent: OmegaAgent):
+    t = (time.time() % 1000) * 0.1
+    print(f"\n  Phylactery Chain ({len(agent.phylactery)} commits):")
+    for i, commit in enumerate(agent.phylactery.chain):
+        content = commit.content[:45] + ("..." if len(commit.content) > 45 else "")
+        r, g, b = gradient_at(i * 0.1 + t)
+        hash_colored = f"{_rgb(r, g, b)}{commit.hash[:12]}{_RESET}"
+        print(f"    [{i}] {hash_colored}... | {content}")
+    valid = agent.phylactery.verify_chain()
+    status = f"\033[32mVALID\033[0m" if valid else f"\033[31mBROKEN\033[0m"
+    print(f"  Chain integrity: {status}")
+    print()
+
+
+def print_memory(agent: OmegaAgent):
+    t = (time.time() % 1000) * 0.1
+    print(f"\n  Memory Graph: {agent.memory.node_count} nodes, {agent.memory.edge_count} edges")
+    for i, (nid, node) in enumerate(list(agent.memory.nodes.items())[:10]):
+        r, g, b = gradient_at(i * 0.1 + t)
+        nid_colored = f"{_rgb(r, g, b)}{nid}{_RESET}"
+        print(f"    [{nid_colored}] {node.content[:50]}...")
+    if agent.memory.node_count > 10:
+        print(f"    ... and {agent.memory.node_count - 10} more")
+    print()
+
+
+# =============================================================================
+# Main
+# =============================================================================
+
+def main():
+    models = check_ollama()
+    if not models:
+        # Still show the banner even on failure
+        print(render_banner())
+        print("  Ollama is not running or has no models.")
+        print()
+        print("  To set up:")
+        print("    1. Install Ollama:  https://ollama.com")
+        print("    2. Start it:        ollama serve")
+        print("    3. Pull a model:    ollama pull llama3.2:3b")
+        print("    4. Run this again:  python3 omega_chat.py")
+        print()
+        sys.exit(1)
+
+    model = pick_model(models)
+
+    if len(sys.argv) > 1 and sys.argv[1] not in ("--help", "-h"):
+        model = sys.argv[1]
+        if model not in models:
+            print(f"  Warning: '{model}' not in available models: {models}")
+            print()
+
+    if "--help" in sys.argv or "-h" in sys.argv:
+        print(__doc__)
+        sys.exit(0)
+
+    agent = OmegaAgent(
+        name="OmegA",
+        phylactery_path=os.path.join(os.path.dirname(__file__), ".omega_phylactery.json"),
+    )
+
+    # Show the full colorshifting banner
+    print(render_banner())
+    print_session_info(model, agent)
+
+    last_result = None
+
+    while True:
+        try:
+            # Colorshift the prompt
+            t = (time.time() % 1000) * 0.1
+            r, g, b = gradient_at(t)
+            prompt = f"{_rgb(r, g, b)}You:{_RESET} "
+            user_input = input(prompt).strip()
+        except (EOFError, KeyboardInterrupt):
+            print(f"\n\n  Session ended. Identity chain preserved.")
+            break
+
+        if not user_input:
+            continue
+
+        if user_input.lower() in ("quit", "exit", "/quit", "/exit"):
+            print(f"\n  Session ended. Identity chain preserved.")
+            break
+
+        if user_input == "/state":
+            print_state(agent)
+            continue
+
+        if user_input == "/chain":
+            print_chain(agent)
+            continue
+
+        if user_input == "/memory":
+            print_memory(agent)
+            continue
+
+        if user_input == "/verify":
+            if last_result:
+                v = last_result.verification
+                print(f"\n  Last Verification:")
+                print(f"    V score:       {v['V']}")
+                print(f"    Outcome:       {v['outcome']}")
+                print(f"    Hallucination: {v['hallucination_signals']} signals")
+                print(f"    Hedge:         {v['hedge_signals']} signals")
+                print(f"    Goal relevance:{v['goal_relevance']}")
+                print(f"    Risk score:    {last_result.risk_score:.3f}")
+                print(f"    Risk allowed:  {last_result.risk_allowed}")
+                print(f"    Envelope v{last_result.envelope_version}")
+                print()
+            else:
+                print("  No messages yet.\n")
+            continue
+
+        if user_input in ("/help", "/?"):
+            print(render_banner())
+            print_session_info(model, agent)
+            continue
+
+        # Run through the full OmegA stack
+        t = (time.time() % 1000) * 0.1
+        r, g, b = gradient_at(t)
+        dim = "\033[2m"
+        print(f"  {dim}{_rgb(r, g, b)}[envelope v{agent.envelope_clock.version + 1} | "
+              f"chain={len(agent.phylactery)} | "
+              f"memory={agent.memory.node_count}]{_RESET}")
+
+        result = agent.run(user_input, model=model)
+        last_result = result
+
+        # Show response with colorshifted "OmegA:" label
+        t = (time.time() % 1000) * 0.1
+        r, g, b = gradient_at(t + 0.3)
+        print()
+        print(f"{_rgb(r, g, b)}OmegA:{_RESET} {result.response}")
+        print()
+
+        # Status line
+        status_parts = [
+            f"V={result.verification['V']}",
+            result.verification['outcome'],
+            f"R={result.risk_score:.2f}",
+            f"{result.elapsed_ms:.0f}ms",
+        ]
+        if not result.risk_allowed:
+            status_parts.insert(0, "BLOCKED")
+        r, g, b = gradient_at(t + 0.6)
+        print(f"  {dim}{_rgb(r, g, b)}[{' | '.join(status_parts)}]{_RESET}")
+        print()
+
+
+if __name__ == "__main__":
+    main()

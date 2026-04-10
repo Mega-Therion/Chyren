@@ -1,0 +1,129 @@
+"""
+Ingest fresh downloads: extracted zips + loose files in Downloads.
+Skips already-checkpointed paths, binary files, node_modules, .git dirs.
+"""
+import os, psycopg2, logging, gc
+from sentence_transformers import SentenceTransformer
+
+logging.basicConfig(filename='/home/mega/rovi_fresh_scan.log', level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s')
+console = logging.StreamHandler()
+console.setLevel(logging.INFO)
+logging.getLogger('').addHandler(console)
+
+DB_URI     = "postgresql://neondb_owner:npg_HbW1Zlkjd7NI@ep-sweet-glade-anvm0pwn-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require"
+CHECKPOINT = '/home/mega/rovi_fresh_checkpoint.txt'
+CHUNK_SIZE = 50_000
+MAX_CHUNKS = 200
+
+TEXT_EXTS = {'.md','.txt','.py','.js','.ts','.tsx','.jsx','.json','.sh',
+             '.yaml','.yml','.log','.html','.css','.env','.toml','.ini',
+             '.conf','.pdf','.csv','.xml','.rst'}
+
+SKIP_DIRS = {'node_modules','.git','__MACOSX','__pycache__','.next','dist','build'}
+
+def load_ckpt():
+    if os.path.exists(CHECKPOINT):
+        with open(CHECKPOINT) as f: return set(l.strip() for l in f)
+    return set()
+
+def save_ckpt(key):
+    with open(CHECKPOINT, 'a') as f: f.write(key + '\n')
+
+def importance_for(path):
+    p = path.lower()
+    if any(x in p for x in ['jasi','j•a•s•i','impdocs','legal']): return 0.9
+    if any(x in p for x in ['claude data',' data','safa data']): return 0.9
+    if any(x in p for x in ['omega','sovereign','identity','phylactery','vault']): return 0.8
+    if any(x in p for x in ['notes','docs','staging','intelligence']): return 0.75
+    if p.endswith('.log'): return 0.5
+    return 0.6
+
+def collect_files():
+    files = []
+    # Extracted zips
+    for root, dirs, filenames in os.walk('/tmp/fresh_extract'):
+        dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
+        for fn in filenames:
+            ext = os.path.splitext(fn)[1].lower()
+            if ext in TEXT_EXTS and not fn.startswith('.'):
+                fp = os.path.join(root, fn)
+                if os.path.getsize(fp) < 10_000_000:  # skip >10MB
+                    files.append(fp)
+    # Loose files in Downloads
+    for fn in os.listdir('/home/mega/Downloads'):
+        fp = os.path.join('/home/mega/Downloads', fn)
+        if not os.path.isfile(fp): continue
+        if fn.endswith('.zip'): continue
+        ext = os.path.splitext(fn)[1].lower()
+        if ext in TEXT_EXTS or ext == '':
+            if os.path.getsize(fp) < 10_000_000:
+                files.append(fp)
+    return files
+
+def main():
+    logging.info("Starting fresh scan ingest...")
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+    logging.info("Model loaded.")
+
+    done = load_ckpt()
+    conn = psycopg2.connect(DB_URI)
+    cur  = conn.cursor()
+    logging.info("DB connected.")
+
+    files = collect_files()
+    logging.info(f"Found {len(files)} candidate files.")
+
+    total_inserted = 0
+
+    for fp in files:
+        if fp in done: continue
+        try:
+            with open(fp, 'r', encoding='utf-8', errors='ignore') as f:
+                content = f.read().replace('\x00', '')
+        except Exception:
+            save_ckpt(fp); continue
+
+        if not content.strip():
+            save_ckpt(fp); continue
+
+        chunks = [content[i:i+CHUNK_SIZE] for i in range(0, len(content), CHUNK_SIZE)]
+        if len(chunks) > MAX_CHUNKS:
+            step = len(chunks) / MAX_CHUNKS
+            chunks = [chunks[int(i*step)] for i in range(MAX_CHUNKS)]
+
+        fname = os.path.basename(fp)
+        imp   = importance_for(fp)
+
+        for idx, chunk in enumerate(chunks):
+            ck_key = f"{fp}::chunk_{idx}"
+            if ck_key in done or not chunk.strip():
+                save_ckpt(ck_key); continue
+
+            labeled = f"[Source: {fname}, chunk {idx+1}/{len(chunks)}]\n\n{chunk}"
+            try:
+                emb = model.encode(chunk[:10000]).tolist()
+                cur.execute(
+                    "INSERT INTO public.omega_memory_entries (id,content,embedding,source,namespace,domain,importance,created_at,version,confidence) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                    (os.urandom(8).hex(), labeled, emb, 'mega_fresh_scan', 'fresh_downloads', 'operational', imp, '2026-03-25', 1, 1.0)
+                )
+                total_inserted += 1
+                if total_inserted % 50 == 0:
+                    conn.commit()
+                    logging.info(f"Progress: {total_inserted} inserted")
+                    gc.collect()
+                save_ckpt(ck_key)
+            except Exception as e:
+                logging.error(f"Insert error {fp} chunk {idx}: {e}")
+                conn.rollback()
+                save_ckpt(ck_key)
+
+        save_ckpt(fp)
+
+    conn.commit()
+    cur.close()
+    conn.close()
+    logging.info(f"Fresh scan complete. {total_inserted} total inserted.")
+
+if __name__ == '__main__':
+    main()

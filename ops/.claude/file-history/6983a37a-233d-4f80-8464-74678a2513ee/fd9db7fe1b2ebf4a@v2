@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Step 1: authenticate with Cloudflare (opens browser)
+echo "=== Cloudflare Login ==="
+cloudflared tunnel login
+
+# Step 2: create a named tunnel for the OmegA gateway
+echo "=== Creating tunnel: omega-gateway ==="
+cloudflared tunnel create omega-gateway
+
+# Step 3: get the tunnel ID
+TUNNEL_ID=$(cloudflared tunnel list 2>/dev/null | grep omega-gateway | awk '{print $1}')
+echo "Tunnel ID: $TUNNEL_ID"
+
+# Step 4: write tunnel config
+mkdir -p ~/.cloudflared
+cat > ~/.cloudflared/omega-gateway.yml << EOF
+tunnel: $TUNNEL_ID
+credentials-file: /home/mega/.cloudflared/$TUNNEL_ID.json
+
+ingress:
+  - hostname: gateway.omega.YOURDOMAIN.com
+    service: http://localhost:8787
+  - service: http_status:404
+EOF
+
+echo ""
+echo "=== Done ==="
+echo "Tunnel config written to ~/.cloudflared/omega-gateway.yml"
+echo ""
+echo "Next: edit ~/.cloudflared/omega-gateway.yml and replace YOURDOMAIN.com with your actual domain."
+echo "Then run: cloudflared tunnel run omega-gateway"

@@ -1,0 +1,277 @@
+'use client';
+
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+export interface OmegaMessage {
+  id: string;
+  sessionId: string;
+  role: 'user' | 'assistant';
+  content: string;
+  createdAt: string;
+}
+
+export interface OmegaSession {
+  id: string;
+  userId?: string;
+  model: string;
+  createdAt: string;
+  updatedAt: string;
+  title?: string;
+}
+
+export interface OmegaChatState {
+  conversations: OmegaSession[];
+  activeConvoId: string | null;
+  messages: OmegaMessage[];
+  systemState: 'idle' | 'thinking' | 'followup' | 'error';
+  streaming: boolean;
+  error: string | null;
+}
+
+interface UseOmegaChatReturn extends OmegaChatState {
+  sendMessage: (text: string) => Promise<void>;
+  createConversation: () => Promise<string>;
+  deleteConversation: (id: string) => Promise<void>;
+  switchConversation: (id: string) => Promise<void>;
+  retry: (messageId: string) => Promise<void>;
+  clearError: () => void;
+}
+
+export function useOmegaChat(): UseOmegaChatReturn {
+  const [state, setState] = useState<OmegaChatState>({
+    conversations: [],
+    activeConvoId: null,
+    messages: [],
+    systemState: 'idle',
+    streaming: false,
+    error: null,
+  });
+
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Load initial sessions on mount
+  useEffect(() => {
+    const loadSessions = async () => {
+      try {
+        const res = await fetch('/api/sessions', { method: 'GET' });
+        if (res.ok) {
+          const sessions = await res.json();
+          setState((prev) => ({ ...prev, conversations: sessions }));
+          if (sessions.length > 0) {
+            setState((prev) => ({ ...prev, activeConvoId: sessions[0].id }));
+            await loadMessages(sessions[0].id);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load sessions:', err);
+      }
+    };
+
+    loadSessions();
+  }, []);
+
+  const loadMessages = useCallback(async (sessionId: string) => {
+    try {
+      const res = await fetch(`/api/sessions/${sessionId}/messages`, {
+        method: 'GET',
+      });
+      if (res.ok) {
+        const messages = await res.json();
+        setState((prev) => ({ ...prev, messages }));
+      }
+    } catch (err) {
+      console.error('Failed to load messages:', err);
+    }
+  }, []);
+
+  const createConversation = useCallback(async (): Promise<string> => {
+    try {
+      const res = await fetch('/api/sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'grok' }),
+      });
+
+      if (!res.ok) throw new Error('Failed to create session');
+
+      const session = await res.json();
+      setState((prev) => ({
+        ...prev,
+        conversations: [...prev.conversations, session],
+        activeConvoId: session.id,
+        messages: [],
+      }));
+
+      return session.id;
+    } catch (err) {
+      setState((prev) => ({
+        ...prev,
+        systemState: 'error',
+        error: 'Failed to create conversation',
+      }));
+      throw err;
+    }
+  }, []);
+
+  const switchConversation = useCallback(
+    async (sessionId: string) => {
+      setState((prev) => ({
+        ...prev,
+        activeConvoId: sessionId,
+        messages: [],
+        systemState: 'idle',
+        error: null,
+      }));
+      await loadMessages(sessionId);
+    },
+    [loadMessages]
+  );
+
+  const deleteConversation = useCallback(async (sessionId: string) => {
+    try {
+      const res = await fetch(`/api/sessions/${sessionId}`, { method: 'DELETE' });
+      if (res.ok) {
+        setState((prev) => ({
+          ...prev,
+          conversations: prev.conversations.filter((c) => c.id !== sessionId),
+          activeConvoId:
+            prev.activeConvoId === sessionId ? null : prev.activeConvoId,
+          messages: prev.activeConvoId === sessionId ? [] : prev.messages,
+        }));
+      }
+    } catch (err) {
+      setState((prev) => ({
+        ...prev,
+        systemState: 'error',
+        error: 'Failed to delete conversation',
+      }));
+    }
+  }, []);
+
+  const sendMessage = useCallback(
+    async (text: string) => {
+      if (!state.activeConvoId) {
+        setState((prev) => ({
+          ...prev,
+          systemState: 'error',
+          error: 'No active conversation',
+        }));
+        return;
+      }
+
+      const userMessage: OmegaMessage = {
+        id: `msg_${Date.now()}_user`,
+        sessionId: state.activeConvoId,
+        role: 'user',
+        content: text,
+        createdAt: new Date().toISOString(),
+      };
+
+      setState((prev) => ({
+        ...prev,
+        messages: [...prev.messages, userMessage],
+        systemState: 'thinking',
+        streaming: true,
+        error: null,
+      }));
+
+      abortControllerRef.current = new AbortController();
+
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: state.activeConvoId,
+            message: text,
+            context: 'voice_enabled',
+          }),
+          signal: abortControllerRef.current.signal,
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(
+            errorData.error?.message || 'Failed to get response'
+          );
+        }
+
+        let assistantContent = '';
+        const reader = res.body?.getReader();
+        if (!reader) throw new Error('No response body');
+
+        const assistantMessage: OmegaMessage = {
+          id: `msg_${Date.now()}_assistant`,
+          sessionId: state.activeConvoId,
+          role: 'assistant',
+          content: '',
+          createdAt: new Date().toISOString(),
+        };
+
+        setState((prev) => ({
+          ...prev,
+          messages: [...prev.messages, assistantMessage],
+          systemState: 'followup',
+        }));
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = new TextDecoder().decode(value);
+          assistantContent += chunk;
+
+          setState((prev) => ({
+            ...prev,
+            messages: prev.messages.map((m) =>
+              m.id === assistantMessage.id
+                ? { ...m, content: assistantContent }
+                : m
+            ),
+          }));
+        }
+
+        setState((prev) => ({
+          ...prev,
+          systemState: 'idle',
+          streaming: false,
+        }));
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') {
+          setState((prev) => ({ ...prev, streaming: false }));
+        } else {
+          setState((prev) => ({
+            ...prev,
+            systemState: 'error',
+            error: err instanceof Error ? err.message : 'Unknown error',
+            streaming: false,
+          }));
+        }
+      }
+    },
+    [state.activeConvoId]
+  );
+
+  const retry = useCallback(
+    async (messageId: string) => {
+      const message = state.messages.find((m) => m.id === messageId);
+      if (!message || message.role !== 'user') return;
+      await sendMessage(message.content);
+    },
+    [state.messages, sendMessage]
+  );
+
+  const clearError = useCallback(() => {
+    setState((prev) => ({ ...prev, error: null, systemState: 'idle' }));
+  }, []);
+
+  return {
+    ...state,
+    sendMessage,
+    createConversation,
+    deleteConversation,
+    switchConversation,
+    retry,
+    clearError,
+  };
+}

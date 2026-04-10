@@ -1,0 +1,43 @@
+ I tightened the proof surface one notch further and kept
+  it green.
+
+  What I added:
+
+  - tools/proof_auditor.py
+      - checks theorem ledger, proof map, claim ledger,
+        and gate wiring stay in sync
+      - enforces T-10 monotonic envelope versioning is
+        present in the formal surface
+      - enforces T-8 stays marked as the live-provider-
+        dependent theorem in the ledger
+  - Wired it into verify.sh
+  - Added it to tools/INDEX.md
+  - Pointed README.md, CLAUDE.md, and proofs/README.md at
+    it
+  - Added .hypothesis/ to .gitignore
+
+  What it proves operationally:
+
+  - the proof layer is now self-auditing
+  - theorem / claim / proof drift will fail the gate
+  - the monotonic envelope fix is enforced end-to-end, not
+    just described
+
+  Validation:
+
+  - python3 tools/proof_auditor.py PASS
+  - bash verify.sh PASS
+  - formal invariant suite: 36/36 PASS
+  - T-10: PASS
+  - proof audit: PASS
+
+  Where this leaves OmegA:
+
+  - the executable proof surface is strong and now
+    actively guarded
+  - the repo is materially tighter against proof drift
+  - the only remaining “higher ceiling” work is a true
+    theorem-assistant layer for the core invariants if you
+    want to push from executable proof toward formal proof
+    in the strict academic sense
+

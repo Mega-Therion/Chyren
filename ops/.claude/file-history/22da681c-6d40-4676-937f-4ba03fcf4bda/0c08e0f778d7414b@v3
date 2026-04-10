@@ -1,0 +1,587 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500&family=Instrument+Serif:ital@0;1&display=swap');
+
+.root {
+  position: fixed;
+  inset: 0;
+  background: #010104;
+  color: white;
+  overflow: hidden;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+}
+
+/* Particle canvas */
+.canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+/* Reflective floor */
+.floor {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 38vh;
+  z-index: 1;
+  background: linear-gradient(to bottom, transparent 0%, rgba(1, 1, 4, 0.5) 25%, rgba(1, 1, 4, 0.88) 100%);
+  pointer-events: none;
+}
+
+.floor::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 520px;
+  height: 140px;
+  background: radial-gradient(ellipse at center, rgba(180, 0, 255, 0.14) 0%, rgba(0, 229, 255, 0.07) 40%, transparent 70%);
+  filter: blur(35px);
+}
+
+.backLink {
+  position: fixed;
+  top: 1.3rem;
+  left: 1.4rem;
+  z-index: 30;
+  font-size: 0.68rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.2);
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+
+.backLink:hover {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Init overlay */
+.initOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  border: 0;
+  background: #010104;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.initLabel {
+  color: rgba(255, 255, 255, 0.28);
+  font-size: 0.6rem;
+  letter-spacing: 0.55em;
+  text-transform: uppercase;
+  animation: pulseLabel 3s ease-in-out infinite;
+}
+
+/* Interface layer */
+.interfaceLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.6rem;
+  padding: 1.5rem;
+  pointer-events: none;
+}
+
+/* Feedback / status */
+.feedback {
+  min-height: 1rem;
+  font-size: 0.58rem;
+  letter-spacing: 0.52em;
+  text-transform: uppercase;
+  color: rgba(0, 229, 255, 0.38);
+  pointer-events: none;
+  text-shadow: 0 0 14px rgba(0, 229, 255, 0.18);
+}
+
+/* === THE OMEGA ARTIFACT === */
+.omegaWrapper {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* Outer neon glow field */
+.omegaGlow {
+  position: absolute;
+  inset: -65px;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.18;
+  transition: opacity 0.6s ease, background 1s ease;
+  background: radial-gradient(circle, rgba(180, 0, 255, 0.5) 0%, rgba(0, 229, 255, 0.25) 55%, transparent 75%);
+}
+
+/* Holographic inner ring */
+.innerRing {
+  position: absolute;
+  width: 175px;
+  height: 175px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 229, 255, 0.12);
+  box-shadow: inset 0 0 30px rgba(180, 0, 255, 0.06), 0 0 20px rgba(0, 229, 255, 0.04);
+  animation: ringRotate 22s linear infinite;
+  pointer-events: none;
+}
+
+.innerRing::before {
+  content: '';
+  position: absolute;
+  inset: 9px;
+  border-radius: 50%;
+  border: 1px solid rgba(180, 0, 255, 0.08);
+  border-top-color: rgba(0, 229, 255, 0.18);
+  border-right-color: transparent;
+}
+
+.innerRing::after {
+  content: '';
+  position: absolute;
+  inset: 20px;
+  border-radius: 50%;
+  border: 1px dashed rgba(0, 229, 255, 0.05);
+}
+
+/* Neon-outlined Omega symbol */
+.omegaSymbol {
+  position: relative;
+  z-index: 2;
+  font-size: 7.5rem;
+  line-height: 1;
+  color: transparent;
+  user-select: none;
+  -webkit-text-stroke: 1.8px rgba(255, 255, 255, 0.88);
+  text-shadow:
+    0 0 8px rgba(0, 229, 255, 0.7),
+    0 0 25px rgba(0, 229, 255, 0.45),
+    0 0 55px rgba(180, 0, 255, 0.35),
+    0 0 100px rgba(180, 0, 255, 0.18);
+  filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.5));
+  transition: text-shadow 0.8s ease, filter 0.8s ease;
+}
+
+/* Lateral energy filaments */
+.filamentLeft,
+.filamentRight {
+  position: absolute;
+  top: 50%;
+  height: 1px;
+  pointer-events: none;
+  opacity: 0.7;
+  transition: opacity 0.6s ease, width 0.6s ease;
+}
+
+.filamentLeft {
+  right: 100%;
+  margin-right: 15px;
+  width: 160px;
+  background: linear-gradient(to left, rgba(180, 0, 255, 0.35), rgba(180, 0, 255, 0.08) 60%, transparent);
+}
+
+.filamentRight {
+  left: 100%;
+  margin-left: 15px;
+  width: 160px;
+  background: linear-gradient(to right, rgba(0, 229, 255, 0.35), rgba(0, 229, 255, 0.08) 60%, transparent);
+}
+
+.filamentLeft::before,
+.filamentRight::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  width: 100%;
+  height: 7px;
+  filter: blur(4px);
+}
+
+.filamentLeft::before {
+  background: linear-gradient(to left, rgba(180, 0, 255, 0.12), transparent);
+}
+
+.filamentRight::before {
+  background: linear-gradient(to right, rgba(0, 229, 255, 0.12), transparent);
+}
+
+/* Transcript */
+.transcriptWrap {
+  width: min(1000px, calc(100vw - 2rem));
+  min-height: 8.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.transcript {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.3rem 0.6rem;
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(1.8rem, 3.8vw, 3rem);
+  line-height: 1.12;
+  text-align: center;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 0 18px rgba(180, 0, 255, 0.12);
+}
+
+.word {
+  display: inline-block;
+  opacity: 0;
+  filter: blur(8px);
+  transform: translateY(8px);
+  transition: opacity 0.5s cubic-bezier(0.1, 0.9, 0.2, 1), transform 0.5s cubic-bezier(0.1, 0.9, 0.2, 1), filter 0.5s ease;
+}
+
+.wordVisible {
+  opacity: 1;
+  filter: blur(0);
+  transform: translateY(0);
+}
+
+.wordDim {
+  opacity: 0.1;
+  filter: blur(2px);
+}
+
+/* Runtime panel */
+.runtimePanel {
+  width: min(880px, calc(100vw - 2rem));
+  background: rgba(2, 2, 8, 0.82);
+  border: 1px solid rgba(0, 229, 255, 0.07);
+  border-radius: 14px;
+  padding: 1rem 1.2rem;
+  backdrop-filter: blur(22px);
+  pointer-events: auto;
+}
+
+.runtimeHeader {
+  margin-bottom: 0.8rem;
+  color: rgba(0, 229, 255, 0.42);
+  font-size: 0.56rem;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.12);
+}
+
+.runtimeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem 1rem;
+}
+
+.runtimeItem,
+.runtimeItemWide {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.runtimeItemWide {
+  grid-column: 1 / -1;
+}
+
+.runtimeLabel {
+  color: rgba(255, 255, 255, 0.26);
+  font-size: 0.52rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.runtimeValue {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.78rem;
+}
+
+.runtimeMono {
+  color: rgba(0, 229, 255, 0.55);
+  font-size: 0.68rem;
+  word-break: break-all;
+  font-family: 'Space Grotesk', monospace;
+}
+
+/* Manifestation */
+.manifestation {
+  width: min(720px, calc(100vw - 2rem));
+  max-height: 32vh;
+  overflow: auto;
+  padding: 1rem 1.5rem;
+  background: rgba(2, 2, 8, 0.82);
+  border: 1px solid rgba(180, 0, 255, 0.08);
+  border-radius: 16px;
+  backdrop-filter: blur(22px);
+  pointer-events: auto;
+}
+
+/* Text input fallback */
+.textInputWrap {
+  display: flex;
+  gap: 0.5rem;
+  width: min(600px, calc(100vw - 2rem));
+  pointer-events: auto;
+}
+
+.textInput {
+  flex: 1;
+  padding: 0.65rem 1rem;
+  border: 1px solid rgba(0, 229, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(2, 2, 8, 0.7);
+  color: rgba(255, 255, 255, 0.88);
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  outline: none;
+  backdrop-filter: blur(16px);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.textInput::placeholder {
+  color: rgba(255, 255, 255, 0.22);
+  letter-spacing: 0.06em;
+}
+
+.textInput:focus {
+  border-color: rgba(0, 229, 255, 0.3);
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.06);
+}
+
+.textInput:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.textSubmit {
+  padding: 0.65rem 1.1rem;
+  border: 1px solid rgba(0, 229, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(0, 229, 255, 0.04);
+  color: rgba(255, 255, 255, 0.7);
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.textSubmit:hover:not(:disabled) {
+  border-color: rgba(0, 229, 255, 0.32);
+  background: rgba(0, 229, 255, 0.08);
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.06);
+}
+
+.textSubmit:disabled {
+  opacity: 0.26;
+  cursor: not-allowed;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  pointer-events: auto;
+}
+
+.actionButton,
+.actionButtonGhost {
+  border-radius: 999px;
+  padding: 0.65rem 1.25rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  transition: transform 0.2s ease, border-color 0.3s ease, background 0.3s ease, color 0.2s ease, opacity 0.2s ease, box-shadow 0.3s ease;
+}
+
+.actionButton {
+  border: 1px solid rgba(0, 229, 255, 0.14);
+  background: rgba(0, 229, 255, 0.03);
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.actionButtonGhost {
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.actionButton:hover {
+  transform: translateY(-1px);
+  border-color: rgba(0, 229, 255, 0.32);
+  background: rgba(0, 229, 255, 0.06);
+  box-shadow: 0 0 18px rgba(0, 229, 255, 0.07);
+}
+
+.actionButtonGhost:hover {
+  transform: translateY(-1px);
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.actionButtonActive {
+  border-color: rgba(180, 0, 255, 0.45);
+  background: rgba(180, 0, 255, 0.08);
+  color: rgba(230, 200, 255, 0.92);
+  box-shadow: 0 0 22px rgba(180, 0, 255, 0.1);
+}
+
+.actionButton:disabled,
+.actionButtonGhost:disabled {
+  opacity: 0.26;
+  cursor: not-allowed;
+}
+
+/* === STATE-REACTIVE GLOW === */
+
+.stateListening .omegaGlow {
+  opacity: 0.6;
+  background: radial-gradient(circle, rgba(180, 0, 255, 0.65) 0%, rgba(255, 0, 128, 0.35) 55%, transparent 75%);
+  animation: pulseResonance 2s infinite ease-in-out;
+}
+
+.stateListening .innerRing {
+  border-color: rgba(180, 0, 255, 0.28);
+  box-shadow: inset 0 0 40px rgba(180, 0, 255, 0.12), 0 0 28px rgba(180, 0, 255, 0.08);
+}
+
+.stateListening .omegaSymbol {
+  -webkit-text-stroke-color: rgba(255, 200, 255, 0.92);
+  text-shadow:
+    0 0 8px rgba(180, 0, 255, 0.85),
+    0 0 25px rgba(180, 0, 255, 0.55),
+    0 0 55px rgba(255, 0, 128, 0.35),
+    0 0 100px rgba(180, 0, 255, 0.18);
+}
+
+.stateListening .filamentLeft,
+.stateListening .filamentRight {
+  opacity: 1;
+  width: 220px;
+}
+
+.stateProcessing .omegaGlow {
+  opacity: 0.8;
+  background: radial-gradient(circle, rgba(0, 229, 255, 0.65) 0%, rgba(0, 100, 255, 0.35) 55%, transparent 75%);
+  animation: pulseResonance 0.55s infinite ease-in-out;
+}
+
+.stateProcessing .innerRing {
+  border-color: rgba(0, 229, 255, 0.32);
+  animation: ringRotate 2.5s linear infinite;
+}
+
+.stateProcessing .omegaSymbol {
+  -webkit-text-stroke-color: rgba(200, 255, 255, 0.92);
+  text-shadow:
+    0 0 8px rgba(0, 229, 255, 0.85),
+    0 0 25px rgba(0, 229, 255, 0.55),
+    0 0 55px rgba(0, 100, 255, 0.35),
+    0 0 100px rgba(0, 229, 255, 0.18);
+}
+
+.stateProcessing .filamentLeft,
+.stateProcessing .filamentRight {
+  opacity: 1;
+  width: 250px;
+}
+
+.stateSpeaking .omegaGlow {
+  opacity: 0.7;
+  background: radial-gradient(circle, rgba(140, 0, 255, 0.55) 0%, rgba(0, 229, 255, 0.3) 55%, transparent 75%);
+  animation: pulseResonance 1.4s infinite ease-in-out;
+}
+
+.stateSpeaking .innerRing {
+  border-color: rgba(140, 0, 255, 0.22);
+  box-shadow: inset 0 0 32px rgba(140, 0, 255, 0.08), 0 0 22px rgba(0, 229, 255, 0.06);
+}
+
+.stateSpeaking .omegaSymbol {
+  text-shadow:
+    0 0 8px rgba(140, 0, 255, 0.75),
+    0 0 25px rgba(0, 229, 255, 0.45),
+    0 0 55px rgba(140, 0, 255, 0.3),
+    0 0 100px rgba(0, 229, 255, 0.12);
+}
+
+.stateSpeaking .filamentLeft,
+.stateSpeaking .filamentRight {
+  opacity: 0.9;
+  width: 200px;
+}
+
+/* Animations */
+@keyframes pulseResonance {
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.1); opacity: 0.82; }
+}
+
+@keyframes ringRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulseLabel {
+  0%, 100% { opacity: 0.18; }
+  50% { opacity: 0.48; }
+}
+
+/* Mobile */
+@media (max-width: 720px) {
+  .interfaceLayer {
+    gap: 1.2rem;
+    padding: 1rem;
+  }
+
+  .omegaWrapper {
+    width: 175px;
+    height: 175px;
+  }
+
+  .innerRing {
+    width: 135px;
+    height: 135px;
+  }
+
+  .omegaSymbol {
+    font-size: 5.5rem;
+  }
+
+  .filamentLeft,
+  .filamentRight {
+    width: 70px;
+  }
+
+  .runtimeGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .actionButton,
+  .actionButtonGhost {
+    width: 100%;
+  }
+
+  .floor::before {
+    width: 300px;
+    height: 80px;
+  }
+}

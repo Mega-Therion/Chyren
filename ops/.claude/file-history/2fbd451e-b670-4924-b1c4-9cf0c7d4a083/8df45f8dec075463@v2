@@ -1,0 +1,237 @@
+"""
+rovi_inbox.py — Ingest a zip from INBOX into OmegA DB.
+
+Usage:
+    python3 rovi_inbox.py <zip_path> <namespace> [--dry-run]
+
+Extracts text files, embeds with all-MiniLM-L6-v2, inserts into the DB
+registered for <namespace> via db_registry.py.  Checkpoint at
+INGEST/checkpoints/rovi_inbox_<namespace>.txt for resumability.
+"""
+import os
+import sys
+import json
+import zipfile
+import hashlib
+import logging
+import argparse
+from pathlib import Path
+
+# ── env ──────────────────────────────────────────────────────────────────────
+VAULT = Path("/home/mega/OMEGA_WORKSPACE/VAULT/one-true.env")
+if VAULT.exists():
+    import subprocess
+    result = subprocess.run(
+        ["bash", "-c", f"set -a && source {VAULT} && set +a && env"],
+        capture_output=True, text=True
+    )
+    for line in result.stdout.splitlines():
+        if "=" in line and line.startswith("OMEGA_"):
+            k, _, v = line.partition("=")
+            os.environ.setdefault(k, v.strip("'\""))
+
+sys.path.insert(0, str(Path(__file__).parent.parent / "INGEST"))
+from db_registry import get_conn_for_namespace, guard
+
+# ── config ────────────────────────────────────────────────────────────────────
+CKPT_DIR  = Path(__file__).parent / "checkpoints"
+CHUNK_KB  = 8       # split files larger than this into chunks
+MAX_KB    = 200     # skip individual chunks/files larger than this
+BATCH     = 32      # embedding batch size
+
+TEXT_EXTS = {
+    ".md", ".txt", ".py", ".js", ".ts", ".json", ".yaml", ".yml",
+    ".sh", ".toml", ".cfg", ".ini", ".env", ".html", ".css",
+    ".rs", ".go", ".java", ".cpp", ".c", ".h", ".sql",
+}
+
+IMPORTANCE_MAP = {
+    "omega": 0.90, "sovereign": 0.90, "aeon": 0.88, "aegis": 0.88,
+    "adccl": 0.88, "myelin": 0.88, "magnus": 0.87, "identity": 0.87,
+    "canon": 0.86, "deepseek": 0.85, "claude": 0.85, "": 0.85,
+    "documents": 0.80, "takeout": 0.78, "mcp": 0.82,
+}
+
+def importance_for(path: str) -> float:
+    p = path.lower()
+    for key, score in IMPORTANCE_MAP.items():
+        if key in p:
+            return score
+    return 0.72
+
+
+def chunk_text(text: str, chunk_kb: int = CHUNK_KB) -> list[str]:
+    chunk_bytes = chunk_kb * 1024
+    if len(text.encode()) <= chunk_bytes:
+        return [text]
+    words = text.split()
+    chunks, current, current_size = [], [], 0
+    for word in words:
+        wb = len(word.encode()) + 1
+        if current_size + wb > chunk_bytes and current:
+            chunks.append(" ".join(current))
+            current, current_size = [], 0
+        current.append(word)
+        current_size += wb
+    if current:
+        chunks.append(" ".join(current))
+    return chunks
+
+
+def load_checkpoint(ckpt_path: Path) -> set:
+    if not ckpt_path.exists():
+        return set()
+    with open(ckpt_path) as f:
+        return {line.strip() for line in f if line.strip()}
+
+
+def save_checkpoint(ckpt_path: Path, key: str):
+    with open(ckpt_path, "a") as f:
+        f.write(key + "\n")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Ingest INBOX zip into OmegA DB")
+    parser.add_argument("zip_path", help="Path to zip file")
+    parser.add_argument("namespace", help="Target namespace (e.g. omega_sovereign)")
+    parser.add_argument("--dry-run", action="store_true", help="Parse only, no DB writes")
+    args = parser.parse_args()
+
+    zip_path = Path(args.zip_path)
+    namespace = args.namespace
+    dry_run = args.dry_run
+
+    # ── logging ──────────────────────────────────────────────────────────────
+    log_dir = Path("/home/mega/OMEGA_WORKSPACE/LOGS")
+    log_dir.mkdir(exist_ok=True)
+    logging.basicConfig(
+        filename=str(log_dir / f"rovi_inbox_{namespace}.log"),
+        level=logging.INFO,
+        format="%(asctime)s - %(levelname)s - %(message)s",
+    )
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    logging.getLogger("").addHandler(console)
+
+    logging.info(f"rovi_inbox: zip={zip_path.name} namespace={namespace} dry_run={dry_run}")
+
+    if not zip_path.exists():
+        logging.error(f"Zip not found: {zip_path}")
+        sys.exit(1)
+
+    # ── checkpoint ───────────────────────────────────────────────────────────
+    CKPT_DIR.mkdir(exist_ok=True)
+    ckpt_path = CKPT_DIR / f"rovi_inbox_{namespace}.txt"
+    done = load_checkpoint(ckpt_path)
+    logging.info(f"Checkpoint: {len(done)} already processed.")
+
+    # ── model ────────────────────────────────────────────────────────────────
+    from sentence_transformers import SentenceTransformer
+    model = SentenceTransformer("all-MiniLM-L6-v2")
+    logging.info("Model loaded.")
+
+    # ── DB ───────────────────────────────────────────────────────────────────
+    if not dry_run:
+        guard(namespace)
+        conn = get_conn_for_namespace(namespace)
+        cur  = conn.cursor()
+        logging.info(f"DB connected for namespace={namespace}")
+
+    # ── scan zip ─────────────────────────────────────────────────────────────
+    inserted = skipped = errors = 0
+
+    with zipfile.ZipFile(zip_path) as zf:
+        members = [m for m in zf.infolist()
+                   if not m.is_dir()
+                   and Path(m.filename).suffix.lower() in TEXT_EXTS
+                   and m.file_size > 0
+                   and m.file_size < MAX_KB * 1024 * 10]  # skip >2MB files
+        logging.info(f"Text members to process: {len(members)}")
+
+        pending_texts, pending_ids, pending_meta = [], [], []
+
+        def flush_batch():
+            nonlocal inserted
+            if not pending_texts:
+                return
+            embeddings = model.encode(pending_texts, batch_size=BATCH, show_progress_bar=False)
+            for i, (entry_id, meta) in enumerate(zip(pending_ids, pending_meta)):
+                emb_str = "[" + ",".join(f"{x:.6f}" for x in embeddings[i].tolist()) + "]"
+                if not dry_run:
+                    cur.execute("""
+                        INSERT INTO public.omega_memory_entries
+                            (id, content, embedding, source, namespace, domain,
+                             importance, created_at, version, confidence)
+                        VALUES (%s, %s, %s::vector, %s, %s, %s, %s,
+                                NOW()::text, 1, 0.85)
+                        ON CONFLICT (id) DO NOTHING
+                    """, (
+                        entry_id,
+                        meta["content"],
+                        emb_str,
+                        meta["source"],
+                        namespace,
+                        meta["domain"],
+                        meta["importance"],
+                    ))
+                    conn.commit()
+                    save_checkpoint(ckpt_path, entry_id)
+                inserted += 1
+                if inserted % 100 == 0:
+                    logging.info(f"  inserted={inserted} skipped={skipped}")
+            pending_texts.clear()
+            pending_ids.clear()
+            pending_meta.clear()
+
+        for member in members:
+            try:
+                data = zf.read(member.filename)
+                text = data.decode("utf-8", errors="ignore").replace("\x00", "").strip()
+            except Exception as e:
+                logging.warning(f"Read error {member.filename}: {e}")
+                errors += 1
+                continue
+
+            if not text:
+                continue
+
+            chunks = chunk_text(text)
+            for ci, chunk in enumerate(chunks):
+                if len(chunk.strip()) < 30:
+                    continue
+                chunk_key = hashlib.md5(
+                    f"{zip_path.name}:{member.filename}:{ci}".encode()
+                ).hexdigest()
+                entry_id = f"{namespace}:{chunk_key}"
+
+                if entry_id in done:
+                    skipped += 1
+                    continue
+
+                pending_texts.append(chunk[:4000])
+                pending_ids.append(entry_id)
+                pending_meta.append({
+                    "content":    chunk[:4000],
+                    "source":     f"{zip_path.name}/{member.filename}",
+                    "domain":     namespace.replace("_", "."),
+                    "importance": importance_for(member.filename),
+                })
+
+                if len(pending_texts) >= BATCH:
+                    flush_batch()
+
+        flush_batch()
+
+    if not dry_run:
+        cur.close()
+        conn.close()
+
+    logging.info(
+        f"Done. inserted={inserted} skipped={skipped} errors={errors} "
+        f"zip={zip_path.name} namespace={namespace}"
+    )
+    print(f"\n[rovi_inbox] {namespace}: inserted={inserted} skipped={skipped} errors={errors}")
+
+
+if __name__ == "__main__":
+    main()

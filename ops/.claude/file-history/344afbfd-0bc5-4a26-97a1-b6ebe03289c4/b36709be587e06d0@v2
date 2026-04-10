@@ -1,0 +1,150 @@
+#!/usr/bin/env python3
+"""
+OmegA CLI — public interface to the OmegA sovereign intelligence system.
+
+Usage:
+  omega                  Start an interactive conversation
+  omega "question"       Ask a single question and exit
+  omega --help           Show this help
+
+No installation required beyond Python 3.8+.
+Set OMEGA_API_URL to point at a different deployment (default: production).
+"""
+import json
+import os
+import sys
+import urllib.request
+import urllib.error
+from pathlib import Path
+
+API_BASE = os.environ.get("OMEGA_API_URL", "https://omega-sovereign.vercel.app")
+HISTORY_FILE = Path.home() / ".omega-cli" / "history.txt"
+
+C = sys.stdout.isatty()
+def cyan(t):    return f"\033[36;1m{t}\033[0m" if C else t
+def magenta(t): return f"\033[35;1m{t}\033[0m" if C else t
+def dim(t):     return f"\033[2m{t}\033[0m" if C else t
+def red(t):     return f"\033[31m{t}\033[0m" if C else t
+
+def chat_stream(user: str, history: list) -> str:
+    payload = json.dumps({
+        "user": user,
+        "history": history,
+        "voiceMode": False,
+    }).encode()
+
+    req = urllib.request.Request(
+        f"{API_BASE}/api/chat",
+        data=payload,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+
+    full = ""
+    try:
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            print(magenta("Ω "), end="", flush=True)
+            buf = b""
+            while True:
+                chunk = resp.read(256)
+                if not chunk:
+                    break
+                buf += chunk
+                while b"\n" in buf:
+                    line, buf = buf.split(b"\n", 1)
+                    text = line.decode("utf-8", errors="replace")
+                    if text.startswith('data: {"type":"status"'):
+                        continue
+                    if text.strip():
+                        print(text, end="", flush=True)
+                        full += text
+            if buf:
+                text = buf.decode("utf-8", errors="replace")
+                if not text.startswith('data: {"type":"status"'):
+                    print(text, end="", flush=True)
+                    full += text
+            print()
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", errors="replace")
+        print(red(f"\nerror {e.code}: {body}"), file=sys.stderr)
+    except urllib.error.URLError as e:
+        print(red(f"\nconnection error: {e.reason}"), file=sys.stderr)
+        print(red(f"Check that {API_BASE} is reachable."), file=sys.stderr)
+
+    return full
+
+def setup_readline():
+    try:
+        import readline
+        HISTORY_FILE.parent.mkdir(parents=True, exist_ok=True)
+        if HISTORY_FILE.exists():
+            readline.read_history_file(str(HISTORY_FILE))
+        import atexit
+        atexit.register(lambda: readline.write_history_file(str(HISTORY_FILE)))
+    except ImportError:
+        pass
+
+def banner():
+    print(magenta("  Ω  OmegA"))
+    print(dim("  Sovereign intelligence system by R.W. Yett"))
+    print(dim("  /new · clear history    /exit · quit"))
+    print()
+
+def repl():
+    setup_readline()
+    history = []
+    banner()
+
+    while True:
+        try:
+            line = input(cyan("you › ")).strip()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            return
+
+        if not line:
+            continue
+        if line in ("/exit", "/quit", "exit", "quit"):
+            return
+        if line == "/new":
+            history.clear()
+            print(dim("  conversation cleared"))
+            continue
+        if line == "/help":
+            print(dim("  /new    clear conversation"))
+            print(dim("  /exit   quit"))
+            continue
+
+        reply = chat_stream(line, history)
+        if reply:
+            history.append({"role": "user", "text": line})
+            history.append({"role": "omega", "text": reply})
+        print()
+
+def one_shot(prompt: str) -> int:
+    reply = chat_stream(prompt, [])
+    return 0 if reply else 1
+
+def main():
+    args = sys.argv[1:]
+
+    if not args:
+        if not sys.stdin.isatty():
+            prompt = sys.stdin.read().strip()
+            if prompt:
+                return one_shot(prompt)
+        repl()
+        return 0
+
+    if args[0] in ("--help", "-h", "help"):
+        print(__doc__)
+        return 0
+
+    return one_shot(" ".join(args))
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        print()
+        sys.exit(0)

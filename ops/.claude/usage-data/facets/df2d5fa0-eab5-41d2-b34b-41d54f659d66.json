@@ -1,0 +1,17 @@
+{
+  "underlying_goal": "Continue a previous session working on a Neon database script, understanding what was being done before a rate limit interruption",
+  "goal_categories": {
+    "context_recovery": 1
+  },
+  "outcome": "partially_achieved",
+  "user_satisfaction_counts": {},
+  "claude_helpfulness": "slightly_helpful",
+  "session_type": "single_task",
+  "friction_counts": {
+    "rate_limit_interruption": 1
+  },
+  "friction_detail": "Session was mostly consumed by recovering context after a rate limit hit, with limited actual progress.",
+  "primary_success": "none",
+  "brief_summary": "User wanted to continue previous database work after a rate limit, but the session mostly involved recovering context with no substantive progress visible.",
+  "session_id": "df2d5fa0-eab5-41d2-b34b-41d54f659d66"
+}

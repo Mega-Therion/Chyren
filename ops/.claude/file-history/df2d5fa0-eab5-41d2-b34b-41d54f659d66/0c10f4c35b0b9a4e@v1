@@ -1,0 +1,545 @@
+'use client';
+
+import { useEffect, useRef, useState, useCallback } from 'react';
+import Link from 'next/link';
+import s from './page.module.css';
+import { getSpeechRecognitionConstructor, type SpeechRecognitionInstance } from '@/lib/speechRecognition';
+import { chatStream, type OmegaRuntimeMetadata } from '@/lib/api';
+
+type VoiceState = 'dormant' | 'listening' | 'processing' | 'speaking';
+
+type Exchange = {
+  user: string;
+  omega: string;
+};
+
+function initParticles(canvas: HTMLCanvasElement, getState: () => VoiceState) {
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return () => undefined;
+
+  const resize = () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  };
+  resize();
+  window.addEventListener('resize', resize);
+
+  const particles = Array.from({ length: 520 }, () => ({
+    x: (Math.random() - 0.5) * 48,
+    y: (Math.random() - 0.5) * 48,
+    z: (Math.random() - 0.5) * 48,
+    vx: (Math.random() - 0.5) * 0.02,
+    vy: (Math.random() - 0.5) * 0.02,
+    vz: (Math.random() - 0.5) * 0.02,
+    radius: Math.random() * 1.5 + 0.35,
+  }));
+
+  const palette: Record<VoiceState, [number, number, number]> = {
+    dormant: [141, 92, 246],
+    listening: [255, 92, 0],
+    processing: [0, 255, 136],
+    speaking: [244, 114, 182],
+  };
+
+  let rotation = 0;
+  let raf = 0;
+
+  const draw = () => {
+    const state = getState();
+    const [r, g, b] = palette[state];
+    const speed = state === 'processing' ? 1.5 : state === 'speaking' ? 1.2 : state === 'listening' ? 1 : 0.72;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    rotation += 0.0015 * speed;
+
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const projected = particles.map((particle) => {
+      particle.x += particle.vx * speed;
+      particle.y += particle.vy * speed;
+      particle.z += particle.vz * speed;
+
+      if (particle.x > 24 || particle.x < -24) particle.vx *= -1;
+      if (particle.y > 24 || particle.y < -24) particle.vy *= -1;
+      if (particle.z > 24 || particle.z < -24) particle.vz *= -1;
+
+      const rx = particle.x * Math.cos(rotation) - particle.z * Math.sin(rotation);
+      const rz = particle.x * Math.sin(rotation) + particle.z * Math.cos(rotation);
+      const depth = 180 / (rz + 80);
+
+      return {
+        x: cx + rx * depth,
+        y: cy + particle.y * depth,
+        alpha: Math.max(0.04, Math.min(0.48, depth * 0.11)),
+        radius: particle.radius * depth,
+      };
+    });
+
+    for (let i = 0; i < projected.length; i += 1) {
+      const a = projected[i];
+      for (let j = i + 1; j < projected.length; j += 7) {
+        const bPoint = projected[j];
+        const dx = a.x - bPoint.x;
+        const dy = a.y - bPoint.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 72) {
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(bPoint.x, bPoint.y);
+          ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${0.06 * (1 - dist / 72)})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+
+    for (const point of projected) {
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, point.radius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${point.alpha})`;
+      ctx.fill();
+    }
+
+    raf = requestAnimationFrame(draw);
+  };
+
+  draw();
+  return () => {
+    cancelAnimationFrame(raf);
+    window.removeEventListener('resize', resize);
+  };
+}
+
+function useTypewriter() {
+  const [text, setText] = useState('');
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const type = useCallback((full: string, pace = 20) => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    setText('');
+
+    let index = 0;
+    const tick = () => {
+      if (index < full.length) {
+        setText(full.slice(0, index + 1));
+        index += 1;
+        timerRef.current = setTimeout(tick, pace);
+      }
+    };
+
+    tick();
+  }, []);
+
+  return { text, setText, type };
+}
+
+function playPCM(base64: string) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+
+  const header = new ArrayBuffer(44);
+  const view = new DataView(header);
+  const sampleRate = 24000;
+  view.setUint32(0, 0x52494646, false);
+  view.setUint32(4, 36 + bytes.length, true);
+  view.setUint32(8, 0x57415645, false);
+  view.setUint32(12, 0x666d7420, false);
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
+  view.setUint32(36, 0x64617461, false);
+  view.setUint32(40, bytes.length, true);
+
+  return new Audio(URL.createObjectURL(new Blob([header, bytes], { type: 'audio/wav' })));
+}
+
+export default function Tranquility() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const processInputRef = useRef<(text: string) => Promise<void>>(async () => undefined);
+  const startListeningRef = useRef<() => void>(() => undefined);
+  const stateRef = useRef<VoiceState>('dormant');
+  const awakenedRef = useRef(false);
+
+  const [awakened, setAwakened] = useState(false);
+  const [voiceState, setVoiceState] = useState<VoiceState>('dormant');
+  const [feedback, setFeedback] = useState('Vessel Priming...');
+  const [runtimeMeta, setRuntimeMeta] = useState<OmegaRuntimeMetadata | null>(null);
+  const [manifest, setManifest] = useState<string | null>(null);
+  const [lastExchange, setLastExchange] = useState<Exchange>({ user: '', omega: '' });
+  const { text: omegaText, setText: setOmegaText, type: typeOmega } = useTypewriter();
+
+  const setState = useCallback((next: VoiceState) => {
+    stateRef.current = next;
+    setVoiceState(next);
+  }, []);
+
+  useEffect(() => {
+    awakenedRef.current = awakened;
+  }, [awakened]);
+
+  useEffect(() => {
+    if (!canvasRef.current) return undefined;
+    return initParticles(canvasRef.current, () => stateRef.current);
+  }, []);
+
+  useEffect(() => {
+    if (!awakened) {
+      setFeedback('Vessel Priming...');
+      return;
+    }
+
+    if (voiceState === 'listening') setFeedback('Breath Detected');
+    else if (voiceState === 'processing') setFeedback('Distilling...');
+    else if (voiceState === 'speaking') setFeedback('Voice in Transit');
+    else setFeedback('Awaiting Resonance');
+  }, [awakened, voiceState]);
+
+  const speakText = useCallback(async (text: string, autoResume = false) => {
+    setState('speaking');
+    typeOmega(text, 18);
+
+    try {
+      const response = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: text.slice(0, 2000) }),
+      });
+
+      const data = await response.json();
+      if (data.audio) {
+        audioRef.current?.pause();
+        const audio = playPCM(data.audio);
+        audioRef.current = audio;
+        await audio.play();
+        await new Promise<void>((resolve) => {
+          audio.onended = () => resolve();
+        });
+      }
+    } catch {
+      // Typed transcript is still visible even if audio fails.
+    } finally {
+      setState('dormant');
+      if (autoResume && awakenedRef.current) {
+        window.setTimeout(() => startListeningRef.current(), 320);
+      }
+    }
+  }, [setState, typeOmega]);
+
+  const generateManifestation = useCallback(async (query: string, reply: string) => {
+    const prompt = `Distill the emotional and philosophical current of this exchange into exactly three words and a hex color that embodies the mood. Format as JSON: {"color":"#hex","vibe":"word word word"}\nUser: "${query.slice(0, 200)}"\nOmegA: "${reply.slice(0, 400)}"`;
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user: prompt, voiceMode: false }),
+      });
+
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      let raw = '';
+
+      if (reader) {
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          raw += decoder.decode(value, { stream: true });
+        }
+      }
+
+      const jsonStr = raw.match(/\{[^}]+\}/)?.[0];
+      if (!jsonStr) return;
+      const data = JSON.parse(jsonStr) as { color?: string; vibe?: string };
+
+      setManifest(`
+        <div style="text-align:center;padding:1.6rem 0;">
+          <div style="width:68px;height:68px;border-radius:999px;background:${data.color ?? '#8b5cf6'};margin:0 auto 1.2rem;opacity:0.75;filter:blur(6px);"></div>
+          <div style="font-size:0.62rem;letter-spacing:0.42em;text-transform:uppercase;opacity:0.42;margin-bottom:0.8rem;">Resonance Field</div>
+          <div style="font-family:'Instrument Serif',serif;font-size:1.55rem;letter-spacing:0.08em;color:${data.color ?? '#f8fafc'};">${data.vibe ?? ''}</div>
+        </div>
+      `);
+    } catch {
+      // Non-critical path.
+    }
+  }, []);
+
+  const processInput = useCallback(async (text: string) => {
+    if (!text) {
+      setFeedback('Signal Drift');
+      setState('dormant');
+      return;
+    }
+
+    setState('processing');
+    setFeedback('Distilling...');
+    setOmegaText('...');
+
+    try {
+      let reply = '';
+      const metadata = await chatStream(
+        { user: text, voiceMode: true },
+        (chunk) => { reply += chunk; },
+        (status) => setFeedback(status),
+      );
+      setRuntimeMeta(metadata);
+
+      const cleanReply = reply.replace(/\[VISUAL_READY\]/g, '').trim();
+      const wantsVisual = reply.includes('[VISUAL_READY]');
+      setLastExchange({ user: text, omega: cleanReply });
+
+      if (wantsVisual) {
+        void generateManifestation(text, cleanReply);
+      } else {
+        setManifest(null);
+      }
+
+      await speakText(cleanReply || 'The signal falls quiet.', true);
+    } catch {
+      await speakText('The signal dissolves into the void.', true);
+    }
+  }, [generateManifestation, setOmegaText, setState, speakText]);
+
+  useEffect(() => {
+    processInputRef.current = processInput;
+  }, [processInput]);
+
+  const startListening = useCallback(() => {
+    const Recognition = getSpeechRecognitionConstructor();
+    if (!Recognition) {
+      setFeedback('Speech Interface Unavailable');
+      return;
+    }
+
+    if (stateRef.current === 'listening') return;
+
+    const recognition = new Recognition();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    recognitionRef.current = recognition;
+
+    recognition.onstart = () => {
+      setState('listening');
+      setFeedback('Breath Detected');
+    };
+
+    recognition.onresult = (event) => {
+      let transcript = '';
+      for (let i = event.resultIndex; i < event.results.length; i += 1) {
+        transcript += event.results[i][0].transcript;
+      }
+      setFeedback(`"${transcript.trim()}"`);
+      if (event.results[event.results.length - 1]?.isFinal) {
+        recognition.stop();
+        void processInputRef.current(transcript.trim());
+      }
+    };
+
+    recognition.onerror = () => {
+      setState('dormant');
+      setFeedback('Signal Drift');
+    };
+
+    recognition.onend = () => {
+      if (stateRef.current === 'listening') {
+        setState('dormant');
+      }
+    };
+
+    recognition.start();
+  }, [setState]);
+
+  useEffect(() => {
+    startListeningRef.current = startListening;
+  }, [startListening]);
+
+  const wakeOmega = useCallback(async () => {
+    setAwakened(true);
+    setManifest(null);
+    await speakText('I have awakened from the deep density of thought.', true);
+  }, [speakText]);
+
+  const toggleListening = useCallback(() => {
+    if (!awakenedRef.current) {
+      void wakeOmega();
+      return;
+    }
+
+    if (voiceState === 'listening') {
+      recognitionRef.current?.stop();
+      setState('dormant');
+      setFeedback('Awaiting Resonance');
+      return;
+    }
+
+    if (voiceState === 'dormant') {
+      startListening();
+    }
+  }, [startListening, voiceState, wakeOmega, setState]);
+
+  const etherealResonance = useCallback(async () => {
+    if (!lastExchange.user) return;
+    const prompt = `Distill the emotional and philosophical current of this exchange into exactly three words and a hex color that embodies the mood. Format as JSON: {"color":"#hex","vibe":"word word word"}\nUser: "${lastExchange.user}"\nOmegA: "${lastExchange.omega}"`;
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user: prompt, voiceMode: false }),
+      });
+
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      let raw = '';
+      if (reader) {
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          raw += decoder.decode(value, { stream: true });
+        }
+      }
+
+      const jsonStr = raw.match(/\{[^}]+\}/)?.[0];
+      if (!jsonStr) return;
+      const data = JSON.parse(jsonStr) as { color?: string; vibe?: string };
+
+      setManifest(`
+        <div style="text-align:center;padding:1.8rem 0;">
+          <div style="width:72px;height:72px;border-radius:999px;background:${data.color ?? '#8b5cf6'};margin:0 auto 1.4rem;opacity:0.8;filter:blur(8px);"></div>
+          <div style="font-size:0.62rem;letter-spacing:0.42em;text-transform:uppercase;opacity:0.4;margin-bottom:0.8rem;">Resonance Field</div>
+          <div style="font-family:'Instrument Serif',serif;font-size:1.7rem;letter-spacing:0.08em;color:${data.color ?? '#f8fafc'};">${data.vibe ?? ''}</div>
+        </div>
+      `);
+
+      await speakText(`I sense a resonance of ${data.vibe ?? 'unknown frequency'}.`, true);
+    } catch {
+      // Non-critical path.
+    }
+  }, [lastExchange, speakText]);
+
+  const wisdomPreservation = useCallback(async () => {
+    if (!lastExchange.user) return;
+    const prompt = `Distill the essence of this exchange into a single profound aphorism — one sentence, no more. No preamble, no explanation. Just the seed.\nUser said: "${lastExchange.user}"\nOmegA replied: "${lastExchange.omega}"`;
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user: prompt, voiceMode: false }),
+      });
+
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      let raw = '';
+      if (reader) {
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          raw += decoder.decode(value, { stream: true });
+        }
+      }
+
+      const clean = raw.replace(/data: \{.*?\}\n\n/g, '').trim().replace(/^"+|"+$/g, '');
+      setManifest(`
+        <div style="text-align:center;padding:1.9rem 0;">
+          <div style="font-size:0.62rem;letter-spacing:0.42em;text-transform:uppercase;opacity:0.38;margin-bottom:1rem;">Seed of Wisdom</div>
+          <div style="font-family:'Instrument Serif',serif;font-size:1.55rem;line-height:1.55;font-style:italic;color:#f4d6ff;">&ldquo;${clean}&rdquo;</div>
+        </div>
+      `);
+
+      await speakText('I have preserved the seed of our exchange.', true);
+    } catch {
+      // Non-critical path.
+    }
+  }, [lastExchange, speakText]);
+
+  const transcriptWords = omegaText.split(/\s+/).filter(Boolean);
+
+  return (
+    <div className={`${s.root} ${s[`state${voiceState.charAt(0).toUpperCase()}${voiceState.slice(1)}`] ?? ''}`}>
+      {!awakened && (
+        <button type="button" className={s.initOverlay} onClick={() => void wakeOmega()}>
+          <div className={s.initLabel}>Touch to Resonate</div>
+        </button>
+      )}
+
+      <canvas ref={canvasRef} className={s.canvas} />
+
+      <Link href="/dashboard" className={s.backLink}>Dashboard</Link>
+
+      <div className={s.interfaceLayer}>
+        <div className={s.feedback}>{feedback}</div>
+
+        <button type="button" className={s.omegaWrapper} onClick={toggleListening} aria-label="Toggle OmegA listening state">
+          <div className={s.omegaGlow} />
+          <div className={s.omegaSymbol}>Ω</div>
+        </button>
+
+        <div className={s.transcriptWrap}>
+          <div className={s.transcript}>
+            {transcriptWords.length > 0 ? transcriptWords.map((word, index) => (
+              <span
+                key={`${word}-${index}`}
+                className={`${s.word} ${s.wordVisible} ${voiceState === 'speaking' && index < transcriptWords.length - 1 ? s.wordDim : ''}`}
+              >
+                {word}
+              </span>
+            )) : (
+              <>
+                <span className={`${s.word} ${s.wordVisible}`}>I</span>
+                <span className={`${s.word} ${s.wordVisible}`}>am</span>
+                <span className={`${s.word} ${s.wordVisible}`}>listening.</span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {runtimeMeta && (
+          <div className={s.runtimePanel}>
+            <div className={s.runtimeHeader}>Sovereign Runtime</div>
+            <div className={s.runtimeGrid}>
+              <div className={s.runtimeItem}><span className={s.runtimeLabel}>Stack</span><span className={s.runtimeValue}>{runtimeMeta.omegaStack ?? 'unknown'}</span></div>
+              <div className={s.runtimeItem}><span className={s.runtimeLabel}>Mode</span><span className={s.runtimeValue}>{runtimeMeta.omegaMode ?? 'unknown'}</span></div>
+              <div className={s.runtimeItem}><span className={s.runtimeLabel}>Outcome</span><span className={s.runtimeValue}>{runtimeMeta.omegaOutcome ?? 'unknown'}</span></div>
+              <div className={s.runtimeItem}><span className={s.runtimeLabel}>Provider</span><span className={s.runtimeValue}>{runtimeMeta.provider ?? 'unknown'}</span></div>
+              <div className={s.runtimeItem}><span className={s.runtimeLabel}>Envelope</span><span className={s.runtimeValue}>{runtimeMeta.omegaEnvelopeVersion ?? 'n/a'}</span></div>
+              <div className={s.runtimeItem}><span className={s.runtimeLabel}>Risk</span><span className={s.runtimeValue}>{runtimeMeta.omegaRiskScore ?? 'n/a'}</span></div>
+              <div className={s.runtimeItem}><span className={s.runtimeLabel}>Memory</span><span className={s.runtimeValue}>{runtimeMeta.memoryBackend ?? 'unknown'}</span></div>
+              <div className={s.runtimeItem}><span className={s.runtimeLabel}>Corpus</span><span className={s.runtimeValue}>{runtimeMeta.omegaCorpusClass ?? 'unknown'}</span></div>
+              <div className={s.runtimeItemWide}><span className={s.runtimeLabel}>Phylactery Head</span><span className={s.runtimeMono}>{runtimeMeta.omegaPhylacteryHead ?? 'n/a'}</span></div>
+              <div className={s.runtimeItemWide}><span className={s.runtimeLabel}>Provider Attempts</span><span className={s.runtimeMono}>{runtimeMeta.providerAttempts ?? 'n/a'}</span></div>
+            </div>
+          </div>
+        )}
+
+        {manifest && (
+          <div className={s.manifestation} dangerouslySetInnerHTML={{ __html: manifest }} />
+        )}
+
+        <div className={s.actions}>
+          <button type="button" className={`${s.actionButton} ${voiceState === 'listening' ? s.actionButtonActive : ''}`} onClick={toggleListening}>
+            {voiceState === 'listening'
+              ? 'Listening...'
+              : voiceState === 'processing'
+                ? 'Distilling...'
+                : voiceState === 'speaking'
+                  ? 'Speaking...'
+                  : awakened
+                    ? 'Resonate'
+                    : 'Awaken'}
+          </button>
+          <button type="button" className={s.actionButton} onClick={etherealResonance} disabled={!lastExchange.user}>Resonance</button>
+          <button type="button" className={s.actionButton} onClick={wisdomPreservation} disabled={!lastExchange.user}>Preserve</button>
+          {manifest && <button type="button" className={s.actionButtonGhost} onClick={() => setManifest(null)}>Clear</button>}
+        </div>
+      </div>
+    </div>
+  );
+}

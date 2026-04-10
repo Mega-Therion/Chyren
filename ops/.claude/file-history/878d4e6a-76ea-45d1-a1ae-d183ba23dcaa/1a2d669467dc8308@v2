@@ -1,0 +1,115 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { resolveInteractionMode } from '@/lib/omega/policy';
+import {
+  safeErrorMessage,
+  validateAudioFile,
+  checkRateLimit,
+  generateCorrelationId,
+  CORRELATION_HEADER,
+  withRetryBackoff,
+  getCircuitBreaker,
+} from '@/lib/hardening';
+
+// STT timeout — Whisper is fast but network can be slow
+const STT_TIMEOUT_MS = 30_000;
+
+/**
+ * OmegA STT — Speech-to-Text endpoint
+ * Accepts: multipart/form-data with field "audio" (webm/wav/mp3/m4a)
+ * Returns: { text: string, correlationId: string }
+ * Uses OpenAI Whisper API
+ */
+export async function POST(req: NextRequest) {
+  const correlationId = req.headers.get(CORRELATION_HEADER) ?? generateCorrelationId();
+
+  // Auth gate — STT uses your OpenAI key, don't expose it publicly (#V9)
+  const mode = resolveInteractionMode(req);
+  const isOperator = mode === 'operator';
+
+  // Rate limit STT separately (different cost profile from chat)
+  const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown';
+  const rateResult = checkRateLimit(req, isOperator);
+  if (!rateResult.allowed) {
+    return NextResponse.json(
+      { error: safeErrorMessage(429) },
+      { status: 429, headers: { 'Retry-After': String(Math.ceil((rateResult.resetAt - Date.now()) / 1000)) } },
+    );
+  }
+
+  void clientIp; // used in rate limit via req headers above
+
+  try {
+    const key = process.env.OPENAI_API_KEY;
+    if (!key) {
+      return NextResponse.json({ error: 'STT unavailable' }, { status: 503 });
+    }
+
+    const formData = await req.formData();
+    const audioFile = formData.get('audio') as File | null;
+
+    // File validation — type, size (#V3)
+    const audioValidation = validateAudioFile(audioFile as File);
+    if (!audioValidation.ok) {
+      return NextResponse.json({ error: audioValidation.error }, { status: 400 });
+    }
+
+    const cb = getCircuitBreaker('whisper');
+    if (cb.isOpen) {
+      return NextResponse.json({ error: 'Transcription service temporarily unavailable' }, { status: 503 });
+    }
+
+    // Forward to OpenAI Whisper with timeout (#V5b)
+    const whisperForm = new FormData();
+    whisperForm.append('file', audioFile!, audioFile!.name || 'audio.webm');
+    whisperForm.append('model', 'whisper-1');
+    whisperForm.append('language', 'en');
+    whisperForm.append('response_format', 'verbose_json'); // get segments + confidence
+
+    let data: Record<string, unknown>;
+    try {
+      data = await withRetryBackoff(async () => {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), STT_TIMEOUT_MS);
+        try {
+          const res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${key}` },
+            body: whisperForm,
+            signal: controller.signal,
+          });
+          if (!res.ok) {
+            const errText = await res.text().catch(() => '');
+            console.error('[OmegA STT] Whisper error:', errText);
+            throw new Error(`Whisper API ${res.status}`);
+          }
+          return await res.json() as Record<string, unknown>;
+        } finally {
+          clearTimeout(timer);
+        }
+      }, { maxAttempts: 2, baseDelayMs: 500 });
+      cb.recordSuccess();
+    } catch (e) {
+      cb.recordFailure();
+      console.error('[OmegA STT] Whisper failed:', e);
+      return NextResponse.json({ error: 'Transcription failed — please try again' }, { status: 502 });
+    }
+
+    const text = (data.text as string) ?? '';
+
+    // Low-confidence detection from verbose_json segments (#V3)
+    const segments = Array.isArray(data.segments) ? data.segments as Array<{ avg_logprob?: number }> : [];
+    const lowConfidence = segments.length > 0 &&
+      segments.every(s => typeof s.avg_logprob === 'number' && s.avg_logprob < -1.0);
+
+    return NextResponse.json({
+      text,
+      lowConfidence,
+      correlationId,
+    }, {
+      headers: { [CORRELATION_HEADER]: correlationId },
+    });
+  } catch (err) {
+    console.error('[OmegA STT]', err);
+    return NextResponse.json({ error: safeErrorMessage(500, err) }, { status: 500 });
+  }
+}

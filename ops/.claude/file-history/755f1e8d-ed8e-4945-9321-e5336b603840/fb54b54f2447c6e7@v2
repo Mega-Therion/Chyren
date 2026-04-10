@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TRACE_DB="/home/mega/.omega/trace.db"
+OVERRIDE_DIR="/etc/systemd/system/omega-gateway.service.d"
+OVERRIDE_FILE="$OVERRIDE_DIR/trace-db.conf"
+
+echo "==> Creating systemd override for omega-gateway trace DB..."
+sudo mkdir -p "$OVERRIDE_DIR"
+sudo tee "$OVERRIDE_FILE" > /dev/null <<EOF
+[Service]
+Environment=OMEGA_TRACE_DB_URL=sqlite://${TRACE_DB}
+EOF
+
+echo "==> Reloading systemd and restarting omega-gateway..."
+sudo systemctl daemon-reload
+sudo systemctl restart omega-gateway
+
+echo "==> Waiting for gateway to come up..."
+sleep 3
+
+echo "==> Verifying service status..."
+systemctl is-active omega-gateway
+
+echo "==> Sending test request..."
+omega "Reply with exactly PERSISTENT_TRACE_OK"
+
+echo "==> Checking trace output..."
+omega trace | head -10
+
+echo ""
+echo "Done. Traces now persist to: $TRACE_DB"

@@ -1,0 +1,17 @@
+[package]
+name = "omega-spokes"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+omega-core = { path = "../omega-core" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+async-trait = "0.1"
+thiserror = "1"
+anyhow = "1"
+
+# Provider SDKs (optional, loaded at runtime for now)

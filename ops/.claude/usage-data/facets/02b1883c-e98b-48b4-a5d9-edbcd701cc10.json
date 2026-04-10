@@ -1,0 +1,19 @@
+{
+  "underlying_goal": "User was trying to check if Claude was available/responsive",
+  "goal_categories": {
+    "warmup_minimal": 1
+  },
+  "outcome": "not_achieved",
+  "user_satisfaction_counts": {
+    "frustrated": 1
+  },
+  "claude_helpfulness": "unhelpful",
+  "session_type": "quick_question",
+  "friction_counts": {
+    "system_limitation": 2
+  },
+  "friction_detail": "Claude was rate-limited and could not respond to the user's messages.",
+  "primary_success": "none",
+  "brief_summary": "User tried to interact with Claude but was blocked by a usage limit, and disputing the reset time didn't help.",
+  "session_id": "02b1883c-e98b-48b4-a5d9-edbcd701cc10"
+}

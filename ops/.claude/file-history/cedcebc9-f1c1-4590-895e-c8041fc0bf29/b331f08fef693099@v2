@@ -1,0 +1,12 @@
+#!/bin/bash
+set -e
+VENV="/home/mega/OMEGA_WORKSPACE/INGEST/venv"
+PY="$VENV/bin/python"
+PIP="$VENV/bin/pip"
+
+echo "Installing voice deps..."
+$PIP install -q faster-whisper google-generativeai 2>/dev/null || true
+
+echo "Starting OmegA voice loop..."
+cd "$(dirname "$0")"
+exec $PY voice_service.py

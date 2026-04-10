@@ -1,0 +1,162 @@
+"""
+OmegA CLI Prompts — File-based prompt management and templates.
+"""
+
+from pathlib import Path
+from typing import Optional, List, Dict, Any
+
+
+class PromptManager:
+    """Manages file-based prompts and templates."""
+
+    def __init__(self):
+        """Initialize prompt manager."""
+        self.prompts_dir = Path.home() / ".omega" / "prompts"
+        self.templates_dir = self.prompts_dir / "templates"
+
+        # Create directories
+        self.prompts_dir.mkdir(parents=True, exist_ok=True)
+        self.templates_dir.mkdir(parents=True, exist_ok=True)
+
+        # Create default templates
+        self._init_templates()
+
+    def _init_templates(self) -> None:
+        """Initialize default prompt templates."""
+        templates = {
+            "audit-review": """# Code Audit Review
+
+## Files to Review
+[Paste file paths or code here]
+
+## Focus Areas
+- Code quality and style
+- Security issues
+- Performance concerns
+- Best practices violations
+
+## Questions
+1. What are the main issues found?
+2. What should be prioritized?
+3. Are there patterns or anti-patterns?
+""",
+            "feature-spec": """# Feature Specification
+
+## Summary
+[Brief description of the feature]
+
+## Requirements
+- [ ] Requirement 1
+- [ ] Requirement 2
+- [ ] Requirement 3
+
+## Implementation Notes
+[Any special considerations]
+
+## Testing
+[How to verify this works]
+""",
+            "bug-report": """# Bug Report
+
+## Description
+[What's the issue?]
+
+## Steps to Reproduce
+1. Step 1
+2. Step 2
+3. Step 3
+
+## Expected Behavior
+[What should happen]
+
+## Actual Behavior
+[What actually happens]
+
+## Environment
+- OS:
+- Version:
+- [Other relevant info]
+""",
+        }
+
+        for name, content in templates.items():
+            template_file = self.templates_dir / f"{name}.md"
+            if not template_file.exists():
+                template_file.write_text(content)
+
+    def load_prompt(self, path: str) -> Optional[str]:
+        """Load a prompt from a file."""
+        file_path = Path(path).expanduser()
+
+        if not file_path.exists():
+            return None
+
+        try:
+            return file_path.read_text()
+        except Exception:
+            return None
+
+    def save_prompt(self, name: str, content: str) -> bool:
+        """Save a prompt to file."""
+        try:
+            prompt_file = self.prompts_dir / f"{name}.md"
+            prompt_file.write_text(content)
+            return True
+        except Exception:
+            return False
+
+    def list_saved_prompts(self) -> List[str]:
+        """List all saved prompts."""
+        prompts = [f.stem for f in self.prompts_dir.glob("*.md")]
+        return sorted(prompts)
+
+    def list_templates(self) -> List[str]:
+        """List all available templates."""
+        templates = [f.stem for f in self.templates_dir.glob("*.md")]
+        return sorted(templates)
+
+    def get_template(self, name: str) -> Optional[str]:
+        """Get a template by name."""
+        template_file = self.templates_dir / f"{name}.md"
+
+        if template_file.exists():
+            try:
+                return template_file.read_text()
+            except Exception:
+                return None
+
+        return None
+
+    def chunk_prompt(self, content: str, chunk_size_kb: int = 100) -> List[str]:
+        """Chunk a large prompt into smaller segments."""
+        chunk_size_bytes = chunk_size_kb * 1024
+        chunks = []
+
+        # Split by double newlines first (paragraphs)
+        paragraphs = content.split("\n\n")
+        current_chunk = ""
+
+        for para in paragraphs:
+            if len((current_chunk + para).encode()) > chunk_size_bytes:
+                if current_chunk:
+                    chunks.append(current_chunk.strip())
+                current_chunk = para
+            else:
+                current_chunk += f"\n\n{para}" if current_chunk else para
+
+        if current_chunk:
+            chunks.append(current_chunk.strip())
+
+        return chunks
+
+
+# Global instance
+_prompt_manager: Optional[PromptManager] = None
+
+
+def get_prompt_manager() -> PromptManager:
+    """Get the global prompt manager instance."""
+    global _prompt_manager
+    if _prompt_manager is None:
+        _prompt_manager = PromptManager()
+    return _prompt_manager

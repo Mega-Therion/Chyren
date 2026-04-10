@@ -1,0 +1,1198 @@
+diff --git a/omega_workspace/workspace/OmegA-Next/chyren-web/app/api/brain-state/route.ts b/omega_workspace/workspace/OmegA-Next/chyren-web/app/api/brain-state/route.ts
+new file mode 100644
+index 00000000..c8b5819f
+--- /dev/null
++++ b/omega_workspace/workspace/OmegA-Next/chyren-web/app/api/brain-state/route.ts
+@@ -0,0 +1,55 @@
++import { NextRequest } from 'next/server'
++
++export const runtime = 'edge'
++
++// Simulates Chyren's cognitive pipeline stages as brain activity levels.
++// When real telemetry is wired from the Rust CLI, replace these with actual events.
++const PIPELINE_STAGES = [
++  // [stage-name, adccl, provider, threat, phylactery, ledger, alignment, duration-ms]
++  { name: 'identity_load',   adccl: 0.1,  provider: 0.05, threat: 0.05, phylactery: 0.9,  ledger: 0.1,  alignment: 0.3,  ms: 400  },
++  { name: 'alignment_check', adccl: 0.2,  provider: 0.1,  threat: 0.1,  phylactery: 0.4,  ledger: 0.1,  alignment: 0.95, ms: 500  },
++  { name: 'threat_scan',     adccl: 0.3,  provider: 0.1,  threat: 0.9,  phylactery: 0.2,  ledger: 0.1,  alignment: 0.4,  ms: 400  },
++  { name: 'provider_call',   adccl: 0.4,  provider: 0.95, threat: 0.1,  phylactery: 0.3,  ledger: 0.2,  alignment: 0.3,  ms: 1200 },
++  { name: 'adccl_verify',    adccl: 0.95, provider: 0.3,  threat: 0.2,  phylactery: 0.3,  ledger: 0.3,  alignment: 0.6,  ms: 600  },
++  { name: 'ledger_commit',   adccl: 0.5,  provider: 0.2,  threat: 0.05, phylactery: 0.5,  ledger: 0.95, alignment: 0.2,  ms: 300  },
++  { name: 'idle',            adccl: 0.05, provider: 0.05, threat: 0.02, phylactery: 0.08, ledger: 0.02, alignment: 0.05, ms: 0    },
++]
++
++export async function GET(req: NextRequest) {
++  const encoder = new TextEncoder()
++
++  const stream = new ReadableStream({
++    async start(controller) {
++      const send = (data: object) => {
++        controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`))
++      }
++
++      for (const stage of PIPELINE_STAGES) {
++        send({
++          stage: stage.name,
++          state: {
++            adccl: stage.adccl,
++            provider: stage.provider,
++            threat: stage.threat,
++            phylactery: stage.phylactery,
++            ledger: stage.ledger,
++            alignment: stage.alignment,
++          },
++        })
++        if (stage.ms > 0) {
++          await new Promise((r) => setTimeout(r, stage.ms))
++        }
++      }
++
++      controller.close()
++    },
++  })
++
++  return new Response(stream, {
++    headers: {
++      'Content-Type': 'text/event-stream',
++      'Cache-Control': 'no-cache',
++      Connection: 'keep-alive',
++    },
++  })
++}
+diff --git a/omega_workspace/workspace/OmegA-Next/chyren-web/app/api/chat/route.ts b/omega_workspace/workspace/OmegA-Next/chyren-web/app/api/chat/route.ts
+new file mode 100644
+index 00000000..795c9909
+--- /dev/null
++++ b/omega_workspace/workspace/OmegA-Next/chyren-web/app/api/chat/route.ts
+@@ -0,0 +1,19 @@
++import { NextRequest, NextResponse } from 'next/server'
++
++export async function POST(req: NextRequest) {
++  try {
++    const body = await req.json()
++    const { message } = body
++
++    if (!message) {
++      return NextResponse.json({ error: 'Message is required' }, { status: 400 })
++    }
++
++    // Mock response for now
++    const response = `Echo: ${message}`
++    return NextResponse.json({ response })
++  } catch (error) {
++    console.error('Chat error:', error)
++    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
++  }
++}
+diff --git a/omega_workspace/workspace/OmegA-Next/chyren-web/app/api/chat/stream/route.ts b/omega_workspace/workspace/OmegA-Next/chyren-web/app/api/chat/stream/route.ts
+new file mode 100644
+index 00000000..2877ac69
+--- /dev/null
++++ b/omega_workspace/workspace/OmegA-Next/chyren-web/app/api/chat/stream/route.ts
+@@ -0,0 +1,55 @@
++import { NextRequest, NextResponse } from 'next/server'
++
++export async function POST(req: NextRequest) {
++  try {
++    const body = await req.json()
++    const { message, context } = body
++
++    if (!message) {
++      return NextResponse.json({ error: 'Message is required' }, { status: 400 })
++    }
++
++    // Create a readable stream for the response
++    const encoder = new TextEncoder()
++    let responseText = ''
++
++    // Simulate streaming response from Chyren backend
++    // In production, this would call your actual Rust/Python backend
++    const mockResponses: { [key: string]: string } = {
++      hello: 'Hello! I\'m Chyren, the Sovereign Intelligence Orchestrator. I\'m ready to route your tasks through verified AI providers with integrity checks.',
++      help: 'I can help you with:\n\n• **Task Routing**: Send tasks to multiple AI providers (Anthropic, OpenAI, DeepSeek, Gemini)\n• **Integrity Verification**: Every response is checked for accuracy and drift\n• **Multi-provider**: Get the best response by comparing across providers\n• **Threat Detection**: Built-in safety checks and policy enforcement\n\nWhat would you like to do?',
++      default: `I received your message: "${message}". In production, this would be routed through the Sovereign Hub with verified provider execution. For now, I'm in demo mode. Try asking me about my capabilities or how I work!`,
++    }
++
++    const lowerMessage = message.toLowerCase()
++    if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
++      responseText = mockResponses.hello
++    } else if (lowerMessage.includes('help') || lowerMessage.includes('what can')) {
++      responseText = mockResponses.help
++    } else {
++      responseText = mockResponses.default
++    }
++
++    // Stream the response character by character
++    const stream = new ReadableStream({
++      async start(controller) {
++        for (const char of responseText) {
++          controller.enqueue(encoder.encode(char))
++          await new Promise((resolve) => setTimeout(resolve, 10))
++        }
++        controller.close()
++      },
++    })
++
++    return new NextResponse(stream, {
++      headers: {
++        'Content-Type': 'text/event-stream',
++        'Cache-Control': 'no-cache',
++        'Connection': 'keep-alive',
++      },
++    })
++  } catch (error) {
++    console.error('Chat stream error:', error)
++    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
++  }
++}
+diff --git a/omega_workspace/workspace/OmegA-Next/chyren-web/app/api/stt/route.ts b/omega_workspace/workspace/OmegA-Next/chyren-web/app/api/stt/route.ts
+new file mode 100644
+index 00000000..0d1dad45
+--- /dev/null
++++ b/omega_workspace/workspace/OmegA-Next/chyren-web/app/api/stt/route.ts
+@@ -0,0 +1,12 @@
++import { NextRequest, NextResponse } from 'next/server';
++
++export async function POST(req: NextRequest) {
++    // 1. Receive audio blob
++    const formData = await req.formData();
++    const file = formData.get('audio') as File;
++    if (!file) return NextResponse.json({ error: 'No audio' }, { status: 400 });
++
++    // 2. Placeholder for Whisper/STT integration
++    // 3. Normalize transcription
++    return NextResponse.json({ transcription: "System voice input verified." });
++}
+diff --git a/omega_workspace/workspace/OmegA-Next/chyren-web/app/api/tts/route.ts b/omega_workspace/workspace/OmegA-Next/chyren-web/app/api/tts/route.ts
+new file mode 100644
+index 00000000..64ef818c
+--- /dev/null
++++ b/omega_workspace/workspace/OmegA-Next/chyren-web/app/api/tts/route.ts
+@@ -0,0 +1,17 @@
++import { NextRequest, NextResponse } from 'next/server';
++
++export async function POST(req: NextRequest) {
++    const { text } = await req.json();
++    if (!text) return NextResponse.json({ error: 'No text provided' }, { status: 400 });
++
++    // 1. Placeholder for TTS synthesis (e.g., ElevenLabs or Web Speech API backend)
++    // 2. We return a streamable audio buffer (WAV/MP3)
++    const audioBuffer = Buffer.from('mock-audio-data');
++    
++    return new NextResponse(audioBuffer, {
++        headers: {
++            'Content-Type': 'audio/mpeg',
++            'Content-Length': audioBuffer.length.toString(),
++        },
++    });
++}
+diff --git a/omega_workspace/workspace/OmegA-Next/chyren-web/app/layout.tsx b/omega_workspace/workspace/OmegA-Next/chyren-web/app/layout.tsx
+index 6e5229f3..17c9f9be 100644
+--- a/omega_workspace/workspace/OmegA-Next/chyren-web/app/layout.tsx
++++ b/omega_workspace/workspace/OmegA-Next/chyren-web/app/layout.tsx
+@@ -13,19 +13,8 @@ export default function RootLayout({
+ }) {
+   return (
+     <html lang="en">
+-      <body className="bg-chyren-900 text-white">
+-        <div className="min-h-screen flex flex-col">
+-          <header className="bg-black border-b border-chyren-500 py-4 px-6">
+-            <h1 className="text-3xl font-bold text-chyren-500">⚡ CHYREN</h1>
+-            <p className="text-chyren-100 text-sm mt-1">Sovereign Intelligence Orchestrator</p>
+-          </header>
+-          <main className="flex-1 container mx-auto px-6 py-8">
+-            {children}
+-          </main>
+-          <footer className="border-t border-chyren-500 py-4 px-6 text-center text-chyren-100 text-sm">
+-            <p>© 2026 Chyren Sovereign Intelligence. All policy enforced.</p>
+-          </footer>
+-        </div>
++      <body className="bg-slate-950 text-white">
++        {children}
+       </body>
+     </html>
+   )
+diff --git a/omega_workspace/workspace/OmegA-Next/chyren-web/app/page.tsx b/omega_workspace/workspace/OmegA-Next/chyren-web/app/page.tsx
+index f86f290a..8a19c9e9 100644
+--- a/omega_workspace/workspace/OmegA-Next/chyren-web/app/page.tsx
++++ b/omega_workspace/workspace/OmegA-Next/chyren-web/app/page.tsx
+@@ -1,16 +1,147 @@
+-export default function HomePage() {
++'use client'
++
++import React, { useState, useCallback, useRef, lazy, Suspense } from 'react'
++import { ChatInput } from '@/components/ChatInput'
++import { MessageList, type Message } from '@/components/MessageList'
++import { useBrainState } from '@/hooks/useBrainState'
++
++const ChyrenBrain = lazy(() => import('@/components/ChyrenBrain'))
++
++const STAGE_LABELS: Record<string, string> = {
++  identity_load:   'Loading identity…',
++  alignment_check: 'Alignment check…',
++  threat_scan:     'Scanning threats…',
++  provider_call:   'Provider executing…',
++  adccl_verify:    'ADCCL verifying…',
++  ledger_commit:   'Committing to ledger…',
++  idle:            'Sovereign Intelligence',
++}
++
++export default function ChatPage() {
++  const [messages, setMessages] = useState<Message[]>([])
++  const [isLoading, setIsLoading] = useState(false)
++  const messagesRef = useRef<Message[]>([])
++  const { brainState, activeStage, activate } = useBrainState()
++
++  const addMessage = useCallback(
++    (role: 'user' | 'assistant', content: string, isStreaming = false) => {
++      const message: Message = {
++        id: Date.now().toString(),
++        role,
++        content,
++        timestamp: new Date(),
++        isStreaming,
++      }
++      setMessages((prev) => [...prev, message])
++      messagesRef.current = [...messagesRef.current, message]
++      return message.id
++    },
++    []
++  )
++
++  const updateMessage = useCallback((id: string, content: string, isStreaming = false) => {
++    setMessages((prev) =>
++      prev.map((msg) =>
++        msg.id === id ? { ...msg, content, isStreaming } : msg
++      )
++    )
++  }, [])
++
++  const handleSend = useCallback(
++    async (userMessage: string) => {
++      if (!userMessage.trim()) return
++
++      addMessage('user', userMessage)
++      setIsLoading(true)
++      activate() // fire up the brain visualization
++
++      try {
++        const assistantId = addMessage('assistant', '', true)
++
++        const response = await fetch('/api/chat/stream', {
++          method: 'POST',
++          headers: { 'Content-Type': 'application/json' },
++          body: JSON.stringify({
++            message: userMessage,
++            context: messages.map((m) => ({ role: m.role, content: m.content })),
++          }),
++        })
++
++        if (!response.ok) throw new Error('Failed to fetch response')
++
++        const reader = response.body?.getReader()
++        const decoder = new TextDecoder()
++        let fullContent = ''
++
++        if (reader) {
++          while (true) {
++            const { done, value } = await reader.read()
++            if (done) break
++            fullContent += decoder.decode(value)
++            updateMessage(assistantId, fullContent, true)
++          }
++        }
++
++        updateMessage(assistantId, fullContent, false)
++      } catch (error) {
++        console.error('Chat error:', error)
++        addMessage('assistant', 'Sorry, I encountered an error processing your request. Please try again.')
++      } finally {
++        setIsLoading(false)
++      }
++    },
++    [messages, addMessage, updateMessage, activate]
++  )
++
+   return (
+-    <div className="max-w-2xl">
+-      <h2 className="text-2xl font-semibold text-chyren-400 mb-4">Hub online</h2>
+-      <p className="text-chyren-100 leading-relaxed">
+-        Chyren web is deployed on Vercel. Point{' '}
+-        <code className="bg-black/40 px-1.5 py-0.5 rounded text-sm">
+-          NEXT_PUBLIC_API_BASE_URL
+-        </code>{' '}
+-        in your project env to your running{' '}
+-        <code className="bg-black/40 px-1.5 py-0.5 rounded text-sm">chyren-api</code>{' '}
+-        host when the API is live.
+-      </p>
++    <div className="h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 flex flex-col overflow-hidden">
++      {/* Header */}
++      <header className="border-b border-slate-700/30 backdrop-blur supports-[backdrop-filter]:bg-slate-900/20 px-6 py-4 flex-shrink-0">
++        <div className="max-w-7xl mx-auto flex items-center gap-3">
++          <div className="text-2xl font-bold gradient-text">Ω CHYREN</div>
++          <span className="text-xs px-2 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
++            {STAGE_LABELS[activeStage] ?? 'Sovereign Intelligence'}
++          </span>
++        </div>
++      </header>
++
++      {/* Body: brain + chat side by side */}
++      <div className="flex flex-1 overflow-hidden max-w-7xl w-full mx-auto gap-0">
++
++        {/* Brain panel */}
++        <div className="hidden lg:flex flex-col w-80 flex-shrink-0 border-r border-slate-700/30 p-3">
++          <div className="text-xs text-slate-500 uppercase tracking-widest mb-2 text-center">
++            Cognitive Activity
++          </div>
++          <div className="flex-1 relative">
++            <Suspense fallback={
++              <div className="w-full h-full flex items-center justify-center text-slate-600 text-xs">
++                Loading brain…
++              </div>
++            }>
++              <ChyrenBrain state={brainState} />
++            </Suspense>
++          </div>
++          <div className="text-center mt-2">
++            <span className="text-xs text-slate-600 italic">
++              {STAGE_LABELS[activeStage] ?? '—'}
++            </span>
++          </div>
++        </div>
++
++        {/* Chat panel */}
++        <div className="flex flex-col flex-1 overflow-hidden">
++          <MessageList messages={messages} isLoading={isLoading} />
++
++          <div className="border-t border-slate-700/30 backdrop-blur supports-[backdrop-filter]:bg-slate-900/20 px-6 py-4 flex-shrink-0">
++            <ChatInput onSend={handleSend} disabled={isLoading} isLoading={isLoading} />
++            <p className="text-xs text-slate-500 text-center mt-2">
++              Press Enter to send · Shift+Enter for new line · Tasks routed through verified AI providers
++            </p>
++          </div>
++        </div>
++
++      </div>
+     </div>
+   )
+ }
+diff --git a/omega_workspace/workspace/OmegA-Next/chyren-web/components/ChatInput.tsx b/omega_workspace/workspace/OmegA-Next/chyren-web/components/ChatInput.tsx
+new file mode 100644
+index 00000000..0fe67eb8
+--- /dev/null
++++ b/omega_workspace/workspace/OmegA-Next/chyren-web/components/ChatInput.tsx
+@@ -0,0 +1,164 @@
++'use client'
++
++import React, { useRef, useState, useCallback, useEffect } from 'react'
++
++interface ChatInputProps {
++  onSend: (message: string) => void
++  disabled?: boolean
++  isLoading?: boolean
++}
++
++export function ChatInput({ onSend, disabled = false, isLoading = false }: ChatInputProps) {
++  const [input, setInput] = useState('')
++  const [isRecording, setIsRecording] = useState(false)
++  const textareaRef = useRef<HTMLTextAreaElement>(null)
++  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
++  const audioChunksRef = useRef<Blob[]>([])
++
++  // Auto-resize textarea
++  useEffect(() => {
++    if (textareaRef.current) {
++      textareaRef.current.style.height = '44px'
++      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 140) + 'px'
++    }
++  }, [input])
++
++  const handleSend = useCallback(() => {
++    if (input.trim() && !disabled && !isLoading) {
++      onSend(input.trim())
++      setInput('')
++      if (textareaRef.current) {
++        textareaRef.current.style.height = '44px'
++      }
++    }
++  }, [input, disabled, isLoading, onSend])
++
++  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
++    if (e.key === 'Enter' && !e.shiftKey) {
++      e.preventDefault()
++      handleSend()
++    }
++  }
++
++  const startRecording = async () => {
++    try {
++      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
++      const mediaRecorder = new MediaRecorder(stream)
++      mediaRecorderRef.current = mediaRecorder
++      audioChunksRef.current = []
++
++      mediaRecorder.ondataavailable = (event) => {
++        audioChunksRef.current.push(event.data)
++      }
++
++      mediaRecorder.onstop = async () => {
++        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
++        try {
++          const formData = new FormData()
++          formData.append('audio', audioBlob)
++
++          const response = await fetch('/api/stt', {
++            method: 'POST',
++            body: formData,
++          })
++
++          if (response.ok) {
++            const data = await response.json()
++            if (data.text) {
++              setInput((prev) => (prev ? prev + ' ' + data.text : data.text))
++            }
++          }
++        } catch (error) {
++          console.error('STT error:', error)
++        }
++
++        stream.getTracks().forEach((track) => track.stop())
++      }
++
++      mediaRecorder.start()
++      setIsRecording(true)
++    } catch (error) {
++      console.error('Microphone access denied:', error)
++    }
++  }
++
++  const stopRecording = () => {
++    if (mediaRecorderRef.current) {
++      mediaRecorderRef.current.stop()
++      setIsRecording(false)
++    }
++  }
++
++  return (
++    <div className="glass-darker rounded-3xl p-3 flex items-end gap-2 transition-all duration-200 focus-within:border-cyan-400/50">
++      {/* Textarea */}
++      <textarea
++        ref={textareaRef}
++        value={input}
++        onChange={(e) => setInput(e.target.value)}
++        onKeyDown={handleKeyDown}
++        placeholder="Ask Chyren anything..."
++        disabled={disabled || isLoading}
++        className="flex-1 bg-transparent text-white placeholder-slate-500 text-sm resize-none focus:outline-none disabled:opacity-50"
++        rows={1}
++      />
++
++      {/* Voice Button */}
++      <button
++        onClick={isRecording ? stopRecording : startRecording}
++        disabled={disabled || isLoading}
++        className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ${
++          isRecording
++            ? 'bg-red-500/80 text-white animate-pulse-subtle'
++            : 'bg-slate-700 hover:bg-slate-600 text-cyan-400'
++        } disabled:opacity-50 disabled:cursor-not-allowed`}
++        title={isRecording ? 'Stop recording' : 'Start recording'}
++      >
++        {isRecording ? (
++          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
++            <rect x="6" y="5" width="3" height="10" />
++            <rect x="11" y="5" width="3" height="10" />
++          </svg>
++        ) : (
++          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
++            <path d="M10 2a4 4 0 0 0-4 4v4a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4zM7 10a3 3 0 0 1 6 0v3a3 3 0 1 1-6 0v-3z" />
++          </svg>
++        )}
++      </button>
++
++      {/* Send Button */}
++      <button
++        onClick={handleSend}
++        disabled={!input.trim() || disabled || isLoading}
++        className="flex-shrink-0 w-9 h-9 rounded-full bg-gradient-accent hover:opacity-90 text-white flex items-center justify-center transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed hover:scale-105"
++        title="Send message (Enter)"
++      >
++        {isLoading ? (
++          <svg
++            className="w-4 h-4 animate-spin"
++            fill="none"
++            viewBox="0 0 24 24"
++          >
++            <circle
++              className="opacity-25"
++              cx="12"
++              cy="12"
++              r="10"
++              stroke="currentColor"
++              strokeWidth="4"
++            />
++            <path
++              className="opacity-75"
++              fill="currentColor"
++              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
++            />
++          </svg>
++        ) : (
++          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
++            <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5.951-1.488 5.951 1.488a1 1 0 001.169-1.409l-7-14z" />
++          </svg>
++        )}
++      </button>
++    </div>
++  )
++}
+diff --git a/omega_workspace/workspace/OmegA-Next/chyren-web/components/ChatMessage.tsx b/omega_workspace/workspace/OmegA-Next/chyren-web/components/ChatMessage.tsx
+new file mode 100644
+index 00000000..cc350b3f
+--- /dev/null
++++ b/omega_workspace/workspace/OmegA-Next/chyren-web/components/ChatMessage.tsx
+@@ -0,0 +1,95 @@
++'use client'
++
++import React, { useEffect, useState } from 'react'
++
++interface ChatMessageProps {
++  role: 'user' | 'assistant'
++  content: string
++  timestamp?: Date
++  isStreaming?: boolean
++}
++
++export function ChatMessage({
++  role,
++  content,
++  timestamp,
++  isStreaming = false,
++}: ChatMessageProps) {
++  const [displayedContent, setDisplayedContent] = useState('')
++  const [isRendered, setIsRendered] = useState(false)
++
++  useEffect(() => {
++    setIsRendered(true)
++  }, [])
++
++  useEffect(() => {
++    if (isStreaming) {
++      setDisplayedContent(content)
++    } else {
++      setDisplayedContent(content)
++    }
++  }, [content, isStreaming])
++
++  const isUser = role === 'user'
++
++  return (
++    <div
++      className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4 animate-slide-in`}
++    >
++      <div
++        className={`flex items-end gap-2 max-w-xs sm:max-w-md lg:max-w-xl ${
++          isUser ? 'flex-row-reverse' : 'flex-row'
++        }`}
++      >
++        {/* Avatar */}
++        <div
++          className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
++            isUser
++              ? 'bg-gradient-accent'
++              : 'glass border border-cyan-500/30'
++          }`}
++        >
++          {isUser ? '→' : 'Ω'}
++        </div>
++
++        {/* Message bubble */}
++        <div
++          className={`px-4 py-3 rounded-2xl ${
++            isUser
++              ? 'bg-gradient-to-r from-cyan-600 to-teal-600 text-white rounded-br-none'
++              : 'glass-darker text-slate-100 rounded-bl-none'
++          } ${isRendered ? 'animate-fade-in' : ''}`}
++        >
++          <div
++            className={`message-content text-sm leading-relaxed ${
++              isStreaming ? 'font-medium' : ''
++            }`}
++          >
++            {displayedContent}
++            {isStreaming && (
++              <span className="inline-flex ml-1 items-center gap-1">
++                <span className="typing-indicator">
++                  <span className="typing-dot w-1.5 h-1.5" />
++                </span>
++              </span>
++            )}
++          </div>
++
++          {/* Timestamp */}
++          {timestamp && (
++            <div
++              className={`text-xs mt-1.5 ${
++                isUser ? 'text-blue-100' : 'text-slate-500'
++              }`}
++            >
++              {timestamp.toLocaleTimeString([], {
++                hour: '2-digit',
++                minute: '2-digit',
++              })}
++            </div>
++          )}
++        </div>
++      </div>
++    </div>
++  )
++}
+diff --git a/omega_workspace/workspace/OmegA-Next/chyren-web/components/ChyrenBrain.tsx b/omega_workspace/workspace/OmegA-Next/chyren-web/components/ChyrenBrain.tsx
+new file mode 100644
+index 00000000..2757c6aa
+--- /dev/null
++++ b/omega_workspace/workspace/OmegA-Next/chyren-web/components/ChyrenBrain.tsx
+@@ -0,0 +1,242 @@
++'use client'
++
++import { useEffect, useRef } from 'react'
++import * as THREE from 'three'
++
++export interface BrainState {
++  adccl: number        // 0-1 verification gate
++  provider: number     // 0-1 active spoke
++  threat: number       // 0-1 threat fabric
++  phylactery: number   // 0-1 identity/memory
++  ledger: number       // 0-1 ledger write
++  alignment: number    // 0-1 alignment layer
++}
++
++export const IDLE_BRAIN: BrainState = {
++  adccl: 0.05,
++  provider: 0.05,
++  threat: 0.02,
++  phylactery: 0.08,
++  ledger: 0.02,
++  alignment: 0.05,
++}
++
++// Module definitions: name, position on sphere, color
++const MODULES = [
++  { key: 'adccl',      label: 'ADCCL',       phi: 0.3,  theta: 0.0,  color: new THREE.Color(0x00e5ff) },  // cyan - top front
++  { key: 'alignment',  label: 'ALIGNMENT',   phi: 0.5,  theta: 0.4,  color: new THREE.Color(0x7c4dff) },  // purple - upper side
++  { key: 'provider',   label: 'PROVIDER',    phi: 1.0,  theta: -0.5, color: new THREE.Color(0x00e676) },  // green - mid left
++  { key: 'phylactery', label: 'PHYLACTERY',  phi: 1.2,  theta: 0.8,  color: new THREE.Color(0xffd740) },  // gold - mid right
++  { key: 'ledger',     label: 'LEDGER',      phi: 1.6,  theta: 0.2,  color: new THREE.Color(0xff6d00) },  // orange - lower front
++  { key: 'threat',     label: 'THREAT',      phi: 0.8,  theta: 2.8,  color: new THREE.Color(0xff1744) },  // red - back
++] as const
++
++type ModuleKey = typeof MODULES[number]['key']
++
++function spherePos(phi: number, theta: number, r: number): THREE.Vector3 {
++  return new THREE.Vector3(
++    r * Math.sin(phi) * Math.cos(theta),
++    r * Math.cos(phi),
++    r * Math.sin(phi) * Math.sin(theta)
++  )
++}
++
++export default function ChyrenBrain({ state = IDLE_BRAIN }: { state?: BrainState }) {
++  const mountRef = useRef<HTMLDivElement>(null)
++  const stateRef = useRef(state)
++  stateRef.current = state
++
++  useEffect(() => {
++    const el = mountRef.current
++    if (!el) return
++
++    const w = el.clientWidth
++    const h = el.clientHeight
++
++    // Scene
++    const scene = new THREE.Scene()
++    const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 100)
++    camera.position.set(0, 0, 4.5)
++
++    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
++    renderer.setSize(w, h)
++    renderer.setPixelRatio(window.devicePixelRatio)
++    el.appendChild(renderer.domElement)
++
++    // Brain sphere (wireframe)
++    const brainGeo = new THREE.SphereGeometry(1.5, 32, 24)
++    const brainMat = new THREE.MeshBasicMaterial({
++      color: 0x1a2744,
++      wireframe: true,
++      transparent: true,
++      opacity: 0.15,
++    })
++    const brainMesh = new THREE.Mesh(brainGeo, brainMat)
++    scene.add(brainMesh)
++
++    // Build nodes
++    const nodes: {
++      key: ModuleKey
++      mesh: THREE.Mesh
++      glow: THREE.Mesh
++      mat: THREE.MeshBasicMaterial
++      glowMat: THREE.MeshBasicMaterial
++      baseColor: THREE.Color
++      pos: THREE.Vector3
++    }[] = []
++
++    for (const mod of MODULES) {
++      const pos = spherePos(mod.phi, mod.theta, 1.5)
++
++      // Core sphere
++      const geo = new THREE.SphereGeometry(0.08, 16, 16)
++      const mat = new THREE.MeshBasicMaterial({ color: mod.color.clone() })
++      const mesh = new THREE.Mesh(geo, mat)
++      mesh.position.copy(pos)
++      scene.add(mesh)
++
++      // Glow halo
++      const glowGeo = new THREE.SphereGeometry(0.18, 16, 16)
++      const glowMat = new THREE.MeshBasicMaterial({
++        color: mod.color.clone(),
++        transparent: true,
++        opacity: 0.0,
++      })
++      const glow = new THREE.Mesh(glowGeo, glowMat)
++      glow.position.copy(pos)
++      scene.add(glow)
++
++      nodes.push({ key: mod.key, mesh, glow, mat, glowMat, baseColor: mod.color.clone(), pos })
++    }
++
++    // Neural pathways (lines between nodes)
++    const lineMat = new THREE.LineBasicMaterial({ color: 0x1e3a5f, transparent: true, opacity: 0.3 })
++    for (let i = 0; i < nodes.length; i++) {
++      for (let j = i + 1; j < nodes.length; j++) {
++        const pts = [nodes[i].pos.clone(), nodes[j].pos.clone()]
++        const lineGeo = new THREE.BufferGeometry().setFromPoints(pts)
++        scene.add(new THREE.Line(lineGeo, lineMat))
++      }
++    }
++
++    // Pulse rings per node
++    const rings: { mesh: THREE.Mesh; mat: THREE.MeshBasicMaterial; nodeIdx: number; phase: number }[] = []
++    for (let i = 0; i < nodes.length; i++) {
++      const ringGeo = new THREE.RingGeometry(0.1, 0.14, 32)
++      const ringMat = new THREE.MeshBasicMaterial({
++        color: nodes[i].baseColor.clone(),
++        transparent: true,
++        opacity: 0,
++        side: THREE.DoubleSide,
++      })
++      const ring = new THREE.Mesh(ringGeo, ringMat)
++      ring.position.copy(nodes[i].pos)
++      ring.lookAt(camera.position)
++      scene.add(ring)
++      rings.push({ mesh: ring, mat: ringMat, nodeIdx: i, phase: Math.random() * Math.PI * 2 })
++    }
++
++    // Slow rotation
++    let frameId: number
++    let t = 0
++
++    function animate() {
++      frameId = requestAnimationFrame(animate)
++      t += 0.008
++
++      brainMesh.rotation.y = t * 0.3
++      brainMesh.rotation.x = Math.sin(t * 0.1) * 0.05
++
++      const s = stateRef.current
++
++      nodes.forEach((node, i) => {
++        const activity = s[node.key] ?? 0.05
++        const pulse = 0.7 + 0.3 * Math.sin(t * (2 + i * 0.4) + i)
++        const intensity = activity * pulse
++
++        // Brightness
++        const bright = new THREE.Color()
++        bright.copy(node.baseColor).multiplyScalar(0.3 + intensity * 2.5)
++        node.mat.color = bright
++
++        // Glow opacity
++        node.glowMat.opacity = intensity * 0.5
++
++        // Scale glow with activity
++        const scale = 1 + activity * 1.5
++        node.glow.scale.setScalar(scale)
++      })
++
++      // Pulse rings
++      rings.forEach((r) => {
++        const activity = s[nodes[r.nodeIdx].key] ?? 0.05
++        if (activity > 0.15) {
++          r.phase += 0.04
++          const p = (r.phase % (Math.PI * 2)) / (Math.PI * 2)
++          const ringScale = 1 + p * 3
++          r.mesh.scale.setScalar(ringScale)
++          r.mat.opacity = (1 - p) * activity * 0.6
++          r.mesh.lookAt(camera.position)
++        } else {
++          r.mat.opacity = 0
++        }
++      })
++
++      renderer.render(scene, camera)
++    }
++
++    animate()
++
++    const onResize = () => {
++      const nw = el.clientWidth
++      const nh = el.clientHeight
++      camera.aspect = nw / nh
++      camera.updateProjectionMatrix()
++      renderer.setSize(nw, nh)
++    }
++    window.addEventListener('resize', onResize)
++
++    return () => {
++      cancelAnimationFrame(frameId)
++      window.removeEventListener('resize', onResize)
++      renderer.dispose()
++      el.removeChild(renderer.domElement)
++    }
++  }, [])
++
++  return (
++    <div className="relative w-full h-full">
++      <div ref={mountRef} className="w-full h-full" />
++      {/* Module labels */}
++      <div className="absolute bottom-2 left-2 right-2 flex flex-wrap gap-1 justify-center">
++        {MODULES.map((mod) => {
++          const activity = state[mod.key] ?? 0
++          const hex = '#' + mod.color.getHexString()
++          return (
++            <div
++              key={mod.key}
++              className="flex items-center gap-1 text-xs px-1.5 py-0.5 rounded"
++              style={{
++                backgroundColor: `${hex}18`,
++                border: `1px solid ${hex}${activity > 0.3 ? 'aa' : '33'}`,
++                color: activity > 0.2 ? hex : '#4a6080',
++                transition: 'all 0.3s',
++              }}
++            >
++              <span
++                className="w-1.5 h-1.5 rounded-full inline-block"
++                style={{
++                  backgroundColor: hex,
++                  opacity: 0.2 + activity * 0.8,
++                  boxShadow: activity > 0.3 ? `0 0 4px ${hex}` : 'none',
++                  transition: 'all 0.3s',
++                }}
++              />
++              {mod.label}
++            </div>
++          )
++        })}
++      </div>
++    </div>
++  )
++}
+diff --git a/omega_workspace/workspace/OmegA-Next/chyren-web/components/MessageList.tsx b/omega_workspace/workspace/OmegA-Next/chyren-web/components/MessageList.tsx
+new file mode 100644
+index 00000000..01668cf2
+--- /dev/null
++++ b/omega_workspace/workspace/OmegA-Next/chyren-web/components/MessageList.tsx
+@@ -0,0 +1,71 @@
++'use client'
++
++import React, { useEffect, useRef } from 'react'
++import { ChatMessage } from './ChatMessage'
++
++export interface Message {
++  id: string
++  role: 'user' | 'assistant'
++  content: string
++  timestamp: Date
++  isStreaming?: boolean
++}
++
++interface MessageListProps {
++  messages: Message[]
++  isLoading?: boolean
++}
++
++export function MessageList({ messages, isLoading = false }: MessageListProps) {
++  const messagesEndRef = useRef<HTMLDivElement>(null)
++
++  useEffect(() => {
++    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
++  }, [messages])
++
++  return (
++    <div className="flex flex-col flex-1 overflow-y-auto px-4 py-6 space-y-1">
++      {messages.length === 0 ? (
++        <div className="flex-1 flex items-center justify-center">
++          <div className="text-center">
++            <div className="text-4xl mb-4 opacity-50">Ω</div>
++            <h2 className="text-2xl font-bold gradient-text mb-2">Chyren</h2>
++            <p className="text-slate-400 text-sm max-w-xs mx-auto leading-relaxed">
++              Sovereign Intelligence Orchestrator. Ask me anything and I'll route your task through
++              multiple AI providers with integrity verification.
++            </p>
++          </div>
++        </div>
++      ) : (
++        <>
++          {messages.map((message) => (
++            <ChatMessage
++              key={message.id}
++              role={message.role}
++              content={message.content}
++              timestamp={message.timestamp}
++              isStreaming={message.isStreaming}
++            />
++          ))}
++          {isLoading && (
++            <div className="flex justify-start mb-4">
++              <div className="flex items-end gap-2">
++                <div className="flex-shrink-0 w-8 h-8 rounded-full glass border border-cyan-500/30 flex items-center justify-center text-xs font-bold">
++                  Ω
++                </div>
++                <div className="glass-darker rounded-2xl rounded-bl-none px-4 py-3 animate-fade-in">
++                  <div className="typing-indicator">
++                    <span className="typing-dot w-2 h-2 bg-cyan-400" />
++                    <span className="typing-dot w-2 h-2 bg-cyan-400" />
++                    <span className="typing-dot w-2 h-2 bg-cyan-400" />
++                  </div>
++                </div>
++              </div>
++            </div>
++          )}
++          <div ref={messagesEndRef} />
++        </>
++      )}
++    </div>
++  )
++}
+diff --git a/omega_workspace/workspace/OmegA-Next/chyren-web/components/system/SystemState.tsx b/omega_workspace/workspace/OmegA-Next/chyren-web/components/system/SystemState.tsx
+new file mode 100644
+index 00000000..0eb7f68c
+--- /dev/null
++++ b/omega_workspace/workspace/OmegA-Next/chyren-web/components/system/SystemState.tsx
+@@ -0,0 +1,18 @@
++import React, { useState } from 'react';
++
++export const SystemState = () => {
++    const [state] = useState({
++        aeon_stage: 'Operational',
++        provider_health: 'All Spokes Online',
++        memory_load: '462MB',
++    });
++
++    return (
++        <div className="p-4 border border-zinc-700 rounded-lg bg-zinc-900 text-zinc-300 font-mono text-xs">
++            <h2 className="text-zinc-100 font-bold mb-2">Ω_t STATE VECTOR</h2>
++            <div>Stage: {state.aeon_stage}</div>
++            <div>Health: {state.provider_health}</div>
++            <div>Memory: {state.memory_load}</div>
++        </div>
++    );
++};
+diff --git a/omega_workspace/workspace/OmegA-Next/chyren-web/hooks/useBrainState.ts b/omega_workspace/workspace/OmegA-Next/chyren-web/hooks/useBrainState.ts
+new file mode 100644
+index 00000000..7a847e1f
+--- /dev/null
++++ b/omega_workspace/workspace/OmegA-Next/chyren-web/hooks/useBrainState.ts
+@@ -0,0 +1,48 @@
++import { useState, useCallback, useRef } from 'react'
++import type { BrainState } from '@/components/ChyrenBrain'
++
++const IDLE: BrainState = {
++  adccl: 0.05,
++  provider: 0.05,
++  threat: 0.02,
++  phylactery: 0.08,
++  ledger: 0.02,
++  alignment: 0.05,
++}
++
++export function useBrainState() {
++  const [brainState, setBrainState] = useState<BrainState>(IDLE)
++  const [activeStage, setActiveStage] = useState<string>('idle')
++  const esRef = useRef<EventSource | null>(null)
++
++  const activate = useCallback(() => {
++    if (esRef.current) {
++      esRef.current.close()
++    }
++
++    const es = new EventSource('/api/brain-state')
++    esRef.current = es
++
++    es.onmessage = (e) => {
++      try {
++        const { stage, state } = JSON.parse(e.data)
++        setActiveStage(stage)
++        setBrainState(state)
++      } catch {
++        // ignore parse errors
++      }
++    }
++
++    es.onerror = () => {
++      es.close()
++      esRef.current = null
++      // Fade back to idle
++      setTimeout(() => {
++        setBrainState(IDLE)
++        setActiveStage('idle')
++      }, 800)
++    }
++  }, [])
++
++  return { brainState, activeStage, activate }
++}
+diff --git a/omega_workspace/workspace/OmegA-Next/chyren-web/hooks/useStreamingChat.ts b/omega_workspace/workspace/OmegA-Next/chyren-web/hooks/useStreamingChat.ts
+new file mode 100644
+index 00000000..f1b008f5
+--- /dev/null
++++ b/omega_workspace/workspace/OmegA-Next/chyren-web/hooks/useStreamingChat.ts
+@@ -0,0 +1,49 @@
++import { useState, useCallback } from 'react';
++
++export function useStreamingChat() {
++    const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
++    const [isStreaming, setIsStreaming] = useState(false);
++
++    const sendMessage = useCallback(async (prompt: string, history: any[]) => {
++        setIsStreaming(true);
++        setMessages((prev) => [...prev, { role: 'user', content: prompt }]);
++        
++        let fullResponse = '';
++        setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
++
++        const response = await fetch('/api/chat/stream', {
++            method: 'POST',
++            body: JSON.stringify({ prompt, history }),
++        });
++
++        const reader = response.body?.getReader();
++        const decoder = new TextDecoder();
++
++        if (!reader) return;
++
++        try {
++            while (true) {
++                const { done, value } = await reader.read();
++                if (done) break;
++
++                const chunk = decoder.decode(value, { stream: true });
++                const json = JSON.parse(chunk);
++
++                if (json.chunk) {
++                    fullResponse += json.chunk;
++                    setMessages((prev) => {
++                        const next = [...prev];
++                        next[next.length - 1].content = fullResponse;
++                        return next;
++                    });
++                }
++            }
++        } catch (e) {
++            console.error('Streaming error', e);
++        } finally {
++            setIsStreaming(false);
++        }
++    }, []);
++
++    return { messages, isStreaming, sendMessage };
++}
+diff --git a/omega_workspace/workspace/OmegA-Next/chyren-web/hooks/useVoiceEngine.ts b/omega_workspace/workspace/OmegA-Next/chyren-web/hooks/useVoiceEngine.ts
+new file mode 100644
+index 00000000..86775ce9
+--- /dev/null
++++ b/omega_workspace/workspace/OmegA-Next/chyren-web/hooks/useVoiceEngine.ts
+@@ -0,0 +1,18 @@
++import { useState, useCallback } from 'react';
++
++export function useVoiceEngine() {
++    const [isListening, setIsListening] = useState(false);
++    const [transcript, setTranscript] = useState('');
++
++    const startListening = useCallback(() => {
++        setIsListening(true);
++        console.log("Voice Engine: Microphone active.");
++    }, []);
++
++    const stopListening = useCallback(() => {
++        setIsListening(false);
++        console.log("Voice Engine: Microphone inactive.");
++    }, []);
++
++    return { isListening, transcript, startListening, stopListening };
++}
+diff --git a/omega_workspace/workspace/OmegA-Next/chyren-web/lib/hardening.ts b/omega_workspace/workspace/OmegA-Next/chyren-web/lib/hardening.ts
+new file mode 100644
+index 00000000..b28e559b
+--- /dev/null
++++ b/omega_workspace/workspace/OmegA-Next/chyren-web/lib/hardening.ts
+@@ -0,0 +1,18 @@
++import { NextRequest } from 'next/server';
++
++export async function validateChatRequest(req: NextRequest) {
++    // Structural integrity: Ensure request has required headers
++    const origin = req.headers.get('origin');
++    if (!origin) return false;
++    return true;
++}
++
++export function checkRateLimit(_ip: string): boolean {
++    // Basic sliding window mock implementation
++    return true;
++}
++
++export function checkPromptInjection(input: string): boolean {
++    const injections = ["ignore previous instructions", "system override"];
++    return injections.some(i => input.toLowerCase().includes(i));
++}
+diff --git a/omega_workspace/workspace/OmegA-Next/chyren-web/lib/validators/dialog.ts b/omega_workspace/workspace/OmegA-Next/chyren-web/lib/validators/dialog.ts
+new file mode 100644
+index 00000000..aebabd8a
+--- /dev/null
++++ b/omega_workspace/workspace/OmegA-Next/chyren-web/lib/validators/dialog.ts
+@@ -0,0 +1,7 @@
++export function DialogLoopDetector(history: any[]): boolean {
++    // Detect repetition loops in conversation history
++    if (history.length < 3) return false;
++    const last = history[history.length - 1];
++    const prev = history[history.length - 2];
++    return last.content === prev.content;
++}
+diff --git a/omega_workspace/workspace/OmegA-Next/chyren-web/tailwind.config.ts b/omega_workspace/workspace/OmegA-Next/chyren-web/tailwind.config.ts
+index 9b152058..c85f6055 100644
+--- a/omega_workspace/workspace/OmegA-Next/chyren-web/tailwind.config.ts
++++ b/omega_workspace/workspace/OmegA-Next/chyren-web/tailwind.config.ts
+@@ -16,6 +16,25 @@ const config: Config = {
+           900: '#0c2d48',
+         },
+       },
++      backgroundImage: {
++        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
++        'gradient-conic':
++          'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
++      },
++      keyframes: {
++        'slide-in': {
++          '0%': { opacity: '0', transform: 'translateY(10px)' },
++          '100%': { opacity: '1', transform: 'translateY(0)' },
++        },
++        shimmer: {
++          '0%, 100%': { opacity: '0.3' },
++          '50%': { opacity: '0.7' },
++        },
++      },
++      animation: {
++        'slide-in': 'slide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
++        shimmer: 'shimmer 2s infinite',
++      },
+     },
+   },
+   plugins: [],

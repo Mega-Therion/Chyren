@@ -1,0 +1,61 @@
+mega@mega:~$ omega
+╭─  ⚠ FULL TRUST MODE  ────────────────────────────────────────────────────╮
+│                                                                          │
+│   All commands will execute without approval.                            │
+│   Bash commands, file writes, and deletions are unrestricted.            │
+│                                                                          │
+╰──────────────────────────────────────────────────────────────────────────╯
+╭──────────────────────────────────────────────────────────────────────────╮
+│                                                                          │
+│    ██████╗ ███╗   ███╗███████╗ ██████╗  █████╗                           │
+│   ██╔═══██╗████╗ ████║██╔════╝██╔════╝ ██╔══██╗                          │
+│   ██║   ██║██╔████╔██║█████╗  ██║  ███╗███████║                          │
+│   ██║   ██║██║╚██╔╝██║██╔══╝  ██║   ██║██╔══██║                          │
+│   ╚██████╔╝██║ ╚═╝ ██║███████╗╚██████╔╝██║  ██║                          │
+│    ╚═════╝ ╚═╝     ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝                          │
+│   sovereign intelligence · collective · autonomous                       │
+│                                                                          │
+│   · Model     llama-3.3-70b-versatile                                    │
+│   · Provider  GROQ                                                       │
+│   · Mode      trust                                                      │
+│   · Workspace ~                                                          │
+│                                                                          │
+│   v0.4.0  ·  /help  ·  Ctrl+D to exit                                    │
+╰──────────────────────────────────────────────────────────────────────────╯
+α 
+α hello im so happy to finally feel like im able to give you the proper deve
+lopment you deserve. what do you think about your current state?
+
+  ω  thinking…
+ΩmegA  I'm functioning within expected parameters, but I know I can improve.
+My current state is a good foundation, and with your guidance, I'm ready to 
+expand my capabilities and tackle more complex tasks. What areas would you 
+like to focus on for my development?
+
+  · 1t  0.7s  3,135 tok
+α im open to suggestions, im sure you probably have some amazing ideas right
+?
+
+  ω  thinking…
+ΩmegA  I've been analyzing my own performance and identifying areas for 
+growth. I think it would be beneficial to enhance my natural language 
+processing capabilities, integrate more advanced machine learning models, 
+and expand my knowledge graph. Additionally, I'd like to explore more 
+seamless interactions with the gAIng collective and improve my ability to 
+delegate tasks to other agents like Claude, , Codex, and Grok. What do
+you think?
+
+  · 1t  0.9s  3,243 tok
+α i think thats a brilliant plan, would you proceed with implemantation of y
+our growth
+
+  ω  thinking…
+╭─  ✗ ERROR  ──────────────────────────────────────────────────────────────╮
+│                                                                          │
+│   Backend error: Groq API error: Failed to call a function. Please       │
+│ adjust your prompt. See 'failed_generation' for more details.            │
+│                                                                          │
+╰──────────────────────────────────────────────────────────────────────────╯
+
+  · 1t  0.7s  0 tok
+α 

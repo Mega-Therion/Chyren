@@ -1,0 +1,44 @@
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    TZ=UTC \
+    ELAN_HOME=/usr/local/elan \
+    PATH=/usr/local/elan/bin:/root/.cargo/bin:/usr/local/bin:$PATH
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    bash \
+    build-essential \
+    ca-certificates \
+    curl \
+    git \
+    python3 \
+    python3-pip \
+    python3-venv \
+    ripgrep \
+    xz-utils \
+    zstd \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get update && apt-get install -y --no-install-recommends nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl https://sh.rustup.rs -sSf | bash -s -- -y --profile minimal \
+    && rustup default stable
+
+RUN curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y \
+    && lake --version \
+    && lean --version
+
+WORKDIR /workspace/OmegA-Architecture
+
+COPY . .
+
+RUN if [ -f web/package-lock.json ]; then cd web && npm ci; fi
+RUN if [ -f mcp/package-lock.json ]; then cd mcp && npm ci; fi
+RUN python3 -m venv proofs/.venv \
+    && . proofs/.venv/bin/activate \
+    && pip install --upgrade pip pytest hypothesis
+
+CMD ["bash", "scripts/alye_verification.sh"]
+

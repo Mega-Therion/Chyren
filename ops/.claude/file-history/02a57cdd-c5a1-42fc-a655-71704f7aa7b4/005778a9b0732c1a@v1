@@ -1,0 +1,11 @@
+{
+  "projectId": "prj_jvy4bqzklplHi52ZxmSV0GnpFgw5",
+  "orgId": "team_XV2729DxcXdAeyqg1ZagLxEY",
+  "projectName": "chyren-web",
+  "settings": {
+    "framework": "nextjs",
+    "installCommand": "npm ci",
+    "buildCommand": "npm run build",
+    "nodeVersion": "24.x"
+  }
+}

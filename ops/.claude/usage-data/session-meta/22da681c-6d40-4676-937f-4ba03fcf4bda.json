@@ -1,0 +1,56 @@
+{
+  "session_id": "22da681c-6d40-4676-937f-4ba03fcf4bda",
+  "project_path": "/home/mega",
+  "start_time": "2026-03-29T13:32:47.804Z",
+  "duration_minutes": 9,
+  "user_message_count": 7,
+  "assistant_message_count": 34,
+  "tool_counts": {
+    "Bash": 17,
+    "Read": 3,
+    "Edit": 2
+  },
+  "languages": {
+    "Shell": 2
+  },
+  "git_commits": 0,
+  "git_pushes": 0,
+  "input_tokens": 44,
+  "output_tokens": 4964,
+  "first_prompt": "can you figure out why these appear above my banner everytime i open my terminal, and fix the issue causing it: bash: /home/mega/.omega/one-true.env: No such file or directory bash: /home/mega/.omega/…",
+  "user_interruptions": 0,
+  "user_response_times": [
+    160.949,
+    27.956,
+    8.497
+  ],
+  "tool_errors": 4,
+  "tool_error_categories": {
+    "Command Failed": 4
+  },
+  "uses_task_agent": false,
+  "uses_mcp": false,
+  "uses_web_search": false,
+  "uses_web_fetch": false,
+  "lines_added": 0,
+  "lines_removed": 6,
+  "files_modified": 2,
+  "message_hours": [
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8
+  ],
+  "user_message_timestamps": [
+    "2026-03-29T13:32:47.804Z",
+    "2026-03-29T13:32:47.803Z",
+    "2026-03-29T13:32:47.803Z",
+    "2026-03-29T13:33:39.607Z",
+    "2026-03-29T13:40:27.477Z",
+    "2026-03-29T13:41:13.862Z",
+    "2026-03-29T13:41:25.221Z"
+  ]
+}

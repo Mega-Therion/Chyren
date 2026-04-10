@@ -1,0 +1,87 @@
+• I verified the new layer directly. The core of Claude’s report is now accurate.
+
+  Findings
+
+  1. The reported gate counts are real.
+      - verify.sh now runs and passes:
+          - 36/36 property tests
+          - 29/29 correspondence tests
+          - 4/4 state-machine tests
+          - Lean4 build
+          - proof audit
+      - The gate output explicitly shows those counts in the current repo run: OMEGA_WORKSPACE/CANON/OmegA-
+        Architecture/verify.sh:176.
+  2. The proof-to-implementation layer materially closes the main caveat from the prior review.
+      - The new correspondence suite exists and is nontrivial: OMEGA_WORKSPACE/CANON/OmegA-Architecture/proofs/
+        correspondence.py:1.
+      - It now checks the runtime code against the formal models for:
+          - T-2 phylactery behavior
+          - T-3 risk gate behavior
+          - T-5 hardening update behavior
+          - T-7 unified action gating
+      - This is the right missing bridge. Before, the Lean layer proved abstract models in isolation. Now there is a
+        concrete correspondence layer tying those models back to runtime code.
+  3. The state-machine coverage is real and useful.
+      - The four machines exist and are wired into the gate: OMEGA_WORKSPACE/CANON/OmegA-Architecture/proofs/
+        state_machines.py:1.
+      - They cover:
+          - T-1 state vector integrity
+          - T-6 verifier non-bypass
+          - T-9 append-only self-tag behavior
+          - T-10 envelope clock monotonicity
+  4. The Lean proofs are still model-level proofs, but that is now much less of a weakness than before.
+      - The Lean files still prove abstract formulations, not extracted proofs over the Python runtime directly:
+          - OMEGA_WORKSPACE/CANON/OmegA-Architecture/proofs/OmegaProofs/IdentityContinuity.lean:16
+          - OMEGA_WORKSPACE/CANON/OmegA-Architecture/proofs/OmegaProofs/GovernanceFailClosed.lean:24
+          - OMEGA_WORKSPACE/CANON/OmegA-Architecture/proofs/OmegaProofs/MemoryHardening.lean:19
+          - OMEGA_WORKSPACE/CANON/OmegA-Architecture/proofs/OmegaProofs/UnifiedGating.lean:18
+      - The difference now is that the repo has a correspondence layer and state-machine layer on top of that, which
+        is the correct way to reduce the gap.
+  5. There is still one documentation mismatch.
+      - The theorem ledger and claim ledger still mark T-2, T-3, T-5, and T-7 as Tested, not upgraded to reflect the
+        Lean layer:
+          - OMEGA_WORKSPACE/CANON/OmegA-Architecture/specs/THEOREM_LEDGER.md:72
+          - OMEGA_WORKSPACE/CANON/OmegA-Architecture/publication/CLAIM_LEDGER.md:16
+      - Claude’s report says these are machine-checked, which is true.
+      - The docs should now be updated so the ledger language matches the actual state of the repo.
+  6. The working tree is still not clean.
+      - The proof and gate changes are present locally but not yet all committed.
+      - That does not invalidate the review, but it matters if you want to treat this as sealed state.
+
+  What works
+
+  - Full canonical verification gate
+  - Lean proof package
+  - Runtime correspondence tests
+  - Stateful invariant machines
+  - Proof drift audit
+  - Blind external verification package
+  - T-10 monotonic envelope/versioning fix
+
+  What’s proven
+
+  - Four core theorems now have machine-checked formal proofs plus runtime correspondence checks.
+  - The remaining structural claims are covered by property-based tests and stateful randomized testing.
+  - The release gate is now meaningfully stronger than before because it checks formal surface, runtime surface, and
+    drift.
+
+  What needs hardening
+
+  - Update the theorem ledger and claim ledger to reflect the actual proof status.
+  - Commit the proof-surface changes cleanly.
+  - Finish the remaining formal track for T-1, T-6, and T-9 if you want the same level of rigor there.
+  - Add the remaining fuzzing/symbolic work if you want an even tighter boundary story.
+
+  Bottom line
+  This moves the repo from “strong executable proof surface” to “strong executable proof surface plus machine-checked
+  core.” That is a substantial upgrade. The earlier caveat I raised is now mostly addressed by the new correspondence
+  and state-machine layers.
+
+  The remaining issues are smaller:
+
+  1. docs are lagging the actual proof status
+  2. the new proof work needs to be committed cleanly
+  3. the remaining theorem set can still be pushed further
+
+  This is now close to the highest standard the current repo architecture can support without moving into a heavier
+  formal methods stack.

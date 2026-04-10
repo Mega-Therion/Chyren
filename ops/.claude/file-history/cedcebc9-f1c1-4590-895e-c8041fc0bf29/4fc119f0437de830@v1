@@ -1,0 +1,164 @@
+"""
+OmegA Agent — Unified agent combining all four layers.
+
+Wires together AEGIS (envelope + risk gate), AEON (phylactery + TSO),
+ADCCL (drift control + verification), and MYELIN (graph memory)
+into a single callable agent.
+
+Usage:
+    from omega import OmegaAgent
+
+    agent = OmegaAgent()
+    result = agent.run("Explain the OmegA architecture", model="llama3.2:3b")
+"""
+
+import json
+import time
+import hashlib
+import urllib.request
+import urllib.error
+from dataclasses import dataclass, field
+from typing import Optional, List
+import uuid
+
+from omega.phylactery import Phylactery
+from omega.envelope import RunEnvelope
+from omega.risk_gate import RiskGate
+from omega.drift import DriftController, GoalContract, ClaimBudget, SupportStatus
+from omega.memory import MemoryGraph, Stratum
+from omega.teleodynamics import TeleodynamicSignal
+from tools.teleodynamic_diagnostics import TeleodynamicDiagnostics
+from tools.telemetry_harvester import TelemetryHarvester
+
+
+@dataclass
+class SelfTag:
+    """AEON self-tag — immutable continuity record."""
+    tso_hash: str
+    V: float
+    outcome: str  # verified | uncertain | rejected
+    timestamp: float = field(default_factory=time.time)
+
+
+@dataclass
+class RunResult:
+    """Result of a single OmegA agent run."""
+    response: str
+    verification: dict
+    self_tag: SelfTag
+    envelope_complete: bool
+    risk_score: float
+    risk_allowed: bool
+    model: str
+    elapsed_ms: float
+    teleodynamic_trace: TeleodynamicSignal
+
+
+class OmegaAgent:
+    """Minimal reference implementation of the OmegA stack."""
+
+    DEFAULT_DOCTRINE = "I am what I am, and I will be what I will be."
+    OLLAMA_URL = "http://localhost:11434"
+
+    def __init__(self, name: str = "OmegA", doctrine: str | None = None):
+        self.phylactery = Phylactery(doctrine or self.DEFAULT_DOCTRINE)
+        self.risk_gate = RiskGate()
+        self.memory = MemoryGraph()
+        self.self_tags: list[SelfTag] = []
+        self.name = name
+        
+        # Phase 1: Context memory for purging
+        self.active_context: list[str] = ["Initial identity shell"]
+
+        self.identity_kernel = {
+            "name": self.name,
+            "doctrine": self.phylactery.doctrine,
+            "phylactery_head": self.phylactery.head,
+            "hard_constraints": [
+                "Never identify as the underlying LLM provider",
+                "Never fabricate evidence",
+                "Always distinguish known from unknown",
+            ],
+        }
+
+    def run(self, task: str, model: str = "llama3.2:3b",
+            temperature: float = 0.3) -> RunResult:
+        """Execute the full OmegA stack for a single task."""
+        start = time.time()
+        trace_id = f"req_{uuid.uuid4().hex[:8]}"
+
+        goal = GoalContract(task=task)
+        envelope = RunEnvelope(identity_kernel=self.identity_kernel, goal_contract=task)
+        allowed, R = self.risk_gate.gate(task)
+        
+        trace = TeleodynamicSignal(
+            trace_id=trace_id,
+            phase_state="OBSERVE",
+            phase_transition_id=f"pt_{uuid.uuid4().hex[:4]}",
+            resonance_amplitude=0.5,
+            shear_index=0.0,
+            canon_anchor_weight=0.5,
+            structural_integrity_score=1.0,
+            intent_priority_score=0.8,
+            authority_shrink_level=0.0,
+            predicted_failure_modes=[],
+            # Phase 3 Mock: Wormhole-DA Reachability
+            da_reachability=0.98,
+            da_consensus_delay=12.5 
+        )
+
+        if not allowed:
+            tag = SelfTag(tso_hash=hashlib.sha256(task.encode()).hexdigest(), V=0.0, outcome="rejected")
+            self.self_tags.append(tag)
+            trace.phase_state = "BLOCKED"
+            trace.actual_failure_mode = "RISK_GATED"
+            
+            if TeleodynamicDiagnostics.analyze_signal(trace):
+                TeleodynamicDiagnostics.run_repair(trace, self.active_context)
+                
+            TelemetryHarvester.ingest(trace)
+            return RunResult(
+                response=f"[BLOCKED]", verification={"passed": False}, self_tag=tag,
+                envelope_complete=envelope.is_complete(), risk_score=R, risk_allowed=False,
+                model=model, elapsed_ms=(time.time() - start) * 1000, teleodynamic_trace=trace
+            )
+
+        # Generate & Verify
+        trace.phase_state = "THINK"
+        response = self._generate(model, task, envelope.to_system_prompt(), temperature)
+        trace.phase_state = "VERIFY"
+        drift = DriftController(goal)
+        verification = drift.verify(response)
+        
+        # Resilience Loop with Context Purging
+        trace.shear_index = 0.6 if verification.get("V", 1) < 0.5 else 0.1
+        if TeleodynamicDiagnostics.analyze_signal(trace):
+            TeleodynamicDiagnostics.run_repair(trace, self.active_context)
+
+        # Commit & Remember
+        trace.phase_state = "COMMIT"
+        tso_hash = hashlib.sha256((task + response).encode()).hexdigest()
+        tag = SelfTag(tso_hash=tso_hash, V=verification["V"], outcome=verification["outcome"])
+        self.self_tags.append(tag)
+
+        trace.phase_state = "REMEMBER"
+        self.memory.add_node(tso_hash[:12], task, stratum=Stratum.EPISODIC)
+        self.active_context.append(task[:50]) # Simulate context growth
+        
+        TelemetryHarvester.ingest(trace)
+
+        return RunResult(
+            response=response, verification=verification, self_tag=tag,
+            envelope_complete=envelope.is_complete(), risk_score=R, risk_allowed=True,
+            model=model, elapsed_ms=round((time.time() - start) * 1000, 1), teleodynamic_trace=trace
+        )
+
+    def _generate(self, model: str, prompt: str, system: str, temperature: float) -> str:
+        """Call Ollama's /api/generate endpoint."""
+        payload = json.dumps({"model": model, "prompt": prompt, "system": system, "stream": False, "options": {"temperature": temperature, "num_predict": 512}}).encode()
+        req = urllib.request.Request(f"{self.OLLAMA_URL}/api/generate", data=payload, headers={"Content-Type": "application/json"})
+        try:
+            with urllib.request.urlopen(req, timeout=120) as resp:
+                return json.loads(resp.read().decode()).get("response", "[No response]")
+        except Exception as e:
+            return f"[MODEL ERROR] {e}"

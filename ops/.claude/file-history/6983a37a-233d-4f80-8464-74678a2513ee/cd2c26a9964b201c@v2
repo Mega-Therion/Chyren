@@ -1,0 +1,25 @@
+#!/bin/bash
+# Add OMEGA_RUNTIME_PROFILE=full to the gateway env file
+# and restart the service
+set -e
+
+ENV_FILE="/etc/omega/omega-gateway.env"
+
+# Add or update OMEGA_RUNTIME_PROFILE
+if grep -q "^OMEGA_RUNTIME_PROFILE=" "$ENV_FILE"; then
+    sed -i 's/^OMEGA_RUNTIME_PROFILE=.*/OMEGA_RUNTIME_PROFILE=full/' "$ENV_FILE"
+    echo "Updated existing OMEGA_RUNTIME_PROFILE"
+else
+    echo "OMEGA_RUNTIME_PROFILE=full" >> "$ENV_FILE"
+    echo "Added OMEGA_RUNTIME_PROFILE=full"
+fi
+
+echo "Current env file:"
+cat "$ENV_FILE"
+
+echo ""
+echo "Restarting omega-gateway..."
+systemctl restart omega-gateway
+sleep 2
+systemctl status omega-gateway --no-pager | head -5
+echo "Done."

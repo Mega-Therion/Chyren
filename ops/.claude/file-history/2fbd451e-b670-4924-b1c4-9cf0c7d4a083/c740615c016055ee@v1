@@ -1,0 +1,10 @@
+name = "OmegaProofs"
+version = "0.1.0"
+defaultTargets = ["omegaproofs"]
+
+[[lean_lib]]
+name = "OmegaProofs"
+
+[[lean_exe]]
+name = "omegaproofs"
+root = "Main"

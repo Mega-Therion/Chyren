@@ -1,0 +1,28 @@
+import os
+from pydantic_settings import BaseSettings
+from dotenv import load_dotenv
+
+load_dotenv()
+
+class Settings(BaseSettings):
+    API_V1_STR: str = "/api/v1"
+    PROJECT_NAME: str = "OmegA Sovereign"
+    
+    # Neon Database
+    DATABASE_URL: str = os.getenv("DATABASE_URL", os.getenv("OMEGA_DB_URL", ""))
+    
+    # Security
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "SUPER_SECRET_KEY_FOR_DEVELOPMENT_ONLY") # Fallback for HS256, will be replaced by JWKS
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
+
+    # Ollama
+    OLLAMA_URL: str = os.getenv("OLLAMA_URL", "http://localhost:11434")
+    DEFAULT_MODEL: str = os.getenv("DEFAULT_MODEL", "llama3.2:3b")
+
+    # Neon Auth JWKS URL (for JWT verification)
+    NEON_AUTH_JWKS_URL: str = os.getenv(
+        "NEON_AUTH_JWKS_URL", 
+        "https://ep-sweet-glade-anvm0pwn.neonauth.c-6.us-east-1.aws.neon.tech/neondb/auth/.well-known/jwks.json"
+    )
+
+settings = Settings()

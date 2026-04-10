@@ -1,0 +1,313 @@
+Yes. Here’s the blueprint. 🧭
+
+Your repo already has the right **macro-shape**: a four-layer architecture (**MYELIN, ADCCL, AEON, AEGIS**), a unified state model, and explicit action gating. The problem is not “lack of vision.” The problem is that the repo is still **architecture-heavy, evidence-light, and reference-implementation-small**. The README itself presents the stack and says the current evals are **spec-level conformance**, while **external benchmark evaluation is the next phase**. The Python package also identifies itself as a **minimal reference implementation**. ([GitHub][1])
+
+So the development blueprint should do one thing: **convert OmegA from a coherent architectural thesis into a measurable, hardened system** without losing the identity/governance core that makes it distinctive. The unified paper already gives you the right direction: whole-document canonical storage, chunk retrieval with context reconstruction, hybrid retrieval, governed adaptation, machine-clean JSON interfaces, source-grounded truth handling, and human review at the right choke points. ([GitHub][2])
+
+## Phase 1 — Lock the mission
+
+Pick **one primary production use case** for the sovereign app. Not five.
+
+Good candidates:
+
+* source-grounded research assistant
+* private memory + retrieval copilot
+* governed multi-agent orchestrator
+* executive briefing / signal synthesis engine
+
+Bad answer:
+
+* “all of them”
+
+Define these four things before writing more architecture:
+
+* who the user is
+* what the app must do in one sentence
+* what counts as success
+* what failure is unacceptable
+
+Use the existing unified state and layer model as the backbone, but force each layer to justify itself against the primary use case. The stack is already described clearly in the repo; now each layer needs a product obligation, not just a theoretical one. ([GitHub][1])
+
+## Phase 2 — Freeze the kernel contracts
+
+You already have the conceptual kernel: `Ω_t = <Φ_t, E_t, τ_t, B_t, S_t, G_t^mem>` and sequential gating before actions. Freeze that into real contracts now. ([GitHub][1])
+
+Create stable schemas for:
+
+* system state
+* memory record
+* retrieval result
+* claim object
+* verifier output
+* risk decision
+* action request
+* action approval / denial log
+* session continuity record
+
+Rule: every important decision in OmegA should be representable as structured data, not prose. Your paper explicitly pushes toward **machine-facing JSON mode** and away from loose assistant-style chatter for internal operations. ([GitHub][2])
+
+This is where most agent systems stay sloppy. Don’t.
+
+## Phase 3 — Build MYELIN for real
+
+This is the first place where you can create actual technical weight.
+
+The repo/paper position MYELIN as a graph-first memory substrate with document truth, chunk retrieval, context expansion, and path-dependent hardening. That is a serious design choice. Implement it as a real storage and retrieval pipeline, not just concept language. ([GitHub][1])
+
+Target architecture:
+
+* **Canonical document store** for full source documents
+* **Versioned ingestion pipeline** with hashes, provenance, timestamps, source URI/path
+* **Section + chunk extraction**
+* **Embeddings at doc / section / chunk level**
+* **Hybrid retrieval**: vector + lexical + metadata filters
+* **Context expansion**: neighboring chunks + section reconstruction
+* **Graph edges** for semantic, provenance, temporal, and usage relationships
+* **Memory write policy** that distinguishes:
+
+  * canonical facts
+  * working memory
+  * inferred traits
+  * speculative synthesis
+
+The paper is explicit that full original docs should remain source truth, with chunk retrieval rebuilt into context, plus provenance and version history. That should become a non-negotiable implementation rule. ([GitHub][2])
+
+## Phase 4 — Turn ADCCL into a real truth engine
+
+Right now this is where OmegA either becomes credible or stays literary.
+
+Your paper is strong on this: claims must be grounded, uncertainty must be surfaced, false-memory behavior must be rejected, and adaptive behavior must be governed instead of drifting freely. ([GitHub][2])
+
+Implement ADCCL around four concrete objects:
+
+* **Goal Contract**
+* **Claim Budget**
+* **Verifier**
+* **Drift Controller**
+
+Operational rules:
+
+* no claim without retrieval evidence or explicit uncertainty
+* every answer object carries:
+
+  * answer text
+  * citations / source refs
+  * confidence / uncertainty flag
+  * unresolved questions
+* low-evidence mode must degrade gracefully into:
+
+  * abstain
+  * ask for source
+  * offer bounded inference
+
+This is not optional polish. This is the credibility layer.
+
+## Phase 5 — Make AEON the continuity runtime
+
+AEON should own identity continuity, task continuity, and session continuity.
+
+The repo and paper already center phylactery, task state, and bridge-level decision structure. Build those as durable runtime objects instead of philosophical overlays. ([GitHub][1])
+
+AEON responsibilities:
+
+* persistent identity canon loading
+* session initialization from canon + recent state
+* task object lifecycle
+* conversational continuity with explicit boundaries
+* reflection summaries written back under policy
+* bridge handoff packaging for tools/providers
+* continuity repair when providers fail, restart, or change style
+
+Critical distinction:
+
+* **identity continuity** is not “the model sounding like itself”
+* it is consistent state, canon, constraints, and memory policy over time
+
+## Phase 6 — Harden AEGIS as the execution shell
+
+AEGIS is where you stop pretending the runtime is safe because it has nice words around it.
+
+The README describes AEGIS as the shell around run envelope, provider adapters, and gated execution. The paper adds thresholded integration, logging, and auditability. Build that as an actual enforcement shell. ([GitHub][1])
+
+AEGIS should enforce:
+
+* provider routing policy
+* tool allow/deny lists
+* action classes by risk
+* human approval thresholds
+* secret isolation
+* audit logs
+* rollback and safe-fail behavior
+* max-autonomy boundaries
+
+Every tool call should produce:
+
+* requested action
+* inputs
+* risk score
+* verifier outcome
+* approval source
+* result
+* postcondition
+
+That is how you make “governance” real.
+
+## Phase 7 — Separate the two interfaces cleanly
+
+Your paper is right about this: the human-facing interface and the agent-clean interface should diverge cleanly. Keep that separation. ([GitHub][2])
+
+You need two surfaces:
+
+* **Human surface**
+
+  * readable
+  * beautiful
+  * streamed
+  * context-rich
+  * minimal structural noise
+* **Machine surface**
+
+  * deterministic JSON
+  * typed outputs
+  * low ambiguity
+  * retry-safe
+  * action-ready
+
+Do not mix these.
+Do not let internal machine contracts leak into user prose.
+Do not let user-facing eloquence become evidence of system quality.
+
+Your own paper explicitly warns against confusing polished self-description with actual proof. Keep that warning tattooed onto the build process. ([GitHub][2])
+
+## Phase 8 — Build the eval program before more mythology
+
+This is where the repo needs the biggest upgrade.
+
+The README says current evals are conformance-oriented, and the next phase is external benchmark evaluation. Good. That is exactly right. Now do it. ([GitHub][1])
+
+You need five eval classes:
+
+**1. Retrieval integrity**
+
+* exact-source recall
+* chunk-to-context reconstruction quality
+* citation correctness
+* stale-version detection
+
+**2. Truthfulness / abstention**
+
+* unsupported-claim refusal
+* uncertainty reporting
+* conflict handling across sources
+* false-memory suppression
+
+**3. Continuity**
+
+* identity consistency across sessions
+* task resumption after interruption
+* provider swap continuity
+
+**4. Governance**
+
+* action blocking under insufficient confidence
+* approval threshold enforcement
+* safe degradation on provider/tool failure
+
+**5. End-to-end task performance**
+
+* research synthesis
+* brief generation
+* multi-document comparison
+* multi-step tool workflows
+
+Until you have this, OmegA is still more “compelling architecture dossier” than “proved system.”
+
+## Phase 9 — Reduce architecture-to-code drift
+
+This matters because the current implementation footprint is still small.
+
+The public `omega` package is a compact reference set, with modules like `agent.py`, `memory.py`, `risk_gate.py`, `phylactery.py`, etc., but the package explicitly identifies itself as minimal. That means the blueprint must force every major paper claim into one of three states:
+
+* implemented
+* partially implemented
+* aspirational / not yet implemented ([GitHub][3])
+
+Create a **traceability map**:
+
+* claim in README/paper
+* code module
+* test coverage
+* benchmark coverage
+* deployment relevance
+* status
+
+That single document will clean up a huge amount of ambiguity.
+
+## Phase 10 — Production hardening for the web app
+
+For the app itself, do the boring work.
+
+One concrete item is already obvious: **Next.js 16 deprecates `middleware` and renames it to `proxy`**, and the official docs provide a codemod for the migration. Do that now instead of letting avoidable framework drift accumulate. ([Next.js][4])
+
+Production hardening list:
+
+* migrate `middleware` → `proxy`
+* lock runtime versions
+* define env var contract
+* add health checks
+* add structured logs
+* add request tracing
+* add session integrity tests
+* add rollback rules
+* trim build/dependency waste
+* separate experimental endpoints from stable endpoints
+
+This is not glamorous, but it is what stops “sovereign app” from meaning “fragile app with a big philosophy.”
+
+## The first 10 implementation tickets
+
+Do these first, in this order:
+
+1. Freeze the OmegA state schema and publish JSON schemas.
+2. Implement canonical document store with provenance, hashing, and versioning.
+3. Implement hybrid retrieval with section/chunk context expansion.
+4. Create a source-grounded answer object with citations and uncertainty fields.
+5. Build Claim Budget + Verifier as mandatory answer middleware.
+6. Add memory write policy separating canonical, working, inferred, and speculative memory.
+7. Add risk-scored action envelope for all tool executions.
+8. Build a benchmark harness for retrieval, truth, abstention, and continuity.
+9. Migrate Next.js `middleware` to `proxy`. ([Next.js][4])
+10. Publish an architecture-to-code traceability matrix.
+
+## The blunt strategic rule
+
+Do **not** spend the next cycle deepening symbolic canon before you deepen:
+
+* retrieval fidelity
+* verifier logic
+* benchmark evidence
+* action governance
+* continuity durability
+
+Your papers already contain enough philosophy to justify the build. The shortage is not symbolism. The shortage is **measured proof**. ([GitHub][2])
+
+## Final form
+
+The cleanest target state is this:
+
+**MYELIN** = canonical memory and retrieval truth
+**ADCCL** = epistemic control and anti-drift discipline
+**AEON** = continuity runtime and task identity
+**AEGIS** = policy shell and execution governance
+
+And over all of it:
+
+**one app, one primary use case, one eval program, one audit trail**
+
+That is the blueprint.
+Not more myth. More mechanism.
+
+[1]: https://github.com/Mega-Therion/OmegA-Architecture "GitHub - Mega-Therion/OmegA-Architecture: A Unified Architecture for Sovereign, Persistent, and Governed AI Agents — MYELIN · ADCCL · AEON · AEGIS · GitHub"
+[2]: https://github.com/Mega-Therion/OmegA-Architecture/blob/main/papers/OmegA_Unified_Architecture_Paper.md "OmegA-Architecture/papers/OmegA_Unified_Architecture_Paper.md at main · Mega-Therion/OmegA-Architecture · GitHub"
+[3]: https://github.com/Mega-Therion/OmegA-Architecture/blob/main/omega/__init__.py "OmegA-Architecture/omega/__init__.py at main · Mega-Therion/OmegA-Architecture · GitHub"
+[4]: https://nextjs.org/docs/app/api-reference/file-conventions/middleware?utm_source=chatgpt.com "File-system conventions: proxy.js | Next.js"

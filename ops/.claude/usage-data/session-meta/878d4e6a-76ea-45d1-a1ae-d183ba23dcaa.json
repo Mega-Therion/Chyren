@@ -1,0 +1,47 @@
+{
+  "session_id": "878d4e6a-76ea-45d1-a1ae-d183ba23dcaa",
+  "project_path": "/home/mega",
+  "start_time": "2026-03-29T23:27:44.405Z",
+  "duration_minutes": 3,
+  "user_message_count": 3,
+  "assistant_message_count": 14,
+  "tool_counts": {
+    "Glob": 1,
+    "Read": 2,
+    "Grep": 2
+  },
+  "languages": {
+    "HTML": 1
+  },
+  "git_commits": 0,
+  "git_pushes": 0,
+  "input_tokens": 164,
+  "output_tokens": 2209,
+  "first_prompt": "did you read the famlore.html by itself?",
+  "user_interruptions": 0,
+  "user_response_times": [
+    88.619,
+    48.93
+  ],
+  "tool_errors": 1,
+  "tool_error_categories": {
+    "File Too Large": 1
+  },
+  "uses_task_agent": false,
+  "uses_mcp": false,
+  "uses_web_search": false,
+  "uses_web_fetch": false,
+  "lines_added": 0,
+  "lines_removed": 0,
+  "files_modified": 0,
+  "message_hours": [
+    18,
+    18,
+    18
+  ],
+  "user_message_timestamps": [
+    "2026-03-29T23:27:44.406Z",
+    "2026-03-29T23:29:21.720Z",
+    "2026-03-29T23:30:16.813Z"
+  ]
+}

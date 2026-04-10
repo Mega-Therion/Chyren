@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# omega-tunnel-start.sh
+# Starts a persistent Cloudflare quick tunnel to the OmegA gateway.
+# On each start, captures the public URL and updates Vercel env + redeploys
+# if the URL changed (which it does on every restart).
+
+VERCEL_TOKEN=$(python3 -c "import json; d=json.load(open('/home/mega/.local/share/com.vercel.cli/auth.json')); print(d['token'])")
+PROJECT_ID="prj_JIYEkVJ0QfTbd0HshlLvUJLVgOYP"
+TEAM_ID="team_XV2729DxcXdAeyqg1ZagLxEY"
+LOG=/tmp/cf_tunnel.log
+URL_CACHE=/tmp/omega_tunnel_url.txt
+
+# Kill any stale tunnel
+pkill -f "cloudflared tunnel --url" 2>/dev/null || true
+sleep 2
+
+# Start tunnel — http2 required (QUIC fails on Starlink)
+rm -f "$LOG"
+cloudflared tunnel --url http://localhost:8787 --no-autoupdate --protocol http2 > "$LOG" 2>&1 &
+TUNNEL_PID=$!
+echo $TUNNEL_PID > /tmp/omega_tunnel.pid
+echo "[omega-tunnel] started PID $TUNNEL_PID"
+
+# Wait up to 45s for the URL to appear in the log
+URL=""
+for i in $(seq 1 45); do
+    URL=$(grep -oP "https://[a-z0-9-]+\.trycloudflare\.com" "$LOG" 2>/dev/null | head -1)
+    [[ -n "$URL" ]] && break
+    sleep 1
+done
+
+if [[ -z "$URL" ]]; then
+    echo "[omega-tunnel] ERROR: no URL after 45s — check $LOG"
+    exit 1
+fi
+
+echo "[omega-tunnel] URL: $URL"
+
+# Only update Vercel if the URL changed
+PREV_URL=$(cat "$URL_CACHE" 2>/dev/null || echo "")
+if [[ "$URL" == "$PREV_URL" ]]; then
+    echo "[omega-tunnel] URL unchanged, skipping Vercel update"
+else
+    echo "$URL" > "$URL_CACHE"
+    echo "[omega-tunnel] URL changed — updating Vercel env and redeploying..."
+
+    # Get existing env var ID and patch it
+    ENV_ID=$(curl -s "https://api.vercel.com/v9/projects/$PROJECT_ID/env?teamId=$TEAM_ID" \
+      -H "Authorization: Bearer $VERCEL_TOKEN" | \
+      python3 -c "import sys,json; [print(e['id']) for e in json.load(sys.stdin).get('envs',[]) if e['key']=='NEXT_PUBLIC_OMEGA_API_URL']" 2>/dev/null | head -1)
+
+    if [[ -n "$ENV_ID" ]]; then
+        curl -s -X PATCH "https://api.vercel.com/v9/projects/$PROJECT_ID/env/$ENV_ID?teamId=$TEAM_ID" \
+          -H "Authorization: Bearer $VERCEL_TOKEN" -H "Content-Type: application/json" \
+          -d "{\"value\":\"$URL\"}" > /dev/null
+        echo "[omega-tunnel] Vercel env patched"
+    fi
+
+    # Redeploy last successful build
+    LAST_DEPLOY=$(curl -s "https://api.vercel.com/v6/deployments?projectId=$PROJECT_ID&teamId=$TEAM_ID&state=READY&limit=1" \
+      -H "Authorization: Bearer $VERCEL_TOKEN" | \
+      python3 -c "import sys,json; d=json.load(sys.stdin); print(d['deployments'][0]['uid'])" 2>/dev/null)
+
+    if [[ -n "$LAST_DEPLOY" ]]; then
+        curl -s -X POST "https://api.vercel.com/v13/deployments?teamId=$TEAM_ID&forceNew=1" \
+          -H "Authorization: Bearer $VERCEL_TOKEN" -H "Content-Type: application/json" \
+          -d "{\"deploymentId\":\"$LAST_DEPLOY\",\"name\":\"omega-sovereign\",\"target\":\"production\"}" > /dev/null
+        echo "[omega-tunnel] Vercel redeploy triggered"
+    fi
+
+    echo "[omega-tunnel] omega-sovereign.vercel.app will be live in ~30s"
+fi
+
+# Keep running — systemd tracks this process
+wait $TUNNEL_PID

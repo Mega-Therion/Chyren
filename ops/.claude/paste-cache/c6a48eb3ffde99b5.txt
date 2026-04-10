@@ -1,0 +1,63 @@
+ Findings
+
+  1. The new proof layer is real, but it proves abstract models, not the runtime implementation directly.
+      - The Lean package exists and builds: OMEGA_WORKSPACE/CANON/OmegA-Architecture/proofs/lakefile.toml,
+        OMEGA_WORKSPACE/CANON/OmegA-Architecture/proofs/OmegaProofs.lean.
+      - T-2 is modeled with axioms like Hash and hash_injective, so it is a proof over a formal hash model, not over
+        the concrete runtime hash function: OMEGA_WORKSPACE/CANON/OmegA-Architecture/proofs/OmegaProofs/
+        IdentityContinuity.lean:16.
+      - T-3 and T-5 are also proved over simplified formal models rather than the exact live scoring/update code:
+        OMEGA_WORKSPACE/CANON/OmegA-Architecture/proofs/OmegaProofs/GovernanceFailClosed.lean:27, OMEGA_WORKSPACE/
+        CANON/OmegA-Architecture/proofs/OmegaProofs/MemoryHardening.lean:19.
+  2. The release gate is materially stronger and does enforce the proof surface.
+      - verify.sh now runs the proof auditor, the executable invariant suite, and the Lean build: OMEGA_WORKSPACE/
+        CANON/OmegA-Architecture/verify.sh:155.
+      - The proof drift checker is real and useful: OMEGA_WORKSPACE/CANON/OmegA-Architecture/tools/proof_auditor.py.
+  3. T-10’s earlier structural gap is closed in code and in the proof/test surface.
+      - Envelope versioning is now explicit in the runtime path: OMEGA_WORKSPACE/CANON/OmegA-Architecture/omega/
+        envelope.py:8, OMEGA_WORKSPACE/CANON/OmegA-Architecture/omega/agent.py:62, OMEGA_WORKSPACE/CANON/OmegA-
+        Architecture/omega/runtime.py:42.
+      - The regression coverage for it exists in the invariant suite: OMEGA_WORKSPACE/CANON/OmegA-Architecture/proofs/
+        invariants.py:339.
+  4. The repo’s own docs are mostly honest about the remaining distance.
+      - The theorem ledger distinguishes theorem class and evidence status: OMEGA_WORKSPACE/CANON/OmegA-Architecture/
+        specs/THEOREM_LEDGER.md:1.
+      - The proof README still lists remaining work for stronger formalization, which is the correct posture:
+        OMEGA_WORKSPACE/CANON/OmegA-Architecture/proofs/README.md:77.
+
+  What works
+
+  - Polyglot build and canonical gate
+  - Proof auditor
+  - 36/36 executable invariant tests
+  - Lean proofs for T-2, T-3, T-5, T-7
+  - Blind external verification package
+  - Cross-session identity and memory utility coverage
+  - T-10 envelope/version consistency
+
+  What’s proven
+
+  - The repo now has a genuine machine-checked formal layer for four core theorem models.
+  - The rest of the theorem surface is covered by executable invariants and regression tests.
+  - The proof surface is traceable through the ledger and map: OMEGA_WORKSPACE/CANON/OmegA-Architecture/proofs/
+    PROOF_MAP.md, OMEGA_WORKSPACE/CANON/OmegA-Architecture/publication/CLAIM_LEDGER.md.
+
+  What still needs hardening
+
+  - Proof of correspondence between the Lean models and the actual runtime functions.
+  - The remaining formal state-machine work on T-1, T-6, T-9.
+  - T-8 live multi-provider proof path.
+  - Fuzzing on envelope completeness and boundary behavior.
+  - Cleanup/commit of the current proof-related working tree; it is not clean yet.
+
+  Bottom line
+  Claude’s report is directionally correct. The repo is substantially stronger than before, and the proof surface is
+  real. The only important correction is this: the new Lean layer gives you machine-checked proofs of the formal core
+  models, not full direct proofs of the implementation yet.
+
+  What to do next
+
+  1. Add proof-to-implementation correspondence checks for T-2, T-3, T-5, and T-7.
+  2. Finish the remaining formal state-machine track for T-1, T-6, and T-9.
+  3. Add fuzzing for envelope and gate-boundary behavior.
+  4. Commit the current proof-surface changes cleanly once reviewed.

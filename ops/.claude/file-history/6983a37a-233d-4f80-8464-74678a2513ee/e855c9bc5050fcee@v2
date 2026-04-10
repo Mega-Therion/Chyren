@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -e
+
+SUPABASE_URL="postgresql://postgres:HpXUfNXxMZTRqdtq@db.tssfdlodjgtedsssfpfc.supabase.co:5432/postgres"
+NEON_URL="postgresql://neondb_owner:npg_HbW1Zlkjd7NI@ep-sweet-glade-anvm0pwn.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require"
+DUMP_FILE="/tmp/rowi_dump.dump"
+
+echo "==> Dumping ROWI from Supabase..."
+pg_dump "$SUPABASE_URL" \
+  --no-owner \
+  --no-acl \
+  --no-privileges \
+  -Fc \
+  -f "$DUMP_FILE"
+
+echo "==> Dump complete: $(du -h $DUMP_FILE | cut -f1)"
+
+echo "==> Restoring to Neon..."
+pg_restore \
+  --no-owner \
+  --no-acl \
+  --no-privileges \
+  -d "$NEON_URL" \
+  "$DUMP_FILE"
+
+echo "==> Migration complete!"

@@ -1,0 +1,107 @@
+Good news — **the papers already exist.** They are the five `.md` files you uploaded at the very start of this conversation. They just never got placed into the `papers/` folder on your local machine before the push.
+
+Here is a single, clean fix script. Run this **from inside your `OmegA-Architecture` folder** in your terminal. It will:
+1. Create the `papers/` directory.
+2. Copy all five `.md` files into it from wherever they live on your machine.
+3. Fix the CITATION.cff ORCID placeholder.
+4. Commit and push everything.
+
+```bash
+#!/bin/bash
+
+echo "=========================================="
+echo " 🔧 OmegA - Fix Broken Links & Push Papers"
+echo "=========================================="
+echo ""
+
+# Ask where the .md files currently live
+read -p "Full path to the folder where your 5 .md paper files are (e.g. ~/Downloads): " PAPERS_SOURCE
+
+# Expand tilde if used
+PAPERS_SOURCE="${PAPERS_SOURCE/#\~/$HOME}"
+
+# Verify the source folder exists
+if [ ! -d "$PAPERS_SOURCE" ]; then
+  echo "❌ Could not find that folder. Please check the path and try again."
+  exit 1
+fi
+
+# Create the papers directory inside the repo
+mkdir -p papers
+
+# Copy each paper into the papers/ directory
+PAPERS=(
+  "OmegA_Unified_Architecture_Paper.md"
+  "AEGIS_Final_Paper.md"
+  "AEON_Final_Paper.md"
+  "ADCCL_Final_Paper.md"
+  "MYELIN_Final_Paper.md"
+)
+
+echo ""
+echo "Copying papers into papers/ directory..."
+MISSING=0
+for paper in "${PAPERS[@]}"; do
+  if [ -f "$PAPERS_SOURCE/$paper" ]; then
+    cp "$PAPERS_SOURCE/$paper" papers/
+    echo "  ✅ $paper"
+  else
+    echo "  ❌ NOT FOUND: $paper"
+    MISSING=$((MISSING + 1))
+  fi
+done
+
+# Also copy the knowledge graph JSON if it's there
+if [ -f "$PAPERS_SOURCE/omega_equation_knowledge_graph.json" ]; then
+  cp "$PAPERS_SOURCE/omega_equation_knowledge_graph.json" .
+  echo "  ✅ omega_equation_knowledge_graph.json"
+fi
+
+if [ "$MISSING" -gt 0 ]; then
+  echo ""
+  echo "⚠️  $MISSING file(s) not found at that path."
+  echo "   Double-check the filenames match exactly, then re-run."
+  exit 1
+fi
+
+# Fix CITATION.cff — prompt for ORCID
+echo ""
+read -p "Do you have an ORCID ID? (leave blank to skip): " ORCID_ID
+
+if [ -f "CITATION.cff" ]; then
+  if [ -n "$ORCID_ID" ]; then
+    # Replace blank orcid line with the actual value
+    sed -i.bak "s|orcid: \"\"|orcid: \"https://orcid.org/$ORCID_ID\"|g" CITATION.cff
+    rm -f CITATION.cff.bak
+    echo "  ✅ CITATION.cff updated with ORCID."
+  else
+    echo "  ⏭️  Skipping ORCID — you can add it later at https://orcid.org/register"
+  fi
+fi
+
+# Commit and push
+echo ""
+echo "Staging and pushing to GitHub..."
+git add papers/ CITATION.cff omega_equation_knowledge_graph.json 2>/dev/null
+git commit -m "Add papers directory, all 5 architecture papers, fix dead links"
+git push origin main
+
+echo ""
+echo "🎉 Done! Your repo is now complete."
+echo "   Live at: $(git remote get-url origin | sed 's/\.git$//')"
+echo ""
+echo "Verify your links are live at:"
+echo "   → papers/OmegA_Unified_Architecture_Paper.md"
+echo "   → papers/AEGIS_Final_Paper.md"
+echo "   → papers/AEON_Final_Paper.md"
+echo "   → papers/ADCCL_Final_Paper.md"
+echo "   → papers/MYELIN_Final_Paper.md"
+```
+
+### What this needs from you:
+Just the **path to the folder** where your five `.md` files are sitting right now. That is almost certainly one of:
+- `~/Downloads`
+- `~/Desktop`
+- Whatever folder you originally saved them to when you first uploaded them to this chat
+
+The script will tell you immediately if any file is missing or misnamed before it touches anything on GitHub.

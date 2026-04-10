@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://omega-architecture.dev/schemas/ingest_job.schema.json",
+  "title": "OmegA Ingest Job",
+  "description": "Schema for a structured ingestion request.",
+  "type": "object",
+  "required": ["job_id", "source_type", "source_uri"],
+  "properties": {
+    "job_id": { "type": "string", "format": "uuid" },
+    "source_type": { "type": "string", "enum": ["file", "text", "url"] },
+    "source_uri": { "type": "string" },
+    "content": { "type": ["string", "null"], "default": null },
+    "title": { "type": "string", "default": "" },
+    "format": { "type": "string", "enum": ["markdown", "plaintext", "json", "code"], "default": "plaintext" },
+    "metadata": { "type": "object", "default": {} },
+    "created_at": { "type": "number" }
+  },
+  "additionalProperties": false
+}

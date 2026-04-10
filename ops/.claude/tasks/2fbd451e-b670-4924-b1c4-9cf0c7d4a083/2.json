@@ -1,0 +1,9 @@
+{
+  "id": "2",
+  "subject": "Build TypeScript AEGIS governance module for web",
+  "description": "Port AEGIS Run Envelope + risk gate logic to TypeScript, wrap /api/chat so every request is governance-gated",
+  "activeForm": "Building AEGIS governance module",
+  "status": "in_progress",
+  "blocks": [],
+  "blockedBy": []
+}

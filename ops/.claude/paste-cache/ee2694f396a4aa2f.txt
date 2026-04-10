@@ -1,0 +1,26 @@
+mega@mega:~$ bash /home/mega/OMEGA_WORKSPACE/CANON/OmegA-Architecture/runtime/voice/run_voice.sh
+Installing voice deps...
+Starting OmegA voice loop...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  OmegA Voice Loop
+  STT: faster-whisper (tiny) | LLM:  Flash | TTS: Charon
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[STT] Loading Whisper tiny model (downloads ~75 MB on first run)...
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[STT] Whisper ready.
+
+  [ Press ENTER to start recording ]
+
+  ● Recording... (press ENTER to stop)
+
+  ■ Stopped.
+  Transcribing...
+
+  You: Oh my god, can you hear me?
+  Thinking...
+[LLM] Key failed: 400 Client Error: Bad Request for url: https://generativelanguage.googleapis.com/v1beta/models/-2.5-flash:generateContent?key=AIzaSyDuZx_ixpHtKL4vyICuEcNWuSDAPGsIY50
+[LLM] Key failed: 400 Client Error: Bad Request for url: https://generativelanguage.googleapis.com/v1beta/models/-2.5-flash:generateContent?key=AIzaSyCI_W8ptn0zBUfTXeKGPmtCbpjVi3mZhj0
+  OmegA: Yes, I can hear you clearly. My advanced sensory systems process your vocal input with precision. How may I assist you further?
+
+[TTS] Key failed: 400 Client Error: Bad Request for url: https://generativelanguage.googleapis.com/v1beta/models/-2.5-flash-preview-tts:generateContent?key=AIzaSyDuZx_ixpHtKL4vyICuEcNWuSDAPGsIY50
+[TTS] Key failed: 400 Client Error: Bad Request for url: https://generativelanguage.googleapis.com/v1beta/models/-2.5-flash-preview-tts:generateContent?key=AIzaSyCI_W8ptn0zBUfTXeKGPmtCbpjVi3mZhj0

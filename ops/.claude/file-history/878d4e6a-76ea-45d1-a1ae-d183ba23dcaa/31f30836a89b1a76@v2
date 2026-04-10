@@ -1,0 +1,76 @@
+'use client';
+
+import React from 'react';
+import type { OmegaSession } from '../../hooks/useOmegaChat';
+
+interface ConversationSidebarProps {
+  conversations: OmegaSession[];
+  activeConvoId: string | null;
+  onSelectConversation: (id: string) => void;
+  onNewConversation: () => void;
+  onDeleteConversation: (id: string) => void;
+  isOpen?: boolean;
+}
+
+export function ConversationSidebar({
+  conversations,
+  activeConvoId,
+  onSelectConversation,
+  onNewConversation,
+  onDeleteConversation,
+  isOpen = true,
+}: ConversationSidebarProps) {
+  return (
+    <aside
+      className={`bg-gray-50 border-r border-gray-200 flex flex-col ${
+        isOpen ? 'w-64' : 'w-0 overflow-hidden'
+      } transition-all duration-200`}
+    >
+      <div className='p-4 border-b border-gray-200'>
+        <button
+          onClick={onNewConversation}
+          className='w-full bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors'
+        >
+          + New Chat
+        </button>
+      </div>
+
+      <nav className='flex-1 overflow-y-auto p-2'>
+        {conversations.map((convo) => (
+          <div
+            key={convo.id}
+            className='group mb-1'
+            onClick={() => onSelectConversation(convo.id)}
+          >
+            <button
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                activeConvoId === convo.id
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <div className='truncate'>
+                {convo.title ||
+                  `Chat ${new Date(convo.createdAt).toLocaleDateString()}`}
+              </div>
+              <div className='text-xs opacity-75'>
+                {convo.model}
+              </div>
+            </button>
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeleteConversation(convo.id);
+              }}
+              className='hidden group-hover:block absolute right-2 p-1 text-gray-400 hover:text-red-600'
+              title='Delete conversation'
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+      </nav>
+    </aside>
+  );
+}

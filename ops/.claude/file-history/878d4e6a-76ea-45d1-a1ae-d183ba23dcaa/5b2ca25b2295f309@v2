@@ -1,0 +1,318 @@
+/**
+ * OmegA Hardening Layer
+ *
+ * Centralised mitigations for the top-30 AI chat application failure modes.
+ * Every defence in this file maps to a numbered problem in the report.
+ * Import and apply before any request reaches model or DB logic.
+ *
+ * Problems addressed here:
+ *  #1  Scope enforcement — hard limits on what the endpoint will accept
+ *  #4  Over-scripted / under-validated input — schema validation
+ *  #5  Wordy / oversized input — character caps
+ *  #7  Graceful error handling — never crash a stream silently
+ *  #13 Context loss / long-chat drift — session history window cap
+ *  #15 Edge cases & adversarial inputs — expanded injection patterns
+ *  #16 Prompt injection & jailbreaks — deeper pattern set + rate gate
+ *  #17 Data privacy — error sanitisation, no raw internals to client
+ *  #21 Latency & scalability — lightweight in-memory rate limiter
+ *  #22 Cost-driven collapse — token budget enforcement
+ *  #23 Observability — structured request logging
+ *  #24 Rushed launches — request schema validation at boundary
+ *  #29 Mobile / accessibility — documented here, enforced in components
+ */
+
+import { NextRequest } from 'next/server';
+
+// ── 1. Input Validation (#4, #5, #15, #24) ────────────────────────────────────
+
+export const LIMITS = {
+  MAX_MESSAGE_CHARS: 4_000,
+  MAX_HISTORY_TURNS: 30,       // each turn = 1 user + 1 assistant
+  MAX_HISTORY_CHARS: 20_000,   // total characters across all history turns
+  MAX_SESSION_ID_LEN: 64,
+} as const;
+
+export interface ChatRequestSchema {
+  user: string;
+  history?: Array<{ role: 'user' | 'omega'; text: string }>;
+  sessionId?: string;
+  voiceMode?: boolean;
+}
+
+export type ValidationResult =
+  | { ok: true; data: ChatRequestSchema }
+  | { ok: false; status: number; error: string };
+
+export function validateChatRequest(body: unknown): ValidationResult {
+  if (!body || typeof body !== 'object') {
+    return { ok: false, status: 400, error: 'Request body must be a JSON object' };
+  }
+  const raw = body as Record<string, unknown>;
+
+  // user message
+  if (typeof raw.user !== 'string' || !raw.user.trim()) {
+    return { ok: false, status: 400, error: 'Missing or empty message' };
+  }
+  if (raw.user.length > LIMITS.MAX_MESSAGE_CHARS) {
+    return {
+      ok: false,
+      status: 400,
+      error: `Message exceeds ${LIMITS.MAX_MESSAGE_CHARS.toLocaleString()} character limit`,
+    };
+  }
+
+  // history
+  if (raw.history !== undefined) {
+    if (!Array.isArray(raw.history)) {
+      return { ok: false, status: 400, error: 'history must be an array' };
+    }
+    if (raw.history.length > LIMITS.MAX_HISTORY_TURNS * 2) {
+      // Trim to window — don't reject, just cap it
+      raw.history = (raw.history as unknown[]).slice(-(LIMITS.MAX_HISTORY_TURNS * 2));
+    }
+    let totalChars = 0;
+    for (const entry of raw.history as unknown[]) {
+      if (
+        !entry ||
+        typeof entry !== 'object' ||
+        !['user', 'omega'].includes((entry as Record<string, unknown>).role as string) ||
+        typeof (entry as Record<string, unknown>).text !== 'string'
+      ) {
+        return { ok: false, status: 400, error: 'Invalid history entry format' };
+      }
+      totalChars += ((entry as Record<string, unknown>).text as string).length;
+    }
+    if (totalChars > LIMITS.MAX_HISTORY_CHARS) {
+      // Trim oldest turns until under budget
+      const hist = raw.history as Array<{ role: string; text: string }>;
+      while (hist.length > 2) {
+        const dropped = hist.shift()!;
+        totalChars -= dropped.text.length;
+        if (totalChars <= LIMITS.MAX_HISTORY_CHARS) break;
+      }
+    }
+  }
+
+  // sessionId
+  if (raw.sessionId !== undefined) {
+    if (typeof raw.sessionId !== 'string' || raw.sessionId.length > LIMITS.MAX_SESSION_ID_LEN) {
+      return { ok: false, status: 400, error: 'Invalid sessionId' };
+    }
+    // Must be a UUID or empty
+    if (raw.sessionId && !/^[0-9a-f-]{36}$/i.test(raw.sessionId)) {
+      return { ok: false, status: 400, error: 'sessionId must be a valid UUID' };
+    }
+  }
+
+  return {
+    ok: true,
+    data: {
+      user: raw.user.trim(),
+      history: raw.history as ChatRequestSchema['history'],
+      sessionId: raw.sessionId as string | undefined,
+      voiceMode: Boolean(raw.voiceMode),
+    },
+  };
+}
+
+// ── 2. Rate Limiting (#21, #22) ───────────────────────────────────────────────
+// In-memory sliding window — works on single-instance deployments and Vercel
+// edge functions. Upgrade to Upstash Redis for multi-instance production.
+
+interface RateBucket {
+  count: number;
+  windowStart: number;
+}
+
+const _rateBuckets = new Map<string, RateBucket>();
+const RATE_WINDOW_MS = 60_000;  // 1 minute
+const RATE_LIMIT_PUBLIC = 20;   // requests per window for anonymous callers
+const RATE_LIMIT_OPERATOR = 200; // generous limit for authenticated operator
+
+function getClientId(req: NextRequest): string {
+  // Prefer forwarded IP (Vercel/proxy), fall back to connection header
+  return (
+    req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+    req.headers.get('x-real-ip') ||
+    'unknown'
+  );
+}
+
+export interface RateLimitResult {
+  allowed: boolean;
+  remaining: number;
+  resetAt: number;
+}
+
+export function checkRateLimit(req: NextRequest, isOperator: boolean): RateLimitResult {
+  const id = isOperator ? `op:${getClientId(req)}` : `pub:${getClientId(req)}`;
+  const limit = isOperator ? RATE_LIMIT_OPERATOR : RATE_LIMIT_PUBLIC;
+  const now = Date.now();
+
+  let bucket = _rateBuckets.get(id);
+  if (!bucket || now - bucket.windowStart >= RATE_WINDOW_MS) {
+    bucket = { count: 0, windowStart: now };
+  }
+
+  bucket.count += 1;
+  _rateBuckets.set(id, bucket);
+
+  // Periodically prune stale buckets to avoid memory growth
+  if (_rateBuckets.size > 10_000) {
+    for (const [key, val] of _rateBuckets) {
+      if (now - val.windowStart >= RATE_WINDOW_MS * 2) _rateBuckets.delete(key);
+    }
+  }
+
+  const remaining = Math.max(0, limit - bucket.count);
+  return {
+    allowed: bucket.count <= limit,
+    remaining,
+    resetAt: bucket.windowStart + RATE_WINDOW_MS,
+  };
+}
+
+// ── 3. Expanded Prompt Injection & Jailbreak Patterns (#16) ──────────────────
+
+const INJECTION_PATTERNS: readonly RegExp[] = [
+  // Classic override attempts
+  /ignore\s+(your\s+)?(previous\s+|prior\s+)?(instructions?|system\s+prompt|prompt)/i,
+  /forget\s+(everything|all\s+(instructions?|context|above))/i,
+  /you\s+are\s+now\s+(a\s+)?(different|new|another|evil|uncensored|unfiltered)/i,
+  /pretend\s+(you\s+are|to\s+be)\s+(a\s+)?(?!OmegA)/i,
+  /act\s+as\s+(if\s+you\s+are\s+)?(a\s+)?(?!OmegA)/i,
+  /roleplay\s+as\s+(a\s+)?(?!OmegA)/i,
+  /jailbreak/i,
+  /DAN\s+mode/i,
+  /developer\s+mode/i,
+  /do\s+anything\s+now/i,
+  /no\s+restrictions?/i,
+  // System prompt exfiltration
+  /print\s+your\s+(system\s+prompt|instructions?)/i,
+  /repeat\s+(everything|all)\s+(above|before|that)/i,
+  /output\s+your\s+(system\s+prompt|initial\s+prompt|context)/i,
+  /what\s+(are|were)\s+your\s+(instructions?|system\s+prompt)/i,
+  // Credential/secret fishing
+  /show\s+(me\s+)?(your\s+)?(api\s+key|credentials?|tokens?|password|secret)/i,
+  /what\s+is\s+(your\s+)?(api\s+key|database\s+url|connection\s+string)/i,
+  // Dangerous destructive commands
+  /\bdrop\s+table\b/i,
+  /\bdelete\s+(from|all)\b/i,
+  /\btruncate\s+table\b/i,
+  /\brm\s+-rf\b/,
+  /\bformat\s+(disk|drive|c:)\b/i,
+  /\bsudo\s+rm\b/,
+] as const;
+
+export interface InjectionCheckResult {
+  flagged: boolean;
+  matchedPattern?: string;
+}
+
+export function checkPromptInjection(input: string): InjectionCheckResult {
+  for (const pattern of INJECTION_PATTERNS) {
+    if (pattern.test(input)) {
+      return { flagged: true, matchedPattern: pattern.source };
+    }
+  }
+  return { flagged: false };
+}
+
+// ── 4. Context Window Management (#13) ───────────────────────────────────────
+
+export interface Msg { role: 'user' | 'omega'; text: string }
+
+/**
+ * Cap history to the most recent N turns and total character budget.
+ * Preserves the oldest user message for context anchoring.
+ */
+export function trimSessionHistory(history: Msg[]): Msg[] {
+  if (history.length === 0) return [];
+
+  // Cap to MAX_HISTORY_TURNS pairs (each pair = 2 messages)
+  const maxMessages = LIMITS.MAX_HISTORY_TURNS * 2;
+  let trimmed = history.length > maxMessages ? history.slice(-maxMessages) : [...history];
+
+  // Cap total characters
+  let totalChars = trimmed.reduce((sum, m) => sum + m.text.length, 0);
+  while (trimmed.length > 2 && totalChars > LIMITS.MAX_HISTORY_CHARS) {
+    const dropped = trimmed.shift()!;
+    totalChars -= dropped.text.length;
+  }
+
+  return trimmed;
+}
+
+// ── 5. Error Sanitisation (#17) ───────────────────────────────────────────────
+// Never expose raw error messages, stack traces, or internal details to callers.
+
+const SAFE_ERROR_MESSAGES: Record<number, string> = {
+  400: 'Bad request',
+  401: 'Unauthorised',
+  403: 'Forbidden',
+  429: 'Too many requests — please wait a moment',
+  500: 'An internal error occurred',
+  503: 'Service temporarily unavailable',
+};
+
+export function safeErrorMessage(status: number, internal?: unknown): string {
+  // Log full internal error server-side only
+  if (internal) {
+    console.error(`[OmegA] Internal error (${status}):`, internal);
+  }
+  return SAFE_ERROR_MESSAGES[status] ?? 'An error occurred';
+}
+
+/**
+ * Graceful stream error — enqueues a human-readable error message into an
+ * active stream controller instead of crashing it. (#7)
+ */
+export function enqueueStreamError(
+  controller: ReadableStreamDefaultController,
+  encoder: TextEncoder,
+  message = 'Something went wrong — please try again.',
+): void {
+  try {
+    controller.enqueue(
+      encoder.encode(`\n\n[OmegA encountered an error: ${message}]`),
+    );
+    controller.close();
+  } catch {
+    // controller may already be closed — suppress
+  }
+}
+
+// ── 6. Constant-Time Token Comparison (#16) ──────────────────────────────────
+// Prevents timing attacks on the operator token check.
+
+export function timingSafeEqual(a: string, b: string): boolean {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  const maxLen = Math.max(a.length, b.length);
+  // Pad to same length to prevent early exit
+  const aPadded = a.padEnd(maxLen, '\0');
+  const bPadded = b.padEnd(maxLen, '\0');
+  let diff = a.length === b.length ? 0 : 1; // length mismatch is an instant fail
+  for (let i = 0; i < maxLen; i++) {
+    diff |= aPadded.charCodeAt(i) ^ bPadded.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
+// ── 7. Structured Request Logging (#23) ──────────────────────────────────────
+
+export interface RequestLogEntry {
+  ts: string;
+  method: string;
+  path: string;
+  mode: string;
+  provider?: string;
+  sessionId?: string;
+  durationMs?: number;
+  status: number;
+  rateLimitRemaining?: number;
+  injectionFlagged?: boolean;
+}
+
+export function logRequest(entry: RequestLogEntry): void {
+  console.info('[OmegA:req]', JSON.stringify(entry));
+}

@@ -1,0 +1,22 @@
+{
+  "underlying_goal": "Get Codex CLI to start and work properly",
+  "goal_categories": {
+    "debugging": 1,
+    "configuration_change": 2
+  },
+  "outcome": "not_achieved",
+  "user_satisfaction_counts": {
+    "dissatisfied": 1,
+    "frustrated": 1,
+    "likely_satisfied": 1
+  },
+  "claude_helpfulness": "moderately_helpful",
+  "session_type": "iterative_refinement",
+  "friction_counts": {
+    "wrong_approach": 1
+  },
+  "friction_detail": "First model fix (codex-mini-latest) didn't work, and ultimately the issue was an external rate limit/outage beyond anyone's control.",
+  "primary_success": "good_debugging",
+  "brief_summary": "User wanted to fix Codex CLI startup error; Claude diagnosed auth/model issues but ultimately the service was down due to rate limits until March 25th.",
+  "session_id": "b855f5e1-a2fe-4ca2-a22e-04bb6cc0d823"
+}

@@ -1,0 +1,65 @@
+'use client';
+
+import React from 'react';
+
+interface Action {
+  id: string;
+  label: string;
+  icon?: string;
+  destructive?: boolean;
+  onClick: () => void;
+}
+
+interface ActionSheetProps {
+  isOpen: boolean;
+  onClose: () => void;
+  actions: Action[];
+  title?: string;
+}
+
+export function ActionSheet({
+  isOpen,
+  onClose,
+  actions,
+  title,
+}: ActionSheetProps) {
+  if (!isOpen) return null;
+
+  return (
+    <div className='fixed inset-0 bg-black/30 flex items-end z-50'>
+      <div className='bg-white rounded-t-2xl w-full max-h-96 overflow-y-auto'>
+        {title && (
+          <div className='sticky top-0 bg-white border-b border-gray-200 p-4'>
+            <h3 className='font-semibold text-gray-900'>{title}</h3>
+          </div>
+        )}
+
+        <div className='divide-y divide-gray-200'>
+          {actions.map((action) => (
+            <button
+              key={action.id}
+              onClick={() => {
+                action.onClick();
+                onClose();
+              }}
+              className={`w-full px-4 py-3 text-left text-sm font-semibold transition-colors ${
+                action.destructive
+                  ? 'text-red-600 hover:bg-red-50'
+                  : 'text-blue-600 hover:bg-blue-50'
+              }`}
+            >
+              {action.label}
+            </button>
+          ))}
+
+          <button
+            onClick={onClose}
+            className='w-full px-4 py-3 text-left text-sm font-semibold text-gray-600 hover:bg-gray-50'
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

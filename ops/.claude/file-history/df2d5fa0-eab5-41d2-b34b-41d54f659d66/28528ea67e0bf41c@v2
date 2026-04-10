@@ -1,0 +1,201 @@
+import { getCircuitBreaker } from './hardening';
+
+export type ProviderName = 'vercel-gateway' | 'openai-direct' | 'xai-direct' | '-flash';
+
+export type ProviderAttempt = {
+  name: ProviderName;
+  status: 'failed' | 'selected';
+  error?: string;
+};
+
+export type ProviderHealthSnapshot = {
+  gateway: {
+    configured: boolean;
+    available: boolean;
+    reason: string | null;
+    url: string;
+    authSource: string | null;
+  };
+  openai: {
+    configured: boolean;
+    available: boolean;
+    reason: string | null;
+  };
+  xai: {
+    configured: boolean;
+    available: boolean;
+    reason: string | null;
+  };
+  : {
+    configured: boolean;
+    available: boolean;
+    reason: string | null;
+    keysConfigured: number;
+  };
+  preferredOrder: ProviderName[];
+};
+
+export const DEFAULT_PROVIDER_ORDER: ProviderName[] = [
+  'vercel-gateway',
+  'xai-direct',
+  '-flash',
+  'openai-direct',
+];
+
+const _KEYS = [
+  process.env._API_KEY_4,
+  process.env._API_KEY_2,
+  process.env._API_KEY,
+].filter(Boolean) as string[];
+
+export function resolveGatewayAuth(): { key: string | null; source: string | null } {
+  if (process.env.AI_GATEWAY_API_KEY) {
+    return { key: process.env.AI_GATEWAY_API_KEY, source: 'AI_GATEWAY_API_KEY' };
+  }
+
+  if (process.env.VERCEL_AI_GATEWAY_KEY) {
+    return { key: process.env.VERCEL_AI_GATEWAY_KEY, source: 'VERCEL_AI_GATEWAY_KEY' };
+  }
+
+  if (process.env.VERCEL_OIDC_TOKEN) {
+    return { key: process.env.VERCEL_OIDC_TOKEN, source: 'VERCEL_OIDC_TOKEN' };
+  }
+
+  return { key: null, source: null };
+}
+
+export function getProviderHealthSnapshot(): ProviderHealthSnapshot {
+  const gatewayAuth = resolveGatewayAuth();
+  const gatewayConfigured = Boolean(gatewayAuth.key);
+  const openaiConfigured = Boolean(process.env.OPENAI_API_KEY);
+  const xaiConfigured = Boolean(process.env.XAI_API_KEY);
+  const Configured = _KEYS.length > 0;
+
+  return {
+    gateway: {
+      configured: gatewayConfigured,
+      available: gatewayConfigured,
+      reason: gatewayConfigured ? null : 'missing gateway auth',
+      url: 'https://ai-gateway.vercel.sh/v1',
+      authSource: gatewayAuth.source,
+    },
+    openai: {
+      configured: openaiConfigured,
+      available: openaiConfigured,
+      reason: openaiConfigured ? null : 'missing OpenAI key',
+    },
+    xai: {
+      configured: xaiConfigured,
+      available: xaiConfigured,
+      reason: xaiConfigured ? null : 'missing xAI key',
+    },
+    : {
+      configured: Configured,
+      available: Configured,
+      reason: Configured ? null : 'missing  key(s)',
+      keysConfigured: _KEYS.length,
+    },
+    preferredOrder: DEFAULT_PROVIDER_ORDER,
+  };
+}
+
+export function getProviderOrder(): ProviderName[] {
+  return DEFAULT_PROVIDER_ORDER;
+}
+
+export function serializeProviderHealth(snapshot: ProviderHealthSnapshot): string {
+  return JSON.stringify(snapshot);
+}
+
+export async function selectStreamingProvider(
+  providers: Array<{ name: ProviderName; fn: () => Promise<ReadableStream> }>,
+  encoder: TextEncoder,
+  decoder: TextDecoder,
+): Promise<{
+  provider: ProviderName;
+  stream: ReadableStream;
+  attempts: ProviderAttempt[];
+}> {
+  let lastErr: unknown;
+  const attempts: ProviderAttempt[] = [];
+
+  for (const p of providers) {
+    // Skip providers whose circuit breaker is open (#V5)
+    const cb = getCircuitBreaker(`provider:${p.name}`);
+    if (cb.isOpen) {
+      attempts.push({ name: p.name, status: 'failed', error: 'circuit open' });
+      continue;
+    }
+
+    try {
+      const providerStream = await p.fn();
+      const selected = await promoteNonEmptyStream(providerStream, encoder, decoder);
+      if (selected) {
+        cb.recordSuccess();
+        attempts.push({ name: p.name, status: 'selected' });
+        return { provider: p.name, stream: selected, attempts };
+      }
+      cb.recordFailure();
+      attempts.push({ name: p.name, status: 'failed', error: 'empty response' });
+    } catch (e) {
+      cb.recordFailure();
+      const error = e instanceof Error ? e.message : String(e);
+      attempts.push({ name: p.name, status: 'failed', error });
+      lastErr = e;
+    }
+  }
+
+  throw lastErr ?? new Error(`All providers failed (${attempts.map(p => p.name).join(' -> ')})`);
+}
+
+async function promoteNonEmptyStream(
+  providerStream: ReadableStream,
+  encoder: TextEncoder,
+  decoder: TextDecoder,
+): Promise<ReadableStream | null> {
+  const reader = providerStream.getReader();
+  const bufferedChunks: string[] = [];
+  let sawMeaningfulChunk = false;
+
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      const text = decoder.decode(value, { stream: true });
+      if (text) {
+        bufferedChunks.push(text);
+        if (text.trim()) {
+          sawMeaningfulChunk = true;
+          break;
+        }
+      }
+    }
+
+    if (!sawMeaningfulChunk) {
+      await reader.cancel().catch(() => {});
+      return null;
+    }
+
+    return new ReadableStream({
+      async start(ctrl) {
+        try {
+          for (const chunk of bufferedChunks) {
+            ctrl.enqueue(encoder.encode(chunk));
+          }
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            const text = decoder.decode(value, { stream: true });
+            if (text) ctrl.enqueue(encoder.encode(text));
+          }
+          ctrl.close();
+        } catch (err) {
+          ctrl.error(err);
+        }
+      },
+    });
+  } catch (err) {
+    await reader.cancel().catch(() => {});
+    throw err;
+  }
+}

@@ -1,0 +1,148 @@
+use comfy_table::{presets::UTF8_FULL, Cell, Color, ContentArrangement, Row, Table};
+use owo_colors::OwoColorize;
+use std::time::SystemTime;
+
+use crate::config::CliConfig;
+
+// Gradient Stops: Cyan -> Dodger Blue -> Blue Violet -> Magenta -> Gold -> Dark Orange -> Red Orange -> Cyan
+const GRADIENT_STOPS: &[(u8, u8, u8)] = &[
+    (0, 255, 255),     // Cyan
+    (0, 120, 255),     // Dodger Blue
+    (138, 43, 226),    // Blue Violet
+    (255, 0, 255),     // Magenta
+    (255, 215, 0),     // Gold
+    (255, 140, 0),     // Dark Orange
+    (255, 69, 0),      // Red Orange
+    (0, 255, 255),     // Loop back to Cyan
+];
+
+fn interpolate_color(color1: (u8, u8, u8), color2: (u8, u8, u8), t: f32) -> (u8, u8, u8) {
+    let r = color1.0 as f32 + (color2.0 as f32 - color1.0 as f32) * t;
+    let g = color1.1 as f32 + (color2.1 as f32 - color1.1 as f32) * t;
+    let b = color1.2 as f32 + (color2.2 as f32 - color1.2 as f32) * t;
+    (r as u8, g as u8, b as u8)
+}
+
+fn get_gradient_color(progress: f32) -> (u8, u8, u8) {
+    let progress = progress % 1.0;
+    let num_stops = GRADIENT_STOPS.len() - 1;
+    let segment_length = 1.0 / num_stops as f32;
+
+    let segment_index = (progress / segment_length) as usize;
+    let segment_progress = (progress - (segment_index as f32 * segment_length)) / segment_length;
+
+    let segment_index = std::cmp::min(segment_index, num_stops - 1);
+
+    interpolate_color(
+        GRADIENT_STOPS[segment_index],
+        GRADIENT_STOPS[segment_index + 1],
+        segment_progress,
+    )
+}
+
+fn ansi_rgb(r: u8, g: u8, b: u8) -> String {
+    format!("\x1b[38;2;{};{};{}m", r, g, b)
+}
+
+fn render_line(text: &str, y_index: usize, time_offset: f32, spread: f32) -> String {
+    let mut rendered = String::new();
+
+    for (x, ch) in text.chars().enumerate() {
+        if ch == ' ' {
+            rendered.push(ch);
+            continue;
+        }
+
+        // Apply gradient color based on position and time
+        let wave_pos = (x as f32 * spread) + (y_index as f32 * 0.05) + time_offset;
+        let (r, g, b) = get_gradient_color(wave_pos);
+        rendered.push_str(&ansi_rgb(r, g, b));
+        rendered.push(ch);
+    }
+
+    rendered.push_str("\x1b[0m");
+    rendered
+}
+
+pub fn print_banner(cfg: &CliConfig) {
+    // Get time offset for animation
+    let now = SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs_f32();
+    let time_offset = (now % 1000.0) * 0.1;
+
+    // Render the colorshifting banner
+    let title = "Ω OmegA";
+    let subtitle = "Sovereign. Persistent. Self-Knowing.";
+
+    println!("{}", render_line(title, 0, time_offset, 0.03));
+    println!("{}", render_line(subtitle, 1, time_offset + 0.5, 0.01));
+    println!();
+
+    // Config table
+    let mut table = Table::new();
+    table.load_preset(UTF8_FULL);
+    table.set_content_arrangement(ContentArrangement::DynamicFullWidth);
+    table.set_header(vec![
+        Cell::new("Gateway").fg(Color::Cyan),
+        Cell::new("Value").fg(Color::Yellow),
+    ]);
+    table.add_row(Row::from(vec![
+        Cell::new("URL").fg(Color::Cyan),
+        Cell::new(cfg.gateway.url.clone()).fg(Color::White),
+    ]));
+    table.add_row(Row::from(vec![
+        Cell::new("Mode").fg(Color::Cyan),
+        Cell::new(cfg.defaults.mode.clone()).fg(Color::White),
+    ]));
+    table.add_row(Row::from(vec![
+        Cell::new("Auth").fg(Color::Cyan),
+        Cell::new(if cfg.gateway.token.is_empty() {
+            "linked without token"
+        } else {
+            "linked"
+        })
+        .fg(Color::Green),
+    ]));
+    table.add_row(Row::from(vec![
+        Cell::new("Surface").fg(Color::Cyan),
+        Cell::new(
+            "ask · briefing · inspect · pulse · providers · history · chat · forward · gains · warp · config",
+        )
+            .fg(Color::White),
+    ]));
+    println!("{table}");
+}
+
+pub fn print_section(title: &str) {
+    println!();
+    println!("{}", title.bright_magenta().bold());
+}
+
+pub fn print_kv_table(title: &str, rows: &[(impl AsRef<str>, impl AsRef<str>)]) {
+    let mut table = Table::new();
+    table.load_preset(UTF8_FULL);
+    table.set_content_arrangement(ContentArrangement::DynamicFullWidth);
+    table.set_header(vec![
+        Cell::new(title).fg(Color::Magenta),
+        Cell::new("Value").fg(Color::Yellow),
+    ]);
+
+    for (key, value) in rows {
+        table.add_row(Row::from(vec![
+            Cell::new(key.as_ref()).fg(Color::Cyan),
+            Cell::new(value.as_ref()).fg(Color::White),
+        ]));
+    }
+
+    println!("{table}");
+}
+
+pub fn print_bullets(title: &str, items: &[String]) {
+    println!();
+    println!("{}", title.bright_magenta().bold());
+    for item in items {
+        println!("  {}", format!("• {}", item).bright_white());
+    }
+}

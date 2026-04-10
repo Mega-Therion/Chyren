@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+"""Search all tables in both Neon DBs for any mention of Rylan."""
+import os
+import psycopg2
+
+DB1 = 'postgresql://neondb_owner:npg_HbW1Zlkjd7NI@ep-sweet-glade-anvm0pwn.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require'
+DB2 = 'postgresql://neondb_owner:npg_m9PMfDUC1kpB@ep-snowy-dew-ak5hrcr3-pooler.c-3.us-west-2.aws.neon.tech/neondb?sslmode=require'
+
+def search_db(label, url):
+    print(f"\n{'='*60}")
+    print(f"DB: {label}")
+    print('='*60)
+    conn = psycopg2.connect(url)
+    cur = conn.cursor()
+
+    # Get all tables
+    cur.execute("""
+        SELECT table_name FROM information_schema.tables
+        WHERE table_schema = 'public' AND table_type = 'BASE TABLE'
+        ORDER BY table_name
+    """)
+    tables = [r[0] for r in cur.fetchall()]
+    print(f"Tables: {tables}\n")
+
+    found_any = False
+    for table in tables:
+        # Get text/varchar columns
+        cur.execute(f"""
+            SELECT column_name, data_type FROM information_schema.columns
+            WHERE table_schema = 'public' AND table_name = %s
+            AND data_type IN ('text', 'character varying', 'json', 'jsonb')
+            ORDER BY ordinal_position
+        """, (table,))
+        text_cols = [r[0] for r in cur.fetchall()]
+        if not text_cols:
+            continue
+
+        conditions = " OR ".join([f'CAST("{c}" AS TEXT) ILIKE %s' for c in text_cols])
+        params = ['%rylan%'] * len(text_cols)
+        try:
+            cur.execute(f'SELECT * FROM "{table}" WHERE {conditions} LIMIT 20', params)
+            rows = cur.fetchall()
+            if rows:
+                found_any = True
+                colnames = [d[0] for d in cur.description]
+                print(f"*** FOUND in table: {table} ({len(rows)} rows) ***")
+                for row in rows:
+                    for col, val in zip(colnames, row):
+                        if val and 'rylan' in str(val).lower():
+                            print(f"  [{col}]: {str(val)[:500]}")
+                    print()
+        except Exception as e:
+            print(f"  (skip {table}: {e})")
+
+    if not found_any:
+        print("No mentions of 'rylan' found in any table.")
+
+    cur.close()
+    conn.close()
+
+search_db("omega-personal-db (DB1)", DB1)
+search_db("omega-technical-db (DB2)", DB2)

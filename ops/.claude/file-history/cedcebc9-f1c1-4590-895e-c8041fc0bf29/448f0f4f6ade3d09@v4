@@ -1,0 +1,34 @@
+# Claude Skill Bundle
+
+This folder mirrors the skill directories currently available in this workspace. It is organized so Claude Code's skill creator can inspect the real `SKILL.md` files, bundled references, scripts, and assets without relying on a hand-written summary.
+
+## Layout
+- `skills/universal/` - universal bootstrappers and shared meta-skills
+- `skills//` - mirrored skills from the  CLI core bundle
+
+- `skills/codex/` - mirrored skills from `/home/mega/.codex/skills`
+- `skills/agents/` - mirrored skills from `/home/mega/.agents/skills`
+- `skills/claude/` - mirrored skills from `/home/mega/.claude/skills`
+- `skills-manifest.json` - machine-readable inventory with descriptions and usage notes
+- `INDEX.md` - human-readable catalog of every mirrored skill
+
+## How To Use
+
+1. Point the Claude Code skill creator at this folder.
+2. Use `INDEX.md` to find the closest matching skill by trigger or description.
+3. Open the mirrored `SKILL.md` for the exact workflow, references, and bundled resources.
+4. When creating a new skill, copy the closest existing pattern and adapt the frontmatter, trigger language, and workflow sections.
+
+## Inventory
+
+- Codex skills mirrored: 83
+- Agent skills mirrored: 35
+- Claude skills mirrored: 20
+-  skills mirrored: 23
+- Universal skills mirrored: 4
+- Total skills mirrored: 165
+
+## Notes
+
+- Duplicate or overlapping skill names are preserved by source tree, so you can compare variants instead of losing information.
+- The bundle intentionally keeps the original structure intact so the skill creator can inspect real resources rather than a flattened approximation.

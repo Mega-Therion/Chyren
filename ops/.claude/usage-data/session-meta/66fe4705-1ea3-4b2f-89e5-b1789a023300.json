@@ -1,0 +1,34 @@
+{
+  "session_id": "66fe4705-1ea3-4b2f-89e5-b1789a023300",
+  "project_path": "/home/mega",
+  "start_time": "2026-03-24T14:08:38.597Z",
+  "duration_minutes": 0,
+  "user_message_count": 1,
+  "assistant_message_count": 2,
+  "tool_counts": {
+    "Glob": 1
+  },
+  "languages": {},
+  "git_commits": 0,
+  "git_pushes": 0,
+  "input_tokens": 6,
+  "output_tokens": 102,
+  "first_prompt": "Export all of my stored memories and any context you've learned about me from past conversations. Preserve my words verbatim where possible, especially for instructions and preferences.  ## Categories…",
+  "user_interruptions": 0,
+  "user_response_times": [],
+  "tool_errors": 0,
+  "tool_error_categories": {},
+  "uses_task_agent": false,
+  "uses_mcp": false,
+  "uses_web_search": false,
+  "uses_web_fetch": false,
+  "lines_added": 0,
+  "lines_removed": 0,
+  "files_modified": 0,
+  "message_hours": [
+    9
+  ],
+  "user_message_timestamps": [
+    "2026-03-24T14:08:38.597Z"
+  ]
+}

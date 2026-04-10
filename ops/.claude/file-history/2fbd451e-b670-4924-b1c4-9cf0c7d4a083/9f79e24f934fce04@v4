@@ -1,0 +1,106 @@
+# OmegA Proof System
+
+**Phase:** 2 (Machine-Checked Core)
+**Created:** 2026-03-28
+
+This directory contains the formal proof infrastructure for the OmegA architecture.
+
+## Structure
+
+```
+proofs/
+  README.md              -- this file
+  invariants.py          -- 36 property-based tests (hypothesis) for all 10 theorems
+  correspondence.py      -- 29 proof-to-implementation correspondence tests
+  state_machines.py      -- 4 stateful state machine tests (T-1, T-6, T-9, T-10)
+  fuzz_envelope.py       -- fuzz harness for RunEnvelope and EnvelopeClock
+  fuzz_phylactery.py     -- fuzz harness for Phylactery corruption detection
+  fuzz_memory.py         -- fuzz harness for MemoryGraph integrity
+  fuzz_drift.py          -- fuzz harness for ClaimBudget and DriftController
+  STATUS.md              -- single proof-status truth page
+  PROOF_MAP.md           -- claim-to-evidence traceability matrix
+  lakefile.toml          -- Lean4 Lake project config
+  lean-toolchain         -- pinned Lean4 version
+  OmegaProofs.lean       -- root import
+  OmegaProofs/
+    Basic.lean           -- (generated stub)
+    IdentityContinuity.lean  -- T-2: Phylactery hash chain (machine-checked)
+    MemoryHardening.lean     -- T-5: MYELIN monotonicity (machine-checked)
+    UnifiedGating.lean       -- T-7: 3-gate conjunction (machine-checked)
+    GovernanceFailClosed.lean -- T-3: AEGIS fail-closed (machine-checked)
+tools/proof_auditor.py   -- drift check for theorem/claim/proof correspondence
+```
+
+## Proof Types
+
+| Type | Method | Location | Status |
+|---|---|---|---|
+| Machine-checked proofs | Lean4 | `proofs/OmegaProofs/*.lean` | T-2, T-3, T-4, T-5, T-6, T-7, T-9, T-10 (8 files) |
+| Proof-to-impl correspondence | Python hypothesis | `proofs/correspondence.py` | T-2, T-3, T-4, T-5, T-6, T-7, T-9, T-10 (60 tests) |
+| Stateful state machines | Python hypothesis | `proofs/state_machines.py` | T-1, T-6, T-9, T-10 (4 machines) |
+| Fuzz harnesses | Python hypothesis | `proofs/fuzz_*.py` | envelope, phylactery, memory, drift (75 tests) |
+| Property-based tests | Python hypothesis | `proofs/invariants.py` | T-1 through T-10 (36 tests) |
+| Deterministic assertions | pytest | `evals/test_conformance.py` | 59 assertions |
+| Empirical evidence | Evaluation reports | `evals/*.json` | recorded |
+| Formal statements | Theorem Ledger | `specs/THEOREM_LEDGER.md` | 10 theorems |
+
+## How to Run
+
+### Property-based tests (requires Python + hypothesis)
+```bash
+python3 -m pytest proofs/invariants.py -v
+```
+
+### Machine-checked proofs (requires Lean4)
+```bash
+cd proofs && lake build
+```
+
+### Full release gate (runs both)
+```bash
+bash verify.sh
+```
+
+### Install Lean4 (if not present)
+```bash
+curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+```
+
+## Relationship to Other Artifacts
+
+- `specs/THEOREM_LEDGER.md` -- formal statement of every claim, classified by type
+- `proofs/PROOF_MAP.md` -- maps each claim through: formal statement -> code -> test -> runtime artifact -> log
+- `tools/proof_auditor.py` -- executable drift check that keeps the proof surface synchronized
+- `evals/test_conformance.py` -- 59-assertion conformance suite (deterministic)
+- `publication/CLAIM_LEDGER.md` -- human-readable claim status table (predecessor to THEOREM_LEDGER)
+
+## What is Machine-Checked
+
+| Theorem | Lean4 Proofs | What is Proven |
+|---|---|---|
+| T-2 | `IdentityContinuity.lean` | Chain integrity, tamper detection, chain determinism |
+| T-3 | `GovernanceFailClosed.lean` | Fail-closed gate, monotonic denial, default denial |
+| T-5 | `MemoryHardening.lean` | Monotonicity, boundedness, fixed point |
+| T-6 | `VerifierNonBypass.lean` | Verifier/bridge/risk non-bypass, no compensation, universal non-bypass |
+| T-7 | `UnifiedGating.lean` | Conjunction required, single-gate blocking, order invariance, only-all-true permits |
+| T-9 | `SelfTagImmutability.lean` | Prefix preservation, genesis immutability, entry immutability, length monotonicity |
+| T-4 | `ClaimBudgetBounds.lean` | Validity biconditional, grounding count bound, increment/unchanged lemmas |
+| T-10 | `EnvelopeCompleteness.lean` | Monotonicity, positivity, completeness, no-gaps, n-step version |
+
+## Reproducible Environment
+
+Outside reviewers can run the canonical proof and verification path in a pinned container:
+
+```bash
+docker build -t omega-proof-env .
+docker run --rm -it omega-proof-env
+```
+
+The default container command runs `bash scripts/alye_verification.sh`.
+
+## Remaining Phase 3 Work
+
+- TLA+ model checking for T-1 — requires Java (Python stateful machines provide equivalent coverage)
+- Lean4 proof for T-1 (state vector) — strong coverage from state machines and property tests
+- Mathlib integration for full real-number T-5 proofs
+- External transcript capture for outside testers
