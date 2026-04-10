@@ -10,12 +10,15 @@
         font-family: 'Orbitron', monospace, sans-serif;
         font-weight: 900;
         text-anchor: middle;
-        animation: neon-shift 8s infinite alternate ease-in-out;
+        animation: neon-shift 24s infinite alternate ease-in-out;
+        fill: rgba(15, 15, 20, 0.65);
+        stroke-width: 2px;
       }
       
       .chyren {
         font-size: 85px;
         letter-spacing: 20px;
+        stroke-width: 3px;
       }
       
       .omega-top {
@@ -32,46 +35,79 @@
         font-size: 18px;
         text-anchor: middle;
         letter-spacing: 6px;
-        animation: neon-shift-dim 8s infinite alternate ease-in-out;
-        opacity: 0.9;
+        animation: neon-shift-dim 24s infinite alternate ease-in-out;
+        fill: rgba(15, 15, 20, 0.8);
+        stroke-width: 1px;
       }
       
-      /* Colorshifting Edgelit Neon Keyframes */
+      /* Colorshifting Edgelit Neon Keyframes - Slow Extended Spectrum */
       @keyframes neon-shift {
         0% {
-          fill: #fff;
-          filter: drop-shadow(0 0 5px #00ffff) drop-shadow(0 0 15px #00ffff) drop-shadow(0 0 30px #0088ff);
+          stroke: #cffcff;
+          filter: drop-shadow(0 0 6px #00ffff) drop-shadow(0 0 18px #00ffff) drop-shadow(0 0 35px #0088ff);
         }
-        33% {
-          fill: #fff;
-          filter: drop-shadow(0 0 5px #ff00ff) drop-shadow(0 0 15px #ff00ff) drop-shadow(0 0 30px #8800ff);
+        14% {
+          stroke: #dcf2ff;
+          filter: drop-shadow(0 0 6px #00aaff) drop-shadow(0 0 18px #00aaff) drop-shadow(0 0 35px #0044ff);
         }
-        66% {
-          fill: #fff;
-          filter: drop-shadow(0 0 5px #00ffaa) drop-shadow(0 0 15px #00ffaa) drop-shadow(0 0 30px #008855);
+        28% {
+          stroke: #f2e6ff;
+          filter: drop-shadow(0 0 6px #aa00ff) drop-shadow(0 0 18px #aa00ff) drop-shadow(0 0 35px #5500ff);
+        }
+        42% {
+          stroke: #ffe6ff;
+          filter: drop-shadow(0 0 6px #ff00ff) drop-shadow(0 0 18px #ff00ff) drop-shadow(0 0 35px #8800ff);
+        }
+        56% {
+          stroke: #ffe6e6;
+          filter: drop-shadow(0 0 6px #ff0055) drop-shadow(0 0 18px #ff0055) drop-shadow(0 0 35px #ff0000);
+        }
+        70% {
+          stroke: #fff2e6;
+          filter: drop-shadow(0 0 6px #ffaa00) drop-shadow(0 0 18px #ffaa00) drop-shadow(0 0 35px #ff5500);
+        }
+        84% {
+          stroke: #ffffe6;
+          filter: drop-shadow(0 0 6px #ffff00) drop-shadow(0 0 18px #ffff00) drop-shadow(0 0 35px #88ff00);
         }
         100% {
-          fill: #fff;
-          filter: drop-shadow(0 0 5px #ff0055) drop-shadow(0 0 15px #ff0055) drop-shadow(0 0 30px #ff0000);
+          stroke: #e6ffea;
+          filter: drop-shadow(0 0 6px #00ffaa) drop-shadow(0 0 18px #00ffaa) drop-shadow(0 0 35px #008855);
         }
       }
 
       @keyframes neon-shift-dim {
         0% {
-          fill: #e0ffff;
-          filter: drop-shadow(0 0 4px #00ffff) drop-shadow(0 0 8px #0088ff);
+          stroke: #a0ffff;
+          filter: drop-shadow(0 0 4px #00ffff) drop-shadow(0 0 10px #0088ff);
         }
-        33% {
-          fill: #ffe0ff;
-          filter: drop-shadow(0 0 4px #ff00ff) drop-shadow(0 0 8px #8800ff);
+        14% {
+          stroke: #a0d8ff;
+          filter: drop-shadow(0 0 4px #00aaff) drop-shadow(0 0 10px #0044ff);
         }
-        66% {
-          fill: #e0ffea;
-          filter: drop-shadow(0 0 4px #00ffaa) drop-shadow(0 0 8px #008855);
+        28% {
+          stroke: #d8a0ff;
+          filter: drop-shadow(0 0 4px #aa00ff) drop-shadow(0 0 10px #5500ff);
+        }
+        42% {
+          stroke: #ffa0ff;
+          filter: drop-shadow(0 0 4px #ff00ff) drop-shadow(0 0 10px #8800ff);
+        }
+        56% {
+          stroke: #ffa0a0;
+          filter: drop-shadow(0 0 4px #ff0055) drop-shadow(0 0 10px #ff0000);
+        }
+        70% {
+          stroke: #ffd8a0;
+          filter: drop-shadow(0 0 4px #ffaa00) drop-shadow(0 0 10px #ff5500);
+        }
+        84% {
+          stroke: #ffffa0;
+          filter: drop-shadow(0 0 4px #ffff00) drop-shadow(0 0 10px #88ff00);
         }
         100% {
-          fill: #ffe0e5;
-          filter: drop-shadow(0 0 4px #ff0055) drop-shadow(0 0 8px #ff0000);
+          stroke: #a0ffa0;
+          filter: drop-shadow(0 0 4px #00ffaa) drop-shadow(0 0 10px #008855);
         }
       }
     </style>
