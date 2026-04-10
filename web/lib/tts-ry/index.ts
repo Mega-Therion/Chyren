@@ -51,30 +51,30 @@ export function playLatencyChime(): void {
     const now = ctx.currentTime
 
     const gain = ctx.createGain()
-    gain.gain.setValueAtTime(0.08, now)
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12)
+    gain.gain.setValueAtTime(0.06, now)
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45)
     gain.connect(ctx.destination)
 
     // Root tone
     const osc1 = ctx.createOscillator()
     osc1.type = 'sine'
-    osc1.frequency.setValueAtTime(440, now)
+    osc1.frequency.setValueAtTime(523.25, now)
     osc1.connect(gain)
     osc1.start(now)
-    osc1.stop(now + 0.12)
+    osc1.stop(now + 0.45)
 
     // Harmonic
     const gain2 = ctx.createGain()
-    gain2.gain.setValueAtTime(0.04, now)
-    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.10)
+    gain2.gain.setValueAtTime(0.03, now)
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.35)
     gain2.connect(ctx.destination)
 
     const osc2 = ctx.createOscillator()
     osc2.type = 'sine'
-    osc2.frequency.setValueAtTime(554, now)
+    osc2.frequency.setValueAtTime(659.25, now)
     osc2.connect(gain2)
     osc2.start(now + 0.015)
-    osc2.stop(now + 0.10)
+    osc2.stop(now + 0.35)
   } catch {
     // AudioContext might not be available — silent fallback
   }
