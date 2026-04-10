@@ -127,7 +127,7 @@ function toChatHistory(rawMessages: unknown, fallbackContent: string): ChatMsg[]
   return normalized.length > 0 ? normalized : [{ role: 'user', content: fallbackContent }]
 }
 
-async function fetchGroqStream(
+async function fetchGroqResponse(
   history: ChatMsg[],
   systemPrompt: string,
   temperature: number,
@@ -147,12 +147,30 @@ async function fetchGroqStream(
       body: JSON.stringify({
         model,
         messages,
-        stream: true,
         temperature,
       }),
     })
 
-    if (resp.ok && resp.body) return resp
+    if (resp.ok) {
+      const payload = (await resp.json().catch(() => ({}))) as {
+        choices?: Array<{ message?: { content?: string | Array<{ text?: string }> } }>
+      }
+      const message = payload.choices?.[0]?.message?.content
+      const content =
+        typeof message === 'string'
+          ? message
+          : Array.isArray(message)
+            ? message
+                .map((part) => (typeof part?.text === 'string' ? part.text : ''))
+                .join('')
+                .trim()
+            : ''
+
+      if (content) return createSingleSseTextResponse(content)
+      lastError = `Groq model ${model} returned empty response`
+      continue
+    }
+
     lastError = await resp.text().catch(() => `${resp.status} ${resp.statusText}`)
   }
 
@@ -314,7 +332,7 @@ export async function POST(req: NextRequest) {
     }
 
     const providers: Array<() => Promise<Response>> = [
-      () => fetchGroqStream(history, systemPrompt, profile.temperature),
+      () => fetchGroqResponse(history, systemPrompt, profile.temperature),
       () => fetchOpenAIResponse(history, systemPrompt, profile.temperature),
       () => fetchAnthropicResponse(history, systemPrompt, profile.temperature),
     ]
@@ -329,6 +347,7 @@ export async function POST(req: NextRequest) {
         return resp
       } catch (error) {
         lastProviderError = error instanceof Error ? error.message : 'unknown provider failure'
+        console.error('[CHAT STREAM] Provider attempt failed:', lastProviderError)
       }
     }
 
