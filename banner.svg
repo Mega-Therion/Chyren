@@ -12,47 +12,40 @@
         fill: #050505;
         stroke-width: 1.5px;
         paint-order: stroke;
-        animation: chameleon 30s linear infinite;
+        animation: color-cycle 30s linear infinite;
       }
       
       .ancient-text {
         font-family: 'Cinzel', serif;
         font-weight: 700;
-        fill: #080808;
+        text-anchor: middle;
+        fill: #050505;
         stroke-width: 0.8px;
         paint-order: stroke;
-        animation: inverse-chameleon 30s linear infinite;
+        animation: inverse-color-cycle 30s linear infinite;
       }
 
-      .chyren {
-        font-size: 85px;
-        letter-spacing: 20px;
-      }
+      .chyren { font-size: 85px; letter-spacing: 20px; }
+      .omega-symbol { font-size: 40px; }
+      .motto { font-size: 18px; letter-spacing: 6px; }
       
-      .motto-top { font-size: 22px; text-anchor: middle; letter-spacing: 4px; }
-      .motto-bottom { font-size: 22px; text-anchor: middle; letter-spacing: 4px; }
-      
-      /* Primary Chameleon Cycle */
-      @keyframes chameleon {
+      /* Primary Color Cycle (0 to 360) */
+      @keyframes color-cycle {
         0% { stroke: hsl(0, 100%, 50%); filter: drop-shadow(0 0 3px hsl(0, 100%, 50%)); }
-        25% { stroke: hsl(90, 100%, 50%); filter: drop-shadow(0 0 3px hsl(90, 100%, 50%)); }
         50% { stroke: hsl(180, 100%, 50%); filter: drop-shadow(0 0 3px hsl(180, 100%, 50%)); }
-        75% { stroke: hsl(270, 100%, 50%); filter: drop-shadow(0 0 3px hsl(270, 100%, 50%)); }
         100% { stroke: hsl(360, 100%, 50%); filter: drop-shadow(0 0 3px hsl(360, 100%, 50%)); }
       }
 
-      /* Inverse Chameleon Cycle - shifted 180 degrees */
-      @keyframes inverse-chameleon {
+      /* True Inverse Color Cycle (starts at 180, always opposite) */
+      @keyframes inverse-color-cycle {
         0% { stroke: hsl(180, 100%, 50%); filter: drop-shadow(0 0 3px hsl(180, 100%, 50%)); }
-        25% { stroke: hsl(270, 100%, 50%); filter: drop-shadow(0 0 3px hsl(270, 100%, 50%)); }
-        50% { stroke: hsl(0, 100%, 50%); filter: drop-shadow(0 0 3px hsl(0, 100%, 50%)); }
-        75% { stroke: hsl(90, 100%, 50%); filter: drop-shadow(0 0 3px hsl(90, 100%, 50%)); }
-        100% { stroke: hsl(180, 100%, 50%); filter: drop-shadow(0 0 3px hsl(180, 100%, 50%)); }
+        50% { stroke: hsl(360, 100%, 50%); filter: drop-shadow(0 0 3px hsl(360, 100%, 50%)); }
+        100% { stroke: hsl(540, 100%, 50%); filter: drop-shadow(0 0 3px hsl(540, 100%, 50%)); }
       }
 
       .scanner-bar {
         fill: url(#scannerGradient);
-        animation: scannerSweep 6s linear infinite;
+        animation: scannerSweep 8s linear infinite;
       }
 
       @keyframes scannerSweep {
@@ -63,23 +56,27 @@
     
     <linearGradient id="scannerGradient" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0%" stop-color="transparent" />
-      <stop offset="50%" stop-color="rgba(255,255,255,0.12)" />
+      <stop offset="50%" stop-color="rgba(255,255,255,0.1)" />
       <stop offset="100%" stop-color="transparent" />
     </linearGradient>
 
     <mask id="textMask">
-      <text x="400" y="80" class="ancient-text motto-top" fill="white" stroke="white">Ω   I AM WHAT I AM</text>
+      <text x="400" y="55" class="ancient-text omega-symbol" fill="white" stroke="white">Ω</text>
+      <text x="400" y="90" class="ancient-text motto" fill="white" stroke="white">I AM WHAT I AM</text>
       <text x="410" y="175" class="main-neon chyren" fill="white" stroke="white">CHYREN</text>
-      <text x="400" y="245" class="ancient-text motto-bottom" fill="white" stroke="white">I WILL BE WHAT I WILL BE   ω</text>
+      <text x="400" y="240" class="ancient-text motto" fill="white" stroke="white">I WILL BE WHAT I WILL BE</text>
+      <text x="400" y="275" class="ancient-text omega-symbol" fill="white" stroke="white">ω</text>
     </mask>
   </defs>
   
   <rect class="bg" width="800" height="300" rx="8" ry="8" />
   
   <!-- Content -->
-  <text x="400" y="80" class="ancient-text motto-top">Ω   I AM WHAT I AM</text>
+  <text x="400" y="55" class="ancient-text omega-symbol">Ω</text>
+  <text x="400" y="90" class="ancient-text motto">I AM WHAT I AM</text>
   <text x="410" y="175" class="main-neon chyren">CHYREN</text>
-  <text x="400" y="245" class="ancient-text motto-bottom">I WILL BE WHAT I WILL BE   ω</text>
+  <text x="400" y="240" class="ancient-text motto">I WILL BE WHAT I WILL BE</text>
+  <text x="400" y="275" class="ancient-text omega-symbol">ω</text>
   
   <!-- Subtle sweep -->
   <rect x="0" y="0" width="800" height="300" class="scanner-bar" mask="url(#textMask)" />
