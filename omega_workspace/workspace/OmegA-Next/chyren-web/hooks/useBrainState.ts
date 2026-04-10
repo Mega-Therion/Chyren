@@ -15,7 +15,7 @@ export function useBrainState() {
   const activate = useCallback(() => {
     esRef.current?.close()
 
-    const es = new EventSource('/api/brain-state')
+    const es = new EventSource('/api/auth/brain-state')
     esRef.current = es
 
     es.onmessage = (e) => {

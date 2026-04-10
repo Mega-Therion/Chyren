@@ -5,7 +5,7 @@ import { checkRateLimit } from '@/lib/hardening'
 export const runtime = 'nodejs'
 
 /** Validate session param: must be 1-64 word characters (alphanumeric + underscore) */
-const SESSION_RE = /^\w{1,64}$/
+const SESSION_RE = /^[\w-]{1,64}$/
 
 export async function GET(req: NextRequest) {
   // Rate-limit by IP to prevent SSE abuse

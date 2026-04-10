@@ -120,8 +120,8 @@ export default function ChatPage() {
   useEffect(() => {
     const nextSession =
       typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
-        ? crypto.randomUUID()
-        : `session-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+        ? crypto.randomUUID().replace(/-/g, '')
+        : `session${Date.now()}${Math.random().toString(36).slice(2, 10)}`;
     localStorage.setItem('chyren_session_id', nextSession);
     localStorage.removeItem('chyren_messages');
     setSessionId(nextSession);
