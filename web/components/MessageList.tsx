@@ -14,9 +14,10 @@ export interface Message {
 interface MessageListProps {
   messages: Message[]
   isLoading?: boolean
+  onQuote?: (content: string) => void
 }
 
-export function MessageList({ messages, isLoading = false }: MessageListProps) {
+export function MessageList({ messages, isLoading = false, onQuote }: MessageListProps) {
   const endRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -43,7 +44,8 @@ export function MessageList({ messages, isLoading = false }: MessageListProps) {
                 key={label}
                 className="terminal-panel rounded px-3 py-2 text-center"
               >
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mx-auto mb-1.5"
+                <div
+                  className="w-1.5 h-1.5 rounded-full bg-emerald-500 mx-auto mb-1.5"
                   style={{ boxShadow: '0 0 6px #10b981' }}
                 />
                 <div className="font-mono text-xs text-slate-500">{label}</div>
@@ -63,10 +65,12 @@ export function MessageList({ messages, isLoading = false }: MessageListProps) {
       {messages.map((msg) => (
         <ChatMessage
           key={msg.id}
+          id={msg.id}
           role={msg.role}
           content={msg.content}
           timestamp={msg.timestamp}
           isStreaming={msg.isStreaming}
+          onQuote={onQuote}
         />
       ))}
       {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (

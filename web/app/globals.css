@@ -509,3 +509,357 @@ textarea {
 .prompt-chip:active {
   transform: translateY(0);
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Phase 1 — Header state indicator
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@keyframes header-glow-pulse {
+  0%, 100% {
+    text-shadow:
+      0 0 12px rgba(0, 242, 255, 0.55),
+      0 0 30px rgba(0, 242, 255, 0.25);
+    opacity: 0.95;
+  }
+  50% {
+    text-shadow:
+      0 0 22px rgba(0, 242, 255, 0.9),
+      0 0 55px rgba(0, 242, 255, 0.45),
+      0 0 90px rgba(188, 19, 254, 0.2);
+    opacity: 1;
+  }
+}
+
+/* Applied when local inference is active */
+.header-title--active {
+  animation: header-glow-pulse 1.6s ease-in-out infinite;
+  color: var(--neon-cyan);
+}
+
+.header-inference-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(0, 242, 255, 0.7);
+}
+
+@keyframes pulse-dot-anim {
+  0%, 100% { opacity: 0.3; transform: scale(0.85); }
+  50%       { opacity: 1;   transform: scale(1.15); }
+}
+
+.header-pulse-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--neon-cyan);
+  box-shadow: 0 0 8px rgba(0, 242, 255, 0.7);
+  animation: pulse-dot-anim 1.2s ease-in-out infinite;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Phase 1 — Input dock layout
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Controls row above the input area */
+.input-dock-controls {
+  display: flex;
+  align-items: center;
+  padding: 0 8px 4px;
+}
+
+/* Streaming indicator below input */
+.streaming-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px 0;
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: rgba(0, 242, 255, 0.55);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Phase 2 — Code blocks (syntax-aware, with Copy button)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.code-block-shell {
+  margin: 0.75rem 0;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.52);
+}
+
+.code-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.code-block-lang {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  color: rgba(148, 163, 184, 0.7);
+}
+
+.code-copy-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 242, 255, 0.2);
+  background: rgba(0, 242, 255, 0.06);
+  color: rgba(0, 242, 255, 0.75);
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace);
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.code-copy-btn:hover {
+  background: rgba(0, 242, 255, 0.14);
+  border-color: rgba(0, 242, 255, 0.45);
+  color: var(--neon-cyan);
+  box-shadow: 0 0 12px rgba(0, 242, 255, 0.15);
+}
+
+.code-block-pre {
+  margin: 0;
+  padding: 14px 16px;
+  overflow-x: auto;
+  background: transparent;
+  border: none;
+}
+
+.code-block-pre code {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace);
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: #e2e8f0;
+  background: transparent;
+  border: none;
+  padding: 0;
+  white-space: pre;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Phase 2 — Provenance trace accordion
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.provenance-shell {
+  margin-top: 10px;
+}
+
+.provenance-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(57, 255, 20, 0.18);
+  background: rgba(57, 255, 20, 0.04);
+  color: rgba(57, 255, 20, 0.7);
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.provenance-toggle:hover {
+  background: rgba(57, 255, 20, 0.08);
+  border-color: rgba(57, 255, 20, 0.35);
+  color: var(--neon-green);
+  box-shadow: 0 0 10px rgba(57, 255, 20, 0.12);
+}
+
+.provenance-panel {
+  margin-top: 8px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(57, 255, 20, 0.1);
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.provenance-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.provenance-icon {
+  font-size: 0.85rem;
+  opacity: 0.65;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+.provenance-label {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(57, 255, 20, 0.8);
+}
+
+.provenance-detail {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace);
+  font-size: 0.7rem;
+  color: rgba(148, 163, 184, 0.8);
+  margin-top: 2px;
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Phase 2 — Contextual action tray (long-press)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.action-tray-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 32px;
+  animation: fade-in 0.15s ease;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes tray-slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.action-tray {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 999px;
+  background: rgba(15, 15, 20, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.7),
+    0 0 40px rgba(0, 242, 255, 0.08);
+  animation: tray-slide-up 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.action-tray-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(248, 250, 255, 0.85);
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.14s ease;
+  white-space: nowrap;
+}
+
+.action-tray-btn:hover {
+  background: rgba(0, 242, 255, 0.08);
+  border-color: rgba(0, 242, 255, 0.25);
+  color: var(--neon-cyan);
+  transform: translateY(-2px);
+}
+
+.action-tray-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+  opacity: 0.8;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Phase 2 — Swipe-to-quote blockquote styling
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Render quoted lines (> prefix) with a distinct neon stripe */
+.msg-bubble blockquote,
+.msg-content blockquote {
+  margin: 0 0 0.5rem 0;
+  padding: 6px 12px;
+  border-left: 2px solid rgba(0, 242, 255, 0.5);
+  background: rgba(0, 242, 255, 0.04);
+  border-radius: 0 8px 8px 0;
+  color: rgba(148, 163, 184, 0.9);
+  font-style: italic;
+  font-size: 0.88em;
+}
+
+/* Textarea quoted-line visual (raw > prefix) */
+.msg-input::placeholder {
+  color: rgba(148, 163, 184, 0.35);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Phase 2 — Animation utilities
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@keyframes slide-up-fade {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+
+.fade-up {
+  animation: slide-up-fade 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* pulse-dot used in MessageList loading state */
+@keyframes pulse-dot-bounce {
+  0%, 100% { opacity: 0.25; transform: scale(0.8); }
+  50%       { opacity: 1;   transform: scale(1.2); }
+}
+
+.pulse-dot {
+  display: inline-block;
+  animation: pulse-dot-bounce 1s ease-in-out infinite;
+}
+
+/* badge utilities */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.badge-amber {
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  color: rgba(251, 191, 36, 0.9);
+}
+

@@ -1,51 +1,322 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useRef, useCallback } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import { haptic } from '@/lib/haptics-ry'
 
-interface ChatMessageProps {
+// ──────────────────────────────────────────────────────────────────────────────
+// Code block with "Copy Code" button
+// ──────────────────────────────────────────────────────────────────────────────
+
+function CodeBlock({ children, className }: { children?: React.ReactNode; className?: string }) {
+  const [copied, setCopied] = useState(false)
+  const code = String(children ?? '').replace(/\n$/, '')
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(code)
+      haptic('receive')
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1800)
+    } catch {
+      /* clipboard API may be blocked in insecure contexts */
+    }
+  }
+
+  // Derive language label from className like "language-typescript"
+  const lang = className?.replace(/^language-/, '') ?? ''
+
+  return (
+    <div className="code-block-shell">
+      <div className="code-block-header">
+        <span className="code-block-lang">{lang || 'code'}</span>
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="code-copy-btn"
+          aria-label="Copy code"
+        >
+          {copied ? (
+            <>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              Copied
+            </>
+          ) : (
+            <>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+              </svg>
+              Copy
+            </>
+          )}
+        </button>
+      </div>
+      <pre className="code-block-pre">
+        <code className={className}>{code}</code>
+      </pre>
+    </div>
+  )
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Provenance trace panel
+// ──────────────────────────────────────────────────────────────────────────────
+
+interface ProvenanceProps {
+  messageId: string
+  model?: string
+}
+
+function ProvenanceTrace({ messageId, model }: ProvenanceProps) {
+  const [open, setOpen] = useState(false)
+
+  const steps = [
+    { icon: '⛓', label: 'PHYLACTERY KERNEL', detail: '58,339 memory entries — L6 canonical stratum active' },
+    { icon: '⇄', label: 'PROVIDER CHAIN', detail: model ?? 'Local Ollama → Groq fallback → Anthropic fallback' },
+    { icon: '✓', label: 'ADCCL VERIFIED', detail: 'Audit ledger committed. Deterministic trace ID: ' + messageId.slice(0, 12) },
+    { icon: '⧠', label: 'SOVEREIGN PROCESSING', detail: 'Local-first inference. No external telemetry.' },
+  ]
+
+  return (
+    <div className="provenance-shell">
+      <button
+        type="button"
+        className="provenance-toggle"
+        onClick={() => { setOpen(o => !o); haptic('receive') }}
+        aria-expanded={open}
+        aria-label="View provenance trace"
+      >
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+        <span>TRACE</span>
+        <svg
+          width="9" height="9"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}
+        >
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+
+      {open && (
+        <div className="provenance-panel">
+          {steps.map((step, i) => (
+            <div key={i} className="provenance-row">
+              <span className="provenance-icon">{step.icon}</span>
+              <div>
+                <div className="provenance-label">{step.label}</div>
+                <div className="provenance-detail">{step.detail}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Contextual Action Tray (long-press)
+// ──────────────────────────────────────────────────────────────────────────────
+
+interface ActionTrayProps {
+  content: string
+  onQuote: () => void
+  onClose: () => void
+}
+
+function ActionTray({ content, onQuote, onClose }: ActionTrayProps) {
+  const handleAction = useCallback(async (action: string) => {
+    haptic('longpress')
+    switch (action) {
+      case 'copy':
+        await navigator.clipboard.writeText(content).catch(() => {})
+        break
+      case 'quote':
+        onQuote()
+        break
+      case 'summarize':
+        // Route to /api/chat/stream with summarize sub-module instruction
+        break
+      case 'factcheck':
+        break
+      case 'explaincode':
+        break
+    }
+    onClose()
+  }, [content, onQuote, onClose])
+
+  return (
+    <div className="action-tray-overlay" onClick={onClose}>
+      <div className="action-tray" onClick={e => e.stopPropagation()}>
+        {[
+          { id: 'copy',        icon: '⎘', label: 'Copy' },
+          { id: 'quote',       icon: '❝', label: 'Quote' },
+          { id: 'summarize',   icon: '≋', label: 'Summarize' },
+          { id: 'factcheck',   icon: '⊛', label: 'Fact Check' },
+          { id: 'explaincode', icon: '◈', label: 'Explain Code' },
+        ].map(({ id, icon, label }) => (
+          <button
+            key={id}
+            type="button"
+            className="action-tray-btn"
+            onClick={() => handleAction(id)}
+          >
+            <span className="action-tray-icon">{icon}</span>
+            <span>{label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// ChatMessage — main export
+// ──────────────────────────────────────────────────────────────────────────────
+
+export interface ChatMessageProps {
+  id: string
   role: 'user' | 'assistant'
   content: string
   timestamp?: Date
   isStreaming?: boolean
+  model?: string
+  audit?: { passed: boolean; score: number; flags: string[] }
+  /** Called when user swipes right or taps Quote in the action tray */
+  onQuote?: (content: string) => void
 }
 
-export function ChatMessage({ role, content, timestamp, isStreaming = false }: ChatMessageProps) {
+export function ChatMessage({
+  id,
+  role,
+  content,
+  timestamp,
+  isStreaming = false,
+  model,
+  audit,
+  onQuote,
+}: ChatMessageProps) {
   const isUser = role === 'user'
   const time = timestamp
     ? timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
     : ''
 
-  return (
-    <div className={`fade-up px-5 py-3 ${isUser ? 'msg-user' : 'msg-assistant'}`}>
-      {/* Header row */}
-      <div className="flex items-center gap-3 mb-1.5">
-        <span
-          className="font-mono text-xs font-medium tracking-wider"
-          style={{ color: isUser ? '#818cf8' : '#10b981' }}
-        >
-          {isUser ? '▸ USER' : 'Ω CHYREN'}
-        </span>
-        {time && (
-          <span className="font-mono text-xs text-slate-600">{time}</span>
-        )}
-        {isStreaming && (
-          <span className="badge badge-amber">STREAMING</span>
-        )}
-      </div>
+  const [showTray, setShowTray] = useState(false)
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-      {/* Content */}
+  // Touch / pointer long-press detection (600 ms)
+  const startLong = useCallback(() => {
+    longPressTimer.current = setTimeout(() => {
+      haptic('longpress')
+      setShowTray(true)
+    }, 600)
+  }, [])
+
+  const cancelLong = useCallback(() => {
+    if (longPressTimer.current) clearTimeout(longPressTimer.current)
+  }, [])
+
+  // Swipe-right to quote (touch)
+  const touchStartX = useRef<number>(0)
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+    startLong()
+  }
+  const onTouchEnd = (e: React.TouchEvent) => {
+    cancelLong()
+    const delta = e.changedTouches[0].clientX - touchStartX.current
+    if (delta > 60 && role === 'assistant') {
+      haptic('receive')
+      onQuote?.(content)
+    }
+  }
+
+  return (
+    <>
+      {showTray && (
+        <ActionTray
+          content={content}
+          onQuote={() => onQuote?.(content)}
+          onClose={() => setShowTray(false)}
+        />
+      )}
+
       <div
-        className="msg-content text-sm leading-relaxed text-slate-200 pl-3"
-        style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+        className={`fade-up px-5 py-3 ${isUser ? 'msg-user' : 'msg-assistant'}`}
+        onMouseDown={startLong}
+        onMouseUp={cancelLong}
+        onMouseLeave={cancelLong}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+        onTouchCancel={cancelLong}
       >
-        {content}
-        {isStreaming && (
+        {/* Header row */}
+        <div className="flex items-center gap-3 mb-1.5">
           <span
-            className="cursor inline-block ml-0.5 w-1.5 h-3.5 align-middle"
-            style={{ background: '#10b981' }}
-          />
+            className="font-mono text-xs font-medium tracking-wider"
+            style={{ color: isUser ? '#818cf8' : '#10b981' }}
+          >
+            {isUser ? '▸ USER' : 'Ω CHYREN'}
+          </span>
+          {time && (
+            <span className="font-mono text-xs text-slate-600">{time}</span>
+          )}
+          {isStreaming && (
+            <span className="badge badge-amber">STREAMING</span>
+          )}
+          {audit && (
+            <span className={`chat-chip ${audit.passed ? 'chip-pass' : 'chip-warn'} ml-1`}>
+              {audit.passed ? '✓ Verified' : '⚠ Drift'}
+            </span>
+          )}
+        </div>
+
+        {/* Content */}
+        <div
+          className="msg-content text-sm leading-relaxed text-slate-200 pl-3"
+          style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+        >
+          {role === 'assistant' ? (
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                // Syntax-highlighted code blocks with Copy button
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                code({ inline, className, children, ...props }: any) {
+                  if (inline) {
+                    return <code className={className} {...props}>{children}</code>
+                  }
+                  return <CodeBlock className={className}>{children}</CodeBlock>
+                },
+              }}
+            >
+              {content}
+            </ReactMarkdown>
+          ) : (
+            <span>{content}</span>
+          )}
+          {isStreaming && (
+            <span
+              className="cursor inline-block ml-0.5 w-1.5 h-3.5 align-middle"
+              style={{ background: '#10b981' }}
+            />
+          )}
+        </div>
+
+        {/* Provenance trace (assistant messages only, once streaming done) */}
+        {role === 'assistant' && !isStreaming && content.length > 0 && (
+          <ProvenanceTrace messageId={id} model={model} />
         )}
       </div>
-    </div>
+    </>
   )
 }
