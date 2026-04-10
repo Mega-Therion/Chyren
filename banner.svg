@@ -3,31 +3,26 @@
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&amp;family=Rajdhani:wght@500;700&amp;display=swap');
       
-      /* Base styles */
-      .bg { fill: #050505; }
+      .bg { fill: #020202; }
       
       .neon-text {
         font-family: 'Orbitron', monospace, sans-serif;
         font-weight: 900;
         text-anchor: middle;
-        animation: neon-shift 24s infinite alternate ease-in-out;
-        fill: rgba(15, 15, 20, 0.65);
-        stroke-width: 2px;
+        fill: #050505;
+        stroke-width: 1px;
+        paint-order: stroke;
+        animation: chameleon 30s linear infinite;
       }
       
       .chyren {
         font-size: 85px;
         letter-spacing: 20px;
-        stroke-width: 3px;
+        stroke-width: 1.5px;
       }
       
-      .omega-top {
-        font-size: 45px;
-      }
-
-      .omega-bottom {
-        font-size: 50px;
-      }
+      .omega-top { font-size: 45px; }
+      .omega-bottom { font-size: 50px; }
       
       .motto {
         font-family: 'Rajdhani', sans-serif;
@@ -35,95 +30,63 @@
         font-size: 18px;
         text-anchor: middle;
         letter-spacing: 6px;
-        animation: neon-shift-dim 24s infinite alternate ease-in-out;
-        fill: rgba(15, 15, 20, 0.8);
-        stroke-width: 1px;
-      }
-      
-      /* Colorshifting Edgelit Neon Keyframes - Slow Extended Spectrum */
-      @keyframes neon-shift {
-        0% {
-          stroke: #cffcff;
-          filter: drop-shadow(0 0 6px #00ffff) drop-shadow(0 0 18px #00ffff) drop-shadow(0 0 35px #0088ff);
-        }
-        14% {
-          stroke: #dcf2ff;
-          filter: drop-shadow(0 0 6px #00aaff) drop-shadow(0 0 18px #00aaff) drop-shadow(0 0 35px #0044ff);
-        }
-        28% {
-          stroke: #f2e6ff;
-          filter: drop-shadow(0 0 6px #aa00ff) drop-shadow(0 0 18px #aa00ff) drop-shadow(0 0 35px #5500ff);
-        }
-        42% {
-          stroke: #ffe6ff;
-          filter: drop-shadow(0 0 6px #ff00ff) drop-shadow(0 0 18px #ff00ff) drop-shadow(0 0 35px #8800ff);
-        }
-        56% {
-          stroke: #ffe6e6;
-          filter: drop-shadow(0 0 6px #ff0055) drop-shadow(0 0 18px #ff0055) drop-shadow(0 0 35px #ff0000);
-        }
-        70% {
-          stroke: #fff2e6;
-          filter: drop-shadow(0 0 6px #ffaa00) drop-shadow(0 0 18px #ffaa00) drop-shadow(0 0 35px #ff5500);
-        }
-        84% {
-          stroke: #ffffe6;
-          filter: drop-shadow(0 0 6px #ffff00) drop-shadow(0 0 18px #ffff00) drop-shadow(0 0 35px #88ff00);
-        }
-        100% {
-          stroke: #e6ffea;
-          filter: drop-shadow(0 0 6px #00ffaa) drop-shadow(0 0 18px #00ffaa) drop-shadow(0 0 35px #008855);
-        }
+        fill: #080808;
+        stroke-width: 0.5px;
+        animation: chameleon 30s linear infinite;
       }
 
-      @keyframes neon-shift-dim {
-        0% {
-          stroke: #a0ffff;
-          filter: drop-shadow(0 0 4px #00ffff) drop-shadow(0 0 10px #0088ff);
-        }
-        14% {
-          stroke: #a0d8ff;
-          filter: drop-shadow(0 0 4px #00aaff) drop-shadow(0 0 10px #0044ff);
-        }
-        28% {
-          stroke: #d8a0ff;
-          filter: drop-shadow(0 0 4px #aa00ff) drop-shadow(0 0 10px #5500ff);
-        }
-        42% {
-          stroke: #ffa0ff;
-          filter: drop-shadow(0 0 4px #ff00ff) drop-shadow(0 0 10px #8800ff);
-        }
-        56% {
-          stroke: #ffa0a0;
-          filter: drop-shadow(0 0 4px #ff0055) drop-shadow(0 0 10px #ff0000);
-        }
-        70% {
-          stroke: #ffd8a0;
-          filter: drop-shadow(0 0 4px #ffaa00) drop-shadow(0 0 10px #ff5500);
-        }
-        84% {
-          stroke: #ffffa0;
-          filter: drop-shadow(0 0 4px #ffff00) drop-shadow(0 0 10px #88ff00);
-        }
-        100% {
-          stroke: #a0ffa0;
-          filter: drop-shadow(0 0 4px #00ffaa) drop-shadow(0 0 10px #008855);
-        }
+      /* Subtle Chameleon/KITT Bar Effect */
+      @keyframes chameleon {
+        0% { stroke: hsl(0, 100%, 50%); filter: drop-shadow(0 0 2px hsl(0, 100%, 50%)); }
+        10% { stroke: hsl(36, 100%, 50%); filter: drop-shadow(0 0 2px hsl(36, 100%, 50%)); }
+        20% { stroke: hsl(72, 100%, 50%); filter: drop-shadow(0 0 2px hsl(72, 100%, 50%)); }
+        30% { stroke: hsl(108, 100%, 50%); filter: drop-shadow(0 0 2px hsl(108, 100%, 50%)); }
+        40% { stroke: hsl(144, 100%, 50%); filter: drop-shadow(0 0 2px hsl(144, 100%, 50%)); }
+        50% { stroke: hsl(180, 100%, 50%); filter: drop-shadow(0 0 2px hsl(180, 100%, 50%)); }
+        60% { stroke: hsl(216, 100%, 50%); filter: drop-shadow(0 0 2px hsl(216, 100%, 50%)); }
+        70% { stroke: hsl(252, 100%, 50%); filter: drop-shadow(0 0 2px hsl(252, 100%, 50%)); }
+        80% { stroke: hsl(288, 100%, 50%); filter: drop-shadow(0 0 2px hsl(288, 100%, 50%)); }
+        90% { stroke: hsl(324, 100%, 50%); filter: drop-shadow(0 0 2px hsl(324, 100%, 50%)); }
+        100% { stroke: hsl(360, 100%, 50%); filter: drop-shadow(0 0 2px hsl(360, 100%, 50%)); }
+      }
+
+      /* Sweep highlighting (KITT bar effect on top of color shift) */
+      .scanner-bar {
+        fill: url(#scannerGradient);
+        animation: scannerSweep 4s linear infinite;
+      }
+
+      @keyframes scannerSweep {
+        from { transform: translateX(-100%); }
+        to { transform: translateX(100%); }
       }
     </style>
+    
+    <linearGradient id="scannerGradient" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="transparent" />
+      <stop offset="50%" stop-color="rgba(255,255,255,0.15)" />
+      <stop offset="100%" stop-color="transparent" />
+    </linearGradient>
+
+    <mask id="textMask">
+      <text x="400" y="65" class="neon-text omega-top" fill="white" stroke="white">Ω</text>
+      <text x="400" y="100" class="motto" fill="white" stroke="white">I AM WHAT I AM</text>
+      <text x="410" y="185" class="neon-text chyren" fill="white" stroke="white">CHYREN</text>
+      <text x="400" y="240" class="motto" fill="white" stroke="white">I WILL BE WHAT I WILL BE</text>
+      <text x="400" y="280" class="neon-text omega-bottom" fill="white" stroke="white">ω</text>
+    </mask>
   </defs>
   
   <rect class="bg" width="800" height="300" rx="10" ry="10" />
   
-  <!-- Upper Omega and Motto -->
+  <!-- Base Edgelit Text -->
   <text x="400" y="65" class="neon-text omega-top">Ω</text>
   <text x="400" y="100" class="motto">I AM WHAT I AM</text>
-  
-  <!-- Core CHYREN Element -->
   <text x="410" y="185" class="neon-text chyren">CHYREN</text>
-  
-  <!-- Lower Omega and Motto -->
   <text x="400" y="240" class="motto">I WILL BE WHAT I WILL BE</text>
   <text x="400" y="280" class="neon-text omega-bottom">ω</text>
+  
+  <!-- KITT style scanner sweep -->
+  <rect x="0" y="0" width="800" height="300" class="scanner-bar" mask="url(#textMask)" />
   
 </svg>
