@@ -23,10 +23,6 @@
         animation: inverse-color-cycle 30s linear infinite;
       }
 
-      .symbol-char {
-        text-anchor: middle;
-      }
-      
       /* Background Symbol */
       .omega-bg {
         font-size: 280px;
@@ -35,10 +31,9 @@
         text-anchor: middle;
       }
 
-      /* Character sizes and spacing */
-      .text-char { font-size: 85px; }
-      .omega-c { font-size: 75px; } /* Slightly smaller to fit height */
-      .omega-e { font-size: 70px; }
+      /* Character sizes */
+      .text-char { font-size: 85px; text-anchor: middle; }
+      .symbol-char { font-size: 85px; text-anchor: middle; font-family: 'Cinzel', serif; }
       
       @keyframes color-cycle {
         0% { stroke: hsl(0, 100%, 50%); filter: drop-shadow(0 0 4px hsl(0, 100%, 50%)); }
@@ -72,14 +67,15 @@
     <mask id="textMask">
       <text x="400" y="240" class="ancient-text omega-bg" fill="white" stroke="white">Ω</text>
       <g fill="white" stroke="white">
-        <text x="145" y="165" class="ancient-text omega-c" transform="rotate(90, 145, 145)">Ω</text>
+        <!-- Ω rotated to look like C (opening right) -->
+        <text x="145" y="165" class="symbol-char" transform="rotate(-90, 145, 145)">Ω</text>
         <text x="250" y="165" class="main-neon text-char">H</text>
         <text x="355" y="165" class="main-neon text-char">Y</text>
         <text x="460" y="165" class="main-neon text-char">R</text>
-        <text x="565" y="165" class="ancient-text omega-e">ω</text>
+        <!-- ω rotated to look like E (legs facing left) -->
+        <text x="565" y="165" class="symbol-char" transform="rotate(90, 565, 165)">ω</text>
         <text x="670" y="165" class="main-neon text-char">N</text>
       </g>
-      <text x="412" y="215" class="ancient-text omega-sub" fill="white" stroke="white">ω</text>
     </mask>
   </defs>
   
@@ -90,19 +86,17 @@
   
   <!-- Custom CHYREN with symbols -->
   <g class="main-neon">
-    <!-- Sideways Cap Omega for C -->
-    <text x="145" y="165" class="ancient-text omega-c" transform="rotate(90, 145, 145)" text-anchor="middle">Ω</text>
-    <!-- Standard Letters -->
-    <text x="250" y="165" class="text-char" text-anchor="middle">H</text>
-    <text x="355" y="165" class="text-char" text-anchor="middle">Y</text>
-    <text x="460" y="165" class="text-char" text-anchor="middle">R</text>
-    <!-- Lower Omega for E -->
-    <text x="565" y="165" class="ancient-text omega-e" text-anchor="middle">ω</text>
-    <!-- Final N -->
-    <text x="670" y="165" class="text-char" text-anchor="middle">N</text>
+    <!-- C (Omega rotated -90) -->
+    <text x="145" y="165" class="symbol-char" transform="rotate(-90, 145, 155)">Ω</text>
+    <!-- Standard -->
+    <text x="250" y="165" class="text-char">H</text>
+    <text x="355" y="165" class="text-char">Y</text>
+    <text x="460" y="165" class="text-char">R</text>
+    <!-- E (omega rotated 90) -->
+    <text x="565" y="165" class="symbol-char" transform="rotate(90, 565, 155)">ω</text>
+    <!-- Standard -->
+    <text x="670" y="165" class="text-char">N</text>
   </g>
-  
-  <text x="412" y="215" class="ancient-text" style="font-size: 40px;" text-anchor="middle">ω</text>
   
   <rect x="0" y="0" width="800" height="300" class="scanner-bar" mask="url(#textMask)" />
   
