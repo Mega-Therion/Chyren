@@ -18,7 +18,14 @@ const compat = new FlatCompat({
 const config = [
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
   {
-    ignores: ['.next', 'node_modules', 'next-env.d.ts', 'eslint.config.mjs'],
+    ignores: ['.next', '.vercel', 'node_modules', 'next-env.d.ts', 'eslint.config.mjs'],
+  },
+  {
+    files: ['scripts/hash_helper.js'],
+    rules: {
+      // Utility script; allow CJS-style require without tripping repo-wide lint rules.
+      '@typescript-eslint/no-require-imports': 'off',
+    },
   },
   {
     files: ['**/*.ts', '**/*.tsx'],
