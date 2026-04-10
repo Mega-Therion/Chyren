@@ -8,7 +8,6 @@
       .main-neon {
         font-family: 'Orbitron', sans-serif;
         font-weight: 900;
-        text-anchor: middle;
         fill: #050505;
         stroke-width: 1.5px;
         paint-order: stroke;
@@ -18,26 +17,28 @@
       .ancient-text {
         font-family: 'Cinzel', serif;
         font-weight: 700;
-        text-anchor: middle;
         fill: #050505;
         stroke-width: 0.8px;
         paint-order: stroke;
         animation: inverse-color-cycle 30s linear infinite;
       }
 
-      .chyren { font-size: 85px; letter-spacing: 20px; }
+      .symbol-char {
+        text-anchor: middle;
+      }
       
-      /* Oversized Background Symbol */
+      /* Background Symbol */
       .omega-bg {
         font-size: 280px;
-        opacity: 0.15;
+        opacity: 0.12;
         stroke-width: 1.5px;
+        text-anchor: middle;
       }
 
-      /* Positioned lowercase omega */
-      .omega-sub {
-        font-size: 40px;
-      }
+      /* Character sizes and spacing */
+      .text-char { font-size: 85px; }
+      .omega-c { font-size: 75px; } /* Slightly smaller to fit height */
+      .omega-e { font-size: 70px; }
       
       @keyframes color-cycle {
         0% { stroke: hsl(0, 100%, 50%); filter: drop-shadow(0 0 4px hsl(0, 100%, 50%)); }
@@ -70,7 +71,14 @@
 
     <mask id="textMask">
       <text x="400" y="240" class="ancient-text omega-bg" fill="white" stroke="white">Ω</text>
-      <text x="410" y="165" class="main-neon chyren" fill="white" stroke="white">CHYREN</text>
+      <g fill="white" stroke="white">
+        <text x="145" y="165" class="ancient-text omega-c" transform="rotate(90, 145, 145)">Ω</text>
+        <text x="250" y="165" class="main-neon text-char">H</text>
+        <text x="355" y="165" class="main-neon text-char">Y</text>
+        <text x="460" y="165" class="main-neon text-char">R</text>
+        <text x="565" y="165" class="ancient-text omega-e">ω</text>
+        <text x="670" y="165" class="main-neon text-char">N</text>
+      </g>
       <text x="412" y="215" class="ancient-text omega-sub" fill="white" stroke="white">ω</text>
     </mask>
   </defs>
@@ -78,16 +86,24 @@
   <rect class="bg" width="800" height="300" rx="6" ry="6" />
   
   <!-- Content Layers -->
-  <!-- Layer 1: Background Symbol -->
   <text x="400" y="240" class="ancient-text omega-bg">Ω</text>
   
-  <!-- Layer 2: Main Text -->
-  <text x="410" y="165" class="main-neon chyren">CHYREN</text>
+  <!-- Custom CHYREN with symbols -->
+  <g class="main-neon">
+    <!-- Sideways Cap Omega for C -->
+    <text x="145" y="165" class="ancient-text omega-c" transform="rotate(90, 145, 145)" text-anchor="middle">Ω</text>
+    <!-- Standard Letters -->
+    <text x="250" y="165" class="text-char" text-anchor="middle">H</text>
+    <text x="355" y="165" class="text-char" text-anchor="middle">Y</text>
+    <text x="460" y="165" class="text-char" text-anchor="middle">R</text>
+    <!-- Lower Omega for E -->
+    <text x="565" y="165" class="ancient-text omega-e" text-anchor="middle">ω</text>
+    <!-- Final N -->
+    <text x="670" y="165" class="text-char" text-anchor="middle">N</text>
+  </g>
   
-  <!-- Layer 3: Subscribed Symbol (Under Y and R) -->
-  <text x="412" y="215" class="ancient-text omega-sub">ω</text>
+  <text x="412" y="215" class="ancient-text" style="font-size: 40px;" text-anchor="middle">ω</text>
   
-  <!-- Layer 4: Subtle Sweep -->
   <rect x="0" y="0" width="800" height="300" class="scanner-bar" mask="url(#textMask)" />
   
 </svg>
