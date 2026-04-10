@@ -1,10 +1,10 @@
 {
   "build": {
     "env": {
-      "OMEGA_DB_URL": "@omega_db_url",
-      "GROQ_API_KEY": "@groq_api_key",
-      "CHYREN_API_URL": "@chyren_api_url",
-      "CHYREN_FAMILY_AUTH_CONFIG": "@chyren_family_auth_config"
+      "OMEGA_DB_URL": "OMEGA_DB_URL",
+      "GROQ_API_KEY": "GROQ_API_KEY",
+      "CHYREN_API_URL": "CHYREN_API_URL",
+      "CHYREN_FAMILY_AUTH_CONFIG": "CHYREN_FAMILY_AUTH_CONFIG"
     }
   }
 }
