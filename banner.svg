@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" width="100%">
   <defs>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&amp;display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&amp;family=Cinzel:wght@600&amp;display=swap');
       
       .bg { fill: #000103; }
       
@@ -16,6 +16,15 @@
       }
       
       .chyren { font-size: 85px; letter-spacing: 20px; }
+
+      .ghost-sig {
+        font-family: 'Cinzel', serif;
+        font-size: 14px;
+        fill: #ffffff;
+        opacity: 0.08;
+        letter-spacing: 4px;
+        text-anchor: end;
+      }
       
       @keyframes color-cycle {
         0% { stroke: hsl(0, 100%, 50%); filter: drop-shadow(0 0 5px hsl(0, 100%, 50%)); }
@@ -120,5 +129,8 @@
 
   <!-- Top Layer: Clean Typography -->
   <text x="410" y="180" class="main-neon chyren">CHYREN</text>
+
+  <!-- Ghost Signature: Hebrew Resh, lower Omega, latin y -->
+  <text x="785" y="285" class="ghost-sig" direction="ltr" unicode-bidi="bidi-override">רωy</text>
   
 </svg>
