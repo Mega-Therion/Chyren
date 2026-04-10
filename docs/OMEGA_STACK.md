@@ -269,7 +269,6 @@ The OmegA Stack is not just an architecture — it's a **standard for building s
 
 ## References
 
-- Original OmegA Stack diagram (see `/docs/images/omega-stack-integration.png`)
 - [AEGIS Documentation](./AEGIS.md)
 - [Chyren README](../README.md)
 - [Chiral Thesis](../chiral_thesis.md)
