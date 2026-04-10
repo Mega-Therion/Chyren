@@ -68,6 +68,11 @@ graph TB
         MYELIN["💾 Myelin<br/>(Semantic Memory)"]
     end
     
+    subgraph "🗣️ Local Voice Pipeline"
+        STT["🎙️ Whisper.cpp<br/>(Local STT :8178)"]
+        TTS["🔊 Piper TTS<br/>(Local TTS :5030)"]
+    end
+    
     subgraph "🔌 Provider Spokes"
         ANTHROPIC["🤖 Anthropic"]
         OPENAI["🧑‍💻 OpenAI"]
@@ -75,12 +80,16 @@ graph TB
         GEMINI["✨ Gemini"]
     end
 
-    WEB --> CONDUCTOR
+    WEB <-->|Reactive I/O| CONDUCTOR
     CLI --> CONDUCTOR
     TG --> AEGIS
     AEGIS --> CONDUCTOR
     
-    CONDUCTOR --> MYELIN
+    CONDUCTOR <-->|STT & TTS| STT
+    CONDUCTOR <-->|STT & TTS| TTS
+    STT -.-> TTS
+    
+    CONDUCTOR <--> MYELIN
     CONDUCTOR --> ANTHROPIC
     CONDUCTOR --> OPENAI
     CONDUCTOR --> DEEPSEEK
