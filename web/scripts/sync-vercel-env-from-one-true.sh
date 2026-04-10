@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Push selected env vars from ~/.omega/one-true.env into the linked Vercel project.
+# Push selected env vars from config/.omega/one-true.env into the linked Vercel project.
 # Browser-visible vars stay NEXT_PUBLIC_*; server secrets that the web runtime needs are synced too.
 set -euo pipefail
 
 WEB_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-ENV_FILE="${CHYREN_ENV_FILE:-$HOME/.omega/one-true.env}"
+ENV_FILE="${CHYREN_ENV_FILE:-$WEB_ROOT/../config/.omega/one-true.env}"
 PROJECT_JSON="$WEB_ROOT/.vercel/project.json"
 
 if [[ ! -f "$ENV_FILE" ]]; then
