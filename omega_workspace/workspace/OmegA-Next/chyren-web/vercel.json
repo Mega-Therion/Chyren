@@ -1,12 +1,10 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "nextjs",
-  "installCommand": "npm install",
-  "buildCommand": "npm run build",
-  "crons": [
-    {
-      "path": "/api/cron/warm-context",
-      "schedule": "0 6 * * *"
+  "build": {
+    "env": {
+      "OMEGA_DB_URL": "@omega_db_url",
+      "GROQ_API_KEY": "@groq_api_key",
+      "CHYREN_API_URL": "@chyren_api_url",
+      "CHYREN_FAMILY_AUTH_CONFIG": "@chyren_family_auth_config"
     }
-  ]
+  }
 }
