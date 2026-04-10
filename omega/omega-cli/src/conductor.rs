@@ -1,6 +1,6 @@
 //! Full task conductor: alignment admission → AEON lifecycle → provider routing → ADCCL verification.
 
-use omega_adccl::{ADCCL, VerificationResult};
+use omega_adccl::adccl_logic::{ADCCL, VerificationResult};
 use omega_aegis::{AlignmentLayer, Constitution};
 use omega_aeon::AeonRuntime;
 use omega_core::{now, MatrixProgram, MemoryNode, MemoryStratum, RunEnvelope, RunStatus, VerificationReport};
