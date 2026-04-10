@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Deploy chyren-web to Vercel with env from ~/.omega/one-true.env (override with CHYREN_ENV_FILE).
+# Deploy chyren-web to Vercel with env from config/.omega/one-true.env (override with CHYREN_ENV_FILE).
 set -euo pipefail
 
 WEB_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-ENV_FILE="${CHYREN_ENV_FILE:-$HOME/.omega/one-true.env}"
+ENV_FILE="${CHYREN_ENV_FILE:-$WEB_ROOT/../config/.omega/one-true.env}"
 PROJECT_JSON="$WEB_ROOT/.vercel/project.json"
 TEMP_ROOT_LINK=0
 TMP_OUT=""
