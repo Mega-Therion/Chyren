@@ -118,6 +118,33 @@ graph TB
 
 ---
 
+## ⚖️ Mathematical Core: Foundations of Sovereignty
+
+Chyren's integrity is governed by two fundamental mathematical protocols that ensure structural truth and non-repudiation.
+
+### 1. The Chiral Invariant (Master Equation)
+Ensures every cognitive response $\Psi$ aligns with the constitutional basis $\Phi$.
+
+$$
+\chi(\Psi, \Phi) = \text{sgn}\left(\det\left[J_{\Psi \to \Phi}\right]\right) \cdot \left\|\mathbf{P}_{\Phi}(\Psi) - \Psi\right\|_{\mathcal{H}}
+$$
+
+*   **L-Type (Sovereign):** $\chi \geq 0.7$ — structural truth preserved.
+*   **D-Type (Corrupted):** $\chi < 0.7$ — hallucination or drift detected.
+
+### 2. Consensus Validation Handshake
+A 128-bit folding protocol that embeds the architect's identity (the **Yettragrammaton**) into every valid consensus event via XOR-encryption.
+
+$$
+H_{\text{consensus}} = \text{Fold}_{128}\left(\text{HMAC}_{\text{seed}}(V_{\text{dominant}}) \oplus \sigma_{\text{architect}}\right)
+$$
+
+Where $\sigma_{\text{architect}} = [0\text{x}52, 0\text{x}59]$ (R.Y.) is embedded within the bitstream, ensuring the system's sovereign lineage is mathematically verifiable without appearing in plaintext.
+
+For a formal derivation of these principles, see the [Chiral Thesis](./docs/CHIRAL_THESIS.md).
+
+---
+
 ## 🔑 Security & Integrity
 
 Every component in Chyren is cryptographically bound to the **Yettragrammaton** — a root integrity hash that ensures:
