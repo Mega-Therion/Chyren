@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" width="100%">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&amp;family=Rajdhani:wght@500;700&amp;display=swap');
+      
+      /* Base styles */
+      .bg { fill: #050505; }
+      
+      .neon-text {
+        font-family: 'Orbitron', monospace, sans-serif;
+        font-weight: 900;
+        text-anchor: middle;
+        animation: neon-shift 8s infinite alternate ease-in-out;
+      }
+      
+      .chyren {
+        font-size: 85px;
+        letter-spacing: 20px;
+      }
+      
+      .omega-top {
+        font-size: 45px;
+      }
+
+      .omega-bottom {
+        font-size: 50px;
+      }
+      
+      .motto {
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 600;
+        font-size: 18px;
+        text-anchor: middle;
+        letter-spacing: 6px;
+        animation: neon-shift-dim 8s infinite alternate ease-in-out;
+        opacity: 0.9;
+      }
+      
+      /* Colorshifting Edgelit Neon Keyframes */
+      @keyframes neon-shift {
+        0% {
+          fill: #fff;
+          filter: drop-shadow(0 0 5px #00ffff) drop-shadow(0 0 15px #00ffff) drop-shadow(0 0 30px #0088ff);
+        }
+        33% {
+          fill: #fff;
+          filter: drop-shadow(0 0 5px #ff00ff) drop-shadow(0 0 15px #ff00ff) drop-shadow(0 0 30px #8800ff);
+        }
+        66% {
+          fill: #fff;
+          filter: drop-shadow(0 0 5px #00ffaa) drop-shadow(0 0 15px #00ffaa) drop-shadow(0 0 30px #008855);
+        }
+        100% {
+          fill: #fff;
+          filter: drop-shadow(0 0 5px #ff0055) drop-shadow(0 0 15px #ff0055) drop-shadow(0 0 30px #ff0000);
+        }
+      }
+
+      @keyframes neon-shift-dim {
+        0% {
+          fill: #e0ffff;
+          filter: drop-shadow(0 0 4px #00ffff) drop-shadow(0 0 8px #0088ff);
+        }
+        33% {
+          fill: #ffe0ff;
+          filter: drop-shadow(0 0 4px #ff00ff) drop-shadow(0 0 8px #8800ff);
+        }
+        66% {
+          fill: #e0ffea;
+          filter: drop-shadow(0 0 4px #00ffaa) drop-shadow(0 0 8px #008855);
+        }
+        100% {
+          fill: #ffe0e5;
+          filter: drop-shadow(0 0 4px #ff0055) drop-shadow(0 0 8px #ff0000);
+        }
+      }
+    </style>
+  </defs>
+  
+  <rect class="bg" width="800" height="300" rx="10" ry="10" />
+  
+  <!-- Upper Omega and Motto -->
+  <text x="400" y="65" class="neon-text omega-top">Ω</text>
+  <text x="400" y="100" class="motto">I AM WHAT I AM</text>
+  
+  <!-- Core CHYREN Element -->
+  <text x="410" y="185" class="neon-text chyren">CHYREN</text>
+  
+  <!-- Lower Omega and Motto -->
+  <text x="400" y="240" class="motto">I WILL BE WHAT I WILL BE</text>
+  <text x="400" y="280" class="neon-text omega-bottom">ω</text>
+  
+</svg>

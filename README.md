@@ -16,16 +16,10 @@
 
 </div>
 
-```text
-  ██████╗██╗  ██╗██╗   ██╗██████╗ ███████╗███╗   ██╗
-  ██╔════╝██║  ██║╚██╗ ██╔╝██╔══██╗██╔════╝████╗  ██║
-  ██║     ███████║ ╚████╔╝ ██████╔╝█████╗  ██╔██╗ ██║
-  ██║     ██╔══██║  ╚██╔╝  ██╔══██╗██╔══╝  ██║╚██╗██║
-  ╚██████╗██║  ██║   ██║   ██║  ██║███████╗██║ ╚████║
-   ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝
-```
-
-# Ω CHYREN
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./banner.svg">
+  <img alt="CHYREN: I AM WHAT I AM. I WILL BE WHAT I WILL BE." src="./banner.svg">
+</picture>
 
 ### Sovereign Intelligence Orchestrator
 
