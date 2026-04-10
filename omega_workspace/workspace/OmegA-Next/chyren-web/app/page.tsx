@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { Send, Loader2, AlertCircle, Volume2, VolumeX } from 'lucide-react';
+import { AlertCircle, Loader2, Send, Volume2, VolumeX } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -23,16 +23,14 @@ interface Message {
   };
 }
 
-// Handles Vercel AI SDK text stream (0:"chunk") and plain-text streams
-// Handles Hub events (data: {...}) and plain-text streams
 function parseHubChunk(chunk: string): {
-  content: string,
-  audit?: { passed: boolean, score: number, flags: string[] },
-  status?: string,
-  consensus?: { agreement: number }
+  content: string;
+  audit?: { passed: boolean; score: number; flags: string[] };
+  status?: string;
+  consensus?: { agreement: number };
 } {
   let content = '';
-  let audit: { passed: boolean, score: number, flags: string[] } | undefined;
+  let audit: { passed: boolean; score: number; flags: string[] } | undefined;
   let status: string | undefined;
 
   for (const line of chunk.split('\n')) {
@@ -42,52 +40,41 @@ function parseHubChunk(chunk: string): {
     if (trimmed.startsWith('data: ')) {
       try {
         const json = JSON.parse(trimmed.slice(6));
-        
-        // Handle Standard AI Chunks
         const delta = json.choices?.[0]?.delta?.content;
         if (delta) content += delta;
-
-        // Handle Hub Status Events
-        if (json.status === 'audited') {
-           audit = json.audit_report;
-        }
+        if (json.status === 'audited') audit = json.audit_report;
         if (json.status === 'correction') {
-           content += json.content;
-           status = 'correction';
+          content += json.content;
+          status = 'correction';
         }
         if (json.status === 'deflected') {
-           content = json.content;
-           status = 'deflected';
+          content = json.content;
+          status = 'deflected';
         }
         if (json.status === 'consensus') {
-           content = json.content;
-           status = 'consensus';
-           // Using local status to pass metadata in next pass
+          content = json.content;
+          status = 'consensus';
         }
-      } catch { /* skip */ }
+      } catch {}
     } else if (trimmed.startsWith('0:')) {
-       // Vercel AI SDK compatibility
-       try {
-         const delta = JSON.parse(trimmed.slice(2));
-         if (typeof delta === 'string') content += delta;
-       } catch {}
+      try {
+        const delta = JSON.parse(trimmed.slice(2));
+        if (typeof delta === 'string') content += delta;
+      } catch {}
     }
   }
-  // Re-parse status for consensus data
-  let consensus: { agreement: number } | undefined = undefined;
+
+  let consensus: { agreement: number } | undefined;
   if (chunk.includes('"status":"consensus"')) {
-     try {
-       const json = JSON.parse(chunk.split('\n').find(l => l.includes('"status":"consensus"'))?.slice(6) || '{}');
-       consensus = { agreement: json.agreement };
-     } catch {}
+    try {
+      const json = JSON.parse(chunk.split('\n').find((l) => l.includes('"status":"consensus"'))?.slice(6) || '{}');
+      consensus = { agreement: json.agreement };
+    } catch {}
   }
 
   return { content, audit, status, consensus };
 }
 
-// Pull a speakable chunk from the buffer:
-// - at a sentence boundary (. ! ? newline), or
-// - at a word boundary after 80 chars (to avoid long pauses waiting for punctuation)
 function extractSpeakable(buffer: string): { chunk: string | null; remaining: string } {
   const m = buffer.match(/^([\s\S]+?[.!?\n]+)\s*([\s\S]*)$/);
   if (m) return { chunk: m[1].trim(), remaining: m[2] };
@@ -100,13 +87,12 @@ function extractSpeakable(buffer: string): { chunk: string | null; remaining: st
 
 function getVoice(): SpeechSynthesisVoice | undefined {
   const voices = window.speechSynthesis.getVoices();
-  // Priority: British Male -> British -> English -> First available
   return (
-    voices.find(v => v.lang.startsWith('en-GB') && (v.name.includes('Male') || v.name.includes('Daniel') || v.name.includes('Arthur'))) ||
-    voices.find(v => v.lang.startsWith('en-GB')) ||
-    voices.find(v => v.lang.includes('en-GB')) ||
-    voices.find(v => v.name.toLowerCase().includes('google') && v.lang.startsWith('en')) ||
-    voices.find(v => v.lang.startsWith('en-US')) ||
+    voices.find((v) => v.lang.startsWith('en-GB') && (v.name.includes('Male') || v.name.includes('Daniel') || v.name.includes('Arthur'))) ||
+    voices.find((v) => v.lang.startsWith('en-GB')) ||
+    voices.find((v) => v.lang.includes('en-GB')) ||
+    voices.find((v) => v.name.toLowerCase().includes('google') && v.lang.startsWith('en')) ||
+    voices.find((v) => v.lang.startsWith('en-US')) ||
     voices[0] ||
     undefined
   );
@@ -115,8 +101,7 @@ function getVoice(): SpeechSynthesisVoice | undefined {
 function speak(text: string) {
   if (!text.trim() || typeof window === 'undefined') return;
   const utter = new SpeechSynthesisUtterance(text.trim());
-  // "Smart wise" tuning: slightly slower, slightly lower pitch
-  utter.rate = 0.95; 
+  utter.rate = 0.95;
   utter.pitch = 0.9;
   utter.volume = 1.0;
   const v = getVoice();
@@ -125,48 +110,37 @@ function speak(text: string) {
 }
 
 export default function ChatPage() {
-  const [messages, setMessages]      = useState<Message[]>([]);
-  const [input, setInput]            = useState('');
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
-  const [ttsEnabled, setTtsEnabled]  = useState(true);
-  const [error, setError]            = useState<string | null>(null);
-  const [sessionId, setSessionId]    = useState<string>('global');
+  const [ttsEnabled, setTtsEnabled] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string>('global');
 
-  // Persistence: load from localStorage on mount
   useEffect(() => {
-    const saved = localStorage.getItem('chyren_messages');
-    if (saved) {
-      try {
-        setMessages(JSON.parse(saved));
-      } catch {}
-    }
-    // If we want a fresh session on every page load, we just generate a new one every time.
     const nextSession =
       typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
         ? crypto.randomUUID()
         : `session-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
     localStorage.setItem('chyren_session_id', nextSession);
-    localStorage.removeItem('chyren_messages'); // Clear conversation history on new session
+    localStorage.removeItem('chyren_messages');
     setSessionId(nextSession);
-    setMessages([]); // Clear messages state
+    setMessages([]);
   }, []);
 
-  // Persistence: save to localStorage on change
   useEffect(() => {
-    if (messages.length > 0) {
-      localStorage.setItem('chyren_messages', JSON.stringify(messages));
-    }
+    if (messages.length > 0) localStorage.setItem('chyren_messages', JSON.stringify(messages));
   }, [messages]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const abortRef       = useRef<AbortController | null>(null);
-  const textareaRef    = useRef<HTMLTextAreaElement>(null);
-  const ttsEnabledRef  = useRef(ttsEnabled);
+  const abortRef = useRef<AbortController | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const ttsEnabledRef = useRef(ttsEnabled);
 
-  // Keep ref in sync so the streaming closure always reads the latest value
-  useEffect(() => { ttsEnabledRef.current = ttsEnabled; }, [ttsEnabled]);
+  useEffect(() => {
+    ttsEnabledRef.current = ttsEnabled;
+  }, [ttsEnabled]);
 
-  // Pre-load voices (Chrome lazy-initialises them)
   useEffect(() => {
     const load = () => window.speechSynthesis?.getVoices();
     load();
@@ -185,251 +159,230 @@ export default function ChatPage() {
     const ta = textareaRef.current;
     if (!ta) return;
     ta.style.height = 'auto';
-    ta.style.height = Math.min(ta.scrollHeight, 140) + 'px';
+    ta.style.height = `${Math.min(ta.scrollHeight, 140)}px`;
   }, [input]);
 
-  const sendMessage = useCallback(async (text: string) => {
-    const trimmed = text.trim();
-    if (!trimmed || isStreaming) return;
+  const sendMessage = useCallback(
+    async (text: string) => {
+      const trimmed = text.trim();
+      if (!trimmed || isStreaming) return;
 
-    // Cancel any ongoing speech before starting a new response
-    window.speechSynthesis?.cancel();
+      window.speechSynthesis?.cancel();
+      setError(null);
+      setInput('');
 
-    setError(null);
-    setInput('');
+      const userMsg: Message = { id: `u-${Date.now()}`, role: 'user', content: trimmed };
+      const history = [...messages, userMsg];
+      setMessages(history);
+      setIsStreaming(true);
 
-    const userMsg: Message = { id: `u-${Date.now()}`, role: 'user', content: trimmed };
-    const history = [...messages, userMsg];
-    setMessages(history);
-    setIsStreaming(true);
+      const assistantId = `a-${Date.now()}`;
+      setMessages((prev) => [...prev, { id: assistantId, role: 'assistant', content: '' }]);
 
-    const assistantId = `a-${Date.now()}`;
-    setMessages(prev => [...prev, { id: assistantId, role: 'assistant', content: '' }]);
+      try {
+        abortRef.current?.abort();
+        const abort = new AbortController();
+        abortRef.current = abort;
 
-    try {
-      abortRef.current?.abort();
-      const abort = new AbortController();
-      abortRef.current = abort;
+        const res = await fetch(`/api/chat/stream?session=${encodeURIComponent(sessionId)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: history.map((m) => ({ role: m.role, content: m.content })) }),
+          signal: abort.signal,
+        });
 
-      const res = await fetch(`/api/chat/stream?session=${encodeURIComponent(sessionId)}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: history.map(m => ({ role: m.role, content: m.content })) }),
-        signal: abort.signal,
-      });
+        if (!res.ok) {
+          const body = await res.text().catch(() => '');
+          throw new Error(`HTTP ${res.status}: ${body.slice(0, 120)}`);
+        }
 
-      if (!res.ok) {
-        const body = await res.text().catch(() => '');
-        throw new Error(`HTTP ${res.status}: ${body.slice(0, 120)}`);
-      }
+        const reader = res.body?.getReader();
+        const decoder = new TextDecoder();
+        let accumulated = '';
+        let speechBuffer = '';
 
-      const reader = res.body?.getReader();
-      const decoder = new TextDecoder();
-      let accumulated = '';
-      let speechBuffer = '';
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const { content: delta, audit, status, consensus } = parseHubChunk(decoder.decode(value, { stream: true }));
 
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const { content: delta, audit, status, consensus } = parseHubChunk(decoder.decode(value, { stream: true }));
-          
-          if (delta) {
-            accumulated += delta;
-            setMessages(prev =>
-              prev.map(m => m.id === assistantId ? { ...m, content: accumulated } : m)
-            );
-          }
+            if (delta) {
+              accumulated += delta;
+              setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, content: accumulated } : m)));
+            }
 
-          if (audit) {
-            setMessages(prev =>
-              prev.map(m => m.id === assistantId ? { ...m, audit } : m)
-            );
-          }
+            if (audit) {
+              setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, audit } : m)));
+            }
 
-          if (consensus) {
-            setMessages(prev =>
-              prev.map(m => m.id === assistantId ? { ...m, consensus } : m)
-            );
-          }
+            if (consensus) {
+              setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, consensus } : m)));
+            }
 
-          if (status === 'correction') {
-             setMessages(prev =>
-               prev.map(m => m.id === assistantId ? { ...m, isCorrection: true } : m)
-             );
-          }
+            if (status === 'correction') {
+              setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, isCorrection: true } : m)));
+            }
 
-          // Stream TTS: speak sentence-by-sentence as text arrives
-          if (ttsEnabledRef.current) {
-            speechBuffer += delta;
-            let result = extractSpeakable(speechBuffer);
-            while (result.chunk) {
-              speak(result.chunk);
-              speechBuffer = result.remaining;
-              result = extractSpeakable(speechBuffer);
+            if (ttsEnabledRef.current) {
+              speechBuffer += delta;
+              let result = extractSpeakable(speechBuffer);
+              while (result.chunk) {
+                speak(result.chunk);
+                speechBuffer = result.remaining;
+                result = extractSpeakable(speechBuffer);
+              }
             }
           }
         }
-      }
 
-      // Speak any remaining buffer after stream ends
-      if (ttsEnabledRef.current && speechBuffer.trim()) {
-        speak(speechBuffer.trim());
+        if (ttsEnabledRef.current && speechBuffer.trim()) speak(speechBuffer.trim());
+
+        if (!accumulated) {
+          setMessages((prev) => prev.filter((m) => m.id !== assistantId));
+          setError('Neural link disrupted — no response received. Please wait a moment and retry.');
+        }
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          window.speechSynthesis?.cancel();
+          const msg = (err as Error).message;
+          setError(msg.includes('quota') ? 'AI quota exhausted — check provider config' : `Neural link error: ${msg}`);
+          setMessages((prev) => prev.filter((m) => m.id !== assistantId));
+        }
+      } finally {
+        setIsStreaming(false);
+        abortRef.current = null;
       }
-      
-      // If nothing was received, remove the blank bubble and show an error
-      if (!accumulated) {
-        setMessages(prev => prev.filter(m => m.id !== assistantId));
-        setError('Neural link disrupted — no response received. Please wait a moment and retry.');
-      }
-    } catch (err) {
-      if ((err as Error).name !== 'AbortError') {
-        window.speechSynthesis?.cancel();
-        const msg = (err as Error).message;
-        setError(msg.includes('quota') ? 'AI quota exhausted — check provider config' : `Neural link error: ${msg}`);
-        setMessages(prev => prev.filter(m => m.id !== assistantId));
-      }
-    } finally {
-      setIsStreaming(false);
-      abortRef.current = null;
-    }
-  }, [messages, isStreaming, sessionId]);
+    },
+    [messages, isStreaming, sessionId]
+  );
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       void sendMessage(input);
-      }  };
+    }
+  };
 
   const toggleTTS = () => {
     if (ttsEnabled) window.speechSynthesis?.cancel();
-    setTtsEnabled(s => !s);
+    setTtsEnabled((s) => !s);
   };
 
   const isEmpty = messages.length === 0;
   const lastMsg = messages[messages.length - 1];
 
   return (
-    <div className="omega-root">
+    <div className="omega-root chyren-mobile-shell">
       <div className="omega-bg">
         <NeuralBrain isActive={isStreaming} />
       </div>
 
-      <header className="omega-header">
-        <div className="omega-logo">
-          <span className="omega-symbol">Ω</span>
-        </div>
-        <span className="omega-brand">Chyren</span>
+      <div className="omega-vignette" />
+      <div className="omega-orb omega-orb-left" />
+      <div className="omega-orb omega-orb-right" />
+      <div className="omega-spark omega-spark-one" />
+      <div className="omega-spark omega-spark-two" />
+      <div className="omega-circuit omega-circuit-top" />
+      <div className="omega-circuit omega-circuit-bottom" />
 
-        <div className="omega-header-status">
-          <span className={`omega-status-dot ${isStreaming ? 'omega-status-active' : ''}`} />
-          <span className="omega-status-label">
-            {isStreaming ? 'PROCESSING' : 'SOVEREIGN'}
-          </span>
-        </div>
+      <main className="phone-stage">
+        <section className="phone-frame">
+          <div className="phone-notch" />
 
-        <div className="omega-header-actions">
-          {!isEmpty && (
-            <button 
-              onClick={() => { setMessages([]); localStorage.removeItem('chyren_messages'); }} 
-              className="omega-icon-btn omega-purge-btn" 
-              title="Purge Memory"
-            >
-              PURGE
-            </button>
-          )}
-          <button onClick={toggleTTS} className="omega-icon-btn" title={ttsEnabled ? 'Mute' : 'Unmute'}>
-            {ttsEnabled ? <Volume2 size={15} /> : <VolumeX size={15} />}
-          </button>
-        </div>
-      </header>
-
-      <main className="omega-main">
-        {isEmpty ? (
-          <div className="omega-idle">
-            <div className="omega-idle-title">
-              <span className="omega-idle-omega">Ω</span>
-              <span className="omega-idle-name">Chyren</span>
+          <header className="phone-header">
+            <div className="phone-chrome">
+              <span className="phone-chrome-time">10:32</span>
+              <span className="phone-chrome-icons">◔ 5G ▮▮▮</span>
             </div>
-            <p className="omega-idle-sub">SOVEREIGN INTELLIGENCE ORCHESTRATOR</p>
-            <p className="omega-idle-desc">
-              High-integrity cognitive processing and neural telemetry. Type to initiate a session.
-            </p>
-          </div>
-        ) : (
-          <div className="omega-messages">
-            {messages.map(msg => (
-              <div key={msg.id} className={`omega-msg omega-msg-${msg.role}`}>
-                <div className="omega-msg-label">
-                  {msg.role === 'user' ? '▸ OPERATOR' : 'Ω CHYREN'}
-                </div>
-                <div className={`omega-msg-content ${msg.isCorrection ? 'omega-correction-block' : ''}`}>
-                  {msg.role === 'assistant' ? (
-                    <>
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
-                      {isStreaming && msg === lastMsg && <span className="omega-cursor" />}
-                      
-                      {msg.consensus && (
-                        <div className="omega-consensus-seal">
-                           <span className="omega-consensus-icon">⚖</span>
-                           COUNCIL CONSENSUS: {(msg.consensus.agreement * 100).toFixed(0)}% AGREEMENT
-                        </div>
-                      )}
+            <div className="phone-title">CHYREN</div>
+          </header>
 
-                      {msg.audit && (
-                        <div className={`omega-audit-seal ${msg.audit.passed ? 'omega-audit-passed' : 'omega-audit-drift'}`}>
-                           {msg.audit.passed ? '🛡 VERIFIED BY ADCCL' : `⚠ COGNITIVE DRIFT DETECTED (${msg.audit.score.toFixed(2)})`}
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <p>{msg.content}</p>
-                  )}
+          <section className="phone-chat">
+            {isEmpty ? (
+              <div className="chat-empty">
+                <div className="chat-empty-mark">Ω</div>
+                <div className="chat-empty-copy">
+                  High-integrity sovereign chat. Enter a prompt to begin.
                 </div>
               </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-        )}
+            ) : (
+              <div className="chat-list">
+                {messages.map((msg) => (
+                  <div key={msg.id} className={`chat-row chat-row-${msg.role}`}>
+                    {msg.role === 'assistant' && (
+                      <div className="chat-avatar" aria-hidden="true">
+                        <span>◎</span>
+                      </div>
+                    )}
+                    <article className={`chat-bubble chat-bubble-${msg.role}`}>
+                      <div className="chat-meta">
+                        <span>{msg.role === 'user' ? 'User' : 'Chyren'}</span>
+                        {msg.role === 'assistant' && isStreaming && msg.id === lastMsg?.id && <span className="chat-live">LIVE</span>}
+                      </div>
+                      <div className={`chat-body ${msg.isCorrection ? 'chat-correction' : ''}`}>
+                        {msg.role === 'assistant' ? (
+                          <>
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                            {msg.consensus && <div className="chat-chip">Council consensus {Math.round(msg.consensus.agreement * 100)}%</div>}
+                            {msg.audit && (
+                              <div className={`chat-chip ${msg.audit.passed ? 'chip-pass' : 'chip-drift'}`}>
+                                {msg.audit.passed ? 'Verified by ADCCL' : `Drift detected (${msg.audit.score.toFixed(2)})`}
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <p>{msg.content}</p>
+                        )}
+                      </div>
+                    </article>
+                  </div>
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
+            )}
 
-        {error && (
-          <div className="omega-error">
-            <AlertCircle size={13} />
-            <span>{error}</span>
-            <button className="omega-error-dismiss" onClick={() => setError(null)}>✕</button>
-          </div>
-        )}
+            {error && (
+              <div className="chat-error">
+                <AlertCircle size={13} />
+                <span>{error}</span>
+                <button className="chat-error-close" onClick={() => setError(null)} type="button">
+                  ×
+                </button>
+              </div>
+            )}
+          </section>
+
+          <footer className="phone-footer">
+            <div className="composer-shell">
+              <button className="composer-ghost" type="button" onClick={toggleTTS} aria-label={ttsEnabled ? 'Mute' : 'Unmute'}>
+                {ttsEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+              </button>
+
+              <textarea
+                ref={textareaRef}
+                className="composer-input"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Message..."
+                rows={1}
+                disabled={isStreaming}
+              />
+
+              <button
+                className="composer-send"
+                onClick={() => void sendMessage(input)}
+                disabled={isStreaming || !input.trim()}
+                aria-label="Send"
+                type="button"
+              >
+                {isStreaming ? <Loader2 size={16} className="omega-spin" /> : <Send size={16} />}
+              </button>
+            </div>
+          </footer>
+        </section>
       </main>
-
-      <footer className="omega-footer">
-        <div className="omega-input-wrap">
-          <textarea
-            ref={textareaRef}
-            className="omega-textarea"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="▸  transmit cognitive intent..."
-            rows={1}
-            disabled={isStreaming}
-          />
-
-          <button
-            className="omega-send-btn"
-            onClick={() => sendMessage(input)}
-            disabled={isStreaming || !input.trim()}
-            aria-label="Send"
-          >
-            {isStreaming ? <Loader2 size={17} className="omega-spin" /> : <Send size={17} />}
-          </button>
-        </div>
-
-        <div className="omega-footer-meta">
-          <span className="omega-footer-label">NEURAL LINK</span>
-          <span className={`omega-footer-dot ${isStreaming ? 'omega-footer-dot-active' : ''}`} />
-          <span className="omega-footer-label">{isStreaming ? 'ACTIVE' : 'STANDBY'}</span>
-        </div>
-      </footer>
     </div>
   );
 }
