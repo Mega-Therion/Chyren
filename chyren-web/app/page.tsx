@@ -140,6 +140,7 @@ export default function ChatPage() {
     setInput('');
 
     const userMsg: Message = { id: `u-${Date.now()}`, role: 'user', content: trimmed };
+    const requestMessages = [...messages, userMsg].map(({ role, content }) => ({ role, content }));
     setMessages(prev => [...prev, userMsg]);
     setIsStreaming(true);
 
@@ -151,7 +152,7 @@ export default function ChatPage() {
       const res = await fetch(`/api/chat/stream?session=${sessionId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: trimmed }),
+        body: JSON.stringify({ message: trimmed, messages: requestMessages }),
       });
 
       if (!res.ok) throw new Error('Neural link failure');
@@ -190,7 +191,7 @@ export default function ChatPage() {
       setIsStreaming(false);
       setStreamingAssistantId(null);
     }
-  }, [isStreaming, sessionId, ttsEnabled]);
+  }, [isStreaming, messages, sessionId, ttsEnabled]);
 
   return (
     <div className="omega-viewport">

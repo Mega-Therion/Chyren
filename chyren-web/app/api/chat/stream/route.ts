@@ -14,12 +14,15 @@ const _BASE_SYSTEM_PROMPT = (() => {
 
 export const runtime = 'nodejs'
 
-// Model priority list: primary first, fallbacks after
-const _MODEL_CHAIN = [
-  process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile',
-  'llama-3.1-8b-instant',
-  'gemma2-9b-it',
-]
+// Prefer the configured primary model, but keep lighter Groq models behind it so
+// the chat does not hard-fail when the larger model hits a stricter quota bucket.
+const _MODEL_CHAIN = Array.from(
+  new Set([
+    process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile',
+    'llama-3.1-8b-instant',
+    'meta-llama/llama-4-scout-17b-16e-instruct',
+  ]),
+)
 
 function normalizeEnvValue(value: string | undefined): string | null {
   if (!value) return null
@@ -110,6 +113,16 @@ function buildSystemPrompt(
   return { prompt, profile }
 }
 
+const MAX_HISTORY_MESSAGES = 6
+const MAX_HISTORY_CHARS = 2400
+const MAX_MESSAGE_CHARS = 600
+
+function truncateMessageContent(content: string): string {
+  const trimmed = content.trim()
+  if (trimmed.length <= MAX_MESSAGE_CHARS) return trimmed
+  return `${trimmed.slice(0, MAX_MESSAGE_CHARS)}...`
+}
+
 function toChatHistory(rawMessages: unknown, fallbackContent: string): ChatMsg[] {
   if (!Array.isArray(rawMessages) || rawMessages.length === 0) {
     return [{ role: 'user', content: fallbackContent }]
@@ -118,13 +131,31 @@ function toChatHistory(rawMessages: unknown, fallbackContent: string): ChatMsg[]
   const normalized = rawMessages
     .map((m) => {
       const role = typeof m?.role === 'string' ? m.role : ''
-      const content = typeof m?.content === 'string' ? m.content : ''
+      const content = typeof m?.content === 'string' ? truncateMessageContent(m.content) : ''
       if (!content || (role !== 'user' && role !== 'assistant')) return null
       return { role: role as 'user' | 'assistant', content }
     })
     .filter((m): m is { role: 'user' | 'assistant'; content: string } => Boolean(m))
 
-  return normalized.length > 0 ? normalized : [{ role: 'user', content: fallbackContent }]
+  if (normalized.length === 0) {
+    return [{ role: 'user', content: fallbackContent }]
+  }
+
+  const recent: ChatMsg[] = []
+  let totalChars = 0
+
+  for (let i = normalized.length - 1; i >= 0; i -= 1) {
+    const next = normalized[i]
+    if (recent.length >= MAX_HISTORY_MESSAGES) break
+
+    const nextSize = next.content.length
+    if (recent.length > 0 && totalChars + nextSize > MAX_HISTORY_CHARS) break
+
+    recent.push(next)
+    totalChars += nextSize
+  }
+
+  return recent.reverse()
 }
 
 async function fetchGroqResponse(
@@ -259,6 +290,57 @@ async function fetchAnthropicResponse(
   return createSingleSseTextResponse(content)
 }
 
+async function fetchGeminiResponse(
+  history: ChatMsg[],
+  systemPrompt: string,
+  temperature: number,
+): Promise<Response> {
+  const apiKey = getOptionalEnv('GEMINI_API_KEY')
+  if (!apiKey) throw new Error('Missing required env var: GEMINI_API_KEY')
+
+  const model = getOptionalEnv('GEMINI_MODEL') ?? 'gemini-2.5-flash'
+  const resp = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: {
+          parts: [{ text: systemPrompt }],
+        },
+        contents: history.map((entry) => ({
+          role: entry.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: entry.content }],
+        })),
+        generationConfig: {
+          temperature,
+        },
+      }),
+    },
+  )
+
+  if (!resp.ok) {
+    const errorBody = await resp.text().catch(() => `${resp.status} ${resp.statusText}`)
+    throw new Error(`Gemini fallback failed: ${errorBody}`)
+  }
+
+  const payload = (await resp.json().catch(() => ({}))) as {
+    candidates?: Array<{
+      content?: {
+        parts?: Array<{ text?: string }>
+      }
+    }>
+  }
+  const content =
+    payload.candidates?.[0]?.content?.parts
+      ?.map((part) => part.text ?? '')
+      .join('')
+      .trim() ?? ''
+
+  if (!content) throw new Error('Gemini fallback failed: empty response')
+  return createSingleSseTextResponse(content)
+}
+
 function sseHeaders() {
   return {
     'Content-Type': 'text/event-stream',
@@ -332,9 +414,10 @@ export async function POST(req: NextRequest) {
     }
 
     const providers: Array<() => Promise<Response>> = [
+      () => fetchGeminiResponse(history, systemPrompt, profile.temperature),
+      () => fetchAnthropicResponse(history, systemPrompt, profile.temperature),
       () => fetchGroqResponse(history, systemPrompt, profile.temperature),
       () => fetchOpenAIResponse(history, systemPrompt, profile.temperature),
-      () => fetchAnthropicResponse(history, systemPrompt, profile.temperature),
     ]
 
     let lastProviderError = 'No AI providers are configured.'
