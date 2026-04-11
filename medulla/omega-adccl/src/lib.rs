@@ -1,6 +1,8 @@
 pub mod adccl_logic;
 pub mod ffi;
 
+pub use adccl_logic::{VerificationResult, ADCCL};
+
 #[cfg(test)]
 mod tests {
     use super::adccl_logic::ADCCL;
@@ -10,7 +12,7 @@ mod tests {
         let adccl = ADCCL::new(0.5, None);
         let result = adccl.verify("This is a test response", "Test task");
         assert!(result.passed);
-        
+
         let result_stub = adccl.verify("TODO: Finish this", "Test task");
         assert!(!result_stub.passed);
         assert!(result_stub.flags.contains(&"STUB_MARKERS_DETECTED".to_string()));

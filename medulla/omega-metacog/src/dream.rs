@@ -3,11 +3,11 @@
 //! allowing the Hub to harden its own defenses autonomously.
 
 use crate::{Epiphany, MetacogAgent};
-use omega_aegis::AegisGate;
+use omega_aegis::AlignmentLayer;
 
 impl MetacogAgent {
     /// Execute the Dream cycle: Reflect on insights and update Aegis policies.
-    pub fn execute_dream_cycle(&self, aegis: &mut AegisGate, epiphanies: Vec<Epiphany>) {
+    pub fn execute_dream_cycle(&self, aegis: &mut AlignmentLayer, epiphanies: Vec<Epiphany>) {
         for epiphany in epiphanies {
             // Autonomous policy hardening:
             // If an epiphany indicates a vulnerability, harden the constitutional gate.
@@ -17,6 +17,7 @@ impl MetacogAgent {
                     epiphany.insight
                 );
                 aegis
+                    .constitution
                     .principles
                     .push(format!("AUTO_HARDEN: {}", epiphany.insight));
             }

@@ -2204,6 +2204,9 @@ dependencies = [
 name = "omega-telegram-gateway"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
+ "omega-cli",
+ "omega-core",
  "serde",
  "serde_json",
  "teloxide",

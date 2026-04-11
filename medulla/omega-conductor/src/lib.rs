@@ -3,7 +3,7 @@
 
 #![warn(missing_docs)]
 
-use omega_aegis::AegisGate;
+use omega_aegis::AlignmentLayer;
 use omega_core::{
     gen_id, ClaimBudget, GoalContract, PlanSkeleton, PlanStep, RunEnvelope, TaskStage,
 };
@@ -28,12 +28,12 @@ pub struct SubStep {
 /// Conductor: Orchestrates autonomous multi-step planning
 pub struct Conductor {
     /// Policy enforcement gate — every sub-step is screened before execution
-    pub aegis: AegisGate,
+    pub aegis: AlignmentLayer,
 }
 
 impl Conductor {
     /// Create a new conductor
-    pub fn new(aegis: AegisGate) -> Self {
+    pub fn new(aegis: AlignmentLayer) -> Self {
         Self { aegis }
     }
 
@@ -320,7 +320,12 @@ mod tests {
     use omega_core::{EvidencePacket, RunEnvelope, RunStatus};
 
     fn test_conductor() -> Conductor {
-        let aegis = AegisGate::default();
+        let aegis = AlignmentLayer::new(Constitution {
+            version: 1,
+            created_utc: omega_core::now(),
+            principles: vec!["Ground responses in available evidence".to_string()],
+            forbidden_keywords: vec!["self-destruct".to_string()],
+        });
         Conductor::new(aegis)
     }
 
