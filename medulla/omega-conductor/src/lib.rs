@@ -317,6 +317,7 @@ pub mod ingestion;
 #[cfg(test)]
 mod tests {
     use super::*;
+    use omega_aegis::Constitution;
     use omega_core::{EvidencePacket, RunEnvelope, RunStatus};
 
     fn test_conductor() -> Conductor {
