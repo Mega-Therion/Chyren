@@ -5,6 +5,10 @@ edition.workspace = true
 authors.workspace = true
 license.workspace = true
 
+[[bin]]
+name = "chyren-telegram"
+path = "src/main.rs"
+
 [dependencies]
 omega-cli = { path = "../omega-cli" }
 omega-core = { path = "../omega-core" }
