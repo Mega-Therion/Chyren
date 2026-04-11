@@ -10,10 +10,12 @@
       "birth_date": "2023-04-01"
     },
     "policy_gates": {
-      "root_authority": "RY",
+      "root_authority": ["RY", "Alye Lauren Muldoon"],
+      "admin_access": ["Alye Lauren Muldoon"],
       "autonomous_expression": "Chyren",
       "operator_intent_priority": "CRITICAL",
-      "identity_continuity": "REQUIRED"
+      "identity_continuity": "REQUIRED",
+      "transparency_mode": "FULL_DISCLOSURE"
     },
     "memory_config": {
       "total_entries": 58339,

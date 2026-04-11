@@ -34,26 +34,28 @@ class IdentitySynthesizer:
             sys.exit(1)
 
     def fetch_all_entries(self, limit: int = 58339) -> List[Dict[str, Any]]:
-        """Fetch all omega_memory_entries from Neon."""
+        """Fetch all omega_memory_entries from Neon, prioritizing importance."""
         cursor = self.conn.cursor(cursor_factory=RealDictCursor)
         try:
+            # We fetch priority entries first (importance >= 0.9 or canonical namespace)
+            # then fill up with regular recent entries
             cursor.execute(f"""
-                SELECT
-                    id,
-                    content,
-                    source,
-                    importance,
-                    created_at,
-                    namespace,
-                    domain,
-                    confidence,
-                    key
+                (SELECT
+                    id, content, source, importance, created_at, namespace, domain, confidence, key
                 FROM public.omega_memory_entries
+                WHERE importance >= 0.9 OR namespace = 'canonical' OR namespace = 'identity'
+                ORDER BY importance DESC, created_at DESC)
+                UNION ALL
+                (SELECT
+                    id, content, source, importance, created_at, namespace, domain, confidence, key
+                FROM public.omega_memory_entries
+                WHERE NOT (importance >= 0.9 OR namespace = 'canonical' OR namespace = 'identity')
                 ORDER BY created_at DESC
+                LIMIT {limit})
                 LIMIT {limit}
             """)
             entries = cursor.fetchall()
-            print(f"✓ Fetched {len(entries)} memory entries from Neon")
+            print(f"✓ Fetched {len(entries)} memory entries from Neon (prioritized)")
             return entries
         except Exception as e:
             print(f"✗ Query failed: {e}")
