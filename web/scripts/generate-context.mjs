@@ -14,7 +14,7 @@ async function fetchContext() {
   const sql = neon(process.env.OMEGA_DB_URL)
 
   const [familyRows, knowledgeRows, memoryRows] = await Promise.all([
-    sql`SELECT name, last_name, relationship, location, birthday, deceased, occupation, partner, children, ry_notes, notes_for_omega, how_to_greet FROM family_profiles ORDER BY id`,
+    sql`SELECT name, last_name, relationship, location, birthday, deceased, occupation, partner, children, ry_notes, notes_for_omega, how_to_greet, fun_facts FROM family_profiles ORDER BY id`,
     sql`SELECT title, content, category, importance FROM public_knowledge WHERE category IN ('biography', 'creator', 'concept', 'quote') ORDER BY importance DESC NULLS LAST LIMIT 15`,
     sql`SELECT content, topic, created_at FROM memories ORDER BY created_at DESC LIMIT 20`,
   ])
@@ -25,8 +25,21 @@ async function fetchContext() {
     parts.push('FAMILY PROFILES:')
     for (const r of familyRows) {
       const name = [r.name, r.last_name].filter(Boolean).join(' ')
-      const details = [`rel: ${r.relationship}`, `loc: ${r.location}`].filter(Boolean).join(', ')
+      const details = [`rel: ${r.relationship}`, `loc: ${r.location}`, r.occupation ? `occ: ${r.occupation}` : null].filter(Boolean).join(', ')
       parts.push(`- ${name} (${details})`)
+      if (r.fun_facts) {
+        try {
+          const facts = JSON.parse(r.fun_facts)
+          if (Array.isArray(facts)) {
+            facts.forEach(f => parts.push(`  * ${f}`))
+          }
+        } catch (e) {
+          parts.push(`  * ${r.fun_facts}`)
+        }
+      }
+      if (r.ry_notes) {
+        parts.push(`  RY notes: ${r.ry_notes}`)
+      }
     }
   }
 
