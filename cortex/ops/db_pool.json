@@ -1,0 +1,25 @@
+{
+  "active_primary": "postgresql://neondb_owner:npg_JB7pAw8cioPm@ep-little-moon-amazbflr.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require",
+  "pool": [
+    {
+      "id": "primary_sweet_glade",
+      "url": "postgresql://neondb_owner:npg_HbW1Zlkjd7NI@ep-sweet-glade-anvm0pwn.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require",
+      "status": "quota_limit",
+      "created_at": "2026-04-10T15:00:00Z"
+    },
+    {
+      "id": "overflow_little_moon",
+      "url": "postgresql://neondb_owner:npg_JB7pAw8cioPm@ep-little-moon-amazbflr.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require",
+      "status": "active",
+      "created_at": "2026-04-11T02:52:00Z"
+    },
+    {
+      "id": "overflow_purple_term",
+      "url": "https://ep-purple-term-aezrwupz.apirest.c-2.us-east-2.aws.neon.tech/neondb/rest/v1",
+      "status": "active_rest",
+      "region": "us-east-2",
+      "created_at": "2026-04-11T02:55:00Z"
+    }
+  ],
+  "last_updated": "2026-04-11T02:56:00Z"
+}

@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+import sys
+import os
+import argparse
+import subprocess
+
+# THE BRAIN STEM: Unified Official Chyren CLI
+# This script intelligently routes commands to the Cortex (Python) or Medulla (Rust).
+
+CORTEX_DIR = os.path.join(os.path.dirname(__file__), "cortex")
+MEDULLA_DIR = os.path.join(os.path.dirname(__file__), "medulla")
+
+def run_cortex(args):
+    """Deep reasoning, Security, Council, and Identity."""
+    cmd = [sys.executable, os.path.join(CORTEX_DIR, "main.py")] + args
+    return subprocess.run(cmd)
+
+def run_medulla(args):
+    """System execution, Sharding, Performance, and Memory."""
+    # Build if not exists could happen here, or assume path to binary
+    # For now, we assume 'medulla/target/release/chyren' exists
+    binary = os.path.join(MEDULLA_DIR, "target", "release", "chyren")
+    if not os.path.exists(binary):
+        print("[STEM] Medulla binary not found. Building...")
+        subprocess.run(["cargo", "build", "--release", "--workspace"], cwd=MEDULLA_DIR)
+    
+    cmd = [binary] + args
+    return subprocess.run(cmd)
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="CHYREN — Unified Brain Stem CLI",
+        usage="chyren <thought|action|status|live|dream> [args]"
+    )
+    
+    # Intelligent Routing
+    if len(sys.argv) < 2:
+        parser.print_help()
+        sys.exit(0)
+        
+    cmd_type = sys.argv[1]
+    remainder = sys.argv[2:]
+    
+    if cmd_type in ["thought", "sense", "verify", "identity"]:
+        # Routing to Cortex (The high-level mind)
+        print("[STEM] Routing to Cortex hemispheric processing...")
+        run_cortex(remainder)
+        
+    elif cmd_type in ["action", "flex", "shard", "ingest", "memory"]:
+        # Routing to Medulla (The physical motor control)
+        print("[STEM] Routing to Medulla system-layer execution...")
+        run_medulla(remainder)
+        
+    elif cmd_type == "status":
+        print("--- Unified Brain State ---")
+        print("Hemisphere L (Cortex): High-Resolution Identity Foundational Gate")
+        print("Hemisphere R (Medulla): High-Speed Infrastructural Shard Core")
+        print("Bridge (Stem): ACTIVE")
+        run_cortex(["--status"])
+        
+    elif cmd_type == "live":
+        print("[STEM] Bootstrapping Live Hub (Next.js + Medulla API)...")
+        # Start Medulla server in background
+        subprocess.Popen([os.path.join(MEDULLA_DIR, "target", "release", "chyren"), "server"])
+        # Start Web frontend
+        subprocess.run(["npm", "run", "dev"], cwd=os.path.join(os.path.dirname(__file__), "web"))
+        
+    elif cmd_type == "dream":
+        print("[STEM] Entering Dream State (Autonomous Self-Repair & Maintenance)...")
+        # Run sharding update and identity synthesis
+        subprocess.run([sys.executable, os.path.join(CORTEX_DIR, "chyren_py", "identity_synthesis.py")])
+        subprocess.run([sys.executable, os.path.join(CORTEX_DIR, "ops", "scripts", "catalog_registrar.py")])
+        print("[STEM] Dream cycle complete. Memory indexed.")
+        
+    else:
+        # Default fallback: try Cortex
+        run_cortex(sys.argv[1:])
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,35 @@
+[workspace]
+resolver = "2"
+members = [
+    "omega-core",
+    "omega-aegis",
+    "omega-aeon",
+    "omega-adccl",
+    "omega-myelin",
+    "omega-dream",
+    "omega-metacog",
+    "omega-worldmodel",
+    "omega-integration",
+    "omega-spokes",
+    "omega-telemetry",
+    "omega-conductor",
+    "omega-eval",
+    "omega-cli", "omega-phylactery", "omega-telegram-gateway",
+]
+
+[workspace.dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+regex = "1.0"
+tokio = { version = "1", features = ["full"] }
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["OmegA Collective"]
+license = "PROPRIETARY"
+
+[profile.release]
+opt-level = 3
+lto = true
