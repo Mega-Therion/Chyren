@@ -32,16 +32,14 @@
 
 ## 🔮 What is Chyren?
 
-Chyren is a **stateful sovereign AI orchestrator** — a high-integrity execution platform designed for the next generation of cognitive architecture. 
+Chyren is a **stateful sovereign AI orchestrator** — a high-integrity execution platform designed as a binary-hemispheric cognitive architecture.
 
-**Chyren v2.2.0 (The Sharded Library)** features:
-- ⚡ **Native Rust Performance**: Core integrity gates (`ADCCL`, `Aegis`, `Sandbox`) migrated to Rust binaries.
-- 🛡️ **FFI-Bridge**: Legacy Python Orchestrator linked to Rust via high-performance C-FFI.
-- 💬 **Sovereign Mesh**: Telegram-native gateway for secure, audited remote access.
-- 🗄️ **Horizontal Scaling (SOP-001)**: Multi-project Neon database pooling to bypass quota limits.
-- 🗃️ **Library Index Cards (SOP-002)**: Semantic catalog system for sharded data discovery.
-- 🔐 **Cryptographic Integrity**: Every transaction signed with the Yettragrammaton (HMAC-SHA256).
-- 🧬 **Identity Kernel**: Self-synthesizing identity foundations (58,000+ entries).
+**Chyren v2.3.0 (The Brain Stem)** features:
+- 🧠 **The Brain Stem**: A unified Official CLI (`./chyren`) that intelligently routes commands between logic and execution layers.
+- 🎨 **Cortex (Hemisphere L)**: The cognitive reasoning layer (Python). Owns the Council of Spokes, the Threat Fabric, and Identity.
+- ⚙️ **Medulla (Hemisphere R)**: The physical execution layer (Rust). Owns Sharding, FFI, Memory, and Voice.
+- 🛡️ **Autonomous Routing**: Intelligent task dispatching based on semantic intent.
+- 🔐 **Yettragrammaton Integrity**: Cryptographic sealing across both hemispheres.
 
 ---
 
@@ -135,24 +133,22 @@ $$
 
 ```
 Chyren/
-├── hub/                       # 🧠 Core Intelligence Orchestrator
-│   ├── chyren_py/             # 🧬 Identity & Phylactery systems
-│   ├── ops/                   # ⚙️ Operational SOPs & DB Management
-│   └── scripts/               # 🛠️ Hardening & Scaling tools (SOP-001/002)
+├── chyren                     # 🕹️ BRAIN STEM: Unified Official CLI
 │
-├── omega/                     # ⚡ Rust Workspace (OmegA-Next)
-│   ├── omega-core/            # Foundational types
-│   ├── omega-aegis/           # Alignment & Security gates
-│   ├── omega-myelin/          # Threat fabric & Semantic memory
-│   └── omega-adccl/           # Anti-Drift Cognitive Control Loop
+├── cortex/                    # 🧠 CORTEX: Logic / Security / Identity
+│   ├── chyren_py/             # Identity synthesis & Phylactery
+│   ├── ops/                   # Ops scripts & Sharding SOPs
+│   └── core/                  # Security gates (Aegis, Myelin, ADCCL)
 │
-├── web/                       # 🌐 Next.js 15 Frontend
-│   ├── app/                   # Sovereign cognitive shell
-│   └── lib/                   # Phylactery kernels & static context
+├── medulla/                   # ⚙️ MEDULLA: Execution / Infrastructure
+│   ├── omega-cli/             # Infrastructure management binary
+│   ├── omega-adccl/           # High-speed FFI gates
+│   └── omega-myelin/          # Shaded memory core
 │
-├── gateway/                   # 📱 Telegram / External Spoke Gateway
+├── web/                       # 🌐 Cognitive Shell (Next.js 15)
+├── gateway/                   # 📱 External Spoke Gateway
 ├── docs/                      # 📚 Technical Canon & Proofs
-└── brain/                     # 🧠 Local agentic logs & scratchpads
+└── brain/                     # 🧠 Local agentic logs
 ```
 
 ---
