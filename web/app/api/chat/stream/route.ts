@@ -1,16 +1,17 @@
 import { type NextRequest } from 'next/server'
 import { CHYREN_SYSTEM_PROMPT } from '@/lib/phylactery'
-import { getRYContext } from '@/lib/neon-context'
+import { getRYContextAsync } from '@/lib/neon-context'
 import {
   getVerifiedMemberContext,
   processFamilyAuthMessage,
 } from '@/lib/family-auth'
 
-// Pre-compute system prompt once at module load (zero per-request overhead).
-const _BASE_SYSTEM_PROMPT = (() => {
-  const ctx = getRYContext()
-  return ctx ? CHYREN_SYSTEM_PROMPT + ctx : CHYREN_SYSTEM_PROMPT
-})()
+// Base system prompt is resolved per-request (async) so live-fetched Neon
+// context is available even when the build-time bake was empty (quota issues, etc.)
+async function getBaseSystemPrompt(): Promise<string> {
+  const ctx = await getRYContextAsync()
+  return ctx ? CHYREN_SYSTEM_PROMPT + '\n\n' + ctx : CHYREN_SYSTEM_PROMPT
+}
 
 export const runtime = 'nodejs'
 
@@ -101,16 +102,17 @@ const _CONCISENESS_DIRECTIVE =
   `Lead with the answer. Omit preamble, filler, and unnecessary elaboration. ` +
   `If the question genuinely requires more, you may expand — but default is tight and conversational.`
 
-function buildSystemPrompt(
+async function buildSystemPrompt(
   sessionId: string,
   memberContext?: string | null,
-): {
+): Promise<{
   prompt: string
   profile: ExpressionProfile
-} {
+}> {
+  const basePrompt = await getBaseSystemPrompt()
   const profile = pickExpressionProfile(sessionId)
   let prompt =
-    _BASE_SYSTEM_PROMPT +
+    basePrompt +
     _CONCISENESS_DIRECTIVE +
     `\n\nResponse expression profile: ${profile.styleId}.\n` +
     `${profile.guidance}\n` +
@@ -408,7 +410,7 @@ export async function POST(req: NextRequest) {
 
   const memberContext = await getVerifiedMemberContext(session)
   const history = toChatHistory(messages, content)
-  const { prompt: systemPrompt, profile } = buildSystemPrompt(session, memberContext)
+  const { prompt: systemPrompt, profile } = await buildSystemPrompt(session, memberContext)
   let hubFailure: string | null = null
   try {
     if (getOptionalEnv('CHYREN_API_URL')) {
