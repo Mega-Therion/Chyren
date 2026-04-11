@@ -50,6 +50,17 @@ def main():
         # Routing to Medulla (The physical motor control)
         print("[STEM] Routing to Medulla system-layer execution...")
         run_medulla(remainder)
+
+    elif cmd_type == "telegram":
+        print("[STEM] Starting Telegram Gateway (chyren-telegram)...")
+        binary = os.path.join(MEDULLA_DIR, "target", "release", "chyren-telegram")
+        if not os.path.exists(binary):
+            print("[STEM] chyren-telegram binary not found. Building...")
+            subprocess.run(
+                ["cargo", "build", "--release", "-p", "omega-telegram-gateway"],
+                cwd=MEDULLA_DIR,
+            )
+        subprocess.run([binary])
         
     elif cmd_type == "status":
         print("--- Unified Brain State ---")
