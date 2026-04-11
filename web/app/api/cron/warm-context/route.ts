@@ -1,7 +1,7 @@
 /**
  * /api/cron/warm-context — Neon context warmer
  */
-import { getRYContext } from '@/lib/neon-context'
+import { getRYContextAsync } from '@/lib/neon-context'
 import type { NextRequest } from 'next/server'
 
 export const runtime = 'nodejs'
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
 async function runWarm() {
   const start = Date.now()
   try {
-    const context = getRYContext()
+    const context = await getRYContextAsync()
     const ms = Date.now() - start
     return Response.json({ ok: true, length: context.length, ms })
   } catch (err) {
