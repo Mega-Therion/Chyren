@@ -2,7 +2,8 @@ __pycache__/
 *.py[cod]
 *.pyo
 .env
-state/master_ledger.json
+cortex/state/
+state/
 *.log
 .DS_Store
 target/
