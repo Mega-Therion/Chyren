@@ -64,7 +64,7 @@ async fn main() -> anyhow::Result<()> {
         }
         Some(Commands::Server) => {
             println!("[BOOT] Launching API Server...");
-            crate::api::start_api_server(conductor).await?;
+            omega_cli::api::start_api_server(conductor).await?;
             return Ok(());
         }
         Some(Commands::Reset) => {

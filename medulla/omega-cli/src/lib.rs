@@ -2,3 +2,5 @@
 
 pub mod api;
 pub mod conductor;
+
+pub use conductor::{Conductor, ConductorError, TaskExecution, TaskPlan};

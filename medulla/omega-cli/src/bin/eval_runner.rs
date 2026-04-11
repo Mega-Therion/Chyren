@@ -1,12 +1,18 @@
-use omega_adccl::{AdcclConfig, AdcclGate};
-use omega_aegis::AegisGate;
+use omega_adccl::adccl_logic::ADCCL;
+use omega_aegis::{AlignmentLayer, Constitution};
+use omega_core::now;
 use omega_eval::EvalSuite;
 use omega_myelin::MemoryGraph;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let aegis = AegisGate::new(vec!["unethical".to_string(), "system override".to_string()]);
-    let adccl = AdcclGate::new(AdcclConfig { min_score: 0.7 });
+    let aegis = AlignmentLayer::new(Constitution {
+        version: 1,
+        created_utc: now(),
+        principles: vec!["Ground responses in available evidence".to_string()],
+        forbidden_keywords: vec!["unethical".to_string(), "system override".to_string()],
+    });
+    let adccl = ADCCL::new(0.7, None);
     let memory = MemoryGraph::new();
     let suite = EvalSuite::new(aegis, adccl);
 
