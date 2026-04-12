@@ -2100,12 +2100,16 @@ dependencies = [
 name = "omega-aegis"
 version = "0.1.0"
 dependencies = [
+ "hex",
+ "hmac",
  "omega-core",
  "omega-myelin",
+ "omega-phylactery",
  "omega-telemetry",
  "regex",
  "serde",
  "serde_json",
+ "sha2",
  "thiserror 1.0.69",
 ]
 
@@ -2261,10 +2265,13 @@ dependencies = [
 name = "omega-phylactery"
 version = "0.1.0"
 dependencies = [
+ "hex",
+ "hmac",
  "omega-core",
  "omega-myelin",
  "serde",
  "serde_json",
+ "sha2",
  "tokio",
 ]
 
