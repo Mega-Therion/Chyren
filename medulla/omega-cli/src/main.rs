@@ -10,7 +10,11 @@ fn init_tracing() {
     // Respect `RUST_LOG` when set; otherwise default to info-level logs.
     let filter = tracing_subscriber::EnvFilter::try_from_default_env()
         .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info"));
-    tracing_subscriber::fmt().with_env_filter(filter).init();
+    // Always log to stderr so `--json` stdout remains machine-readable.
+    tracing_subscriber::fmt()
+        .with_env_filter(filter)
+        .with_writer(std::io::stderr)
+        .init();
 }
 
 #[derive(Parser)]
