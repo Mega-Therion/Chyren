@@ -58,6 +58,13 @@ jobs:
           cp README.md "${OUT_DIR}/${PKG}/" || true
           cp LICENSE* "${OUT_DIR}/${PKG}/" || true
 
+          # Ship completions + manpage alongside the binary for nicer installs.
+          mkdir -p "${OUT_DIR}/${PKG}/completions"
+          "medulla/target/release/chyren" completions --shell bash > "${OUT_DIR}/${PKG}/completions/chyren.bash"
+          "medulla/target/release/chyren" completions --shell zsh > "${OUT_DIR}/${PKG}/completions/_chyren"
+          "medulla/target/release/chyren" completions --shell fish > "${OUT_DIR}/${PKG}/completions/chyren.fish"
+          "medulla/target/release/chyren" man > "${OUT_DIR}/${PKG}/chyren.1"
+
           (cd "${OUT_DIR}" && sha256sum "${PKG}/${BIN}" > "${PKG}.sha256")
           (cd "${OUT_DIR}" && tar -czf "${PKG}.tar.gz" "${PKG}" "${PKG}.sha256")
       - name: Upload assets
@@ -97,6 +104,12 @@ jobs:
           cp "$SRC" "${OUT_DIR}/${PKG}/"
           cp README.md "${OUT_DIR}/${PKG}/" || true
           cp LICENSE* "${OUT_DIR}/${PKG}/" || true
+
+          mkdir -p "${OUT_DIR}/${PKG}/completions"
+          "medulla/target/release/chyren" completions --shell bash > "${OUT_DIR}/${PKG}/completions/chyren.bash"
+          "medulla/target/release/chyren" completions --shell zsh > "${OUT_DIR}/${PKG}/completions/_chyren"
+          "medulla/target/release/chyren" completions --shell fish > "${OUT_DIR}/${PKG}/completions/chyren.fish"
+          "medulla/target/release/chyren" man > "${OUT_DIR}/${PKG}/chyren.1"
 
           (cd "${OUT_DIR}" && shasum -a 256 "${PKG}/${BIN}" > "${PKG}.sha256")
           (cd "${OUT_DIR}" && tar -czf "${PKG}.tar.gz" "${PKG}" "${PKG}.sha256")
@@ -140,6 +153,10 @@ jobs:
           if (Test-Path "README.md") { Copy-Item "README.md" $PkgDir }
           Get-ChildItem -Path "." -Filter "LICENSE*" -ErrorAction SilentlyContinue | ForEach-Object { Copy-Item $_.FullName $PkgDir }
 
+          $CompDir = Join-Path $PkgDir "completions"
+          New-Item -ItemType Directory -Force -Path $CompDir | Out-Null
+          & $Src completions --shell powershell | Out-File -Encoding utf8 (Join-Path $CompDir "chyren.ps1")
+
           $Hash = (Get-FileHash -Algorithm SHA256 (Join-Path $PkgDir $Bin)).Hash.ToLower()
           "$Hash  $Pkg/$Bin" | Out-File -Encoding ascii (Join-Path $OutDir "$Pkg.sha256")
 
@@ -151,4 +168,3 @@ jobs:
         with:
           draft: true
           files: dist/*.zip
-
