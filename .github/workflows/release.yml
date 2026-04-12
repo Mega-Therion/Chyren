@@ -10,29 +10,36 @@ permissions:
   contents: write
 
 jobs:
-  build:
-    name: Build (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+  # This workflow is designed to run on self-hosted runners to avoid relying on
+  # GitHub-hosted capacity (useful if the account is locked or hosted runners are unavailable).
+  #
+  # Default GitHub runner labels are typically: self-hosted, Linux|Windows|macOS, X64|ARM64.
+  # Add additional self-hosted runners for macOS/Windows to get full cross-OS artifacts.
+  init-release:
+    name: Init Draft Release
+    runs-on: [self-hosted, Linux, X64]
     steps:
       - uses: actions/checkout@v4
+      - name: Create draft release (notes)
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          generate_release_notes: true
 
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Rust cache
-        uses: Swatinem/rust-cache@v2
+  build-linux:
+    name: Build (Linux)
+    needs: init-release
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
         with:
           workspaces: "medulla -> target"
-
       - name: Build (release)
         run: cargo build --release -p omega-cli --bin chyren
         working-directory: medulla
-
-      - name: Package artifact
+      - name: Package + upload to release
         shell: bash
         run: |
           set -euo pipefail
@@ -43,58 +50,105 @@ jobs:
           mkdir -p "${OUT_DIR}"
 
           BIN="chyren"
-          if [[ "$OS" == "Windows" ]]; then
-            BIN="chyren.exe"
-          fi
-
           SRC="medulla/target/release/${BIN}"
-          if [[ ! -f "$SRC" ]]; then
-            echo "Missing built binary: $SRC" >&2
-            exit 1
-          fi
-
           PKG="chyren-${VERSION}-${OS}-${ARCH}"
+
           mkdir -p "${OUT_DIR}/${PKG}"
           cp "$SRC" "${OUT_DIR}/${PKG}/"
           cp README.md "${OUT_DIR}/${PKG}/" || true
           cp LICENSE* "${OUT_DIR}/${PKG}/" || true
 
-          if command -v shasum >/dev/null 2>&1; then
-            (cd "${OUT_DIR}" && shasum -a 256 "${PKG}/${BIN}" > "${PKG}.sha256")
-          else
-            (cd "${OUT_DIR}" && sha256sum "${PKG}/${BIN}" > "${PKG}.sha256")
-          fi
-
-          if command -v tar >/dev/null 2>&1; then
-            (cd "${OUT_DIR}" && tar -czf "${PKG}.tar.gz" "${PKG}" "${PKG}.sha256")
-          else
-            echo "tar not available" >&2
-            exit 1
-          fi
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist-${{ runner.os }}-${{ runner.arch }}
-          path: dist/*.tar.gz
-
-  publish:
-    name: Publish GitHub Release
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          pattern: dist-*
-          merge-multiple: true
-          path: dist
-
-      - name: Create/Update release
+          (cd "${OUT_DIR}" && sha256sum "${PKG}/${BIN}" > "${PKG}.sha256")
+          (cd "${OUT_DIR}" && tar -czf "${PKG}.tar.gz" "${PKG}" "${PKG}.sha256")
+      - name: Upload assets
         uses: softprops/action-gh-release@v2
         with:
+          draft: true
           files: dist/*.tar.gz
-          generate_release_notes: true
+
+  build-macos:
+    name: Build (macOS)
+    needs: init-release
+    runs-on: [self-hosted, macOS]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "medulla -> target"
+      - name: Build (release)
+        run: cargo build --release -p omega-cli --bin chyren
+        working-directory: medulla
+      - name: Package + upload to release
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF_NAME:-dev}"
+          OS="${{ runner.os }}"
+          ARCH="${{ runner.arch }}"
+          OUT_DIR="dist"
+          mkdir -p "${OUT_DIR}"
+
+          BIN="chyren"
+          SRC="medulla/target/release/${BIN}"
+          PKG="chyren-${VERSION}-${OS}-${ARCH}"
+
+          mkdir -p "${OUT_DIR}/${PKG}"
+          cp "$SRC" "${OUT_DIR}/${PKG}/"
+          cp README.md "${OUT_DIR}/${PKG}/" || true
+          cp LICENSE* "${OUT_DIR}/${PKG}/" || true
+
+          (cd "${OUT_DIR}" && shasum -a 256 "${PKG}/${BIN}" > "${PKG}.sha256")
+          (cd "${OUT_DIR}" && tar -czf "${PKG}.tar.gz" "${PKG}" "${PKG}.sha256")
+      - name: Upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: dist/*.tar.gz
+
+  build-windows:
+    name: Build (Windows)
+    needs: init-release
+    runs-on: [self-hosted, Windows]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "medulla -> target"
+      - name: Build (release)
+        run: cargo build --release -p omega-cli --bin chyren
+        working-directory: medulla
+      - name: Package + upload to release
+        shell: pwsh
+        run: |
+          $Version = "${env:GITHUB_REF_NAME}"
+          if ([string]::IsNullOrEmpty($Version)) { $Version = "dev" }
+          $OS = "${{ runner.os }}"
+          $ARCH = "${{ runner.arch }}"
+          $OutDir = "dist"
+          New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
+
+          $Bin = "chyren.exe"
+          $Src = "medulla/target/release/$Bin"
+          if (!(Test-Path $Src)) { throw "Missing built binary: $Src" }
+
+          $Pkg = "chyren-$Version-$OS-$ARCH"
+          $PkgDir = Join-Path $OutDir $Pkg
+          New-Item -ItemType Directory -Force -Path $PkgDir | Out-Null
+          Copy-Item $Src $PkgDir
+          if (Test-Path "README.md") { Copy-Item "README.md" $PkgDir }
+          Get-ChildItem -Path "." -Filter "LICENSE*" -ErrorAction SilentlyContinue | ForEach-Object { Copy-Item $_.FullName $PkgDir }
+
+          $Hash = (Get-FileHash -Algorithm SHA256 (Join-Path $PkgDir $Bin)).Hash.ToLower()
+          "$Hash  $Pkg/$Bin" | Out-File -Encoding ascii (Join-Path $OutDir "$Pkg.sha256")
+
+          $ZipPath = Join-Path $OutDir "$Pkg.zip"
+          if (Test-Path $ZipPath) { Remove-Item $ZipPath -Force }
+          Compress-Archive -Path $PkgDir, (Join-Path $OutDir "$Pkg.sha256") -DestinationPath $ZipPath
+      - name: Upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: dist/*.zip
 
