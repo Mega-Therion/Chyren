@@ -144,30 +144,33 @@ chyren check --action user_delete --strictness 0.8
 chyren check --action data_export --verbose
 ```
 
-#### Manage Providers
+#### CLI (Unified Entry Point)
+
+Chyren exposes a thin “brain-stem” wrapper at `./chyren` which routes:
+- Cortex (Python): `thought`, `sense`, `verify`, `identity`
+- Medulla (Rust): `action`, `flex`, `shard`, `ingest`, `memory`
 
 ```bash
-# List available providers
-chyren providers list
+# Show high-level system status
+./chyren status
 
-# Run a specific provider
-chyren run-provider --name gemini
+# Run the Medulla API server (for the Next.js frontend)
+./chyren action server
 
-# Stop a provider
-chyren stop-provider --name gemini
+# Execute a task through the Medulla pipeline
+./chyren action "summarize the current architecture in 5 bullets"
+
+# Ingest a MatrixProgram JSON file
+./chyren action ingest --path ./docs/examples/matrix_program.json
 ```
 
-#### Workspace Management
+#### Destructive Reset (Opt-In)
+
+Reset clears Postgres/Neon tables if `OMEGA_DB_URL` is configured, and also clears
+in-process ephemeral state. External vector stores (Qdrant) are not cleared.
 
 ```bash
-# View workspace status
-chyren workspace status
-
-# Clean workspace
-chyren workspace clean
-
-# Reset ADCCL state
-chyren workspace reset-adccl
+CHYREN_ALLOW_RESET=1 ./chyren reset
 ```
 
 ### Programmatic Usage (Rust)
