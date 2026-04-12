@@ -82,9 +82,14 @@ impl GeminiSpoke {
             "contents": [{"parts": [{"text": prompt}]}]
         });
 
+        let model = input
+            .get("model")
+            .and_then(|m| m.as_str())
+            .unwrap_or("gemini-2.0-flash");
+
         let url = format!(
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key={}",
-            api_key
+            "https://generativelanguage.googleapis.com/v1beta/models/{}:generateContent?key={}",
+            model, api_key
         );
 
         let resp = client
