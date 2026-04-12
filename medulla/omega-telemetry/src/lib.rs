@@ -116,21 +116,37 @@ impl TelemetrySink for PrometheusSink {
 #[cfg(test)]
 pub struct CaptureSink {
     events: std::sync::Mutex<Vec<SystemEvent>>,
-    metrics: std::sync::Mutex<Vec<(String, f64, Vec<(String, String)>)>>,
+    metrics: std::sync::Mutex<Vec<MetricSample>>,
+}
+
+#[cfg(test)]
+type Labels = Vec<(String, String)>;
+
+#[cfg(test)]
+type MetricSample = (String, f64, Labels);
+
+#[cfg(test)]
+impl Default for CaptureSink {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 #[cfg(test)]
 impl CaptureSink {
+    /// Create an empty capture sink.
     pub fn new() -> Self {
         Self {
             events: std::sync::Mutex::new(vec![]),
             metrics: std::sync::Mutex::new(vec![]),
         }
     }
+    /// Return a snapshot of all captured events (FIFO).
     pub fn events(&self) -> Vec<SystemEvent> {
         self.events.lock().unwrap().clone()
     }
-    pub fn metrics(&self) -> Vec<(String, f64, Vec<(String, String)>)> {
+    /// Return a snapshot of all captured metrics (FIFO).
+    pub fn metrics(&self) -> Vec<MetricSample> {
         self.metrics.lock().unwrap().clone()
     }
 }
@@ -211,7 +227,11 @@ mod tests {
     #[test]
     fn capture_sink_records_metrics() {
         let sink = CaptureSink::new();
-        sink.record_metric("adccl.score", 0.85, vec![("provider".into(), "anthropic".into())]);
+        sink.record_metric(
+            "adccl.score",
+            0.85,
+            vec![("provider".into(), "anthropic".into())],
+        );
         let metrics = sink.metrics();
         assert_eq!(metrics.len(), 1);
         let (name, value, labels) = &metrics[0];
@@ -248,7 +268,10 @@ mod tests {
         sink.record_metric(
             "latency_ms",
             42.5,
-            vec![("route".into(), "/api/run".into()), ("status".into(), "200".into())],
+            vec![
+                ("route".into(), "/api/run".into()),
+                ("status".into(), "200".into()),
+            ],
         );
     }
 

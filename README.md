@@ -64,6 +64,9 @@ cd web && npm install && npm run dev
 ./chyren status
 ```
 
+## Releases (CLI)
+Tagged releases (`v*`) publish prebuilt `chyren` binaries for Linux/macOS/Windows under GitHub Releases, with `.sha256` checksums.
+
 ## Visuals and Deep Dive
 The full architecture + system-design explainer (control-flow diagrams, state machine, math guardrails, novelty matrix, and proof dashboard) lives in [docs/ARCHITECTURE_ATLAS.md](./docs/ARCHITECTURE_ATLAS.md).  
 Extended visual companion assets (GIFs and candidate renders) are in [docs/SHOWCASE.md](./docs/SHOWCASE.md).

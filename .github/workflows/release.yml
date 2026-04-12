@@ -1,0 +1,100 @@
+name: Release (chyren CLI)
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "medulla -> target"
+
+      - name: Build (release)
+        run: cargo build --release -p omega-cli --bin chyren
+        working-directory: medulla
+
+      - name: Package artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF_NAME:-dev}"
+          OS="${{ runner.os }}"
+          ARCH="${{ runner.arch }}"
+          OUT_DIR="dist"
+          mkdir -p "${OUT_DIR}"
+
+          BIN="chyren"
+          if [[ "$OS" == "Windows" ]]; then
+            BIN="chyren.exe"
+          fi
+
+          SRC="medulla/target/release/${BIN}"
+          if [[ ! -f "$SRC" ]]; then
+            echo "Missing built binary: $SRC" >&2
+            exit 1
+          fi
+
+          PKG="chyren-${VERSION}-${OS}-${ARCH}"
+          mkdir -p "${OUT_DIR}/${PKG}"
+          cp "$SRC" "${OUT_DIR}/${PKG}/"
+          cp README.md "${OUT_DIR}/${PKG}/" || true
+          cp LICENSE* "${OUT_DIR}/${PKG}/" || true
+
+          if command -v shasum >/dev/null 2>&1; then
+            (cd "${OUT_DIR}" && shasum -a 256 "${PKG}/${BIN}" > "${PKG}.sha256")
+          else
+            (cd "${OUT_DIR}" && sha256sum "${PKG}/${BIN}" > "${PKG}.sha256")
+          fi
+
+          if command -v tar >/dev/null 2>&1; then
+            (cd "${OUT_DIR}" && tar -czf "${PKG}.tar.gz" "${PKG}" "${PKG}.sha256")
+          else
+            echo "tar not available" >&2
+            exit 1
+          fi
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ runner.os }}-${{ runner.arch }}
+          path: dist/*.tar.gz
+
+  publish:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: dist-*
+          merge-multiple: true
+          path: dist
+
+      - name: Create/Update release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.tar.gz
+          generate_release_notes: true
+
