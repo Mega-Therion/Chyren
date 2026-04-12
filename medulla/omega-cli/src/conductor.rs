@@ -85,17 +85,47 @@ pub struct Conductor {
 }
 
 impl Conductor {
-    /// Build a conductor with default policy gates and env-configured providers.
-    pub fn new() -> Self {
-        let constitution = Constitution {
+    /// Load the sovereign constitution from `state/constitution.json` (relative to the
+    /// working directory), falling back to a minimal inline constitution if the file
+    /// is absent or malformed.
+    fn load_constitution() -> Constitution {
+        let path = std::env::var("CHYREN_CONSTITUTION_PATH")
+            .unwrap_or_else(|_| "state/constitution.json".to_string());
+        if let Ok(raw) = std::fs::read_to_string(&path) {
+            if let Ok(val) = serde_json::from_str::<serde_json::Value>(&raw) {
+                let principles = val["principles"]
+                    .as_array()
+                    .map(|a| {
+                        a.iter()
+                            .filter_map(|v| v.as_str().map(|s| s.to_string()))
+                            .collect()
+                    })
+                    .unwrap_or_default();
+                let forbidden_keywords = val["forbidden_keywords"]
+                    .as_array()
+                    .map(|a| {
+                        a.iter()
+                            .filter_map(|v| v.as_str().map(|s| s.to_string()))
+                            .collect()
+                    })
+                    .unwrap_or_default();
+                let version = val["version"].as_u64().unwrap_or(1) as u32;
+                let created_utc = val["created_utc"].as_f64().unwrap_or_else(now);
+                return Constitution { version, created_utc, principles, forbidden_keywords };
+            }
+        }
+        // Inline fallback — used in tests and when state/ is not present.
+        Constitution {
             version: 1,
             created_utc: now(),
-            principles: vec![
-                "Ground responses in available evidence".to_string(),
-                "Preserve user safety and system integrity".to_string(),
-            ],
-            forbidden_keywords: vec!["self-destruct".to_string(), "wipe_database".to_string()],
-        };
+            principles: vec!["Preserve system integrity".to_string()],
+            forbidden_keywords: vec!["self-destruct".to_string()],
+        }
+    }
+
+    /// Build a conductor with default policy gates and env-configured providers.
+    pub fn new() -> Self {
+        let constitution = Self::load_constitution();
 
         Self {
             runtime: Arc::new(Mutex::new(AeonRuntime::new())),
