@@ -7,10 +7,12 @@ pub mod openai_spoke;
 pub mod search_spoke;
 
 pub mod deepseek_spoke;
+pub mod ollama_spoke;
 
 pub use anthropic_spoke::AnthropicSpoke;
 pub use deepseek_spoke::DeepSeekSpoke;
 pub use gemini_spoke::GeminiSpoke;
 pub use neon_spoke::NeonSpoke;
+pub use ollama_spoke::OllamaSpoke;
 pub use openai_spoke::OpenAISpoke;
 pub use search_spoke::SearchSpoke;
