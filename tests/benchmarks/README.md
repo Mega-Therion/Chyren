@@ -1,5 +1,7 @@
 # Chyren Performance Benchmarks
 
+> Status note: parts of this document are currently illustrative. Treat any static numbers here as provisional unless they are linked to versioned artifacts under `docs/evidence/`.
+
 ## Overview
 
 This directory contains comprehensive benchmarks for Chyren's core components, measuring performance across various dimensions of the system.

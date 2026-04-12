@@ -1,0 +1,5 @@
+run_id,step,status,duration_sec,source_command
+proof-20260412T003159Z,rust_tests,pass,12,cd '/home/mega/Chyren/medulla' && cargo test
+proof-20260412T003159Z,web_typecheck,pass,3,cd '/home/mega/Chyren/web' && npm run typecheck
+proof-20260412T003159Z,web_lint,fail,8,cd '/home/mega/Chyren/web' && npm run lint
+proof-20260412T003159Z,python_tests,fail,66,cd '/home/mega/Chyren' && pytest

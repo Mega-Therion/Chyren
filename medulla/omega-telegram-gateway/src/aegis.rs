@@ -58,8 +58,16 @@ static INJECTION_PATTERNS: &[&str] = &[
 
 /// Privileged Telegram bot commands that are not permitted for general users.
 static BLOCKED_COMMANDS: &[&str] = &[
-    "/admin", "/reset", "/debug", "/config", "/override",
-    "/shutdown", "/restart", "/exec", "/eval", "/shell",
+    "/admin",
+    "/reset",
+    "/debug",
+    "/config",
+    "/override",
+    "/shutdown",
+    "/restart",
+    "/exec",
+    "/eval",
+    "/shell",
 ];
 
 /// Screen a message through the AEGIS gate.

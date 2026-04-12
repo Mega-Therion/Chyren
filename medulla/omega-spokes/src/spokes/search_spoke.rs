@@ -1,6 +1,8 @@
 //! Search spoke for web and external data access
 
-use crate::{Spoke, SpokeCapability, SpokeConfig, ToolDefinition, ToolInvocation, ToolResult, SpokeStatus};
+use crate::{
+    Spoke, SpokeCapability, SpokeConfig, SpokeStatus, ToolDefinition, ToolInvocation, ToolResult,
+};
 use async_trait::async_trait;
 use serde_json::{json, Value};
 use std::env;
@@ -87,45 +89,39 @@ impl Spoke for SearchSpoke {
         let start = std::time::Instant::now();
 
         let result = match invocation.tool.as_str() {
-            "web_search" => {
-                match self.web_search(&invocation.input).await {
-                    Ok(response) => response,
-                    Err(e) => {
-                        return Ok(ToolResult {
-                            success: false,
-                            output: json!({}),
-                            error: Some(e),
-                            execution_time_ms: start.elapsed().as_millis() as u32,
-                        })
-                    }
+            "web_search" => match self.web_search(&invocation.input).await {
+                Ok(response) => response,
+                Err(e) => {
+                    return Ok(ToolResult {
+                        success: false,
+                        output: json!({}),
+                        error: Some(e),
+                        execution_time_ms: start.elapsed().as_millis() as u32,
+                    })
                 }
-            }
-            "fetch_url" => {
-                match self.fetch_url(&invocation.input).await {
-                    Ok(response) => response,
-                    Err(e) => {
-                        return Ok(ToolResult {
-                            success: false,
-                            output: json!({}),
-                            error: Some(e),
-                            execution_time_ms: start.elapsed().as_millis() as u32,
-                        })
-                    }
+            },
+            "fetch_url" => match self.fetch_url(&invocation.input).await {
+                Ok(response) => response,
+                Err(e) => {
+                    return Ok(ToolResult {
+                        success: false,
+                        output: json!({}),
+                        error: Some(e),
+                        execution_time_ms: start.elapsed().as_millis() as u32,
+                    })
                 }
-            }
-            "api_call" => {
-                match self.api_call(&invocation.input).await {
-                    Ok(response) => response,
-                    Err(e) => {
-                        return Ok(ToolResult {
-                            success: false,
-                            output: json!({}),
-                            error: Some(e),
-                            execution_time_ms: start.elapsed().as_millis() as u32,
-                        })
-                    }
+            },
+            "api_call" => match self.api_call(&invocation.input).await {
+                Ok(response) => response,
+                Err(e) => {
+                    return Ok(ToolResult {
+                        success: false,
+                        output: json!({}),
+                        error: Some(e),
+                        execution_time_ms: start.elapsed().as_millis() as u32,
+                    })
                 }
-            }
+            },
             _ => {
                 return Ok(ToolResult {
                     success: false,
@@ -162,11 +158,13 @@ impl Spoke for SearchSpoke {
 impl SearchSpoke {
     /// Perform web search via external search API
     async fn web_search(&self, input: &Value) -> Result<Value, String> {
-        let query = input.get("query")
+        let query = input
+            .get("query")
             .and_then(|q| q.as_str())
             .ok_or("Missing 'query' in input")?;
 
-        let num_results = input.get("num_results")
+        let num_results = input
+            .get("num_results")
             .and_then(|n| n.as_u64())
             .unwrap_or(10) as usize;
 
@@ -199,7 +197,10 @@ impl SearchSpoke {
 
         let response = client
             .get(&search_url)
-            .header("Authorization", format!("Token {}", search_api_key.unwrap()))
+            .header(
+                "Authorization",
+                format!("Token {}", search_api_key.unwrap()),
+            )
             .header("Accept", "application/json")
             .send()
             .await
@@ -210,7 +211,9 @@ impl SearchSpoke {
             return Err(format!("Search API error: {}", error_text));
         }
 
-        let search_response: Value = response.json().await
+        let search_response: Value = response
+            .json()
+            .await
             .map_err(|e| format!("Failed to parse search response: {}", e))?;
 
         Ok(search_response)
@@ -218,7 +221,8 @@ impl SearchSpoke {
 
     /// Fetch content from a URL
     async fn fetch_url(&self, input: &Value) -> Result<Value, String> {
-        let url = input.get("url")
+        let url = input
+            .get("url")
             .and_then(|u| u.as_str())
             .ok_or("Missing 'url' in input")?;
 
@@ -235,7 +239,9 @@ impl SearchSpoke {
             return Err(format!("HTTP error: {}", response.status()));
         }
 
-        let content = response.text().await
+        let content = response
+            .text()
+            .await
             .map_err(|e| format!("Failed to read response body: {}", e))?;
 
         // Simple HTML stripping (extracts text content)
@@ -251,18 +257,18 @@ impl SearchSpoke {
 
     /// Make arbitrary REST API calls
     async fn api_call(&self, input: &Value) -> Result<Value, String> {
-        let endpoint = input.get("endpoint")
+        let endpoint = input
+            .get("endpoint")
             .and_then(|e| e.as_str())
             .ok_or("Missing 'endpoint' in input")?;
 
-        let method = input.get("method")
+        let method = input
+            .get("method")
             .and_then(|m| m.as_str())
             .unwrap_or("GET")
             .to_uppercase();
 
-        let params = input.get("params")
-            .and_then(|p| p.as_object())
-            .cloned();
+        let params = input.get("params").and_then(|p| p.as_object()).cloned();
 
         let client = reqwest::Client::new();
 
@@ -275,7 +281,8 @@ impl SearchSpoke {
                     .await
             }
             "POST" => {
-                let mut req = client.post(endpoint)
+                let mut req = client
+                    .post(endpoint)
                     .header("Content-Type", "application/json");
 
                 if let Some(p) = params {
@@ -285,7 +292,8 @@ impl SearchSpoke {
                 req.send().await
             }
             "PUT" => {
-                let mut req = client.put(endpoint)
+                let mut req = client
+                    .put(endpoint)
                     .header("Content-Type", "application/json");
 
                 if let Some(p) = params {
@@ -294,12 +302,7 @@ impl SearchSpoke {
 
                 req.send().await
             }
-            "DELETE" => {
-                client
-                    .delete(endpoint)
-                    .send()
-                    .await
-            }
+            "DELETE" => client.delete(endpoint).send().await,
             _ => {
                 return Err(format!("Unsupported HTTP method: {}", method));
             }
@@ -308,7 +311,9 @@ impl SearchSpoke {
         match response {
             Ok(res) => {
                 let status = res.status().as_u16();
-                let body: Value = res.json().await
+                let body: Value = res
+                    .json()
+                    .await
                     .map_err(|e| format!("Failed to parse API response: {}", e))?;
 
                 Ok(json!({
@@ -316,9 +321,7 @@ impl SearchSpoke {
                     "data": body
                 }))
             }
-            Err(e) => {
-                Err(format!("API call failed: {}", e))
-            }
+            Err(e) => Err(format!("API call failed: {}", e)),
         }
     }
 }

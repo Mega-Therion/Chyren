@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="860" viewBox="0 0 1400 860" role="img" aria-label="Chyren stack architecture diagram">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1220"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="aegis" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+    <linearGradient id="aeon" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="adccl" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+    <linearGradient id="myelin" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#22c55e"/>
+      <stop offset="100%" stop-color="#16a34a"/>
+    </linearGradient>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#94a3b8"/>
+    </marker>
+    <style>
+      .title { font: 700 42px Inter,Segoe UI,Arial,sans-serif; fill: #f8fafc; }
+      .subtitle { font: 500 18px Inter,Segoe UI,Arial,sans-serif; fill: #cbd5e1; }
+      .layer-title { font: 700 26px Inter,Segoe UI,Arial,sans-serif; fill: #ffffff; }
+      .layer-body { font: 500 16px Inter,Segoe UI,Arial,sans-serif; fill: #e2e8f0; }
+      .small { font: 500 14px Inter,Segoe UI,Arial,sans-serif; fill: #94a3b8; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1400" height="860" fill="url(#bg)"/>
+  <text x="56" y="72" class="title">Chyren Cognitive Stack</text>
+  <text x="56" y="106" class="subtitle">Sovereignty Shell + Verification-First Execution + Path-Dependent Memory</text>
+
+  <rect x="70" y="150" rx="18" ry="18" width="1260" height="145" fill="url(#aegis)"/>
+  <text x="100" y="205" class="layer-title">AEGIS - Governance Shell</text>
+  <text x="100" y="240" class="layer-body">Policy engine, risk/consent gate, audit controls, tool boundary enforcement</text>
+
+  <rect x="70" y="330" rx="18" ry="18" width="1260" height="120" fill="url(#aeon)"/>
+  <text x="100" y="377" class="layer-title">AEON - Identity and Task State</text>
+  <text x="100" y="408" class="layer-body">Identity nucleus, orchestrator, continuity chain</text>
+
+  <rect x="70" y="480" rx="18" ry="18" width="1260" height="120" fill="url(#adccl)"/>
+  <text x="100" y="527" class="layer-title">ADCCL - Deliberation and Verification</text>
+  <text x="100" y="558" class="layer-body">Grounding checks, claim validation, reject/repair decision boundary</text>
+
+  <rect x="70" y="630" rx="18" ry="18" width="1260" height="120" fill="url(#myelin)"/>
+  <text x="100" y="677" class="layer-title">MYELIN - Memory Substrate</text>
+  <text x="100" y="708" class="layer-body">Graph memory kernel, hardening/decay, conditional write discipline</text>
+
+  <line x1="700" y1="295" x2="700" y2="327" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="700" y1="450" x2="700" y2="477" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="700" y1="600" x2="700" y2="627" stroke="#94a3b8" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <text x="72" y="820" class="small">Repository mapping: cortex/ + medulla/ + web/ + gateway/ + docs/</text>
+</svg>

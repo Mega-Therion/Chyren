@@ -33,11 +33,15 @@ pub struct SystemEvent {
     pub timestamp: f64,
 }
 
+/// Sink interface for recording structured events and metrics.
 pub trait TelemetrySink: Send + Sync {
+    /// Record a structured event.
     fn record(&self, event: &SystemEvent);
+    /// Record a numeric metric with key/value labels.
     fn record_metric(&self, name: &str, value: f64, labels: Vec<(String, String)>);
 }
 
+/// Telemetry sink that writes events and metrics to stdout.
 pub struct StdoutSink;
 impl TelemetrySink for StdoutSink {
     fn record(&self, event: &SystemEvent) {
@@ -51,17 +55,25 @@ impl TelemetrySink for StdoutSink {
     }
 }
 
+/// Telemetry sink that appends JSONL events to a file path.
 pub struct FileSink {
     filepath: String,
 }
 impl FileSink {
+    /// Create a file sink that appends to `filepath`.
     pub fn new(filepath: &str) -> Self {
-        Self { filepath: filepath.to_string() }
+        Self {
+            filepath: filepath.to_string(),
+        }
     }
 }
 impl TelemetrySink for FileSink {
     fn record(&self, event: &SystemEvent) {
-        if let Ok(mut file) = OpenOptions::new().create(true).append(true).open(&self.filepath) {
+        if let Ok(mut file) = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&self.filepath)
+        {
             if let Ok(serialized) = serde_json::to_string(event) {
                 let _ = writeln!(file, "{}", serialized);
             }
@@ -70,36 +82,56 @@ impl TelemetrySink for FileSink {
     fn record_metric(&self, _name: &str, _value: f64, _labels: Vec<(String, String)>) {}
 }
 
+/// Minimal Prometheus-text sink (prints exposition-style metric lines to stdout).
 pub struct PrometheusSink;
 impl PrometheusSink {
-    pub fn new() -> Self { Self {} }
+    /// Create a new Prometheus sink.
+    pub fn new() -> Self {
+        Self {}
+    }
+}
+impl Default for PrometheusSink {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 impl TelemetrySink for PrometheusSink {
     fn record(&self, _event: &SystemEvent) {}
     fn record_metric(&self, name: &str, value: f64, labels: Vec<(String, String)>) {
-        let label_str = labels.iter()
+        let label_str = labels
+            .iter()
             .map(|(k, v)| format!("{}=\"{}\"", k, v))
             .collect::<Vec<_>>()
             .join(",");
-        println!("{metric}{{{labels}}} {value}", metric=name, labels=label_str, value=value);
+        println!(
+            "{metric}{{{labels}}} {value}",
+            metric = name,
+            labels = label_str,
+            value = value
+        );
     }
 }
 
+/// Broadcast helper that fan-outs events and metrics to a fixed set of sinks.
 pub struct TelemetryBus;
 impl TelemetryBus {
+    /// Broadcast an event to stdout and `telemetry.log`.
     pub fn broadcast(event: SystemEvent) {
         let sinks: Vec<Box<dyn TelemetrySink>> = vec![
             Box::new(StdoutSink),
             Box::new(FileSink::new("telemetry.log")),
         ];
-        for sink in sinks { sink.record(&event); }
+        for sink in sinks {
+            sink.record(&event);
+        }
     }
 
+    /// Record a metric to stdout and the Prometheus-text sink.
     pub fn record_metric(name: &str, value: f64, labels: Vec<(String, String)>) {
-        let sinks: Vec<Box<dyn TelemetrySink>> = vec![
-            Box::new(StdoutSink),
-            Box::new(PrometheusSink::new()),
-        ];
-        for sink in sinks { sink.record_metric(name, value, labels.clone()); }
+        let sinks: Vec<Box<dyn TelemetrySink>> =
+            vec![Box::new(StdoutSink), Box::new(PrometheusSink::new())];
+        for sink in sinks {
+            sink.record_metric(name, value, labels.clone());
+        }
     }
 }

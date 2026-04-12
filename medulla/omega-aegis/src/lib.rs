@@ -25,7 +25,7 @@ impl AlignmentLayer {
 
     pub fn check(&self, task: &str) -> AlignmentResult {
         let task_lower = task.to_lowercase();
-        
+
         for kw in &self.constitution.forbidden_keywords {
             if task_lower.contains(kw) {
                 return AlignmentResult {

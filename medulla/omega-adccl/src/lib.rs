@@ -15,6 +15,8 @@ mod tests {
 
         let result_stub = adccl.verify("TODO: Finish this", "Test task");
         assert!(!result_stub.passed);
-        assert!(result_stub.flags.contains(&"STUB_MARKERS_DETECTED".to_string()));
+        assert!(result_stub
+            .flags
+            .contains(&"STUB_MARKERS_DETECTED".to_string()));
     }
 }

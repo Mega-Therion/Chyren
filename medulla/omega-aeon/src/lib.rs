@@ -164,7 +164,9 @@ mod tests {
     #[test]
     fn test_advance_nonexistent_task_fails() {
         let mut rt = AeonRuntime::new();
-        assert!(rt.advance_task("nonexistent", TaskStage::Executing).is_err());
+        assert!(rt
+            .advance_task("nonexistent", TaskStage::Executing)
+            .is_err());
     }
 
     #[test]
@@ -223,4 +225,3 @@ mod tests {
         assert_eq!(rt.active_tasks.len(), 0);
     }
 }
-

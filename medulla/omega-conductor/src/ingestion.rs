@@ -1,5 +1,5 @@
-use anyhow::{Context, Result, anyhow};
-use omega_core::{MatrixProgram, MemoryNode, MemoryEdge};
+use anyhow::{anyhow, Context, Result};
+use omega_core::{MatrixProgram, MemoryEdge, MemoryNode};
 use omega_myelin::MemoryGraph;
 use serde::{Deserialize, Serialize};
 
@@ -18,15 +18,18 @@ pub struct IngestionEngine;
 impl IngestionEngine {
     /// Ingest a MatrixProgram into a MemoryGraph.
     ///
-    /// This "grafts" the program payload onto the existing graph, ensuring 
+    /// This "grafts" the program payload onto the existing graph, ensuring
     /// that new nodes and edges are integrated. In a production environment,
     /// this would also verify cryptographic signatures before ingestion.
     pub async fn ingest(program: MatrixProgram, graph: &mut MemoryGraph) -> Result<()> {
-        println!("[INGESTION] Verifying program: {} v{}", program.domain, program.version);
-        
+        println!(
+            "[INGESTION] Verifying program: {} v{}",
+            program.domain, program.version
+        );
+
         // TODO: In a real system, verify program.integrity_hash here.
         if program.payload.is_empty() {
-             return Err(anyhow!("Empty program payload for {}", program.domain));
+            return Err(anyhow!("Empty program payload for {}", program.domain));
         }
 
         let graft: ProgramPayload = serde_json::from_slice(&program.payload)
@@ -46,7 +49,7 @@ impl IngestionEngine {
         }
 
         println!(
-            "[INGESTION] Successfully grafted {} nodes and {} edges from {}", 
+            "[INGESTION] Successfully grafted {} nodes and {} edges from {}",
             node_count, edge_count, program.domain
         );
 

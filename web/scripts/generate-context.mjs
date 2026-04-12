@@ -33,7 +33,7 @@ async function fetchContext() {
           if (Array.isArray(facts)) {
             facts.forEach(f => parts.push(`  * ${f}`))
           }
-        } catch (e) {
+        } catch {
           parts.push(`  * ${r.fun_facts}`)
         }
       }

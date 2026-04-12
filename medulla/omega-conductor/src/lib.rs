@@ -351,8 +351,16 @@ mod tests {
         let memory = MemoryGraph::new();
         let steps = c.decompose(&env, &memory);
         assert!(steps.len() >= 3); // context + at least 1 task step + adccl + commit
-        assert!(steps.first().unwrap().instruction.contains("Retrieve memory context"));
-        assert!(steps.last().unwrap().instruction.contains("Commit verified result"));
+        assert!(steps
+            .first()
+            .unwrap()
+            .instruction
+            .contains("Retrieve memory context"));
+        assert!(steps
+            .last()
+            .unwrap()
+            .instruction
+            .contains("Commit verified result"));
     }
 
     #[test]
@@ -363,7 +371,9 @@ mod tests {
         let steps = c.decompose(&env, &memory);
         let instructions: Vec<&str> = steps.iter().map(|s| s.instruction.as_str()).collect();
         assert!(instructions.iter().any(|i| i.contains("language")));
-        assert!(instructions.iter().any(|i| i.contains("Generate implementation")));
+        assert!(instructions
+            .iter()
+            .any(|i| i.contains("Generate implementation")));
     }
 
     #[test]
@@ -381,11 +391,17 @@ mod tests {
         let c = test_conductor();
         let env = test_envelope("Implement a secure authentication system");
         let contract = c.derive_goal_contract(&env);
-        assert_eq!(contract.objective, "Implement a secure authentication system");
+        assert_eq!(
+            contract.objective,
+            "Implement a secure authentication system"
+        );
         assert!(contract.success_criteria.len() >= 3);
         assert!(contract.constraints.iter().any(|c| c.contains("fabricate")));
         // Should include code-specific criteria
-        assert!(contract.success_criteria.iter().any(|c| c.contains("compile")));
+        assert!(contract
+            .success_criteria
+            .iter()
+            .any(|c| c.contains("compile")));
     }
 
     #[test]
@@ -413,4 +429,3 @@ mod tests {
         }
     }
 }
-

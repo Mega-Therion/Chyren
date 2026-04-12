@@ -2,6 +2,14 @@ use clap::{Parser, Subcommand};
 use omega_cli::conductor::Conductor;
 use omega_core::{now, EvidencePacket, RunEnvelope, RunStatus};
 use std::sync::Arc;
+use tracing::{info, warn};
+
+fn init_tracing() {
+    // Respect `RUST_LOG` when set; otherwise default to info-level logs.
+    let filter = tracing_subscriber::EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info"));
+    tracing_subscriber::fmt().with_env_filter(filter).init();
+}
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -32,25 +40,26 @@ enum Commands {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    init_tracing();
     let cli = Cli::parse();
 
     let mut conductor = Conductor::new();
-    
+
     if let Ok(url) = std::env::var("OMEGA_DB_URL") {
         match omega_myelin::db::MemoryStore::connect(&url, "").await {
             Ok(store) => {
                 conductor.set_store(Arc::new(store));
-                println!("[SYSTEM] Persistent Master Ledger online.");
+                info!("Persistent Master Ledger online.");
             }
-            Err(e) => println!("[WARN] Failed to connect to DB: {}. Using volatile ledger.", e),
+            Err(e) => warn!("Failed to connect to DB: {e}. Using volatile ledger."),
         }
     }
 
     // Phase 6: Identity Synthesis
     if let Err(e) = conductor.bootstrap_identity().await {
-        println!("[WARN] Phylactery bootstrap failed: {}. Running as generic orchestrator.", e);
+        warn!("Phylactery bootstrap failed: {e}. Running as generic orchestrator.");
     } else {
-        println!("[SYSTEM] Phylactery Identity Kernel active (L6 Canonical).");
+        info!("Phylactery Identity Kernel active (L6 Canonical).");
     }
 
     let conductor = Arc::new(conductor);
@@ -68,18 +77,36 @@ async fn main() -> anyhow::Result<()> {
             return Ok(());
         }
         Some(Commands::Reset) => {
-            println!("Ledger reset not implemented in CLI yet.");
+            // Safety gate: require explicit opt-in to destructive reset.
+            let allow = std::env::var("CHYREN_ALLOW_RESET").unwrap_or_default();
+            if !matches!(allow.as_str(), "1" | "true" | "yes") {
+                println!(
+                    "Refusing to reset without CHYREN_ALLOW_RESET=1.\n\
+                     This operation deletes ledger + memory tables from the configured DB."
+                );
+                return Ok(());
+            }
+
+            if conductor.reset_persistent_store().await? {
+                println!("[OK] Persistent store reset (Postgres/Neon tables cleared).");
+                println!("[NOTE] External vector store (Qdrant) was not cleared.");
+            } else {
+                println!("[WARN] No persistent store configured; clearing ephemeral state only.");
+            }
+
+            conductor.reset_ephemeral_state().await;
+            println!("[OK] Ephemeral in-process state cleared.");
             return Ok(());
         }
         Some(Commands::Ingest { path }) => {
             println!("[TASK] Ingesting MatrixProgram from: {}", path);
             let content = std::fs::read_to_string(path)?;
             let program: omega_core::MatrixProgram = serde_json::from_str(&content)?;
-            
+
             // For now, using a fresh graph (or retrieved from store)
             let mut graph = omega_myelin::MemoryGraph::new();
             omega_cli::conductor::ingestion::IngestionEngine::ingest(program, &mut graph).await?;
-            
+
             println!("[SUCCESS] Program integrated into memory graph.");
             return Ok(());
         }
@@ -99,7 +126,7 @@ async fn main() -> anyhow::Result<()> {
 
                 println!("[PLANNING] Analysing task: \"{}\"", task_text);
                 let plan = conductor.plan_task(&task_text).await?;
-                
+
                 println!("[EXECUTING] Routing through sovereign pipeline...");
                 let result = conductor.execute_plan(plan, &mut envelope).await?;
 

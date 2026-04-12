@@ -1,0 +1,13 @@
+run_id,step,status,duration_sec,source_command,status_file
+proof-20260412T003159Z,rust_tests,pass,12,cd '/home/mega/Chyren/medulla' && cargo test,proof-20260412T003159Z-status.csv
+proof-20260412T003159Z,web_typecheck,pass,3,cd '/home/mega/Chyren/web' && npm run typecheck,proof-20260412T003159Z-status.csv
+proof-20260412T003159Z,web_lint,fail,8,cd '/home/mega/Chyren/web' && npm run lint,proof-20260412T003159Z-status.csv
+proof-20260412T003159Z,python_tests,fail,66,cd '/home/mega/Chyren' && pytest,proof-20260412T003159Z-status.csv
+proof-20260412T003400Z,rust_tests,pass,3,cd '/home/mega/Chyren/medulla' && cargo test,proof-20260412T003400Z-status.csv
+proof-20260412T003400Z,web_typecheck,pass,3,cd '/home/mega/Chyren/web' && npm run typecheck,proof-20260412T003400Z-status.csv
+proof-20260412T003400Z,web_lint,fail,7,cd '/home/mega/Chyren/web' && npm run lint,proof-20260412T003400Z-status.csv
+proof-20260412T003400Z,python_tests,fail,24,cd '/home/mega/Chyren' && pytest tests,proof-20260412T003400Z-status.csv
+proof-20260412T003547Z,rust_tests,pass,5,cd '/home/mega/Chyren/medulla' && cargo test,proof-20260412T003547Z-status.csv
+proof-20260412T003547Z,web_typecheck,pass,7,cd '/home/mega/Chyren/web' && npm run typecheck,proof-20260412T003547Z-status.csv
+proof-20260412T003547Z,web_lint,pass,10,cd '/home/mega/Chyren/web' && npm run lint,proof-20260412T003547Z-status.csv
+proof-20260412T003547Z,python_tests,pass,2,cd '/home/mega/Chyren' && pytest tests,proof-20260412T003547Z-status.csv

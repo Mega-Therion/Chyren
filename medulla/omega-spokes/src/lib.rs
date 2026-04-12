@@ -8,8 +8,6 @@ use serde_json::Value;
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::mpsc;
-use futures::Stream;
-use std::pin::Pin;
 
 /// Capabilities supported by individual spokes.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
@@ -87,8 +85,15 @@ pub trait Spoke: Send + Sync {
     /// Invoke a tool by name.
     async fn invoke_tool(&self, invocation: ToolInvocation) -> Result<ToolResult, String>;
     /// Invoke a tool and stream the result chunks.
-    async fn invoke_tool_stream(&self, _invocation: ToolInvocation, _tx: mpsc::Sender<Value>) -> Result<(), String> {
-        Err(format!("Streaming not implemented for spoke: {}", self.name()))
+    async fn invoke_tool_stream(
+        &self,
+        _invocation: ToolInvocation,
+        _tx: mpsc::Sender<Value>,
+    ) -> Result<(), String> {
+        Err(format!(
+            "Streaming not implemented for spoke: {}",
+            self.name()
+        ))
     }
     /// Check the health of the connection.
     async fn health_check(&self) -> Result<SpokeStatus, String>;
@@ -135,7 +140,7 @@ impl SpokeRegistry {
     /// Load default spokes from environment configuration.
     pub fn from_env() -> Self {
         let mut reg = Self::new();
-        
+
         let providers = vec![
             ("anthropic", 10),
             ("openai", 20),
@@ -184,11 +189,14 @@ impl SpokeRegistry {
     }
 
     pub fn primary(&self) -> Option<Arc<dyn Spoke>> {
-        self.preference.first().and_then(|name| self.spokes.get(name).cloned())
+        self.preference
+            .first()
+            .and_then(|name| self.spokes.get(name).cloned())
     }
 
     pub fn spokes_with_capability(&self, capability: SpokeCapability) -> Vec<Arc<dyn Spoke>> {
-        self.spokes.values()
+        self.spokes
+            .values()
             .filter(|s| s.capabilities().contains(&capability))
             .cloned()
             .collect()
@@ -205,22 +213,31 @@ impl SpokeRegistry {
         preferred: Option<&str>,
         tx: mpsc::Sender<Value>,
     ) -> anyhow::Result<()> {
-        let name = preferred.map(|n| n.to_string())
+        let name = preferred
+            .map(|n| n.to_string())
             .unwrap_or_else(|| self.preference.first().cloned().unwrap_or_default());
 
-        let spoke = self.spokes.get(&name)
+        let spoke = self
+            .spokes
+            .get(&name)
             .ok_or_else(|| anyhow::anyhow!("Spoke {} not found", name))?;
 
-        spoke.invoke_tool_stream(ToolInvocation {
-            tool: "chat_completion".to_string(),
-            input: serde_json::json!({
-                "prompt": request.prompt,
-                "system": request.system,
-                "max_tokens": request.max_tokens,
-                "temperature": request.temperature,
-                "stream": true,
-            }),
-        }, tx).await.map_err(|e| anyhow::anyhow!("Spoke streaming error: {}", e))
+        spoke
+            .invoke_tool_stream(
+                ToolInvocation {
+                    tool: "chat_completion".to_string(),
+                    input: serde_json::json!({
+                        "prompt": request.prompt,
+                        "system": request.system,
+                        "max_tokens": request.max_tokens,
+                        "temperature": request.temperature,
+                        "stream": true,
+                    }),
+                },
+                tx,
+            )
+            .await
+            .map_err(|e| anyhow::anyhow!("Spoke streaming error: {}", e))
     }
 
     /// Route a chat request via the preferred spoke (Legacy-Compat).
@@ -229,31 +246,63 @@ impl SpokeRegistry {
         request: &SpokeRequest,
         preferred: Option<&str>,
     ) -> anyhow::Result<SpokeResponse> {
-        let name = preferred.map(|n| n.to_string())
+        let name = preferred
+            .map(|n| n.to_string())
             .unwrap_or_else(|| self.preference.first().cloned().unwrap_or_default());
 
-        let spoke = self.spokes.get(&name)
+        let spoke = self
+            .spokes
+            .get(&name)
             .ok_or_else(|| anyhow::anyhow!("Spoke {} not found", name))?;
 
         // Translate SpokeRequest to a ToolInvocation of "chat_completion".
         let start = std::time::Instant::now();
-        let result = spoke.invoke_tool(ToolInvocation {
-            tool: "chat_completion".to_string(),
-            input: serde_json::json!({
-                "prompt": request.prompt,
-                "system": request.system,
-                "max_tokens": request.max_tokens,
-                "temperature": request.temperature,
-            }),
-        }).await.map_err(|e| anyhow::anyhow!("Spoke invocation error: {}", e))?;
+        let result = spoke
+            .invoke_tool(ToolInvocation {
+                tool: "chat_completion".to_string(),
+                input: serde_json::json!({
+                    "prompt": request.prompt,
+                    "system": request.system,
+                    "max_tokens": request.max_tokens,
+                    "temperature": request.temperature,
+                }),
+            })
+            .await
+            .map_err(|e| anyhow::anyhow!("Spoke invocation error: {}", e))?;
 
         if !result.success {
             anyhow::bail!("Spoke execution failed: {:?}", result.error);
         }
 
-        let text = result.output.get("choices").and_then(|c| c.get(0)).and_then(|o| o.get("message")).and_then(|m| m.get("content")).and_then(|ct| ct.as_str()).map(|s| s.to_string())
-            .or_else(|| result.output.get("content").and_then(|c| c.get(0)).and_then(|o| o.get("text")).and_then(|t| t.as_str()).map(|s| s.to_string()))
-            .or_else(|| result.output.get("candidates").and_then(|c| c.get(0)).and_then(|o| o.get("content")).and_then(|ct| ct.get("parts")).and_then(|p| p.get(0)).and_then(|pr| pr.get("text")).and_then(|txt| txt.as_str()).map(|s| s.to_string()))
+        let text = result
+            .output
+            .get("choices")
+            .and_then(|c| c.get(0))
+            .and_then(|o| o.get("message"))
+            .and_then(|m| m.get("content"))
+            .and_then(|ct| ct.as_str())
+            .map(|s| s.to_string())
+            .or_else(|| {
+                result
+                    .output
+                    .get("content")
+                    .and_then(|c| c.get(0))
+                    .and_then(|o| o.get("text"))
+                    .and_then(|t| t.as_str())
+                    .map(|s| s.to_string())
+            })
+            .or_else(|| {
+                result
+                    .output
+                    .get("candidates")
+                    .and_then(|c| c.get(0))
+                    .and_then(|o| o.get("content"))
+                    .and_then(|ct| ct.get("parts"))
+                    .and_then(|p| p.get(0))
+                    .and_then(|pr| pr.get("text"))
+                    .and_then(|txt| txt.as_str())
+                    .map(|s| s.to_string())
+            })
             .unwrap_or_default();
 
         Ok(SpokeResponse {
@@ -263,6 +312,12 @@ impl SpokeRegistry {
             token_count: 0,
             latency_ms: start.elapsed().as_millis() as f64,
         })
+    }
+}
+
+impl Default for SpokeRegistry {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

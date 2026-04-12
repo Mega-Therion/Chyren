@@ -4,17 +4,24 @@ use std::collections::HashSet;
 /// CognitiveOutput: A standardized output from a provider spoke for consensus auditing.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CognitiveOutput {
+    /// Provider identifier (e.g., "openai", "anthropic", "deepseek").
     pub provider: String,
+    /// Provider-generated text output (verbatim).
     pub content: String,
+    /// Provider-local score used for dominance selection (heuristic).
     pub score: f64,
 }
 
 /// ConsensusResult: The outcome of a multi-model verification.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ConsensusResult {
+    /// Agreement score in [0,1] (currently based on token-set similarity).
     pub agreement_score: f64,
+    /// Whether a consensus threshold was met.
     pub consensus_reached: bool,
+    /// The dominant response chosen by the engine.
     pub dominant_response: String,
+    /// Providers considered discordant when consensus is not reached.
     pub discordant_providers: Vec<String>,
 }
 
@@ -56,18 +63,21 @@ impl ConsensusEngine {
 
         let agreement_score = total_sim / pairs as f64;
         let consensus_reached = agreement_score >= 0.75;
-        
+
         // Dominant response is the one with the highest individual provider score (for now)
-        let dominant = outputs.iter().max_by(|a, b| a.score.partial_cmp(&b.score).unwrap()).unwrap();
+        let dominant = outputs
+            .iter()
+            .max_by(|a, b| a.score.partial_cmp(&b.score).unwrap())
+            .unwrap();
 
         ConsensusResult {
             agreement_score,
             consensus_reached,
             dominant_response: dominant.content.clone(),
-            discordant_providers: if !consensus_reached { 
-                outputs.iter().map(|o| o.provider.clone()).collect() 
-            } else { 
-                vec![] 
+            discordant_providers: if !consensus_reached {
+                outputs.iter().map(|o| o.provider.clone()).collect()
+            } else {
+                vec![]
             },
         }
     }

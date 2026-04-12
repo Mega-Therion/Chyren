@@ -1,0 +1,125 @@
+{
+  "title": "Chyren-OmegA Architecture Graph",
+  "description": "Network map of architecture layers, verification mechanics, runtime split, and evidence discipline.",
+  "nodes": [
+    {
+      "id": "chyren",
+      "label": "Chyren",
+      "type": "project",
+      "description": "Sovereign intelligence orchestrator integrating governance, identity, verification, and persistence controls."
+    },
+    {
+      "id": "aegis",
+      "label": "AEGIS",
+      "type": "concept",
+      "description": "Governance shell that constrains policy and risk before execution."
+    },
+    {
+      "id": "aeon",
+      "label": "AEON",
+      "type": "concept",
+      "description": "Identity and task-state layer coordinating continuity across runs."
+    },
+    {
+      "id": "adccl",
+      "label": "ADCCL",
+      "type": "technology",
+      "description": "Verification gate that scores drafts and enforces pass/fail routing before persistence."
+    },
+    {
+      "id": "myelin",
+      "label": "MYELIN",
+      "type": "technology",
+      "description": "Memory substrate receiving writes only after verification passes."
+    },
+    {
+      "id": "cortex-medulla",
+      "label": "Cortex-Medulla Split",
+      "type": "technology",
+      "description": "Python orchestration and Rust runtime separation improving modular control and runtime rigor."
+    },
+    {
+      "id": "chiral-chi",
+      "label": "Chiral Invariant χ",
+      "type": "metric",
+      "description": "Mathematical decision guardrail for acceptance versus reject-repair."
+    },
+    {
+      "id": "proof-pack-v02",
+      "label": "Proof Pack v0.2",
+      "type": "solution",
+      "description": "Versioned evidence with run logs, snapshots, and trend charts."
+    },
+    {
+      "id": "novelty-discipline",
+      "label": "Novelty Discipline",
+      "type": "skill",
+      "description": "Claim framing method requiring mechanism, reproduction command, artifacts, and limits."
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "chyren",
+      "target": "aegis",
+      "type": "dependency",
+      "description": "Chyren depends on AEGIS to impose governance constraints before any execution path can proceed, preventing policy bypass during orchestration and persistence decisions."
+    },
+    {
+      "id": "e2",
+      "source": "chyren",
+      "target": "aeon",
+      "type": "dependency",
+      "description": "Chyren uses AEON identity state to maintain coherent task continuity across turns and runs, so verification can evaluate outputs in the correct context."
+    },
+    {
+      "id": "e3",
+      "source": "chyren",
+      "target": "adccl",
+      "type": "dependency",
+      "description": "Chyren routes every candidate output through ADCCL, ensuring verification is mandatory and not optional before any memory or ledger action occurs."
+    },
+    {
+      "id": "e4",
+      "source": "adccl",
+      "target": "myelin",
+      "type": "dependency",
+      "description": "ADCCL governs MYELIN write permissions by allowing only pass-scored outputs to persist while failed outputs are redirected to reject or repair."
+    },
+    {
+      "id": "e5",
+      "source": "chiral-chi",
+      "target": "adccl",
+      "type": "related",
+      "description": "Chiral Invariant χ informs ADCCL threshold behavior by formalizing orientation and residual alignment into an explicit decision boundary for accept versus reject outcomes."
+    },
+    {
+      "id": "e6",
+      "source": "cortex-medulla",
+      "target": "chyren",
+      "type": "related",
+      "description": "Cortex-Medulla Split supports Chyren by separating planning/orchestration responsibilities from high-performance runtime components, reducing coupling and clarifying failure domains."
+    },
+    {
+      "id": "e7",
+      "source": "proof-pack-v02",
+      "target": "chyren",
+      "type": "related",
+      "description": "Proof Pack v0.2 provides measurable execution evidence for Chyren by storing run status logs, metrics snapshots, and trend visualizations tied to reproducible commands."
+    },
+    {
+      "id": "e8",
+      "source": "proof-pack-v02",
+      "target": "novelty-discipline",
+      "type": "related",
+      "description": "Proof Pack v0.2 enables Novelty Discipline by forcing architecture claims to link to concrete metrics and logs rather than unverified language or anecdotal assertions."
+    },
+    {
+      "id": "e9",
+      "source": "novelty-discipline",
+      "target": "chyren",
+      "type": "related",
+      "description": "Novelty Discipline evaluates Chyren claims against reproducibility and boundary-condition standards, distinguishing implemented differentiators from hypotheses that still require external replication."
+    }
+  ]
+}

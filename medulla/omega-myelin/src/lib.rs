@@ -30,7 +30,11 @@ impl MemoryGraph {
         self.nodes.insert(node.node_id.clone(), node);
     }
 
-    pub fn write_node(&mut self, content: String, _stratum: omega_core::MemoryStratum) -> MemoryNode {
+    pub fn write_node(
+        &mut self,
+        content: String,
+        _stratum: omega_core::MemoryStratum,
+    ) -> MemoryNode {
         let node = MemoryNode {
             node_id: omega_core::gen_id("node"),
             content,
@@ -63,10 +67,18 @@ impl Service {
         }
     }
 
-    pub async fn name(&self) -> String { "myelin".into() }
-    
+    pub async fn name(&self) -> String {
+        "myelin".into()
+    }
+
     pub async fn lock(&self) -> tokio::sync::MutexGuard<'_, MemoryGraph> {
         self.graph.lock().await
+    }
+}
+
+impl Default for Service {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
