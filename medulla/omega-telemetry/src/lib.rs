@@ -112,6 +112,42 @@ impl TelemetrySink for PrometheusSink {
     }
 }
 
+/// In-memory sink for testing — captures recorded events and metrics.
+#[cfg(test)]
+pub struct CaptureSink {
+    events: std::sync::Mutex<Vec<SystemEvent>>,
+    metrics: std::sync::Mutex<Vec<(String, f64, Vec<(String, String)>)>>,
+}
+
+#[cfg(test)]
+impl CaptureSink {
+    pub fn new() -> Self {
+        Self {
+            events: std::sync::Mutex::new(vec![]),
+            metrics: std::sync::Mutex::new(vec![]),
+        }
+    }
+    pub fn events(&self) -> Vec<SystemEvent> {
+        self.events.lock().unwrap().clone()
+    }
+    pub fn metrics(&self) -> Vec<(String, f64, Vec<(String, String)>)> {
+        self.metrics.lock().unwrap().clone()
+    }
+}
+
+#[cfg(test)]
+impl TelemetrySink for CaptureSink {
+    fn record(&self, event: &SystemEvent) {
+        self.events.lock().unwrap().push(event.clone());
+    }
+    fn record_metric(&self, name: &str, value: f64, labels: Vec<(String, String)>) {
+        self.metrics
+            .lock()
+            .unwrap()
+            .push((name.to_string(), value, labels));
+    }
+}
+
 /// Broadcast helper that fan-outs events and metrics to a fixed set of sinks.
 pub struct TelemetryBus;
 impl TelemetryBus {
@@ -133,5 +169,107 @@ impl TelemetryBus {
         for sink in sinks {
             sink.record_metric(name, value, labels.clone());
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs;
+    use std::sync::Arc;
+
+    fn make_event(level: EventLevel) -> SystemEvent {
+        SystemEvent {
+            component: "test.component".into(),
+            event_type: "TEST_EVENT".into(),
+            level,
+            payload: serde_json::json!({"key": "value"}),
+            timestamp: 1234567890.0,
+        }
+    }
+
+    #[test]
+    fn system_event_roundtrips_json() {
+        let event = make_event(EventLevel::Info);
+        let json = serde_json::to_string(&event).unwrap();
+        let back: SystemEvent = serde_json::from_str(&json).unwrap();
+        assert_eq!(back.component, event.component);
+        assert_eq!(back.event_type, event.event_type);
+        assert_eq!(back.timestamp, event.timestamp);
+    }
+
+    #[test]
+    fn capture_sink_records_events() {
+        let sink = CaptureSink::new();
+        sink.record(&make_event(EventLevel::Warn));
+        sink.record(&make_event(EventLevel::Critical));
+        let events = sink.events();
+        assert_eq!(events.len(), 2);
+        assert_eq!(events[0].event_type, "TEST_EVENT");
+    }
+
+    #[test]
+    fn capture_sink_records_metrics() {
+        let sink = CaptureSink::new();
+        sink.record_metric("adccl.score", 0.85, vec![("provider".into(), "anthropic".into())]);
+        let metrics = sink.metrics();
+        assert_eq!(metrics.len(), 1);
+        let (name, value, labels) = &metrics[0];
+        assert_eq!(name, "adccl.score");
+        assert!((value - 0.85).abs() < f64::EPSILON);
+        assert_eq!(labels[0].0, "provider");
+    }
+
+    #[test]
+    fn file_sink_appends_jsonl() {
+        let path = format!("/tmp/telemetry_test_{}.log", std::process::id());
+        let sink = FileSink::new(&path);
+        sink.record(&make_event(EventLevel::Info));
+        sink.record(&make_event(EventLevel::Critical));
+
+        let contents = fs::read_to_string(&path).unwrap();
+        let lines: Vec<&str> = contents.lines().collect();
+        assert_eq!(lines.len(), 2);
+        // Each line must be valid JSON
+        for line in &lines {
+            let v: serde_json::Value = serde_json::from_str(line).unwrap();
+            assert_eq!(v["event_type"], "TEST_EVENT");
+        }
+        let _ = fs::remove_file(&path);
+    }
+
+    #[test]
+    fn prometheus_sink_formats_metric_lines() {
+        // PrometheusSink writes to stdout; exercise the formatting logic via
+        // the label string builder without capturing stdout.
+        let sink = PrometheusSink::new();
+        // Should not panic with empty or non-empty labels.
+        sink.record_metric("heap_bytes", 1024.0, vec![]);
+        sink.record_metric(
+            "latency_ms",
+            42.5,
+            vec![("route".into(), "/api/run".into()), ("status".into(), "200".into())],
+        );
+    }
+
+    #[test]
+    fn telemetry_bus_broadcast_does_not_panic() {
+        // TelemetryBus writes to stdout + "telemetry.log" in cwd; just verify
+        // it doesn't panic on valid inputs.
+        TelemetryBus::broadcast(make_event(EventLevel::Info));
+        TelemetryBus::record_metric("test.metric", 1.0, vec![("k".into(), "v".into())]);
+    }
+
+    #[test]
+    fn multi_sink_fan_out_via_trait_object() {
+        let a = Arc::new(CaptureSink::new());
+        let b = Arc::new(CaptureSink::new());
+        let sinks: Vec<Arc<dyn TelemetrySink>> = vec![a.clone(), b.clone()];
+        let event = make_event(EventLevel::Warn);
+        for sink in &sinks {
+            sink.record(&event);
+        }
+        assert_eq!(a.events().len(), 1);
+        assert_eq!(b.events().len(), 1);
     }
 }
