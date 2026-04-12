@@ -18,21 +18,21 @@ def register_index_cards():
             "shard_id": "primary_sweet_glade",
             "shelf_table": "family_profiles",
             "subject_domain": "identity",
-            "semantic_summary": "Original family profile data containing biographical facts for RY, Teresa, Jada, Travis, and Alye.",
+            "subject_domain": "Original family profile data containing biographical facts for RY, Teresa, Jada, Travis, and Alye.",
             "keywords": ["family", "pottsville", "story", "pottsville", "machine_shop"]
         },
         {
             "shard_id": "overflow_little_moon",
             "shelf_table": "family_profiles",
             "subject_domain": "identity_hardened",
-            "semantic_summary": "Hardened family records containing specific pet names (Lux, Nox, Luna, Wookie) and exotic animal lore (Daisy the deer).",
+            "subject_domain": "Hardened family records containing specific pet names (Lux, Nox, Luna, Wookie) and exotic animal lore (Daisy the deer).",
             "keywords": ["pets", "animals", "horses", "deer", "veterinary"]
         },
         {
             "shard_id": "overflow_little_moon",
             "shelf_table": "omega_memory_entries",
             "subject_domain": "canonical_history",
-            "semantic_summary": "High-importance memory entries regarding creator academic path (dropout lore) and family history.",
+            "subject_domain": "High-importance memory entries regarding creator academic path (dropout lore) and family history.",
             "keywords": ["college_history", "academic", "sovereign_learning"]
         }
     ]
@@ -40,15 +40,15 @@ def register_index_cards():
     for card in cards:
         # Check if card for this shard/table/domain already exists
         cur.execute("""
-            SELECT card_id FROM omega_library_catalog 
+            SELECT card_id FROM neocortex_library 
             WHERE shard_id = %s AND shelf_table = %s AND subject_domain = %s
         """, (card["shard_id"], card["shelf_table"], card["subject_domain"]))
         
         if not cur.fetchone():
             cur.execute("""
-                INSERT INTO omega_library_catalog (shard_id, shelf_table, subject_domain, semantic_summary, keywords)
+                INSERT INTO neocortex_library (shard_id, shelf_table, subject_domain, keywords)
                 VALUES (%s, %s, %s, %s, %s)
-            """, (card["shard_id"], card["shelf_table"], card["subject_domain"], card["semantic_summary"], json.dumps(card["keywords"])))
+            """, (card["shard_id"], card["shelf_table"], card["subject_domain"], card["subject_domain"], json.dumps(card["keywords"])))
             print(f"  Inserted Index Card: {card['subject_domain']} on {card['shard_id']}")
 
     conn.commit()
