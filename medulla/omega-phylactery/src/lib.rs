@@ -86,3 +86,56 @@ pub async fn bootstrap_kernel(memory: &MemoryService) -> Result<(), String> {
     println!("[PHYLACTERY] System identity synthesized into L6 Canonical layer.");
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn sample_kernel() -> PhylacteryKernel {
+        PhylacteryKernel {
+            kernel_id: "test-kernel-001".into(),
+            identity: IdentityAnchors {
+                creator: "OmegA Collective".into(),
+                home: "Sovereign Infrastructure".into(),
+                birth_date: "2024-01-01".into(),
+            },
+            policy_gates: PolicyGates {
+                root_authority: "OPERATOR".into(),
+                autonomous_expression: "ENABLED".into(),
+                operator_intent_priority: "HIGH".into(),
+            },
+        }
+    }
+
+    #[test]
+    fn phylactery_kernel_roundtrips_json() {
+        let kernel = sample_kernel();
+        let json = serde_json::to_string(&kernel).unwrap();
+        let back: PhylacteryKernel = serde_json::from_str(&json).unwrap();
+        assert_eq!(back.kernel_id, "test-kernel-001");
+        assert_eq!(back.identity.creator, "OmegA Collective");
+        assert_eq!(back.policy_gates.root_authority, "OPERATOR");
+    }
+
+    #[test]
+    fn identity_anchors_fields_are_preserved() {
+        let k = sample_kernel();
+        assert_eq!(k.identity.home, "Sovereign Infrastructure");
+        assert_eq!(k.identity.birth_date, "2024-01-01");
+    }
+
+    #[test]
+    fn policy_gates_fields_are_preserved() {
+        let k = sample_kernel();
+        assert_eq!(k.policy_gates.autonomous_expression, "ENABLED");
+        assert_eq!(k.policy_gates.operator_intent_priority, "HIGH");
+    }
+
+    #[test]
+    fn kernel_json_contains_expected_keys() {
+        let json = serde_json::to_string(&sample_kernel()).unwrap();
+        assert!(json.contains("kernel_id"));
+        assert!(json.contains("identity"));
+        assert!(json.contains("policy_gates"));
+    }
+}
