@@ -40,6 +40,8 @@ serde_json = "1"
 tokio = { version = "1", features = ["full"] }
 tokio-stream = { version = "0.1", features = ["sync"] }
 clap = { version = "4", features = ["derive"] }
+clap_complete = "4"
+clap_mangen = "0.2"
 actix-web = "4.13.0"
 uuid = "1.23.0"
 thiserror = "2.0.18"

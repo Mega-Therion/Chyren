@@ -202,6 +202,22 @@ impl Conductor {
         plan: TaskPlan,
         envelope: &mut RunEnvelope,
     ) -> Result<TaskExecution, ConductorError> {
+        self.execute_plan_with_overrides(plan, envelope, None, 2048, 0.3)
+            .await
+    }
+
+    /// Execute a plan with CLI-level overrides for routing and generation.
+    ///
+    /// This keeps the API stable (it calls `execute_plan`) while letting the CLI
+    /// provide explicit provider preferences and generation settings.
+    pub async fn execute_plan_with_overrides(
+        &self,
+        plan: TaskPlan,
+        envelope: &mut RunEnvelope,
+        preferred_provider: Option<&str>,
+        max_tokens: usize,
+        temperature: f64,
+    ) -> Result<TaskExecution, ConductorError> {
         let start_time = now();
         envelope.task = plan.steps.join("\n");
 
@@ -227,13 +243,13 @@ impl Conductor {
         let request = SpokeRequest {
             prompt: format!("{}{}", envelope.task, context_text),
             system: plan.system_prompt,
-            max_tokens: 2048,
-            temperature: 0.3,
+            max_tokens,
+            temperature,
         };
 
         let spoke_response = self
             .spokes
-            .route(&request, None)
+            .route(&request, preferred_provider)
             .await
             .map_err(|e| ConductorError::ProviderError(e.to_string()))?;
 

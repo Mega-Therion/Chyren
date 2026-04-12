@@ -197,26 +197,20 @@ def ingest_deepseek():
 
         title = c.get("title", "DeepSeek conversation")[:100]
 
-        # DeepSeek uses same mapping structure as ChatGPT
+        # DeepSeek uses mapping with fragments: [{type: "REQUEST"/"RESPONSE", content: str}]
         human_msgs = []
         for node in c.get("mapping", {}).values():
             msg = node.get("message") if isinstance(node, dict) else None
             if not msg:
                 continue
-            role = msg.get("role", "") or (msg.get("author", {}).get("role", "") if isinstance(msg.get("author"), dict) else "")
-            if role != "user":
-                continue
-            content = msg.get("content", "")
-            if isinstance(content, str) and len(content) > 20:
-                human_msgs.append(content[:300])
-            elif isinstance(content, dict):
-                parts = content.get("parts", [])
-                text = " ".join(str(p) for p in parts if isinstance(p, str)).strip()
-                if len(text) > 20:
-                    human_msgs.append(text[:300])
+            for frag in msg.get("fragments", []):
+                if frag.get("type") == "REQUEST":
+                    text = frag.get("content", "")
+                    if isinstance(text, str) and len(text) > 20:
+                        human_msgs.append(text[:300])
 
         if not human_msgs:
-            # Try flat message list
+            # Try flat message list fallback
             for msg in c.get("messages", []):
                 if msg.get("role") == "user":
                     text = msg.get("content", "")
