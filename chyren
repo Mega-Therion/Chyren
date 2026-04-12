@@ -1,20 +1,30 @@
 #!/usr/bin/env python3
 import sys
 import os
-import argparse
-import subprocess
 import logging
 import shutil
 import signal
+import subprocess
 from typing import List, Optional
 
 # THE BRAIN STEM: Unified Official Chyren CLI
-# This script intelligently routes commands to the Cortex (Python) or Medulla (Rust).
+#
+# Routing map (post-migration):
+#   thought / sense / verify / identity  →  Medulla (Rust sovereign pipeline)
+#   action  / flex  / shard / ingest / memory  →  Medulla
+#   status / reset   →  Medulla subcommands
+#   live             →  Medulla API server + Next.js frontend
+#   telegram         →  Medulla Telegram gateway binary
+#   dream            →  Python maintenance scripts (identity synthesis + catalog)
+#
+# Python cortex/main.py is no longer invoked at runtime.
 
-CORTEX_DIR = os.path.join(os.path.dirname(__file__), "cortex")
-MEDULLA_DIR = os.path.join(os.path.dirname(__file__), "medulla")
+REPO_DIR = os.path.dirname(os.path.abspath(__file__))
+CORTEX_DIR = os.path.join(REPO_DIR, "cortex")
+MEDULLA_DIR = os.path.join(REPO_DIR, "medulla")
 
 LOG = logging.getLogger("chyren")
+
 
 def _configure_logging() -> None:
     level = os.getenv("CHYREN_LOG_LEVEL", "INFO").upper()
@@ -23,148 +33,108 @@ def _configure_logging() -> None:
         format="%(levelname)s %(message)s",
     )
 
+
 def _require_tool(tool: str) -> None:
     if shutil.which(tool) is None:
         raise SystemExit(f"[chyren] required tool not found on PATH: {tool}")
+
 
 def _run(cmd: List[str], *, cwd: Optional[str] = None) -> subprocess.CompletedProcess:
     LOG.debug("exec: %s (cwd=%s)", " ".join(cmd), cwd or os.getcwd())
     return subprocess.run(cmd, cwd=cwd)
 
-def run_cortex(args):
-    """Deep reasoning, Security, Council, and Identity."""
-    cmd = [sys.executable, os.path.join(CORTEX_DIR, "main.py")] + args
-    return _run(cmd)
 
-def run_medulla(args):
-    """System execution, Sharding, Performance, and Memory."""
-    # Prefer prebuilt release binary. If missing, we can optionally build it.
-    binary = os.getenv(
-        "CHYREN_MEDULLA_BIN",
-        os.path.join(MEDULLA_DIR, "target", "release", "chyren"),
-    )
-    if not os.path.exists(binary):
+def _medulla_bin(name: str = "chyren") -> str:
+    if name == "chyren":
+        env_key = "CHYREN_MEDULLA_BIN"
+        default = os.path.join(MEDULLA_DIR, "target", "release", "chyren")
+        pkg = "omega-cli"
+    else:
+        env_key = f"CHYREN_{name.upper()}_BIN"
+        default = os.path.join(MEDULLA_DIR, "target", "release", name)
+        pkg = f"omega-{name.split('-')[0]}"
+
+    path = os.getenv(env_key, default)
+    if not os.path.exists(path):
         if os.getenv("CHYREN_AUTO_BUILD", "").lower() not in ("1", "true", "yes"):
             raise SystemExit(
-                "[chyren] Medulla binary not found. Build it first:\n"
-                "  cd medulla && cargo build --release -p omega-cli --bin chyren\n"
-                "Or set CHYREN_AUTO_BUILD=1 to allow on-demand builds."
+                f"[chyren] Medulla binary '{name}' not found at {path}.\n"
+                f"  Build it: cd medulla && cargo build --release -p {pkg}\n"
+                "  Or set CHYREN_AUTO_BUILD=1."
             )
         _require_tool("cargo")
-        LOG.warning("Medulla binary not found. Building (release)...")
+        LOG.warning("Building Medulla binary '%s' (release)...", name)
         res = _run(
-            ["cargo", "build", "--release", "-p", "omega-cli", "--bin", "chyren"],
+            ["cargo", "build", "--release", "-p", pkg, "--bin", name],
             cwd=MEDULLA_DIR,
         )
-        if res.returncode != 0 or not os.path.exists(binary):
-            raise SystemExit("[chyren] cargo build failed; Medulla binary still missing.")
-    
-    cmd = [binary] + args
-    return _run(cmd)
+        if res.returncode != 0 or not os.path.exists(path):
+            raise SystemExit(f"[chyren] cargo build failed for '{name}'.")
+    return path
 
-def main():
+
+def run_medulla(args: List[str], bin_name: str = "chyren") -> subprocess.CompletedProcess:
+    return _run([_medulla_bin(bin_name)] + args)
+
+
+def main() -> None:
     _configure_logging()
 
-    parser = argparse.ArgumentParser(
-        description="CHYREN — Unified Brain Stem CLI",
-        usage="chyren <thought|action|status|live|dream> [args]"
-    )
-    parser.add_argument(
-        "--version",
-        action="store_true",
-        help="Print version info (best-effort) and exit.",
-    )
-    
-    # Intelligent Routing
-    if len(sys.argv) < 2:
-        parser.print_help()
-        sys.exit(0)
-
-    if sys.argv[1] in ("-h", "--help"):
-        parser.print_help()
+    if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help"):
+        print(
+            "Usage: chyren <command> [args]\n\n"
+            "Commands:\n"
+            "  thought / sense / verify / identity  — Sovereign reasoning pipeline (Medulla)\n"
+            "  action  / flex / shard / ingest / memory  — Execution pipeline (Medulla)\n"
+            "  status    — System status\n"
+            "  reset     — Reset ledger (requires CHYREN_ALLOW_RESET=1)\n"
+            "  live      — Start web + API server\n"
+            "  telegram  — Start Telegram gateway\n"
+            "  dream     — Maintenance: identity synthesis + catalog indexing\n"
+            "  --version — Print version\n"
+        )
         sys.exit(0)
 
     if sys.argv[1] == "--version":
-        # Keep this lightweight; the authoritative version lives in the Rust binary.
-        print("chyren (brain-stem wrapper)")
-        sys.exit(0)
-        
+        res = run_medulla(["--version"])
+        sys.exit(res.returncode)
+
     cmd_type = sys.argv[1]
     remainder = sys.argv[2:]
-    
-    if cmd_type in ["thought", "sense", "verify", "identity"]:
-        # Routing to Cortex (The high-level mind)
-        LOG.info("Routing to Cortex hemispheric processing...")
-        res = run_cortex(remainder)
-        sys.exit(res.returncode)
-        
-    elif cmd_type in ["action", "flex", "shard", "ingest", "memory"]:
-        # Routing to Medulla (The physical motor control)
-        LOG.info("Routing to Medulla system-layer execution...")
+
+    # ── Sovereign pipeline (all reasoning AND execution routes to Medulla) ──────
+    if cmd_type in (
+        "thought", "sense", "verify", "identity",   # reasoning commands
+        "action", "flex", "shard", "ingest", "memory",  # execution commands
+    ):
         res = run_medulla(remainder)
         sys.exit(res.returncode)
 
+    # ── Explicit subcommands ──────────────────────────────────────────────────
+    elif cmd_type == "status":
+        print("--- Unified Brain State ---")
+        print("Hemisphere R (Medulla): HIGH-SPEED SOVEREIGN RUNTIME — ACTIVE")
+        print("Yettragrammaton: R.W.Ϝ.Y.")
+        print("Bridge (Stem): ACTIVE")
+        res = run_medulla(["status"] + remainder)
+        sys.exit(res.returncode)
+
     elif cmd_type == "reset":
-        # Destructive. The Rust binary enforces CHYREN_ALLOW_RESET.
-        LOG.info("Routing reset to Medulla...")
         res = run_medulla(["reset"] + remainder)
         sys.exit(res.returncode)
 
     elif cmd_type == "telegram":
         LOG.info("Starting Telegram Gateway (chyren-telegram)...")
-        _require_tool("cargo")
-        binary = os.path.join(MEDULLA_DIR, "target", "release", "chyren-telegram")
-        if not os.path.exists(binary):
-            LOG.warning("chyren-telegram binary not found. Building (release)...")
-            res = _run(
-                ["cargo", "build", "--release", "-p", "omega-telegram-gateway"],
-                cwd=MEDULLA_DIR,
-            )
-            if res.returncode != 0 or not os.path.exists(binary):
-                raise SystemExit("[chyren] cargo build failed; chyren-telegram binary missing.")
-        sys.exit(_run([binary]).returncode)
-        
-    elif cmd_type == "status":
-        print("--- Unified Brain State ---")
-        print("Hemisphere L (Cortex): High-Resolution Identity Foundational Gate")
-        print("Hemisphere R (Medulla): High-Speed Infrastructural Shard Core")
-        print("Bridge (Stem): ACTIVE")
-        res = run_cortex(["--status"])
-        sys.exit(res.returncode)
-        
+        sys.exit(run_medulla(remainder, bin_name="chyren-telegram").returncode)
+
     elif cmd_type == "live":
         LOG.info("Bootstrapping Live Hub (Next.js + Medulla API)...")
         _require_tool("npm")
-        # Start Medulla server in background (and ensure it can be stopped cleanly).
-        binary = os.getenv(
-            "CHYREN_MEDULLA_BIN",
-            os.path.join(MEDULLA_DIR, "target", "release", "chyren"),
-        )
+        binary = _medulla_bin()
         medulla_proc: Optional[subprocess.Popen] = None
         try:
-            if os.path.exists(binary):
-                medulla_proc = subprocess.Popen([binary, "server"])
-            else:
-                # Avoid surprise builds here; respect CHYREN_AUTO_BUILD.
-                if os.getenv("CHYREN_AUTO_BUILD", "").lower() in ("1", "true", "yes"):
-                    _require_tool("cargo")
-                    LOG.warning("Medulla binary missing; building for live mode (release)...")
-                    res = _run(
-                        ["cargo", "build", "--release", "-p", "omega-cli", "--bin", "chyren"],
-                        cwd=MEDULLA_DIR,
-                    )
-                    if res.returncode != 0 or not os.path.exists(binary):
-                        raise SystemExit("[chyren] build failed; cannot start live hub.")
-                    medulla_proc = subprocess.Popen([binary, "server"])
-                else:
-                    raise SystemExit(
-                        "[chyren] Medulla binary missing; build it first:\n"
-                        "  cd medulla && cargo build --release -p omega-cli --bin chyren\n"
-                        "Or set CHYREN_AUTO_BUILD=1."
-                    )
-
-            # Start Web frontend (foreground).
-            res = _run(["npm", "run", "dev"], cwd=os.path.join(os.path.dirname(__file__), "web"))
+            medulla_proc = subprocess.Popen([binary, "server"])
+            res = _run(["npm", "run", "dev"], cwd=os.path.join(REPO_DIR, "web"))
             sys.exit(res.returncode)
         finally:
             if medulla_proc and medulla_proc.poll() is None:
@@ -173,21 +143,29 @@ def main():
                     medulla_proc.wait(timeout=5)
                 except subprocess.TimeoutExpired:
                     medulla_proc.kill()
-        
+
     elif cmd_type == "dream":
-        LOG.info("Entering Dream State (Autonomous Self-Repair & Maintenance)...")
-        # Run sharding update and identity synthesis
-        r1 = _run([sys.executable, os.path.join(CORTEX_DIR, "chyren_py", "identity_synthesis.py")])
-        r2 = _run([sys.executable, os.path.join(CORTEX_DIR, "ops", "scripts", "catalog_registrar.py")])
+        # Maintenance mode: identity synthesis + catalog indexing.
+        # These are Python data-pipeline scripts, not cortex runtime.
+        LOG.info("Entering Dream State (Autonomous Maintenance)...")
+        r1 = _run([
+            sys.executable,
+            os.path.join(CORTEX_DIR, "chyren_py", "identity_synthesis.py"),
+        ])
+        r2 = _run([
+            sys.executable,
+            os.path.join(CORTEX_DIR, "ops", "scripts", "catalog_registrar.py"),
+        ])
         if r1.returncode != 0 or r2.returncode != 0:
             raise SystemExit("[chyren] dream cycle failed.")
         LOG.info("Dream cycle complete. Memory indexed.")
         sys.exit(0)
-        
+
     else:
-        # Default fallback: try Cortex
-        res = run_cortex(sys.argv[1:])
+        # Default: pass everything as task args to the Medulla binary.
+        res = run_medulla(sys.argv[1:])
         sys.exit(res.returncode)
+
 
 if __name__ == "__main__":
     main()

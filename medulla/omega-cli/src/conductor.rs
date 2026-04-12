@@ -1,7 +1,10 @@
-//! Full task conductor: alignment admission → AEON lifecycle → provider routing → ADCCL verification.
+//! Full task conductor: alignment admission → behavioral analysis → AEON lifecycle → provider routing → ADCCL verification.
 
 use omega_adccl::adccl_logic::{VerificationResult, ADCCL};
-use omega_aegis::{AlignmentLayer, Constitution};
+use omega_aegis::{
+    classify_threat_level, AlignmentLayer, BehavioralAnalyzer, Constitution, DeflectionEngine,
+    ThreatFabric, ThreatLevel,
+};
 use omega_aeon::AeonRuntime;
 use omega_core::{
     now, MatrixProgram, MemoryNode, MemoryStratum, RunEnvelope, RunStatus, VerificationReport,
@@ -51,6 +54,9 @@ pub enum ConductorError {
     /// Task rejected by policy or integrity checks.
     #[error("{0}")]
     Rejected(String),
+    /// Task was adversarial — response text is the deflection message to show the user.
+    #[error("Rejected(adversarial): {0}")]
+    Deflected(String),
     /// Provider call failed.
     #[error("provider: {0}")]
     ProviderError(String),
@@ -64,10 +70,13 @@ pub enum ConductorError {
     },
 }
 
-/// Full pipeline conductor: Alignment → AEON → Provider → ADCCL → Ledger.
+/// Full pipeline conductor: Alignment → Behavioral Analysis → AEON → Provider → ADCCL → Ledger.
 pub struct Conductor {
     runtime: Arc<Mutex<AeonRuntime>>,
     aligner: AlignmentLayer,
+    behavioral_analyzer: BehavioralAnalyzer,
+    deflection_engine: DeflectionEngine,
+    threat_fabric: ThreatFabric,
     adccl: ADCCL,
     memory_service: Arc<omega_myelin::Service>,
     spokes: Arc<SpokeRegistry>,
@@ -91,6 +100,9 @@ impl Conductor {
         Self {
             runtime: Arc::new(Mutex::new(AeonRuntime::new())),
             aligner: AlignmentLayer::new(constitution),
+            behavioral_analyzer: BehavioralAnalyzer::new(),
+            deflection_engine: DeflectionEngine::new(),
+            threat_fabric: ThreatFabric::open(),
             adccl: ADCCL::new(0.1, None),
             memory_service: Arc::new(omega_myelin::Service::new()),
             spokes: Arc::new(SpokeRegistry::from_env()),
@@ -149,6 +161,23 @@ impl Conductor {
         let alignment = self.aligner.check(t);
         if !alignment.passed {
             return Err(ConductorError::Rejected(alignment.note));
+        }
+
+        // Behavioral analysis: static regex inspection for adversarial patterns.
+        let report = self.behavioral_analyzer.analyze(t);
+        let threat_level = classify_threat_level(&report);
+        if threat_level != ThreatLevel::None {
+            // Log to the threat fabric (PII-free: stores only pattern labels, not raw text).
+            self.threat_fabric.ingest(&report);
+
+            let deflection = self.deflection_engine.respond(
+                threat_level,
+                &report.labels,
+                report.severity.as_str(),
+                false,
+                "conductor",
+            );
+            return Err(ConductorError::Deflected(deflection.response_text));
         }
 
         Ok(TaskPlan {
