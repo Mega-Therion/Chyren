@@ -1,6 +1,8 @@
 //! Gemini API spoke for Google model inference
 
-use crate::{Spoke, SpokeCapability, SpokeConfig, ToolDefinition, ToolInvocation, ToolResult, SpokeStatus};
+use crate::{
+    Spoke, SpokeCapability, SpokeConfig, SpokeStatus, ToolDefinition, ToolInvocation, ToolResult,
+};
 use async_trait::async_trait;
 use serde_json::{json, Value};
 use std::env;
@@ -17,8 +19,12 @@ impl GeminiSpoke {
 
 #[async_trait]
 impl Spoke for GeminiSpoke {
-    fn name(&self) -> &str { &self.config.name }
-    fn spoke_type(&self) -> &str { "gemini" }
+    fn name(&self) -> &str {
+        &self.config.name
+    }
+    fn spoke_type(&self) -> &str {
+        "gemini"
+    }
     fn capabilities(&self) -> Vec<SpokeCapability> {
         vec![SpokeCapability::Inference]
     }
@@ -57,14 +63,20 @@ impl Spoke for GeminiSpoke {
         })
     }
 
-    fn config(&self) -> &SpokeConfig { &self.config }
+    fn config(&self) -> &SpokeConfig {
+        &self.config
+    }
 }
 
 impl GeminiSpoke {
     async fn chat_completion(&self, input: &Value) -> Result<Value, String> {
-        let api_key = env::var("GEMINI_API_KEY").map_err(|_| "GEMINI_API_KEY not set".to_string())?;
-        let prompt = input.get("prompt").and_then(|p| p.as_str()).ok_or("Missing prompt")?;
-        
+        let api_key =
+            env::var("GEMINI_API_KEY").map_err(|_| "GEMINI_API_KEY not set".to_string())?;
+        let prompt = input
+            .get("prompt")
+            .and_then(|p| p.as_str())
+            .ok_or("Missing prompt")?;
+
         let client = reqwest::Client::new();
         let body = json!({
             "contents": [{"parts": [{"text": prompt}]}]
@@ -75,7 +87,8 @@ impl GeminiSpoke {
             api_key
         );
 
-        let resp = client.post(&url)
+        let resp = client
+            .post(&url)
             .json(&body)
             .send()
             .await

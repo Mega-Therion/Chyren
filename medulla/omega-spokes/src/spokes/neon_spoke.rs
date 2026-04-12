@@ -1,6 +1,8 @@
 //! Neon database spoke for knowledge and memory retrieval
 
-use crate::{Spoke, SpokeCapability, SpokeConfig, ToolDefinition, ToolInvocation, ToolResult, SpokeStatus};
+use crate::{
+    Spoke, SpokeCapability, SpokeConfig, SpokeStatus, ToolDefinition, ToolInvocation, ToolResult,
+};
 use async_trait::async_trait;
 use serde_json::{json, Value};
 use sqlx::postgres::PgPool;
@@ -88,45 +90,39 @@ impl Spoke for NeonSpoke {
         let start = std::time::Instant::now();
 
         let result = match invocation.tool.as_str() {
-            "query_memory" => {
-                match self.query_memory(&invocation.input).await {
-                    Ok(response) => response,
-                    Err(e) => {
-                        return Ok(ToolResult {
-                            success: false,
-                            output: json!({}),
-                            error: Some(e),
-                            execution_time_ms: start.elapsed().as_millis() as u32,
-                        })
-                    }
+            "query_memory" => match self.query_memory(&invocation.input).await {
+                Ok(response) => response,
+                Err(e) => {
+                    return Ok(ToolResult {
+                        success: false,
+                        output: json!({}),
+                        error: Some(e),
+                        execution_time_ms: start.elapsed().as_millis() as u32,
+                    })
                 }
-            }
-            "vector_search" => {
-                match self.vector_search(&invocation.input).await {
-                    Ok(response) => response,
-                    Err(e) => {
-                        return Ok(ToolResult {
-                            success: false,
-                            output: json!({}),
-                            error: Some(e),
-                            execution_time_ms: start.elapsed().as_millis() as u32,
-                        })
-                    }
+            },
+            "vector_search" => match self.vector_search(&invocation.input).await {
+                Ok(response) => response,
+                Err(e) => {
+                    return Ok(ToolResult {
+                        success: false,
+                        output: json!({}),
+                        error: Some(e),
+                        execution_time_ms: start.elapsed().as_millis() as u32,
+                    })
                 }
-            }
-            "store_evidence" => {
-                match self.store_evidence(&invocation.input).await {
-                    Ok(response) => response,
-                    Err(e) => {
-                        return Ok(ToolResult {
-                            success: false,
-                            output: json!({}),
-                            error: Some(e),
-                            execution_time_ms: start.elapsed().as_millis() as u32,
-                        })
-                    }
+            },
+            "store_evidence" => match self.store_evidence(&invocation.input).await {
+                Ok(response) => response,
+                Err(e) => {
+                    return Ok(ToolResult {
+                        success: false,
+                        output: json!({}),
+                        error: Some(e),
+                        execution_time_ms: start.elapsed().as_millis() as u32,
+                    })
                 }
-            }
+            },
             _ => {
                 return Ok(ToolResult {
                     success: false,
@@ -193,25 +189,24 @@ impl NeonSpoke {
 
     /// Query memory database
     async fn query_memory(&self, input: &Value) -> Result<Value, String> {
-        let query_str = input.get("query")
+        let query_str = input
+            .get("query")
             .and_then(|q| q.as_str())
             .ok_or("Missing 'query' in input")?;
 
-        let limit = input.get("limit")
-            .and_then(|l| l.as_u64())
-            .unwrap_or(10) as i64;
+        let limit = input.get("limit").and_then(|l| l.as_u64()).unwrap_or(10) as i64;
 
         let pool = self.get_connection_pool().await?;
 
         // Query the memory table (assuming it exists in the database)
         let results: Vec<(String, String, f64)> = sqlx::query_as(
-            "SELECT id, content, relevance FROM memory WHERE content ILIKE $1 LIMIT $2"
+            "SELECT id, content, relevance FROM memory WHERE content ILIKE $1 LIMIT $2",
         )
-            .bind(format!("%{}%", query_str))
-            .bind(limit)
-            .fetch_all(&pool)
-            .await
-            .map_err(|e| format!("Memory query failed: {}", e))?;
+        .bind(format!("%{}%", query_str))
+        .bind(limit)
+        .fetch_all(&pool)
+        .await
+        .map_err(|e| format!("Memory query failed: {}", e))?;
 
         let memory_results = results
             .into_iter()
@@ -232,7 +227,8 @@ impl NeonSpoke {
 
     /// Vector search over embeddings
     async fn vector_search(&self, input: &Value) -> Result<Value, String> {
-        let _threshold = input.get("threshold")
+        let _threshold = input
+            .get("threshold")
             .and_then(|t| t.as_f64())
             .unwrap_or(0.75);
 
@@ -240,11 +236,11 @@ impl NeonSpoke {
 
         // Query embeddings table (assumes pgvector extension is available)
         let results: Vec<(String, f64)> = sqlx::query_as(
-            "SELECT id, similarity FROM embeddings ORDER BY similarity DESC LIMIT 10"
+            "SELECT id, similarity FROM embeddings ORDER BY similarity DESC LIMIT 10",
         )
-            .fetch_all(&pool)
-            .await
-            .map_err(|e| format!("Vector search failed: {}", e))?;
+        .fetch_all(&pool)
+        .await
+        .map_err(|e| format!("Vector search failed: {}", e))?;
 
         let search_results = results
             .into_iter()
@@ -263,15 +259,18 @@ impl NeonSpoke {
 
     /// Store evidence record
     async fn store_evidence(&self, input: &Value) -> Result<Value, String> {
-        let claim = input.get("claim")
+        let claim = input
+            .get("claim")
             .and_then(|c| c.as_str())
             .ok_or("Missing 'claim' in input")?;
 
-        let confidence = input.get("confidence")
+        let confidence = input
+            .get("confidence")
             .and_then(|c| c.as_f64())
             .ok_or("Missing 'confidence' in input")?;
 
-        let source = input.get("source")
+        let source = input
+            .get("source")
             .and_then(|s| s.as_str())
             .unwrap_or("unknown");
 

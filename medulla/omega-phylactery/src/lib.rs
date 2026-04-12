@@ -3,7 +3,7 @@
 //! Loads high-integrity personality anchors and structural identity markers into
 //! Chyren's canonical memory layer.
 
-use omega_core::{now, MemoryStratum};
+use omega_core::MemoryStratum;
 use omega_myelin::Service as MemoryService;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -39,7 +39,7 @@ pub async fn bootstrap_kernel(memory: &MemoryService) -> Result<(), String> {
         .map_err(|e| format!("Failed to parse phylactery kernel: {}", e))?;
 
     let phylactery = &kernel_json["phylactery"];
-    
+
     // 1. Anchor Identity Root
     let identity_content = format!(
         "IDENTITY_ROOT: {} | Derived from {}, {}",
@@ -56,8 +56,14 @@ pub async fn bootstrap_kernel(memory: &MemoryService) -> Result<(), String> {
     if let Some(values) = phylactery["anchors"]["values"].as_array() {
         for (i, v) in values.iter().enumerate() {
             if let Some(val) = v.as_str() {
-                let node = mem.write_node(format!("VALUE[{}]: {}", i, val), MemoryStratum::Canonical);
-                let _ = mem.create_edge(root_node.node_id.clone(), node.node_id, "defines_value".to_string(), 1.0);
+                let node =
+                    mem.write_node(format!("VALUE[{}]: {}", i, val), MemoryStratum::Canonical);
+                mem.create_edge(
+                    root_node.node_id.clone(),
+                    node.node_id,
+                    "defines_value".to_string(),
+                    1.0,
+                );
             }
         }
     }
@@ -70,7 +76,12 @@ pub async fn bootstrap_kernel(memory: &MemoryService) -> Result<(), String> {
         phylactery["policy_gates"]["operator_intent_priority"]
     );
     let policy_node = mem.write_node(policy_content, MemoryStratum::Canonical);
-    let _ = mem.create_edge(root_node.node_id.clone(), policy_node.node_id, "enforces_policy".to_string(), 1.0);
+    mem.create_edge(
+        root_node.node_id.clone(),
+        policy_node.node_id,
+        "enforces_policy".to_string(),
+        1.0,
+    );
 
     println!("[PHYLACTERY] System identity synthesized into L6 Canonical layer.");
     Ok(())

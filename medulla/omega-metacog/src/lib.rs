@@ -5,8 +5,10 @@
 
 #![warn(missing_docs)]
 
-pub mod dream;
+/// Consensus heuristics for multi-provider verification and agreement scoring.
 pub mod consensus;
+/// Dream/self-repair routines for autonomous maintenance passes.
+pub mod dream;
 
 use omega_core::now;
 use omega_myelin::MemoryGraph;
@@ -326,7 +328,9 @@ mod tests {
         let mut graph = MemoryGraph::new();
         graph.add_node(hot_node("h1"));
         let insights = agent.reflect(&graph);
-        assert!(insights.iter().any(|e| e.category == EpiphanyCategory::HotNode));
+        assert!(insights
+            .iter()
+            .any(|e| e.category == EpiphanyCategory::HotNode));
     }
 
     #[test]
@@ -335,7 +339,9 @@ mod tests {
         let mut graph = MemoryGraph::new();
         graph.add_node(cold_node("c1"));
         let insights = agent.reflect(&graph);
-        assert!(insights.iter().any(|e| e.category == EpiphanyCategory::ColdNode));
+        assert!(insights
+            .iter()
+            .any(|e| e.category == EpiphanyCategory::ColdNode));
     }
 
     #[test]
@@ -350,7 +356,9 @@ mod tests {
             });
         }
         let insights = agent.reflect(&graph);
-        assert!(insights.iter().any(|e| e.category == EpiphanyCategory::ThreatEscalation));
+        assert!(insights
+            .iter()
+            .any(|e| e.category == EpiphanyCategory::ThreatEscalation));
     }
 
     #[test]
@@ -367,7 +375,9 @@ mod tests {
             to_id: "o2".into(),
         });
         let insights = agent.reflect(&graph);
-        assert!(insights.iter().any(|e| e.category == EpiphanyCategory::OrphanedKnowledge));
+        assert!(insights
+            .iter()
+            .any(|e| e.category == EpiphanyCategory::OrphanedKnowledge));
     }
 
     #[test]
@@ -410,4 +420,3 @@ mod tests {
         assert_eq!(pruned[0].episode_id, "e1");
     }
 }
-

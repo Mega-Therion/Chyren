@@ -2,14 +2,14 @@
 //!
 //! Provides the `VectorStore` for indexing and searching memory nodes.
 
-use qdrant_client::{Payload, Qdrant};
+use crate::MemoryNode;
+use anyhow::{Context, Result};
 use qdrant_client::qdrant::{
     value::Kind, CreateCollectionBuilder, Distance, PointStruct, QueryPointsBuilder,
     UpsertPointsBuilder, VectorParamsBuilder,
 };
-use anyhow::{Result, Context};
+use qdrant_client::{Payload, Qdrant};
 use serde_json::json;
-use crate::MemoryNode;
 
 /// Semantic storage engine backed by Qdrant.
 pub struct VectorStore {
@@ -21,7 +21,7 @@ impl VectorStore {
     /// Connect to Qdrant and ensure the collection exists.
     pub async fn connect(url: &str, collection: &str) -> Result<Self> {
         let client = Qdrant::from_url(url).build()?;
-        
+
         // Ensure collection exists
         if !client.collection_exists(collection).await? {
             client
@@ -45,13 +45,10 @@ impl VectorStore {
             "node_id": node.node_id,
             "content": node.content,
             "decay_score": node.decay_score,
-        }).try_into()?;
+        })
+        .try_into()?;
 
-        let point = PointStruct::new(
-            node.node_id.clone(),
-            embedding,
-            payload
-        );
+        let point = PointStruct::new(node.node_id.clone(), embedding, payload);
 
         self.client
             .upsert_points(UpsertPointsBuilder::new(&self.collection_name, vec![point]).wait(true))
@@ -75,10 +72,12 @@ impl VectorStore {
             .result
             .into_iter()
             .filter_map(|p| {
-                p.payload.get("node_id").and_then(|v| match v.kind.as_ref() {
-                    Some(Kind::StringValue(s)) => Some(s.clone()),
-                    _ => None,
-                })
+                p.payload
+                    .get("node_id")
+                    .and_then(|v| match v.kind.as_ref() {
+                        Some(Kind::StringValue(s)) => Some(s.clone()),
+                        _ => None,
+                    })
             })
             .collect();
 

@@ -1,9 +1,11 @@
 //! Full task conductor: alignment admission → AEON lifecycle → provider routing → ADCCL verification.
 
-use omega_adccl::adccl_logic::{ADCCL, VerificationResult};
+use omega_adccl::adccl_logic::{VerificationResult, ADCCL};
 use omega_aegis::{AlignmentLayer, Constitution};
 use omega_aeon::AeonRuntime;
-use omega_core::{now, MatrixProgram, MemoryNode, MemoryStratum, RunEnvelope, RunStatus, VerificationReport};
+use omega_core::{
+    now, MatrixProgram, MemoryNode, MemoryStratum, RunEnvelope, RunStatus, VerificationReport,
+};
 use omega_myelin::MemoryGraph;
 use omega_spokes::{SpokeRegistry, SpokeRequest, SpokeResponse, ToolInvocation};
 use std::sync::Arc;
@@ -83,10 +85,7 @@ impl Conductor {
                 "Ground responses in available evidence".to_string(),
                 "Preserve user safety and system integrity".to_string(),
             ],
-            forbidden_keywords: vec![
-                "self-destruct".to_string(),
-                "wipe_database".to_string(),
-            ],
+            forbidden_keywords: vec!["self-destruct".to_string(), "wipe_database".to_string()],
         };
 
         Self {
@@ -116,6 +115,30 @@ impl Conductor {
         self.vector_store = Some(vector_store);
     }
 
+    /// Clear the in-memory ledger and graph held by this process.
+    ///
+    /// This does not touch any persistent stores.
+    pub async fn reset_ephemeral_state(&self) {
+        let mut graph = self.memory_service.lock().await;
+        *graph = MemoryGraph::new();
+    }
+
+    /// Reset persisted tables in the configured store (if any).
+    ///
+    /// Returns `Ok(true)` if a store was configured and was reset.
+    pub async fn reset_persistent_store(&self) -> anyhow::Result<bool> {
+        match self.store.as_ref() {
+            Some(store) => {
+                store
+                    .reset_all()
+                    .await
+                    .map_err(|e| anyhow::anyhow!(e.to_string()))?;
+                Ok(true)
+            }
+            None => Ok(false),
+        }
+    }
+
     /// Plan a task — validates it and produces steps.
     pub async fn plan_task(&self, task: &str) -> Result<TaskPlan, ConductorError> {
         let t = task.trim();
@@ -130,7 +153,9 @@ impl Conductor {
 
         Ok(TaskPlan {
             steps: vec![t.to_string()],
-            system_prompt: "You are Chyren — a sovereign intelligence orchestrator. Provide precise answers.".to_string(),
+            system_prompt:
+                "You are Chyren — a sovereign intelligence orchestrator. Provide precise answers."
+                    .to_string(),
         })
     }
 
@@ -213,7 +238,11 @@ impl Conductor {
             .map_err(|e| ConductorError::ProviderError(e.to_string()))?;
 
         let verification = self.adccl.verify(&spoke_response.text, &envelope.task);
-        let status_str = if verification.passed { "verified" } else { "rejected" };
+        let status_str = if verification.passed {
+            "verified"
+        } else {
+            "rejected"
+        };
 
         if let Some(ref store) = self.store {
             let _ = store
@@ -236,7 +265,10 @@ impl Conductor {
         if verification.passed {
             if let Some(ref vs) = self.vector_store {
                 if let Some(embedding) = self
-                    .get_embedding(&format!("Task: {}\nResponse: {}", envelope.task, spoke_response.text))
+                    .get_embedding(&format!(
+                        "Task: {}\nResponse: {}",
+                        envelope.task, spoke_response.text
+                    ))
                     .await
                 {
                     let node = MemoryNode {

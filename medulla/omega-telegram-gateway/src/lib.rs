@@ -72,12 +72,9 @@ pub async fn run_bridge(token: String) -> Result<(), Box<dyn std::error::Error +
                         .verification
                         .map(|v| format!("\n\n_[ADCCL: {:.2}]_", v.score))
                         .unwrap_or_default();
-                    bot.send_message(
-                        msg.chat.id,
-                        format!("{}{}", result.response_text, suffix),
-                    )
-                    .await
-                    .ok();
+                    bot.send_message(msg.chat.id, format!("{}{}", result.response_text, suffix))
+                        .await
+                        .ok();
                 }
                 Err(e) => {
                     bot.send_message(msg.chat.id, format!("⚠️ {e}")).await.ok();

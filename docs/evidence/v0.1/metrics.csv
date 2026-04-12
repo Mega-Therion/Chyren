@@ -1,0 +1,11 @@
+metric_name,category,value,unit,source_command,run_id,captured_at_utc
+rust_tests_passed,verification,1,boolean,cd '/home/mega/Chyren/medulla' && cargo test,proof-20260412T003547Z,2026-04-12T00:36:11Z
+python_tests_passed,verification,1,boolean,cd '/home/mega/Chyren' && pytest tests,proof-20260412T003547Z,2026-04-12T00:36:11Z
+web_typecheck_passed,verification,1,boolean,cd '/home/mega/Chyren/web' && npm run typecheck,proof-20260412T003547Z,2026-04-12T00:36:11Z
+adccl_threshold_default,algorithm,0.7,score,docs/CHIRAL_THESIS.md declared threshold,v0.1-initial,2026-04-12T00:00:00Z
+rust_workspace_crates,architecture,16,count,count omega-* entries in medulla/Cargo.toml,proof-20260412T003547Z,2026-04-12T00:36:11Z
+rust_tests_duration_s,performance,5.00,seconds,cd '/home/mega/Chyren/medulla' && cargo test,proof-20260412T003547Z,2026-04-12T00:36:11Z
+web_typecheck_duration_s,performance,7.00,seconds,cd '/home/mega/Chyren/web' && npm run typecheck,proof-20260412T003547Z,2026-04-12T00:36:11Z
+web_lint_passed,verification,1,boolean,cd '/home/mega/Chyren/web' && npm run lint,proof-20260412T003547Z,2026-04-12T00:36:11Z
+web_lint_duration_s,performance,10.00,seconds,cd '/home/mega/Chyren/web' && npm run lint,proof-20260412T003547Z,2026-04-12T00:36:11Z
+python_tests_duration_s,performance,2.00,seconds,cd '/home/mega/Chyren' && pytest tests,proof-20260412T003547Z,2026-04-12T00:36:11Z

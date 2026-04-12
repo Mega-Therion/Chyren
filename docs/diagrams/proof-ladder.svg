@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="760" viewBox="0 0 1400 760" role="img" aria-label="Proof ladder from claim to external replication">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <marker id="arr" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#94a3b8"/>
+    </marker>
+    <style>
+      .h1 { font: 700 40px Inter,Segoe UI,Arial,sans-serif; fill: #f8fafc; }
+      .h2 { font: 500 18px Inter,Segoe UI,Arial,sans-serif; fill: #cbd5e1; }
+      .step { font: 700 20px Inter,Segoe UI,Arial,sans-serif; fill: #fff; }
+      .body { font: 500 15px Inter,Segoe UI,Arial,sans-serif; fill: #e2e8f0; }
+    </style>
+  </defs>
+
+  <rect width="1400" height="760" fill="url(#bg2)"/>
+  <text x="56" y="70" class="h1">Claim Maturity Ladder</text>
+  <text x="56" y="100" class="h2">How Chyren claims should move from architecture narrative to defensible evidence</text>
+
+  <rect x="70" y="160" width="240" height="220" rx="16" fill="#334155"/>
+  <text x="92" y="208" class="step">1. Claim</text>
+  <text x="92" y="240" class="body">State the assertion</text>
+  <text x="92" y="264" class="body">with scope and limits.</text>
+
+  <rect x="340" y="160" width="240" height="220" rx="16" fill="#0f766e"/>
+  <text x="362" y="208" class="step">2. Mechanism</text>
+  <text x="362" y="240" class="body">Map to module, equation,</text>
+  <text x="362" y="264" class="body">and control path.</text>
+
+  <rect x="610" y="160" width="240" height="220" rx="16" fill="#1d4ed8"/>
+  <text x="632" y="208" class="step">3. Repro</text>
+  <text x="632" y="240" class="body">Attach command, config,</text>
+  <text x="632" y="264" class="body">dataset, and run ID.</text>
+
+  <rect x="880" y="160" width="240" height="220" rx="16" fill="#a16207"/>
+  <text x="902" y="208" class="step">4. Benchmark</text>
+  <text x="902" y="240" class="body">Publish metric outputs</text>
+  <text x="902" y="264" class="body">with failure cases.</text>
+
+  <rect x="1150" y="160" width="180" height="220" rx="16" fill="#7e22ce"/>
+  <text x="1172" y="208" class="step">5. External</text>
+  <text x="1172" y="240" class="body">Independent</text>
+  <text x="1172" y="264" class="body">replication.</text>
+
+  <line x1="310" y1="270" x2="338" y2="270" stroke="#94a3b8" stroke-width="3" marker-end="url(#arr)"/>
+  <line x1="580" y1="270" x2="608" y2="270" stroke="#94a3b8" stroke-width="3" marker-end="url(#arr)"/>
+  <line x1="850" y1="270" x2="878" y2="270" stroke="#94a3b8" stroke-width="3" marker-end="url(#arr)"/>
+  <line x1="1120" y1="270" x2="1148" y2="270" stroke="#94a3b8" stroke-width="3" marker-end="url(#arr)"/>
+
+  <rect x="70" y="430" width="1260" height="250" rx="18" fill="#111827" stroke="#374151"/>
+  <text x="96" y="474" class="step">Current Chyren Position (v0.1)</text>
+  <text x="96" y="508" class="body">Strong on architecture narrative and mechanism mapping.</text>
+  <text x="96" y="534" class="body">Proof Pack establishes reproducibility schema and chart pipeline.</text>
+  <text x="96" y="560" class="body">Next gating milestone: baseline-vs-comparator benchmarks with versioned snapshots.</text>
+  <text x="96" y="586" class="body">Final milestone: third-party replication / external audit.</text>
+</svg>

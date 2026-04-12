@@ -288,10 +288,10 @@ pub struct TemporalAnchor {
 pub trait MasterLedger: Send + Sync {
     /// Commit an envelope to the ledger, returning its final committed sequence ID.
     fn commit_run(&self, envelope: RunEnvelope) -> Result<String, String>;
-    
+
     /// Append a core system event (such as ADCCL rejection) immutably.
     fn append_event(&self, event_type: &str, payload: &str) -> std::io::Result<()>;
-    
+
     /// Retrieve a historical run envelope by its run ID.
     fn get_run(&self, run_id: &str) -> Option<RunEnvelope>;
 }

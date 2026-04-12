@@ -37,7 +37,11 @@ pip install -r requirements.txt
 
 python main.py "Your task" --provider anthropic    # Run with a task
 python chyren_py/identity_synthesis.py             # Refresh phylactery kernel
-pytest /home/mega/Chyren/tests/                    # Run tests
+
+# Run tests (pytest.ini at repo root sets pythonpath=cortex, testpaths=tests)
+pytest                                             # All Python tests
+pytest tests/test_adccl_hub.py                     # Single test file
+pytest -k test_name                                # Single test by name
 ```
 
 ### Web Frontend
@@ -76,11 +80,11 @@ docker-compose up    # Starts chyren-api (8080), chyren-web (3000), postgres, qd
 
 ### Cortex (Python Hub)
 - `cortex/main.py` — `Chyren` class: owns Master Ledger, provider router, 6-phase initialization, `RunResult` dataclass
-- `cortex/core/` — Security gates: `adccl.py` (drift verification), `alignment.py` (constitution), `ledger.py` (immutable log), `threat_fabric.py`, `deflection.py`, `sandbox.py`
-- `cortex/providers/` — Provider adapters implementing `ProviderBase`: Anthropic, OpenAI, DeepSeek, Gemini
+- `cortex/core/` — Security gates: `adccl.py` (drift verification), `adccl_ffi.py` (FFI bridge to Rust ADCCL), `alignment.py` (constitution), `ledger.py` (immutable log), `integrity.py`, `preflight.py`, `threat_fabric.py`, `deflection.py`, `sandbox.py`
+- `cortex/providers/` — Provider adapters implementing `ProviderBase`: Anthropic, OpenAI, DeepSeek, Gemini, Gemma4
 - `cortex/chyren_py/` — Phylactery identity synthesis and kernel loading
 
-### Medulla (Rust — 17 crates)
+### Medulla (Rust — 16 crates)
 | Crate | Role |
 |---|---|
 | `omega-core` | Foundation types, contracts, task envelopes |

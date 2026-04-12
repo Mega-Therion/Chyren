@@ -118,8 +118,7 @@ jobs:
           cache-dependency-path: cortex/requirements.txt
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
-        working-directory: cortex
+        run: pip install -r cortex/requirements.txt
 
       - name: Run tests
         # Exclude tests that require live network/API keys (Gemma, Ollama, etc.)

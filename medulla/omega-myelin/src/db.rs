@@ -31,10 +31,7 @@ impl MemoryStore {
     ///
     /// `url` is a Postgres connection string (e.g. from `OMEGA_DB_URL`).
     /// `_path` is reserved for future local-cache overlay.
-    pub async fn connect(
-        url: &str,
-        _path: &str,
-    ) -> Result<Self, Box<dyn Error + Send + Sync>> {
+    pub async fn connect(url: &str, _path: &str) -> Result<Self, Box<dyn Error + Send + Sync>> {
         let pool = sqlx::PgPool::connect(url).await?;
 
         // Ensure the schema exists — idempotent.
@@ -107,10 +104,7 @@ impl MemoryStore {
     }
 
     /// Upsert a memory node.
-    pub async fn upsert_node(
-        &self,
-        node: &MemoryNode,
-    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+    pub async fn upsert_node(&self, node: &MemoryNode) -> Result<(), Box<dyn Error + Send + Sync>> {
         sqlx::query(
             r#"
             INSERT INTO memory_nodes (node_id, content, retrieval_count, decay_score, updated_at)
@@ -133,10 +127,7 @@ impl MemoryStore {
     }
 
     /// Increment retrieval count for a node.
-    pub async fn touch_node(
-        &self,
-        node_id: &str,
-    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+    pub async fn touch_node(&self, node_id: &str) -> Result<(), Box<dyn Error + Send + Sync>> {
         sqlx::query(
             "UPDATE memory_nodes SET retrieval_count = retrieval_count + 1, updated_at = now() WHERE node_id = $1",
         )
@@ -155,6 +146,7 @@ impl MemoryStore {
     }
 
     /// Store a ledger entry in the database.
+    #[allow(clippy::too_many_arguments)]
     pub async fn store_ledger_entry(
         &self,
         run_id: &str,
@@ -198,6 +190,35 @@ impl MemoryStore {
     /// Get a reference to the connection pool.
     pub fn pool(&self) -> &sqlx::PgPool {
         &self.pool
+    }
+
+    /// Reset all persisted state for this store.
+    ///
+    /// This clears:
+    /// - `ledger_entries`
+    /// - `memory_edges`
+    /// - `memory_nodes`
+    /// - `threat_entries`
+    ///
+    /// Note: This does not affect external vector stores (e.g. Qdrant).
+    pub async fn reset_all(&self) -> Result<(), Box<dyn Error + Send + Sync>> {
+        // Delete in dependency order (edges reference nodes).
+        // Use a transaction so callers never see partially-cleared state.
+        let mut tx = self.pool.begin().await?;
+        sqlx::query("DELETE FROM ledger_entries")
+            .execute(&mut *tx)
+            .await?;
+        sqlx::query("DELETE FROM memory_edges")
+            .execute(&mut *tx)
+            .await?;
+        sqlx::query("DELETE FROM memory_nodes")
+            .execute(&mut *tx)
+            .await?;
+        sqlx::query("DELETE FROM threat_entries")
+            .execute(&mut *tx)
+            .await?;
+        tx.commit().await?;
+        Ok(())
     }
 }
 

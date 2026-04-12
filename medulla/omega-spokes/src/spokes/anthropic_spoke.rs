@@ -1,10 +1,11 @@
-use tokio::sync::mpsc;
 /// Anthropic API spoke for Claude inference
-
-use crate::{Spoke, SpokeCapability, SpokeConfig, ToolDefinition, ToolInvocation, ToolResult, SpokeStatus};
+use crate::{
+    Spoke, SpokeCapability, SpokeConfig, SpokeStatus, ToolDefinition, ToolInvocation, ToolResult,
+};
 use async_trait::async_trait;
 use serde_json::{json, Value};
 use std::env;
+use tokio::sync::mpsc;
 
 /// Anthropic spoke for Claude model access
 pub struct AnthropicSpoke {
@@ -29,10 +30,7 @@ impl Spoke for AnthropicSpoke {
     }
 
     fn capabilities(&self) -> Vec<SpokeCapability> {
-        vec![
-            SpokeCapability::Inference,
-            SpokeCapability::Tools,
-        ]
+        vec![SpokeCapability::Inference, SpokeCapability::Tools]
     }
 
     async fn discover_tools(&self) -> Result<Vec<ToolDefinition>, String> {
@@ -72,19 +70,17 @@ impl Spoke for AnthropicSpoke {
         let start = std::time::Instant::now();
 
         let result = match invocation.tool.as_str() {
-            "chat_completion" => {
-                match self.chat_completion(&invocation.input).await {
-                    Ok(response) => response,
-                    Err(e) => {
-                        return Ok(ToolResult {
-                            success: false,
-                            output: json!({}),
-                            error: Some(e),
-                            execution_time_ms: start.elapsed().as_millis() as u32,
-                        })
-                    }
+            "chat_completion" => match self.chat_completion(&invocation.input).await {
+                Ok(response) => response,
+                Err(e) => {
+                    return Ok(ToolResult {
+                        success: false,
+                        output: json!({}),
+                        error: Some(e),
+                        execution_time_ms: start.elapsed().as_millis() as u32,
+                    })
                 }
-            }
+            },
             "batch_process" => {
                 json!({
                     "batch_id": "batch-123456",
@@ -110,8 +106,12 @@ impl Spoke for AnthropicSpoke {
         })
     }
 
-    async fn invoke_tool_stream(&self, _invocation: ToolInvocation, _tx: mpsc::Sender<Value>) -> Result<(), String> {
-         Err("Streaming not yet implemented for AnthropicSpoke".to_string())
+    async fn invoke_tool_stream(
+        &self,
+        _invocation: ToolInvocation,
+        _tx: mpsc::Sender<Value>,
+    ) -> Result<(), String> {
+        Err("Streaming not yet implemented for AnthropicSpoke".to_string())
     }
 
     async fn health_check(&self) -> Result<SpokeStatus, String> {
@@ -136,21 +136,23 @@ impl AnthropicSpoke {
         let api_key = env::var("ANTHROPIC_API_KEY")
             .map_err(|_| "ANTHROPIC_API_KEY environment variable not set".to_string())?;
 
-        let prompt = input.get("prompt")
+        let prompt = input
+            .get("prompt")
             .and_then(|p| p.as_str())
             .ok_or("Missing 'prompt' in input")?;
 
-        let max_tokens = input.get("max_tokens")
+        let max_tokens = input
+            .get("max_tokens")
             .and_then(|t| t.as_u64())
             .unwrap_or(1024) as i32;
 
-        let model = input.get("model")
+        let model = input
+            .get("model")
             .and_then(|m| m.as_str())
             .unwrap_or("claude-opus-4-6");
 
-        // Make HTTP request to Anthropic API
-        let client = reqwest::Client::new();
-        let messages = input.get("messages")
+        let messages = input
+            .get("messages")
             .and_then(|m| m.as_array())
             .map(|arr| {
                 let start = arr.len().saturating_sub(15);
@@ -181,7 +183,9 @@ impl AnthropicSpoke {
             return Err(format!("API error: {}", error_text));
         }
 
-        let api_response: Value = response.json().await
+        let api_response: Value = response
+            .json()
+            .await
             .map_err(|e| format!("Failed to parse response: {}", e))?;
 
         Ok(api_response)
