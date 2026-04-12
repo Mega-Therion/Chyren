@@ -11,3 +11,6 @@ serde_json = { workspace = true }
 omega-core = { path = "../omega-core" }
 omega-myelin = { path = "../omega-myelin" }
 tokio = { workspace = true }
+sha2 = { workspace = true }
+hex = { workspace = true }
+hmac = { workspace = true }
