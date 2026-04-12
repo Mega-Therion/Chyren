@@ -65,10 +65,25 @@ pub struct MatrixProgram {
     pub domain: String,
     /// Version string.
     pub version: String,
-    /// Integrity hash over payload.
+    /// SHA-256 hex digest of `payload`.
     pub integrity_hash: String,
     /// Raw payload bytes.
     pub payload: Vec<u8>,
+}
+
+impl MatrixProgram {
+    /// Construct a `MatrixProgram`, computing the SHA-256 integrity hash
+    /// over `payload` automatically.
+    pub fn new(domain: impl Into<String>, version: impl Into<String>, payload: Vec<u8>) -> Self {
+        use sha2::{Digest, Sha256};
+        let integrity_hash = hex::encode(Sha256::digest(&payload));
+        Self {
+            domain: domain.into(),
+            version: version.into(),
+            integrity_hash,
+            payload,
+        }
+    }
 }
 
 /// Node within the memory graph.
