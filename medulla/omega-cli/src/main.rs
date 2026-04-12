@@ -1,7 +1,7 @@
 use clap::{CommandFactory, Parser, Subcommand};
 use clap_complete::{generate, Shell};
 use clap_mangen::Man;
-use omega_cli::conductor::Conductor;
+use omega_cli::conductor::{Conductor, ConductorError};
 use omega_core::{now, EvidencePacket, RunEnvelope, RunStatus};
 use std::sync::Arc;
 use tracing::{info, warn};
@@ -263,6 +263,24 @@ async fn main() -> anyhow::Result<()> {
 
                 let plan = match conductor.plan_task(&task_text).await {
                     Ok(p) => p,
+                    Err(ConductorError::Deflected(deflection_text)) => {
+                        // Adversarial input: show the deflection response as output, not as an error.
+                        if cli.json {
+                            print_json(JsonOut {
+                                ok: false,
+                                command: "task",
+                                status: Some("DEFLECTED".to_string()),
+                                run_id: None,
+                                response_text: Some(deflection_text),
+                                adccl_score: None,
+                                provider: None,
+                                error: Some("Rejected(adversarial)".to_string()),
+                            });
+                        } else {
+                            println!("{deflection_text}");
+                        }
+                        std::process::exit(10);
+                    }
                     Err(e) => {
                         let err = anyhow::anyhow!(e.to_string());
                         if cli.json {

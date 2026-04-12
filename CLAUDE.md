@@ -4,13 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This System Is
 
-**Chyren** is a Sovereign Intelligence Orchestrator — a stateful, high-integrity AI task execution platform with a binary-hemispheric architecture:
+**Chyren** is a Sovereign Intelligence Orchestrator — a stateful, high-integrity AI task execution platform.
 
-- **Cortex** (`cortex/`) — Python Hub: orchestration, provider routing, ADCCL verification, Master Ledger
-- **Medulla** (`medulla/`) — Rust Workspace: 17 crates covering security, memory, scheduling, CLI, and API server
+- **Medulla** (`medulla/`) — Rust Workspace: canonical runtime — 17 crates covering security, memory, scheduling, CLI, and API server. All live requests route here.
+- **Cortex** (`cortex/`) — Python layer: identity synthesis (`chyren_py/`), data ops scripts (`ops/scripts/`). No longer invoked for runtime requests.
 - **Web** (`web/`) — Next.js 15 cognitive shell frontend
 - **Gateway** (`gateway/`) — Vite + React 19 external spoke gateway
-- **Brain Stem** (`./chyren`) — Python router script that dispatches commands to Cortex or Medulla
+- **Brain Stem** (`./chyren`) — Python router script dispatching all commands to Medulla; Python cortex only runs during `dream` maintenance mode
 
 ## Build, Test, Lint
 
@@ -69,20 +69,20 @@ docker-compose up    # Starts chyren-api (8080), chyren-web (3000), postgres, qd
 
 ### Brain Stem CLI
 ```bash
-./chyren thought "..."    # → Cortex (Python): reasoning, sensing, verification, identity
+./chyren thought "..."    # → Medulla (Rust): sovereign reasoning pipeline
 ./chyren action "..."     # → Medulla (Rust): execution, memory, sharding, ingestion
-./chyren status           # System status
+./chyren status           # System status (Medulla)
 ./chyren live             # Start web + API
-./chyren dream            # Maintenance mode
+./chyren dream            # Maintenance: identity synthesis + catalog indexing (Python scripts only)
 ```
 
 ## Architecture
 
-### Cortex (Python Hub)
-- `cortex/main.py` — `Chyren` class: owns Master Ledger, provider router, 6-phase initialization, `RunResult` dataclass
-- `cortex/core/` — Security gates: `adccl.py` (drift verification), `adccl_ffi.py` (FFI bridge to Rust ADCCL), `alignment.py` (constitution), `ledger.py` (immutable log), `integrity.py`, `preflight.py`, `threat_fabric.py`, `deflection.py`, `sandbox.py`
-- `cortex/providers/` — Provider adapters implementing `ProviderBase`: Anthropic, OpenAI, DeepSeek, Gemini, Gemma4
-- `cortex/chyren_py/` — Phylactery identity synthesis and kernel loading
+### Cortex (Python — data tooling only, not runtime)
+- `cortex/chyren_py/identity_synthesis.py` — Regenerates `phylactery_kernel.json`; run via `./chyren dream`
+- `cortex/chyren_py/phylactery_kernel.json` — ~58k identity entries loaded by Medulla at startup
+- `cortex/ops/scripts/` — Data pipeline utilities (catalog, ingestion) run during maintenance
+- `cortex/core/`, `cortex/providers/`, `cortex/main.py` — Legacy Python runtime (no longer used for live requests; retained as reference)
 
 ### Medulla (Rust — 16 crates)
 | Crate | Role |
