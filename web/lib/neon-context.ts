@@ -2,9 +2,9 @@
  * neon-context.ts — RY context with build-time bake + runtime live-fetch fallback
  *
  * Primary path: context is baked at build time by scripts/generate-context.mjs.
- * Fallback path: if the baked context is empty (e.g. Neon quota exceeded at build),
- * a live fetch is attempted from OMEGA_DB_URL on the first request and cached
- * in-process for CACHE_TTL_MS to avoid per-request DB round-trips.
+ * Fallback 1: live fetch from OMEGA_DB_URL (Neon) on first request.
+ * Fallback 2: live fetch from SUPABASE_URL (Supabase REST) if Neon is over quota.
+ * Results cached in-process for CACHE_TTL_MS to avoid per-request DB round-trips.
  */
 
 import { GENERATED_RY_CONTEXT } from './generated-context'
@@ -16,9 +16,71 @@ let _runtimeCache: string | null = null
 let _cacheExpiry = 0
 let _fetchInFlight: Promise<string> | null = null
 
+async function fetchFromSupabase(): Promise<string> {
+  const supabaseUrl = process.env.SUPABASE_URL
+  const supabaseKey = process.env.SUPABASE_SERVICE_KEY
+  if (!supabaseUrl || !supabaseKey) return ''
+
+  try {
+    const base = supabaseUrl.replace(/\/$/, '')
+    const headers = {
+      apikey: supabaseKey,
+      Authorization: `Bearer ${supabaseKey}`,
+    }
+
+    const [familyResp, knowledgeResp, memoryResp] = await Promise.all([
+      fetch(`${base}/rest/v1/family_profiles?select=name,last_name,relationship,location,occupation,ry_notes,notes_for_omega,how_to_greet,fun_facts&order=id`, { headers }),
+      fetch(`${base}/rest/v1/public_knowledge?select=title,content,category,importance&category=in.(biography,creator,concept,quote)&order=importance.desc.nullslast&limit=15`, { headers }),
+      fetch(`${base}/rest/v1/memories?select=content,topic,created_at&order=created_at.desc&limit=20`, { headers }),
+    ])
+
+    const familyRows = familyResp.ok ? await familyResp.json() : []
+    const knowledgeRows = knowledgeResp.ok ? await knowledgeResp.json() : []
+    const memoryRows = memoryResp.ok ? await memoryResp.json() : []
+
+    return buildContextString(familyRows, knowledgeRows, memoryRows)
+  } catch (err) {
+    console.warn('[neon-context] Supabase fetch failed:', (err as Error)?.message)
+    return ''
+  }
+}
+
+function buildContextString(
+  familyRows: Record<string, unknown>[],
+  knowledgeRows: Record<string, unknown>[],
+  memoryRows: Record<string, unknown>[]
+): string {
+  const parts: string[] = []
+
+  if (familyRows.length > 0) {
+    parts.push('FAMILY PROFILES:')
+    for (const r of familyRows) {
+      const name = [r.name, r.last_name].filter(Boolean).join(' ')
+      const details = [`rel: ${r.relationship}`, `loc: ${r.location}`, r.occupation ? `occ: ${r.occupation}` : null].filter(Boolean).join(', ')
+      parts.push(`- ${name} (${details})`)
+      if (r.fun_facts) {
+        try {
+          const facts = typeof r.fun_facts === 'string' ? JSON.parse(r.fun_facts) : r.fun_facts
+          if (Array.isArray(facts)) facts.forEach((f: string) => parts.push(`  * ${f}`))
+        } catch { parts.push(`  * ${r.fun_facts}`) }
+      }
+      if (r.ry_notes) parts.push(`  RY notes: ${r.ry_notes}`)
+    }
+  }
+  if (knowledgeRows.length > 0) {
+    parts.push('\nKNOWLEDGE BASE:')
+    for (const r of knowledgeRows) parts.push(`[${r.category}] ${r.title}: ${r.content}`)
+  }
+  if (memoryRows.length > 0) {
+    parts.push('\nPERSONAL MEMORIES:')
+    for (const r of memoryRows) parts.push(`- [${r.topic}] ${r.content}`)
+  }
+  return parts.join('\n')
+}
+
 async function fetchLiveContext(): Promise<string> {
   const url = process.env.OMEGA_DB_URL
-  if (!url) return ''
+  if (!url) return fetchFromSupabase()
 
   try {
     const { neon } = await import('@neondatabase/serverless')
@@ -76,9 +138,19 @@ async function fetchLiveContext(): Promise<string> {
       }
     }
 
-    return parts.join('\n')
+    return buildContextString(
+      familyRows as Record<string, unknown>[],
+      knowledgeRows as Record<string, unknown>[],
+      memoryRows as Record<string, unknown>[]
+    )
   } catch (err) {
-    console.warn('[neon-context] live fetch failed:', (err as Error)?.message)
+    const msg = (err as Error)?.message ?? ''
+    console.warn('[neon-context] Neon fetch failed:', msg)
+    // Quota exceeded or connection error → fall back to Supabase
+    if (msg.includes('quota') || msg.includes('transfer') || msg.includes('ECONNREFUSED') || msg.includes('connection')) {
+      console.warn('[neon-context] Falling back to Supabase...')
+      return fetchFromSupabase()
+    }
     return ''
   }
 }
