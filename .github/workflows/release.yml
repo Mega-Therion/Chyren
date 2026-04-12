@@ -4,7 +4,20 @@ on:
   push:
     tags:
       - "v*"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      include_macos:
+        description: "Build macOS artifact (requires self-hosted macOS runner)"
+        required: false
+        default: "false"
+        type: choice
+        options: ["false", "true"]
+      include_windows:
+        description: "Build Windows artifact (requires self-hosted Windows runner)"
+        required: false
+        default: "false"
+        type: choice
+        options: ["false", "true"]
 
 permissions:
   contents: write
@@ -76,6 +89,7 @@ jobs:
   build-macos:
     name: Build (macOS)
     needs: init-release
+    if: github.event_name == 'workflow_dispatch' && inputs.include_macos == 'true'
     runs-on: [self-hosted, macOS]
     steps:
       - uses: actions/checkout@v4
@@ -122,6 +136,7 @@ jobs:
   build-windows:
     name: Build (Windows)
     needs: init-release
+    if: github.event_name == 'workflow_dispatch' && inputs.include_windows == 'true'
     runs-on: [self-hosted, Windows]
     steps:
       - uses: actions/checkout@v4
