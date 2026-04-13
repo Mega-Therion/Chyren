@@ -142,6 +142,7 @@ impl SpokeRegistry {
         let mut reg = Self::new();
 
         let providers = vec![
+            ("groq", 5),
             ("anthropic", 10),
             ("openai", 20),
             ("gemini", 30),
@@ -160,6 +161,7 @@ impl SpokeRegistry {
             };
 
             let spoke: Option<Arc<dyn Spoke>> = match p {
+                "groq" => Some(Arc::new(spokes::GroqSpoke::new(config))),
                 "anthropic" => Some(Arc::new(spokes::AnthropicSpoke::new(config))),
                 "openai" => Some(Arc::new(spokes::OpenAISpoke::new(config))),
                 "gemini" => Some(Arc::new(spokes::GeminiSpoke::new(config))),
@@ -177,6 +179,7 @@ impl SpokeRegistry {
         }
 
         reg.preference = vec![
+            "groq".into(),
             "anthropic".into(),
             "openai".into(),
             "gemini".into(),
