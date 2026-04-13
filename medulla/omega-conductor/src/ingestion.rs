@@ -1,6 +1,7 @@
 use anyhow::{anyhow, Context, Result};
-use omega_core::{MatrixProgram, MemoryEdge, MemoryNode};
+use omega_core::{MatrixProgram, MemoryEdge, MemoryNode, MemoryStratum};
 use omega_myelin::MemoryGraph;
+use omega_neocortex::{seed_library, Neocortex};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
@@ -23,7 +24,7 @@ impl IngestionEngine {
     /// nodes and edges into the graph. Returns an error if the hash does not
     /// match, preventing tampered or corrupted programs from entering memory.
     pub async fn ingest(program: MatrixProgram, graph: &mut MemoryGraph) -> Result<()> {
-        println!(
+        eprintln!(
             "[INGESTION] Verifying program: {} v{}",
             program.domain, program.version
         );
@@ -59,13 +60,49 @@ impl IngestionEngine {
             graph.edges.push(edge);
         }
 
-        println!(
+        eprintln!(
             "[INGESTION] Successfully grafted {} nodes and {} edges from {}",
             node_count, edge_count, program.domain
         );
 
         Ok(())
     }
+}
+
+/// Boot-time Neocortex injection.
+///
+/// Loads the full seed library, ingests all programs, and grafts each domain's
+/// knowledge as a Canonical memory node into the MemoryGraph. This is called
+/// once at Conductor startup so every subsequent task has Chyren's full identity
+/// and knowledge context available from the first step.
+///
+/// Returns the number of domains successfully grafted.
+pub fn inject_neocortex(graph: &mut MemoryGraph) -> usize {
+    let mut nc = Neocortex::new();
+    nc.library = seed_library();
+
+    let mind = match nc.ingest_all() {
+        Ok(m) => m,
+        Err(e) => {
+            eprintln!("[neocortex] ingest_all failed: {e}");
+            return 0;
+        }
+    };
+
+    let mut grafted = 0;
+    for domain_key in &mind.load_report.domains_loaded {
+        if let Some(value) = mind.knowledge.get(domain_key) {
+            let content = format!("[neocortex::{domain_key}]\n{value}");
+            graph.write_node(content, MemoryStratum::Canonical);
+            grafted += 1;
+        }
+    }
+
+    eprintln!(
+        "[neocortex] Boot injection complete — {} domains grafted into MemoryGraph",
+        grafted
+    );
+    grafted
 }
 
 #[cfg(test)]
@@ -108,6 +145,20 @@ mod tests {
             err.to_string().contains("Integrity check failed"),
             "unexpected error: {err}"
         );
+    }
+
+    #[test]
+    fn inject_neocortex_grafts_seed_programs() {
+        let mut graph = MemoryGraph::new();
+        let grafted = inject_neocortex(&mut graph);
+        assert!(grafted >= 5, "expected at least 5 seed domains grafted, got {grafted}");
+        // Every grafted node should carry the neocortex prefix
+        let nc_nodes: Vec<_> = graph
+            .nodes
+            .values()
+            .filter(|n| n.content.starts_with("[neocortex::"))
+            .collect();
+        assert_eq!(nc_nodes.len(), grafted);
     }
 
     #[tokio::test]

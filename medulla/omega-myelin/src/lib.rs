@@ -19,6 +19,8 @@ pub struct MemoryGraph {
     pub threat_fabric: Vec<ThreatEntry>,
     pub episodes: Vec<RetrievalEpisode>,
     pub user_context: Option<omega_core::UserContext>,
+    #[serde(skip)]
+    pub vector_store: Option<VectorStore>,
 }
 
 impl MemoryGraph {
@@ -85,9 +87,22 @@ impl Default for Service {
 pub mod db;
 pub mod vector;
 
-pub use vector::VectorStore;
+pub use vector::{SearchResult, VectorStore};
 
 impl MemoryGraph {
+    /// Semantic search delegating to the embedded VectorStore.
+    /// Returns empty vec if no VectorStore is configured or Qdrant is unreachable.
+    pub async fn search_semantic(
+        &self,
+        query_vector: Vec<f32>,
+        top_k: usize,
+    ) -> Vec<SearchResult> {
+        match &self.vector_store {
+            Some(vs) => vs.search(query_vector, top_k).await.unwrap_or_default(),
+            None => vec![],
+        }
+    }
+
     pub fn anchor_recall(
         &self,
         anchor: &omega_core::TemporalAnchor,
