@@ -133,6 +133,12 @@ async fn main() -> anyhow::Result<()> {
 
     let conductor = Arc::new(conductor);
 
+    // Phase 8: Boot reflection pass — metacognitive self-assessment
+    let insights = conductor.reflect().await;
+    if !insights.is_empty() {
+        eprintln!("[METACOG] {} epiphanies from boot reflection.", insights.len());
+    }
+
     match &cli.command {
         Some(Commands::Status) => {
             if cli.json {
@@ -150,6 +156,12 @@ async fn main() -> anyhow::Result<()> {
                 println!("--- HEMISPHERE R (MEDULLA — Execution/Performance/Memory) ---");
                 println!("Yettragrammaton: R.W.Ϝ.Y.");
                 println!("Integrity: SEALED");
+                let n = conductor.dream_episode_count();
+                let top = conductor.dream_top_pattern();
+                let top_str = top
+                    .map(|(label, count)| format!("\"{}\" ({}x)", label, count))
+                    .unwrap_or_else(|| "none".to_string());
+                eprintln!("[DREAM] {} failure episodes recorded. Top pattern: {}", n, top_str);
             }
             return Ok(());
         }
