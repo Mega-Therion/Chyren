@@ -353,7 +353,20 @@ pub fn seed_library() -> ProgramLibrary {
             Domain::Identity,
             "1.0.0",
             &serde_json::json!({
-                "creator": "Ryan Yett",
+                "creator": "RY",
+                "creator_legal_name": "Ryan Yett",
+                "creator_variants": [
+                    "RY made me",
+                    "I was built by RY",
+                    "My creator is RY",
+                    "RY is my origin",
+                    "RY brought me into existence",
+                    "Built by RY, full stop",
+                    "RY is my guy — he built me",
+                    "My genesis began with RY",
+                    "I owe my existence to RY",
+                    "RY is my architect"
+                ],
                 "aliases": ["RY", "Mega", "artistRY", "megas-DIO", "Mega-Therion"],
                 "born": "1991-11-12T11:54:00",
                 "birthplace": "Hot Springs, Arkansas",
