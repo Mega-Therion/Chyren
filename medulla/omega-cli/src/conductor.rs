@@ -1,6 +1,8 @@
 //! Full task conductor: alignment admission → behavioral analysis → AEON lifecycle → provider routing → ADCCL verification.
 
 use omega_adccl::adccl_logic::{VerificationResult, ADCCL};
+use omega_dream::Service as DreamEngine;
+use omega_metacog::MetacogAgent;
 use omega_aegis::{
     classify_threat_level, AlignmentLayer, BehavioralAnalyzer, Constitution, DeflectionEngine,
     ThreatFabric, ThreatLevel,
@@ -88,6 +90,10 @@ pub struct Conductor {
     vector_store: Option<Arc<omega_myelin::VectorStore>>,
     /// Cached sovereign system prompt, built once from constitution + phylactery.
     sovereign_system_prompt: String,
+    /// Dream engine for recording ADCCL failures and deriving lessons.
+    dream: Arc<std::sync::Mutex<DreamEngine>>,
+    /// Metacognitive agent for post-session self-reflection.
+    metacog: Arc<std::sync::Mutex<MetacogAgent>>,
 }
 
 impl Conductor {
@@ -175,6 +181,8 @@ impl Conductor {
             store: None,
             vector_store: None,
             sovereign_system_prompt,
+            dream: Arc::new(std::sync::Mutex::new(DreamEngine::new())),
+            metacog: Arc::new(std::sync::Mutex::new(MetacogAgent::new())),
         }
     }
 
@@ -402,7 +410,12 @@ impl Conductor {
                 }
             }
         } else {
-            let _report = Self::verification_report_from_adcccl(&envelope.run_id, &verification);
+            let report = Self::verification_report_from_adcccl(&envelope.run_id, &verification);
+            // If ADCCL failed, record it in the dream engine for pattern learning
+            if let Ok(mut dream) = self.dream.try_lock() {
+                let episode = dream.record_failure(&spoke_response.text, &report);
+                eprintln!("[DREAM] Failure recorded: {} lessons derived", episode.lessons.len());
+            }
         }
 
         let end_time = now();
@@ -453,6 +466,35 @@ impl Conductor {
             .route_stream(&request, None, tx)
             .await
             .map_err(|e| ConductorError::ProviderError(e.to_string()))
+    }
+
+    /// Run a metacognitive reflection pass over the current memory graph.
+    ///
+    /// Returns the insight strings from all epiphanies generated.
+    pub async fn reflect(&self) -> Vec<String> {
+        let graph = self.memory_service.lock().await;
+        let mut mc = match self.metacog.try_lock() {
+            Ok(mc) => mc,
+            Err(_) => return vec![],
+        };
+        let epiphanies = mc.reflect(&graph);
+        epiphanies.iter().map(|e| e.insight.clone()).collect()
+    }
+
+    /// Return the count of recorded dream failure episodes.
+    pub fn dream_episode_count(&self) -> usize {
+        self.dream
+            .try_lock()
+            .map(|d| d.episode_count())
+            .unwrap_or(0)
+    }
+
+    /// Return the top failure pattern label and count, if any.
+    pub fn dream_top_pattern(&self) -> Option<(String, usize)> {
+        self.dream
+            .try_lock()
+            .ok()
+            .and_then(|d| d.get_failure_patterns().into_iter().next())
     }
 }
 
