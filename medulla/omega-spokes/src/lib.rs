@@ -144,6 +144,7 @@ impl SpokeRegistry {
         let providers = vec![
             ("anthropic", 10),
             ("openai", 20),
+            ("groq", 25),
             ("gemini", 30),
             ("deepseek", 40),
             ("ollama", 50),
@@ -162,6 +163,7 @@ impl SpokeRegistry {
             let spoke: Option<Arc<dyn Spoke>> = match p {
                 "anthropic" => Some(Arc::new(spokes::AnthropicSpoke::new(config))),
                 "openai" => Some(Arc::new(spokes::OpenAISpoke::new(config))),
+                "groq" => Some(Arc::new(spokes::GroqSpoke::new(config))),
                 "gemini" => Some(Arc::new(spokes::GeminiSpoke::new(config))),
                 "deepseek" => Some(Arc::new(spokes::DeepSeekSpoke::new(config))),
                 "ollama" => Some(Arc::new(spokes::OllamaSpoke::new(config))),

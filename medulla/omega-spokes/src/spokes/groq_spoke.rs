@@ -7,31 +7,51 @@ use serde_json::{json, Value};
 use std::env;
 use tokio::sync::mpsc;
 
-pub struct OpenAISpoke {
+pub struct GroqSpoke {
     config: SpokeConfig,
 }
 
-impl OpenAISpoke {
+impl GroqSpoke {
     pub fn new(config: SpokeConfig) -> Self {
-        OpenAISpoke { config }
+        GroqSpoke { config }
     }
 
     async fn chat_completion(&self, input: &Value) -> Result<Value, String> {
         let api_key =
-            env::var("OPENAI_API_KEY").map_err(|_| "OPENAI_API_KEY not set".to_string())?;
-        let client = reqwest::Client::new();
-        let prompt = input.get("prompt").and_then(|p| p.as_str()).unwrap_or("");
+            env::var("GROQ_API_KEY").map_err(|_| "GROQ_API_KEY not set".to_string())?;
+        let model = env::var("GROQ_MODEL").unwrap_or_else(|_| "llama3-8b-8192".to_string());
         let model = input
             .get("model")
             .and_then(|m| m.as_str())
-            .unwrap_or("gpt-4");
+            .unwrap_or(&model)
+            .to_string();
 
+        let prompt = input.get("prompt").and_then(|p| p.as_str()).unwrap_or("");
+        let system = input
+            .get("system")
+            .and_then(|s| s.as_str())
+            .unwrap_or("You are a helpful assistant.");
+        let max_tokens = input
+            .get("max_tokens")
+            .and_then(|t| t.as_u64())
+            .unwrap_or(1024);
+        let temperature = input
+            .get("temperature")
+            .and_then(|t| t.as_f64())
+            .unwrap_or(0.7);
+
+        let client = reqwest::Client::new();
         let resp = client
-            .post("https://api.openai.com/v1/chat/completions")
+            .post("https://api.groq.com/openai/v1/chat/completions")
             .header("Authorization", format!("Bearer {}", api_key))
             .json(&json!({
                 "model": model,
-                "messages": [{"role": "user", "content": prompt}]
+                "messages": [
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": prompt}
+                ],
+                "max_tokens": max_tokens,
+                "temperature": temperature
             }))
             .send()
             .await
@@ -43,7 +63,7 @@ impl OpenAISpoke {
                 .text()
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(format!("OpenAI Error ({}): {}", status, err_body));
+            return Err(format!("Groq Error ({}): {}", status, err_body));
         }
 
         resp.json().await.map_err(|e| e.to_string())
@@ -55,18 +75,20 @@ impl OpenAISpoke {
         tx: mpsc::Sender<Value>,
     ) -> Result<(), String> {
         let api_key =
-            env::var("OPENAI_API_KEY").map_err(|_| "OPENAI_API_KEY not set".to_string())?;
-        let client = reqwest::Client::new();
+            env::var("GROQ_API_KEY").map_err(|_| "GROQ_API_KEY not set".to_string())?;
+        let default_model =
+            env::var("GROQ_MODEL").unwrap_or_else(|_| "llama3-8b-8192".to_string());
+        let model = input
+            .get("model")
+            .and_then(|m| m.as_str())
+            .unwrap_or(&default_model)
+            .to_string();
+
         let prompt = input.get("prompt").and_then(|p| p.as_str()).unwrap_or("");
         let system = input
             .get("system")
             .and_then(|s| s.as_str())
             .unwrap_or("You are a helpful assistant.");
-        let model = input
-            .get("model")
-            .and_then(|m| m.as_str())
-            .unwrap_or("gpt-4")
-            .to_string();
         let max_tokens = input
             .get("max_tokens")
             .and_then(|t| t.as_u64())
@@ -76,8 +98,9 @@ impl OpenAISpoke {
             .and_then(|t| t.as_f64())
             .unwrap_or(0.7);
 
+        let client = reqwest::Client::new();
         let resp = client
-            .post("https://api.openai.com/v1/chat/completions")
+            .post("https://api.groq.com/openai/v1/chat/completions")
             .header("Authorization", format!("Bearer {}", api_key))
             .json(&json!({
                 "model": model,
@@ -99,7 +122,7 @@ impl OpenAISpoke {
                 .text()
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(format!("OpenAI Stream Error ({}): {}", status, err_body));
+            return Err(format!("Groq Stream Error ({}): {}", status, err_body));
         }
 
         let mut stream = resp.bytes_stream();
@@ -110,6 +133,7 @@ impl OpenAISpoke {
             let text = String::from_utf8_lossy(&bytes);
             buffer.push_str(&text);
 
+            // Process complete lines from the buffer
             while let Some(newline_pos) = buffer.find('\n') {
                 let line = buffer[..newline_pos].trim().to_string();
                 buffer = buffer[newline_pos + 1..].to_string();
@@ -123,6 +147,7 @@ impl OpenAISpoke {
                         break;
                     }
 
+                    // Parse JSON chunk
                     if let Ok(chunk_json) = serde_json::from_str::<Value>(data) {
                         if let Some(delta_content) = chunk_json
                             .get("choices")
@@ -136,6 +161,7 @@ impl OpenAISpoke {
                                     "choices": [{"delta": {"content": delta_content}}]
                                 });
                                 if tx.send(frame).await.is_err() {
+                                    // Receiver dropped — stop gracefully
                                     return Ok(());
                                 }
                             }
@@ -145,6 +171,7 @@ impl OpenAISpoke {
             }
         }
 
+        // Send final done frame
         let _ = tx.send(json!({"status": "done"})).await;
 
         Ok(())
@@ -152,32 +179,39 @@ impl OpenAISpoke {
 }
 
 #[async_trait]
-impl Spoke for OpenAISpoke {
+impl Spoke for GroqSpoke {
     fn name(&self) -> &str {
         &self.config.name
     }
+
     fn spoke_type(&self) -> &str {
-        "openai"
+        "groq"
     }
+
     fn capabilities(&self) -> Vec<SpokeCapability> {
         vec![SpokeCapability::Inference]
     }
+
     async fn discover_tools(&self) -> Result<Vec<ToolDefinition>, String> {
         Ok(vec![ToolDefinition {
             name: "chat_completion".to_string(),
-            description: "Call OpenAI chat completions API for inference".to_string(),
+            description: "Call Groq chat completions API for fast inference".to_string(),
             input_schema: json!({
                 "type": "object",
                 "properties": {
-                    "model": {"type": "string", "description": "Model ID (default: gpt-4)"},
-                    "prompt": {"type": "string", "description": "User prompt"}
+                    "model": {"type": "string", "description": "Groq model ID (default: llama3-8b-8192)"},
+                    "prompt": {"type": "string", "description": "User prompt"},
+                    "system": {"type": "string", "description": "System prompt"},
+                    "max_tokens": {"type": "integer", "description": "Max response tokens"},
+                    "temperature": {"type": "number", "description": "Sampling temperature"}
                 },
                 "required": ["prompt"]
             }),
             is_deterministic: false,
-            estimated_cost: 1000,
+            estimated_cost: 100,
         }])
     }
+
     async fn invoke_tool(&self, inv: ToolInvocation) -> Result<ToolResult, String> {
         let start = std::time::Instant::now();
         match inv.tool.as_str() {
@@ -203,6 +237,7 @@ impl Spoke for OpenAISpoke {
             }),
         }
     }
+
     async fn invoke_tool_stream(
         &self,
         inv: ToolInvocation,
@@ -213,15 +248,17 @@ impl Spoke for OpenAISpoke {
             _ => Err(format!("Unknown tool for streaming: {}", inv.tool)),
         }
     }
+
     async fn health_check(&self) -> Result<SpokeStatus, String> {
         Ok(SpokeStatus {
             name: self.config.name.clone(),
             health: "healthy".into(),
             last_success: 0.0,
             recent_errors: 0,
-            available_tools: 0,
+            available_tools: 1,
         })
     }
+
     fn config(&self) -> &SpokeConfig {
         &self.config
     }
