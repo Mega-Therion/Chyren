@@ -23,6 +23,30 @@ REPO_DIR = os.path.dirname(os.path.abspath(__file__))
 CORTEX_DIR = os.path.join(REPO_DIR, "cortex")
 MEDULLA_DIR = os.path.join(REPO_DIR, "medulla")
 
+
+def _load_env() -> None:
+    """Load secrets from well-known env files (highest priority first)."""
+    candidates = [
+        os.path.expanduser("~/.omega_keys.env"),
+        os.path.expanduser("~/.omega/one-true.env"),
+        os.path.expanduser("~/OMEGA_WORKSPACE/VAULT/one-true.env"),
+    ]
+    for path in candidates:
+        if os.path.isfile(path):
+            try:
+                with open(path) as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line or line.startswith("#") or "=" not in line:
+                            continue
+                        key, _, val = line.partition("=")
+                        key = key.strip()
+                        val = val.strip().strip('"').strip("'")
+                        if key and key not in os.environ:
+                            os.environ[key] = val
+            except OSError:
+                pass
+
 LOG = logging.getLogger("chyren")
 
 
@@ -78,6 +102,7 @@ def run_medulla(args: List[str], bin_name: str = "chyren") -> subprocess.Complet
 
 
 def main() -> None:
+    _load_env()
     _configure_logging()
 
     if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help"):

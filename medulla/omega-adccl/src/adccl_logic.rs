@@ -52,17 +52,25 @@ impl ADCCL {
             score -= 0.6;
         }
 
-        // Short answer exception from task context.
+        // Short answer exception: task explicitly asks for brief reply.
         let short_answer_ok_re = regex::Regex::new(
             r"(?i)\b(nothing\s+else|one\s+word|single\s+word|only\s+say|just\s+say|exactly)\b",
         )
         .unwrap();
         let short_answer_ok = short_answer_ok_re.is_match(task_text);
 
+        // Short factual Q&A context: a short task (< 60 chars) paired with a short response
+        // (< 100 chars) is a legitimate concise answer — penalise much less.
+        let short_qa_context = text.len() < 100 && task_text.len() < 60;
+
         // Too short to be useful.
         if text.len() < 40 && !(short_answer_ok && text.len() <= 20) {
             flags.push("RESPONSE_TOO_SHORT".to_string());
-            score -= 0.35;
+            if short_qa_context {
+                score -= 0.10; // concise factual answer — light penalty
+            } else {
+                score -= 0.35;
+            }
         }
 
         // "Non-answer" patterns.
@@ -73,8 +81,9 @@ impl ADCCL {
             score -= 0.25;
         }
 
-        // Task overlap gate: ensure some lexical overlap with the task for non-trivial tasks.
-        if !task_text.is_empty() && task_text.len() >= 12 && text.len() >= 40 {
+        // Task overlap gate: skip for short responses (< 80 chars) — factual answers
+        // naturally don't echo the question's vocabulary.
+        if !task_text.is_empty() && task_text.len() >= 12 && text.len() >= 80 {
             let word_re = regex::Regex::new(r"[a-z]{4,}").unwrap();
             let task_lower = task_text.to_lowercase();
             let task_words: HashSet<_> =
