@@ -1,86 +1,212 @@
-//! omega-myelin vector layer: High-performance semantic retrieval via Qdrant.
+//! omega-myelin vector layer: Semantic retrieval via Qdrant REST API.
 //!
-//! Provides the `VectorStore` for indexing and searching memory nodes.
+//! Uses plain HTTP (reqwest) — no gRPC dependency.
 
-use crate::MemoryNode;
-use anyhow::{Context, Result};
-use qdrant_client::qdrant::{
-    value::Kind, CreateCollectionBuilder, Distance, PointStruct, QueryPointsBuilder,
-    UpsertPointsBuilder, VectorParamsBuilder,
-};
-use qdrant_client::{Payload, Qdrant};
-use serde_json::json;
+use serde::{Deserialize, Serialize};
+use serde_json::{json, Value};
+use std::env;
 
-/// Semantic storage engine backed by Qdrant.
+/// A single search result returned by Qdrant.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SearchResult {
+    pub id: String,
+    pub score: f32,
+    pub payload: Value,
+}
+
+/// HTTP-based Qdrant vector store client.
+#[derive(Debug)]
 pub struct VectorStore {
-    client: Qdrant,
-    collection_name: String,
+    client: reqwest::Client,
+    base_url: String,
+    collection: String,
 }
 
 impl VectorStore {
-    /// Connect to Qdrant and ensure the collection exists.
-    pub async fn connect(url: &str, collection: &str) -> Result<Self> {
-        let client = Qdrant::from_url(url).build()?;
+    /// Construct from explicit URL and collection name.
+    pub fn new(url: &str, collection: &str) -> Self {
+        Self {
+            client: reqwest::Client::builder()
+                .timeout(std::time::Duration::from_secs(5))
+                .build()
+                .unwrap_or_default(),
+            base_url: url.trim_end_matches('/').to_string(),
+            collection: collection.to_string(),
+        }
+    }
 
-        // Ensure collection exists
-        if !client.collection_exists(collection).await? {
-            client
-                .create_collection(
-                    CreateCollectionBuilder::new(collection)
-                        .vectors_config(VectorParamsBuilder::new(1536, Distance::Cosine)), // Standard for OpenAI/Chyren embeddings
-                )
-                .await
-                .context("Failed to create Qdrant collection")?;
+    /// Construct from `QDRANT_URL` env var (default: `http://localhost:6333`),
+    /// collection defaults to `"chyren_memory"`.
+    pub fn from_env() -> Self {
+        let url = env::var("QDRANT_URL").unwrap_or_else(|_| "http://localhost:6333".to_string());
+        Self::new(&url, "chyren_memory")
+    }
+
+    /// Returns `true` if Qdrant is reachable, `false` otherwise (never panics).
+    pub async fn health_check(&self) -> bool {
+        let url = format!("{}/healthz", self.base_url);
+        match self.client.get(&url).send().await {
+            Ok(resp) => resp.status().is_success(),
+            Err(_) => false,
+        }
+    }
+
+    /// Upsert a single vector point. No-op (logs to stderr) if Qdrant is unreachable.
+    pub async fn upsert(
+        &self,
+        id: &str,
+        vector: Vec<f32>,
+        payload: Value,
+    ) -> Result<(), anyhow::Error> {
+        let url = format!(
+            "{}/collections/{}/points",
+            self.base_url, self.collection
+        );
+        let body = json!({
+            "points": [{
+                "id": id,
+                "vector": vector,
+                "payload": payload,
+            }]
+        });
+
+        match self.client.put(&url).json(&body).send().await {
+            Ok(resp) if resp.status().is_success() => Ok(()),
+            Ok(resp) => {
+                let status = resp.status();
+                let text = resp.text().await.unwrap_or_default();
+                eprintln!("[omega-myelin] qdrant upsert failed {status}: {text}");
+                Err(anyhow::anyhow!("Qdrant upsert error {status}: {text}"))
+            }
+            Err(e) => {
+                eprintln!("[omega-myelin] qdrant upsert unreachable: {e}");
+                Ok(()) // graceful degradation — treat as no-op
+            }
+        }
+    }
+
+    /// Cosine-similarity search. Returns empty vec if Qdrant is unreachable (never panics).
+    pub async fn search(
+        &self,
+        query_vector: Vec<f32>,
+        top_k: usize,
+    ) -> Result<Vec<SearchResult>, anyhow::Error> {
+        let url = format!(
+            "{}/collections/{}/points/search",
+            self.base_url, self.collection
+        );
+        let body = json!({
+            "vector": query_vector,
+            "limit": top_k,
+            "with_payload": true,
+        });
+
+        let resp = match self.client.post(&url).json(&body).send().await {
+            Ok(r) => r,
+            Err(e) => {
+                eprintln!("[omega-myelin] qdrant search unreachable: {e}");
+                return Ok(vec![]);
+            }
+        };
+
+        if !resp.status().is_success() {
+            let status = resp.status();
+            let text = resp.text().await.unwrap_or_default();
+            eprintln!("[omega-myelin] qdrant search error {status}: {text}");
+            return Ok(vec![]);
         }
 
-        Ok(Self {
-            client,
-            collection_name: collection.to_string(),
-        })
-    }
+        #[derive(Deserialize)]
+        struct QdrantHit {
+            id: Value,
+            score: f32,
+            #[serde(default)]
+            payload: Value,
+        }
+        #[derive(Deserialize)]
+        struct QdrantSearchResponse {
+            result: Vec<QdrantHit>,
+        }
 
-    /// Index a node with its embedding.
-    pub async fn upsert_node(&self, node: &MemoryNode, embedding: Vec<f32>) -> Result<()> {
-        let payload: Payload = json!({
-            "node_id": node.node_id,
-            "content": node.content,
-            "decay_score": node.decay_score,
-        })
-        .try_into()?;
+        let parsed: QdrantSearchResponse = match resp.json().await {
+            Ok(p) => p,
+            Err(e) => {
+                eprintln!("[omega-myelin] qdrant search parse error: {e}");
+                return Ok(vec![]);
+            }
+        };
 
-        let point = PointStruct::new(node.node_id.clone(), embedding, payload);
-
-        self.client
-            .upsert_points(UpsertPointsBuilder::new(&self.collection_name, vec![point]).wait(true))
-            .await?;
-        Ok(())
-    }
-
-    /// Perform a semantic search.
-    pub async fn search(&self, vector: Vec<f32>, top_k: usize) -> Result<Vec<String>> {
-        let search_result = self
-            .client
-            .query(
-                QueryPointsBuilder::new(&self.collection_name)
-                    .query(vector)
-                    .limit(top_k as u64)
-                    .with_payload(true),
-            )
-            .await?;
-
-        let node_ids = search_result
+        let results = parsed
             .result
             .into_iter()
-            .filter_map(|p| {
-                p.payload
-                    .get("node_id")
-                    .and_then(|v| match v.kind.as_ref() {
-                        Some(Kind::StringValue(s)) => Some(s.clone()),
-                        _ => None,
-                    })
+            .map(|hit| SearchResult {
+                id: match &hit.id {
+                    Value::String(s) => s.clone(),
+                    other => other.to_string(),
+                },
+                score: hit.score,
+                payload: hit.payload,
             })
             .collect();
 
-        Ok(node_ids)
+        Ok(results)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_from_env_url_variants() {
+        // Run both env-var checks sequentially within a single test to avoid
+        // parallel-test races on the process-global env.
+        unsafe {
+            // Default: no env var set
+            std::env::remove_var("QDRANT_URL");
+            let vs = VectorStore::from_env();
+            assert_eq!(vs.base_url, "http://localhost:6333");
+            assert_eq!(vs.collection, "chyren_memory");
+
+            // Custom URL
+            std::env::set_var("QDRANT_URL", "http://qdrant.example.com:6333");
+            let vs = VectorStore::from_env();
+            assert_eq!(vs.base_url, "http://qdrant.example.com:6333");
+
+            // Clean up
+            std::env::remove_var("QDRANT_URL");
+        }
+    }
+
+    #[tokio::test]
+    async fn test_health_check_offline_returns_false() {
+        // Port 19999 is almost certainly not listening.
+        let vs = VectorStore::new("http://127.0.0.1:19999", "test_col");
+        let alive = vs.health_check().await;
+        assert!(!alive, "health_check should return false when offline");
+    }
+
+    #[tokio::test]
+    async fn test_search_offline_returns_empty() {
+        let vs = VectorStore::new("http://127.0.0.1:19999", "test_col");
+        let results = vs.search(vec![0.1, 0.2, 0.3], 5).await.unwrap();
+        assert!(
+            results.is_empty(),
+            "search should return empty vec when offline"
+        );
+    }
+
+    #[tokio::test]
+    async fn test_upsert_offline_is_noop() {
+        let vs = VectorStore::new("http://127.0.0.1:19999", "test_col");
+        // Should not panic and should return Ok (graceful degradation)
+        let result = vs
+            .upsert(
+                "test-id-1",
+                vec![0.1, 0.2, 0.3],
+                serde_json::json!({"content": "hello"}),
+            )
+            .await;
+        assert!(result.is_ok(), "upsert should be a no-op when offline");
     }
 }

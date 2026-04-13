@@ -200,13 +200,27 @@ export default function ChatPage() {
 
         <header className="phone-chrome">
           <h1 className={`phone-title ${headerLoadClass}`}>CHYREN</h1>
+          <div className="sovereign-seal">R.W.&#x03DC;.Y. &mdash; SOVEREIGN INTELLIGENCE</div>
           {isStreaming && (
             <span className="header-inference-badge">
               <span className="header-pulse-dot" />
-              LOCAL INFERENCE
+              PROCESSING
             </span>
           )}
         </header>
+
+        {/* Pipeline status bar */}
+        <div className="pipeline-bar" aria-label="Pipeline stages">
+          {(['ALIGN', 'AEON', 'PROVIDER', 'ADCCL', 'LEDGER'] as const).map((stage, i, arr) => (
+            <React.Fragment key={stage}>
+              <span className={`pipeline-stage${isStreaming ? ' pipeline-stage--active' : ''}`}>
+                <span className="pipeline-dot" />
+                {stage}
+              </span>
+              {i < arr.length - 1 && <span className="pipeline-sep" aria-hidden="true" />}
+            </React.Fragment>
+          ))}
+        </div>
 
         <section
           ref={chatWindowRef}

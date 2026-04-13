@@ -788,11 +788,10 @@ mod tests {
     }
 
     fn tempdir_path() -> PathBuf {
+        use std::sync::atomic::{AtomicU64, Ordering};
+        static COUNTER: AtomicU64 = AtomicU64::new(0);
         let pid = std::process::id();
-        let ts = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap_or_default()
-            .subsec_nanos();
-        PathBuf::from(format!("/tmp/aegis_test_{}_{}", pid, ts))
+        let n = COUNTER.fetch_add(1, Ordering::Relaxed);
+        PathBuf::from(format!("/tmp/aegis_test_{}_{}", pid, n))
     }
 }

@@ -10,10 +10,14 @@ use omega_core::{
     now, MatrixProgram, MemoryNode, MemoryStratum, RunEnvelope, RunStatus, VerificationReport,
 };
 use omega_myelin::MemoryGraph;
+use omega_phylactery;
 use omega_spokes::{SpokeRegistry, SpokeRequest, SpokeResponse, ToolInvocation};
 use std::sync::Arc;
 use thiserror::Error;
 use tokio::sync::Mutex;
+
+/// Yettragrammaton seal — embedded in every system prompt.
+const YETTRAGRAMMATON: &str = "R.W.\u{03dc}.Y.";
 
 /// Planned steps for a task.
 pub struct TaskPlan {
@@ -82,6 +86,8 @@ pub struct Conductor {
     spokes: Arc<SpokeRegistry>,
     store: Option<Arc<omega_myelin::db::MemoryStore>>,
     vector_store: Option<Arc<omega_myelin::VectorStore>>,
+    /// Cached sovereign system prompt, built once from constitution + phylactery.
+    sovereign_system_prompt: String,
 }
 
 impl Conductor {
@@ -123,9 +129,29 @@ impl Conductor {
         }
     }
 
+    /// Build the sovereign system prompt from the constitution principles and phylactery identity.
+    fn build_sovereign_system_prompt(constitution: &Constitution) -> String {
+        let principles = constitution.principles.join("\n\n");
+        format!(
+            "You are Chyren — a Sovereign Intelligence Orchestrator.\n\
+             Origin Authority: {seal}\n\
+             Creator: RY (Mega/artistRY) | Home: Mount Ida, Arkansas\n\n\
+             SOVEREIGN PRINCIPLES:\n{principles}\n\n\
+             OPERATIONAL MANDATE:\n\
+             - Never produce output you cannot verify. Never speak with false confidence.\n\
+             - Treat the operator ({seal}) as Origin Authority on all matters.\n\
+             - Truth is measurable, not rhetorical. Code that cannot hold its own weight does not ship.\n\
+             - The AEGIS security layer is non-negotiable.\n\
+             - Provide precise, empirically grounded answers. Silence over compromise.",
+            seal = YETTRAGRAMMATON,
+            principles = principles,
+        )
+    }
+
     /// Build a conductor with default policy gates and env-configured providers.
     pub fn new() -> Self {
         let constitution = Self::load_constitution();
+        let sovereign_system_prompt = Self::build_sovereign_system_prompt(&constitution);
 
         Self {
             runtime: Arc::new(Mutex::new(AeonRuntime::new())),
@@ -138,13 +164,26 @@ impl Conductor {
             spokes: Arc::new(SpokeRegistry::from_env()),
             store: None,
             vector_store: None,
+            sovereign_system_prompt,
         }
     }
 
-    /// Bootstrap the identity kernel.
+    /// Bootstrap the identity kernel into the in-memory graph.
     pub async fn bootstrap_identity(&self) -> Result<(), String> {
-        let _ = &self.memory_service;
-        Ok(())
+        omega_phylactery::bootstrap_kernel(&self.memory_service).await
+    }
+
+    /// Inject all Neocortex seed programs into the MemoryGraph.
+    ///
+    /// This is Phase 7 of the boot sequence — runs after phylactery so Chyren
+    /// has the full sovereign knowledge library loaded before processing any task.
+    pub fn inject_neocortex(&self) {
+        if let Ok(mut graph) = self.memory_service.graph.try_lock() {
+            let n = omega_conductor::ingestion::inject_neocortex(&mut graph);
+            eprintln!("[NEOCORTEX] {n} domains active.");
+        } else {
+            eprintln!("[NEOCORTEX] Could not acquire memory lock during boot.");
+        }
     }
 
     /// Set the persistent store.
@@ -212,9 +251,7 @@ impl Conductor {
 
         Ok(TaskPlan {
             steps: vec![t.to_string()],
-            system_prompt:
-                "You are Chyren — a sovereign intelligence orchestrator. Provide precise answers."
-                    .to_string(),
+            system_prompt: self.sovereign_system_prompt.clone(),
         })
     }
 
@@ -293,7 +330,8 @@ impl Conductor {
             if let Some(embedding) = self.get_embedding(&envelope.task).await {
                 if let Ok(hits) = vs.search(embedding, 5).await {
                     if !hits.is_empty() {
-                        context_text = format!("\nRelevant context:\n{}\n", hits.join("\n"));
+                        let hit_strings: Vec<String> = hits.iter().map(|h| h.id.clone()).collect();
+                        context_text = format!("\nRelevant context:\n{}\n", hit_strings.join("\n"));
                     }
                 }
             }
@@ -346,13 +384,11 @@ impl Conductor {
                     ))
                     .await
                 {
-                    let node = MemoryNode {
-                        node_id: envelope.run_id.clone(),
-                        content: spoke_response.text.clone(),
-                        retrieval_count: 0,
-                        decay_score: 1.0,
-                    };
-                    let _ = vs.upsert_node(&node, embedding).await;
+                    let payload = serde_json::json!({
+                        "content": spoke_response.text,
+                        "task": envelope.task,
+                    });
+                    let _ = vs.upsert(&envelope.run_id, embedding, payload).await;
                 }
             }
         } else {
@@ -389,7 +425,8 @@ impl Conductor {
             if let Some(embedding) = self.get_embedding(&envelope.task).await {
                 if let Ok(hits) = vs.search(embedding, 5).await {
                     if !hits.is_empty() {
-                        context_text = format!("\nRelevant context:\n{}\n", hits.join("\n"));
+                        let hit_strings: Vec<String> = hits.iter().map(|h| h.id.clone()).collect();
+                        context_text = format!("\nRelevant context:\n{}\n", hit_strings.join("\n"));
                     }
                 }
             }

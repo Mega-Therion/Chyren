@@ -33,6 +33,8 @@ omega-myelin = { path = "../omega-myelin" }
 omega-aeon = { path = "../omega-aeon" }
 omega-integration = { path = "../omega-integration" }
 omega-spokes = { path = "../omega-spokes" }
+omega-phylactery = { path = "../omega-phylactery" }
+omega-conductor = { path = "../omega-conductor" }
 omega-telemetry = { path = "../omega-telemetry" }
 omega-eval = { path = "../omega-eval" }
 serde = { version = "1", features = ["derive"] }

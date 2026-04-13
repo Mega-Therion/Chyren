@@ -127,6 +127,10 @@ async fn main() -> anyhow::Result<()> {
         info!("Phylactery Identity Kernel active (L6 Canonical).");
     }
 
+    // Phase 7: Neocortex injection — load Matrix program library into MemoryGraph
+    conductor.inject_neocortex();
+    info!("Neocortex programs injected — sovereign knowledge active.");
+
     let conductor = Arc::new(conductor);
 
     match &cli.command {
