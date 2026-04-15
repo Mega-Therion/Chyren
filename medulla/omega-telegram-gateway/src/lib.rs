@@ -136,6 +136,25 @@ pub async fn run_bridge(token: String) -> Result<(), Box<dyn std::error::Error +
 
     Ok(())
 }
+// ── Proactive Outbound Messaging ───────────────────────────────────────────────
+
+/// Send a proactive message to a specific Telegram chat ID.
+///
+/// This capability allows the AI to initiate communication (e.g., alerts, updates)
+/// outside of the standard request-response REPL loop.
+pub async fn send_telegram_message(
+    token: &str,
+    chat_id: &str,
+    text: &str,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    let bot = Bot::new(token.to_string());
+    
+    // Parse the chat_id which may be a raw numeric ID
+    let parsed_id = chat_id.parse::<i64>().map_err(|e| format!("Invalid chat_id: {}", e))?;
+    
+    bot.send_message(teloxide::types::ChatId(parsed_id), text).await?;
+    Ok(())
+}
 
 // ── Unit tests ─────────────────────────────────────────────────────────────────
 

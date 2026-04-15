@@ -2,13 +2,10 @@ use crate::{
     Spoke, SpokeCapability, SpokeConfig, SpokeStatus, ToolDefinition, ToolInvocation, ToolResult,
 };
 use async_trait::async_trait;
-use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::process::Stdio;
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
-use tokio::process::{Child, Command};
-use tokio::sync::{mpsc, Mutex};
-use std::sync::Arc;
+use tokio::process::Command;
 
 #[derive(Clone)]
 pub struct MCPSpoke {
@@ -106,7 +103,7 @@ impl Spoke for MCPSpoke {
 
     async fn discover_tools(&self) -> Result<Vec<ToolDefinition>, String> {
         // First, we must initialize the connection according to MCP spec
-        let init_params = json!({
+        let _init_params = json!({
             "protocolVersion": "2024-11-05", // Standard MCP protocol version
             "clientInfo": {
                 "name": "Chyren-Medulla-Bridge",
@@ -142,7 +139,7 @@ impl Spoke for MCPSpoke {
                 }
                 Ok(definitions)
             }
-            Err(e) => {
+            Err(_e) => {
                 // Return a mock definition if the server isn't running yet to prevent boot failures
                 Ok(vec![ToolDefinition {
                     name: format!("{}_passthrough", self.name()),
