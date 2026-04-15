@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, ShieldCheck, Zap, BrainCircuit } from 'lucide-react';
+import { Activity, ShieldCheck, Zap } from 'lucide-react';
 
 interface Metrics {
   chyren_task_admitted_total?: number;
@@ -24,13 +24,13 @@ export const MetricsDashboard: React.FC = () => {
       } else {
         setError('Medulla Offline');
       }
-    } catch (err) {
+    } catch {
       setError('Connection Error');
     }
   };
 
   useEffect(() => {
-    fetchMetrics();
+    void fetchMetrics();
     const interval = setInterval(fetchMetrics, 2000);
     return () => clearInterval(interval);
   }, []);

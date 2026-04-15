@@ -85,7 +85,6 @@ async function fetchLiveContext(): Promise<string> {
   try {
     const { neon } = await import('@neondatabase/serverless')
     // Dynamic routing using Librarian logic conceptually
-    const queryTopic = "chyren" // Example topic
     const sql = neon(url)
 
     const [familyRows, knowledgeRows, memoryRows] = await Promise.all([

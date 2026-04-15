@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { motion } from 'framer-motion'
 import dynamic from 'next/dynamic'
 import { AlertCircle, Loader2, Volume2, VolumeX } from 'lucide-react'
 import { ChatMessage } from '@/components/ChatMessage'
@@ -57,7 +58,6 @@ function consumeSseBuffer(buffer: string): {
   return { events, remaining }
 }
 
-const EMPTY_PROMPTS: string[] = []
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([])
