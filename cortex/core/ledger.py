@@ -11,6 +11,7 @@ Rules:
 import json
 import os
 import threading
+import hashlib
 from dataclasses import dataclass, field, asdict
 from typing import Any
 
@@ -33,6 +34,7 @@ class LedgerEntry:
     adccl_score: float              # 0.0–1.0 from ADCCL verification
     adccl_flags: list[str]          # issues raised by ADCCL, empty on clean pass
     state_snapshot: dict[str, Any]  # injected state at the time of the call
+    previous_state_hash: str = ""   # SHA-256 of the previous entry's signature
     timestamp_utc: float = 0.0      # set by stamp()
     signature: str = ""             # set by stamp()
 
@@ -97,6 +99,13 @@ class Ledger:
         and persist to disk. Raises ValueError if integrity check fails.
         Returns the signed entry dict.
         """
+        with self._lock:
+            if self._entries:
+                prev = self._entries[-1]
+                entry.previous_state_hash = hashlib.sha256(
+                    prev.get("signature", "").encode("utf-8")
+                ).hexdigest()
+
         raw = entry.to_dict()
         signed = stamp(raw)
         assert_valid(signed)  # hard gate — this should always pass if integrity.py is correct
