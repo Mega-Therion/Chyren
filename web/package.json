@@ -15,7 +15,7 @@
     "audit:check": "npm audit --audit-level=high"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^3.0.66",
+    "@ai-sdk/anthropic": "^3.0.69",
     "@ai-sdk/google": "^3.0.58",
     "@ai-sdk/groq": "^3.0.35",
     "@ai-sdk/openai": "^3.0.50",
