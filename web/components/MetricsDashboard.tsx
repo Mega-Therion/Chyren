@@ -74,22 +74,25 @@ const MetricCard: React.FC<{ label: string, value: string | number, icon: React.
   <motion.div 
     initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}
-    className={`bg-gradient-to-br ${color} backdrop-blur-md border border-white/10 rounded-2xl p-4 flex flex-col gap-2 shadow-xl shadow-black/20`}
+    className={`bg-zinc-900/40 backdrop-blur-xl border border-white/5 rounded-lg p-4 flex flex-col gap-2 shadow-2xl transition-all hover:border-white/20 group`}
   >
     <div className="flex items-center justify-between">
-      <span className="text-xs font-semibold uppercase tracking-wider text-white/60">{label}</span>
-      {icon}
+      <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 group-hover:text-zinc-300 transition-colors">{label}</span>
+      <div className="opacity-50 group-hover:opacity-100 transition-opacity">
+        {icon}
+      </div>
     </div>
     <AnimatePresence mode="wait">
       <motion.span 
         key={value}
-        initial={{ opacity: 0, x: -5 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: 5 }}
-        className="text-2xl font-bold font-mono text-white"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 1.05 }}
+        className="text-2xl font-bold font-mono text-zinc-100"
       >
         {value}
       </motion.span>
     </AnimatePresence>
+    <div className={`h-0.5 w-0 group-hover:w-full transition-all duration-500 bg-gradient-to-r ${color}`} />
   </motion.div>
 );

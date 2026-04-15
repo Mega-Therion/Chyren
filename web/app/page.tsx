@@ -57,12 +57,7 @@ function consumeSseBuffer(buffer: string): {
   return { events, remaining }
 }
 
-const EMPTY_PROMPTS = [
-  'Summarize my current project status and next actions.',
-  'Draft a deployment checklist for chyren-web on Vercel.',
-  'Find UI/UX issues in this chat UI and propose fixes.',
-  'Help me write a clear GitHub issue for the biggest bug here.',
-]
+const EMPTY_PROMPTS: string[] = []
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([])
@@ -239,24 +234,12 @@ export default function ChatPage() {
           {messages.length === 0 ? (
             <div className="empty-state">
               <div className="empty-state-inner">
-                <div className="empty-state-sigil">Ω</div>
-                <div className="empty-state-title">Awaiting Intent</div>
-                <p className="empty-state-subtitle">
-                  Start with a concrete task. You can paste an error log, request a change, or pick one of these.
-                </p>
-                <div className="empty-prompts" role="list">
-                  {EMPTY_PROMPTS.map(p => (
-                    <button
-                      key={p}
-                      type="button"
-                      className="prompt-chip"
-                      onClick={() => { void sendMessage(p) }}
-                      role="listitem"
-                    >
-                      {p}
-                    </button>
-                  ))}
-                </div>
+                {/* Minimalist splash for Absolute Sovereignty */}
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="empty-state-sigil opacity-20"
+                >Ω</motion.div>
               </div>
             </div>
           ) : (
@@ -275,7 +258,7 @@ export default function ChatPage() {
             ))
           )}
 
-          <div ref={messagesEndRef} style={{ height: 1 }} />
+          <div ref={messagesEndRef} className="h-0.5" />
         </section>
 
         {error && (
@@ -290,7 +273,7 @@ export default function ChatPage() {
               type="button"
               className="p-2 opacity-40 hover:opacity-100 transition-opacity"
               aria-label={ttsEnabled ? 'Disable text to speech' : 'Enable text to speech'}
-              aria-pressed={ttsEnabled}
+              aria-pressed={ttsEnabled ? 'true' : 'false'}
               onClick={() => setTtsEnabled(v => !v)}
             >
               {ttsEnabled ? <Volume2 size={16} className="text-cyan-400" /> : <VolumeX size={16} />}

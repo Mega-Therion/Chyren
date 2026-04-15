@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 export async function GET() {
   try {
     const response = await fetch('http://localhost:9090/metrics', {
-      next: { revalidate: 0 } // Disable caching for real-time metrics
+      cache: 'no-store' // Disable caching for real-time metrics
     });
     
     if (!response.ok) {
