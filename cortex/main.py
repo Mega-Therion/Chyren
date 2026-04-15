@@ -46,6 +46,7 @@ from core.alignment import AlignmentLayer
 from core.sandbox import analyze_payload
 from core.deflection import DeflectionEngine, classify_threat_level, ThreatLevel
 from core.threat_fabric import ThreatFabric, phylactic_sync, is_known_attack
+from librarian_bridge import LibrarianBridge
 from providers.base import ProviderRequest, ProviderRouter, ProviderStatus
 from providers.anthropic import AnthropicProvider
 from providers.openai import OpenAIProvider
@@ -115,6 +116,7 @@ class Chyren:
 
         # Module 4 — Threat Fabric: phylactic immune memory.
         self._threat_fabric = ThreatFabric()
+        self._librarian = LibrarianBridge()
 
         available = self._router.available()
         if not available:

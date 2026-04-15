@@ -34,7 +34,7 @@ SUPA_REF     = "eletftuboucrsrnapqoq"
 SUPA_BASE    = f"https://{SUPA_REF}.supabase.co/rest/v1"
 SUPA_KEY     = next(p["service_key"] for p in POOL["pool"] if p["id"] == "supabase_sovereign")
 
-BRAIN        = Path("/home/mega/Chyren/archives/OMEGA_WORKSPACE/BRAIN")
+BRAIN        = Path("/home/mega/Work/Chyren/archives/OMEGA_WORKSPACE/BRAIN")
 CONSOLIDATED = BRAIN / "raw/OMEGA_DATA_CONSOLIDATED"
 BIOGRAPHY    = BRAIN / "biography"
 DOCS         = Path("/home/mega/Chyren/archives/OMEGA_WORKSPACE/DOCS")
