@@ -108,6 +108,10 @@ async fn main() -> anyhow::Result<()> {
     init_tracing();
     let cli = Cli::parse();
 
+    // Launch The Eye (Prometheus Observability)
+    let _ = omega_telemetry::start_metrics_server(9090).await;
+    omega_telemetry::CHYREN_TASK_ADMITTED_TOTAL.inc();
+
     let mut conductor = Conductor::new();
 
     if let Ok(url) = std::env::var("OMEGA_DB_URL") {

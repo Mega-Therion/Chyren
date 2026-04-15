@@ -22,6 +22,8 @@ pub enum SpokeCapability {
     Search,
     /// General tool execution capability.
     Tools,
+    /// Sensitive operations requiring explicit alignment check.
+    Sensitive,
 }
 
 /// Dynamic configuration for a spoke.
@@ -227,6 +229,17 @@ impl SpokeRegistry {
 
     pub fn get_spoke(&self, name: &str) -> Option<Arc<dyn Spoke>> {
         self.spokes.get(name).cloned()
+    }
+
+    /// Discover tools from all registered spokes.
+    pub async fn discover_all_tools(&self) -> Vec<ToolDefinition> {
+        let mut all_tools = Vec::new();
+        for spoke in self.spokes.values() {
+            if let Ok(mut tools) = spoke.discover_tools().await {
+                all_tools.append(&mut tools);
+            }
+        }
+        all_tools
     }
 
     /// Route a chat request and stream chunks via a channel (Phase 2).

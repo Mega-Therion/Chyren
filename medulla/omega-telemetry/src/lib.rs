@@ -82,6 +82,62 @@ impl TelemetrySink for FileSink {
     fn record_metric(&self, _name: &str, _value: f64, _labels: Vec<(String, String)>) {}
 }
 
+use actix_web::{get, App, HttpResponse, HttpServer, Responder};
+use lazy_static::lazy_static;
+use prometheus::{opts, register_counter, register_gauge, Counter, Encoder, Gauge, TextEncoder};
+use tracing::{info, warn};
+
+lazy_static! {
+    /// Total number of tasks admitted to the system
+    pub static ref CHYREN_TASK_ADMITTED_TOTAL: Counter = register_counter!(
+        opts!("chyren_task_admitted_total", "Total tasks admitted to the system")
+    ).unwrap();
+
+    /// Current number of active runs in the pipeline
+    pub static ref CHYREN_ACTIVE_RUNS: Gauge = register_gauge!(
+        opts!("chyren_active_runs", "Current number of active runs")
+    ).unwrap();
+
+    /// Last recorded ADCCL score
+    pub static ref CHYREN_ADCCL_SCORE: Gauge = register_gauge!(
+        opts!("chyren_adccl_score", "Most recent ADCCL alignment score")
+    ).unwrap();
+}
+
+/// Start the Prometheus metrics server on the specified port.
+/// This runs in a background thread and does not block.
+pub async fn start_metrics_server(port: u16) -> std::io::Result<()> {
+    info!("[THE EYE] Starting metrics server on 0.0.0.0:{}", port);
+    
+    // Spawn the server as a background task
+    tokio::spawn(async move {
+        let server = HttpServer::new(|| {
+            App::new().service(metrics_endpoint)
+        })
+        .bind(("0.0.0.0", port))
+        .expect("Failed to bind metrics server")
+        .run();
+
+        if let Err(e) = server.await {
+            eprintln!("[THE EYE] Metrics server error: {}", e);
+        }
+    });
+
+    Ok(())
+}
+
+#[get("/metrics")]
+async fn metrics_endpoint() -> impl Responder {
+    let encoder = TextEncoder::new();
+    let metric_families = prometheus::gather();
+    let mut buffer = vec![];
+    encoder.encode(&metric_families, &mut buffer).unwrap();
+
+    HttpResponse::Ok()
+        .content_type(encoder.format_type())
+        .body(buffer)
+}
+
 /// Minimal Prometheus-text sink (prints exposition-style metric lines to stdout).
 pub struct PrometheusSink;
 impl PrometheusSink {
@@ -97,18 +153,17 @@ impl Default for PrometheusSink {
 }
 impl TelemetrySink for PrometheusSink {
     fn record(&self, _event: &SystemEvent) {}
-    fn record_metric(&self, name: &str, value: f64, labels: Vec<(String, String)>) {
-        let label_str = labels
-            .iter()
-            .map(|(k, v)| format!("{}=\"{}\"", k, v))
-            .collect::<Vec<_>>()
-            .join(",");
-        println!(
-            "{metric}{{{labels}}} {value}",
-            metric = name,
-            labels = label_str,
-            value = value
-        );
+    fn record_metric(&self, name: &str, value: f64, _labels: Vec<(String, String)>) {
+        // Update global Prometheus metrics based on name
+        match name {
+            "chyren_task_admitted_total" => CHYREN_TASK_ADMITTED_TOTAL.inc(),
+            "chyren_active_runs" => CHYREN_ACTIVE_RUNS.set(value),
+            "chyren_adccl_score" => CHYREN_ADCCL_SCORE.set(value),
+            _ => {
+                // For other metrics, we can still print to stdout
+                println!("[PROMETHEUS] {} = {}", name, value);
+            }
+        }
     }
 }
 

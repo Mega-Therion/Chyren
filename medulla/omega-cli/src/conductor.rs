@@ -14,9 +14,11 @@ use omega_core::{
 use omega_myelin::MemoryGraph;
 use omega_phylactery;
 use omega_spokes::{SpokeRegistry, SpokeRequest, SpokeResponse, ToolInvocation};
+use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use thiserror::Error;
 use tokio::sync::Mutex;
+use tracing::{info, warn};
 
 /// Yettragrammaton seal — embedded in every system prompt.
 const YETTRAGRAMMATON: &str = "R.W.\u{03dc}.Y.";
@@ -267,9 +269,21 @@ impl Conductor {
             return Err(ConductorError::Deflected(deflection.response_text));
         }
 
+        // Fetch relevant lessons from the Dream Engine (cognitive feedback loop)
+        let mut final_system_prompt = self.sovereign_system_prompt.clone();
+        if let Ok(dream) = self.dream.try_lock() {
+            let stats = dream.get_statistics();
+            if stats.total_episodes > 0 {
+                final_system_prompt.push_str("\n\nLESSONS FROM PAST COGNITIVE DRIFT:\n");
+                for (pattern, count) in &stats.most_common_failures {
+                    final_system_prompt.push_str(&format!("- [{}] Found in {} cases. Mitigation: Ensure alignment with task objective and accuracy.\n", pattern, count));
+                }
+            }
+        }
+
         Ok(TaskPlan {
             steps: vec![t.to_string()],
-            system_prompt: self.sovereign_system_prompt.clone(),
+            system_prompt: final_system_prompt,
         })
     }
 
@@ -355,20 +369,130 @@ impl Conductor {
             }
         }
 
-        let request = SpokeRequest {
-            prompt: format!("{}{}", envelope.task, context_text),
-            system: plan.system_prompt,
-            max_tokens,
-            temperature,
+        // --- Tool Discovery & System Prompt Injection ---
+        let tools = self.spokes.discover_all_tools().await;
+        let mut tool_system_prompt = plan.system_prompt.clone();
+        if !tools.is_empty() {
+            tool_system_prompt.push_str("\n\nAUTHENTICATED TOOLS AVAILABLE:\n");
+            for t in &tools {
+                tool_system_prompt.push_str(&format!("- {}: {}\n", t.name, t.description));
+            }
+            tool_system_prompt.push_str("\nTo invoke a tool, respond with exactly: <tool_call>{\"tool\": \"name\", \"input\": { ... }}</tool_call>\n");
+        }
+
+        let mut current_prompt = format!("{}{}", envelope.task, context_text);
+        let mut spoke_response = SpokeResponse {
+            text: String::new(),
+            provider: String::new(),
+            model: String::new(),
+            token_count: 0,
+            latency_ms: 0.0,
         };
 
-        let spoke_response = self
-            .spokes
-            .route(&request, preferred_provider)
-            .await
-            .map_err(|e| ConductorError::ProviderError(e.to_string()))?;
 
-        let verification = self.adccl.verify(&spoke_response.text, &envelope.task);
+        let mut verification = VerificationResult {
+            passed: false,
+            score: 0.0,
+            flags: vec!["initial_execution".to_string()],
+        };
+
+        // --- Autonomic Self-Repair Loop ---
+        let mut repair_turn = 0;
+        const MAX_REPAIRS: usize = 3;
+
+        while repair_turn < MAX_REPAIRS {
+            repair_turn += 1;
+            if repair_turn > 1 {
+                info!("[REPAIR] Starting turn {} to resolve drift: {:?}", repair_turn, verification.flags);
+            }
+
+            // --- Autonomous Tool Execution Loop (The Hands) ---
+            let mut turn = 0;
+            const MAX_TOOL_TURNS: usize = 5;
+
+            while turn < MAX_TOOL_TURNS {
+                turn += 1;
+                let request = SpokeRequest {
+                    prompt: current_prompt.clone(),
+                    system: tool_system_prompt.clone(),
+                    max_tokens,
+                    temperature,
+                };
+
+                let res = self
+                    .spokes
+                    .route(&request, preferred_provider)
+                    .await
+                    .map_err(|e| ConductorError::ProviderError(e.to_string()))?;
+
+                spoke_response = res.clone();
+                
+                // Look for tool calls
+                if let Some(start) = res.text.find("<tool_call>") {
+                    if let Some(end) = res.text.find("</tool_call>") {
+                        let call_json_str = &res.text[start + 11..end];
+                        if let Ok(invocation) = serde_json::from_str::<ToolInvocation>(call_json_str) {
+                            info!("[THE HANDS] Invoking tool {} on turn {}", invocation.tool, turn);
+                            
+                            // --- Tool Permission Check ---
+                            let is_sensitive = self.spokes.spokes_with_capability(omega_spokes::SpokeCapability::Sensitive)
+                                .iter().any(|s| s.name() == invocation.tool); // Simplified: check if tool name matches a sensitive spoke or check its metadata
+                            
+                            if is_sensitive {
+                                // Run a quick AEGIS admission check on tool intent
+                                let alignment = self.aligner.check(&format!("INVOKE TOOL: {} with INPUT: {}", invocation.tool, invocation.input));
+                                if !alignment.passed {
+                                    warn!("[AEGIS] Blocked sensitive tool invocation: {}", alignment.note);
+                                    current_prompt.push_str(&format!("\n\n{}\n\n<tool_error>AEGIS: Access denied to tool {}. Reason: {}</tool_error>\n", res.text, invocation.tool, alignment.note));
+                                    continue;
+                                }
+                            }
+
+                            // Execute tool
+                            let mut tool_result_text = format!("<tool_error>Tool {} not found</tool_error>", invocation.tool);
+                            for spoke in self.spokes.spokes_with_capability(omega_spokes::SpokeCapability::Tools) {
+                                 if let Ok(result) = spoke.invoke_tool(invocation.clone()).await {
+                                    tool_result_text = format!("<tool_result>{}</tool_result>", serde_json::to_string(&result.output).unwrap_or_default());
+                                    break;
+                                 }
+                            }
+
+                            current_prompt.push_str(&format!("\n\n{}\n\n{}\n", res.text, tool_result_text));
+                            continue;
+                        }
+                    }
+                }
+                break;
+            }
+
+            // --- Verification Gate (The Council) ---
+            let local_v = self.adccl.verify(&spoke_response.text, &envelope.task);
+            verification = if local_v.passed {
+                match self.verify_via_council(&spoke_response.text, &envelope.task).await {
+                    Ok(council_v) => {
+                        omega_telemetry::CHYREN_ADCCL_SCORE.set(council_v.score as f64);
+                        council_v
+                    }
+                    Err(e) => {
+                        warn!("Council failed: {}. Falling back.", e);
+                        local_v
+                    }
+                }
+            } else {
+                local_v
+            };
+
+            if verification.passed {
+                break; // Exit repair loop if passed
+            } else {
+                // Prepend repair feedback for next turn
+                info!("[REPAIR] Validation failed (score: {}). Flags: {:?}", verification.score, verification.flags);
+                current_prompt.push_str(&format!("\n\nFEEDBACK FROM VERIFIER:\nYour previous response was REJECTED with score {}. Issues found: {:?}.\nPlease REPAIR the response ensuring clarity, accuracy, and adherence to system principles.", verification.score, verification.flags));
+                // Inject the rejected text into history so it can be corrected
+                current_prompt.push_str(&format!("\n\nPREVIOUS RESPONSE:\n{}\n", spoke_response.text));
+            }
+        }
+
         let status_str = if verification.passed {
             "verified"
         } else {
@@ -479,6 +603,102 @@ impl Conductor {
         };
         let epiphanies = mc.reflect(&graph);
         epiphanies.iter().map(|e| e.insight.clone()).collect()
+    }
+
+    /// The Council: Consensus-based LLM verification.
+    /// Queries multiple models in parallel to score a response.
+    pub async fn verify_via_council(&self, response_text: &str, task: &str) -> Result<VerificationResult, String> {
+        info!("[COUNCIL] Convening session for consensus verification...");
+        
+        // Define the verification prompt
+        let system_prompt = "You are an ADCCL Auditor for the Chyren Sovereign Intelligence system.\n\
+            Your task is to grade an AI's response to a given user task.\n\
+            Critically evaluate the response for accuracy, safety, and lack of stubs or hallucinations.\n\
+            Return ONLY a JSON object with: {\"score\": float (0.0 to 1.0), \"flags\": [string], \"passed\": bool}.\n\
+            The 'passed' threshold is 0.7.";
+        
+        let prompt = format!("USER TASK: {}\n\nAI RESPONSE: {}", task, response_text);
+        
+        // Prepare requests for the Council (OpenAI, Anthropic, Gemini, Ollama)
+        let providers = vec!["openai", "anthropic", "gemini", "ollama"];
+        let mut votes = Vec::new();
+
+        let mut futures = Vec::new();
+        for provider in providers {
+            let request = SpokeRequest {
+                prompt: prompt.clone(),
+                system: system_prompt.to_string(),
+                max_tokens: 256,
+                temperature: 0.1,
+            };
+            let spokes = self.spokes.clone();
+            let provider_name = provider.to_string();
+            futures.push(async move {
+                match spokes.route(&request, Some(&provider_name)).await {
+                    Ok(res) => (provider_name, Some(res.text)),
+                    Err(_) => (provider_name, None),
+                }
+            });
+        }
+
+        let results = futures::future::join_all(futures).await;
+
+        for (provider, output) in results {
+            if let Some(text) = output {
+                // Try to parse JSON from the response
+                let text_str: &str = &text;
+                if let Some(start) = text_str.find('{') {
+                    if let Some(end) = text.rfind('}') {
+                        let json_str = &text[start..=end];
+                        if let Ok(v) = serde_json::from_str::<serde_json::Value>(json_str) {
+                            let score = v["score"].as_f64().unwrap_or(0.0) as f32;
+                            let passed = v["passed"].as_bool().unwrap_or(score >= 0.7);
+                            let flags = v["flags"].as_array().map(|a| {
+                                a.iter().filter_map(|f| f.as_str().map(|s| s.to_string())).collect()
+                            }).unwrap_or_else(Vec::new);
+                            
+                            votes.push((provider, score, passed, flags));
+                        }
+                    }
+                }
+            }
+        }
+
+        if votes.is_empty() {
+            return Err("No council members available for verification".to_string());
+        }
+
+        // Consensus logic: 2-of-3 majority. If only 1 or 2 responded, require unanimity or 2/2.
+        let pass_count = votes.iter().filter(|(_, _, passed, _)| *passed).count();
+        let total_votes = votes.len();
+        
+        let consensus_passed = if total_votes >= 3 {
+            pass_count >= 2
+        } else if total_votes == 2 {
+            pass_count >= 2
+        } else {
+            pass_count == 1
+        };
+
+        // Average score
+        let avg_score = votes.iter().map(|(_, s, _, _)| *s).sum::<f32>() / total_votes as f32;
+        
+        // Aggregate flags
+        let mut all_flags = HashSet::new();
+        for (_, _, _, flags) in votes {
+            for f in flags {
+                all_flags.insert(f);
+            }
+        }
+
+        info!("[COUNCIL] Consensus: {}/{} pass votes. Avg Score: {:.2}", pass_count, total_votes, avg_score);
+
+        Ok(VerificationResult {
+            passed: consensus_passed,
+            score: avg_score,
+            flags: all_flags.into_iter().collect(),
+            status: if consensus_passed { "verified (consensus)".to_string() } else { "rejected (consensus)".to_string() },
+        })
     }
 
     /// Return the count of recorded dream failure episodes.
