@@ -14,7 +14,7 @@ use omega_core::{
 use omega_myelin::MemoryGraph;
 use omega_phylactery;
 use omega_spokes::{SpokeRegistry, SpokeRequest, SpokeResponse, ToolInvocation};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::sync::Arc;
 use thiserror::Error;
 use tokio::sync::Mutex;
@@ -394,6 +394,7 @@ impl Conductor {
             passed: false,
             score: 0.0,
             flags: vec!["initial_execution".to_string()],
+            status: "initial".to_string(),
         };
 
         // --- Autonomic Self-Repair Loop ---

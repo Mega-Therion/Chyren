@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic'
 import { AlertCircle, Loader2, Volume2, VolumeX } from 'lucide-react'
 import { ChatMessage } from '@/components/ChatMessage'
 import { ChatInput } from '@/components/ChatInput'
+import { MetricsDashboard } from '@/components/MetricsDashboard';
 import { startHeartbeat, stopHeartbeat } from '@/lib/haptics-ry'
 import { clearDraft } from '@/lib/draft-ry'
 import { createTtsEngine, type TtsEngine, playLatencyChime } from '@/lib/tts-ry'
@@ -221,6 +222,8 @@ export default function ChatPage() {
             </React.Fragment>
           ))}
         </div>
+
+        <MetricsDashboard />
 
         <section
           ref={chatWindowRef}
