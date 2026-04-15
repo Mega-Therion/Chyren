@@ -147,10 +147,18 @@ impl SpokeRegistry {
             ("openai", 20),
             ("gemini", 30),
             ("deepseek", 40),
+            ("perplexity", 45),
             ("ollama", 50),
             ("search", 90),
             ("neon", 100),
             ("sovereign", 0),
+            // Explicit MCP bridges
+            ("github", 200),
+            ("vercel", 201),
+            ("supabase", 202),
+            ("firebase", 203),
+            ("zapier", 204),
+            ("manus", 205),
         ];
 
         for (p, priority) in providers {
@@ -166,10 +174,19 @@ impl SpokeRegistry {
                 "openai" => Some(Arc::new(spokes::OpenAISpoke::new(config))),
                 "gemini" => Some(Arc::new(spokes::GeminiSpoke::new(config))),
                 "deepseek" => Some(Arc::new(spokes::DeepSeekSpoke::new(config))),
+                "perplexity" => Some(Arc::new(spokes::PerplexitySpoke::new(config))),
                 "ollama" => Some(Arc::new(spokes::OllamaSpoke::new(config))),
                 "search" => Some(Arc::new(spokes::SearchSpoke::new(config))),
                 "neon" => Some(Arc::new(spokes::NeonSpoke::new(config))),
                 "sovereign" => Some(Arc::new(spokes::DeepSeekSpoke::new(config))),
+                
+                // MCP Hub Initializations 
+                "github" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-github"]))),
+                "vercel" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-vercel"]))),
+                "supabase" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-supabase"]))),
+                "firebase" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-firebase"]))),
+                "zapier" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-zapier"]))),
+                "manus" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-manus"]))),
                 _ => None,
             };
 
@@ -184,6 +201,7 @@ impl SpokeRegistry {
             "openai".into(),
             "gemini".into(),
             "deepseek".into(),
+            "perplexity".into(),
         ];
 
         reg
