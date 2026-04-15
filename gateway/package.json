@@ -33,7 +33,7 @@
     "parcel": "^2.16.4",
     "parcel-resolver-tspaths": "^0.0.9",
     "typescript": "~6.0.2",
-    "typescript-eslint": "^8.58.0",
+    "typescript-eslint": "^8.58.2",
     "vite": "^8.0.8"
   }
 }
