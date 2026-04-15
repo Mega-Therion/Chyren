@@ -9,7 +9,7 @@ use omega_aegis::{
 };
 use omega_aeon::AeonRuntime;
 use omega_core::{
-    now, MatrixProgram, MemoryNode, MemoryStratum, RunEnvelope, RunStatus, VerificationReport,
+    now, MatrixProgram, MemoryStratum, RunEnvelope, RunStatus, VerificationReport,
 };
 use omega_myelin::MemoryGraph;
 use omega_phylactery;
