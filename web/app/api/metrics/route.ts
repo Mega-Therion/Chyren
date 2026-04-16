@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const response = await fetch('http://localhost:9090/metrics', {
+    const metricsUrl = process.env.MEDULLA_METRICS_URL || 'http://localhost:9090/metrics';
+    const response = await fetch(metricsUrl, {
       cache: 'no-store' // Disable caching for real-time metrics
     });
     

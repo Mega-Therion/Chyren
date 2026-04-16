@@ -80,6 +80,12 @@ def _medulla_bin(name: str = "chyren") -> str:
 
     path = os.getenv(env_key, default)
     if not os.path.exists(path):
+        # Fallback to root target folder (for workspace builds)
+        root_target = os.path.join(REPO_DIR, "target", "release", name)
+        if os.path.exists(root_target):
+            path = root_target
+            
+    if not os.path.exists(path):
         if os.getenv("CHYREN_AUTO_BUILD", "").lower() not in ("1", "true", "yes"):
             raise SystemExit(
                 f"[chyren] Medulla binary '{name}' not found at {path}.\n"
