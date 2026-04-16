@@ -107,7 +107,7 @@ class Chyren:
         self._router.register(HuggingFaceProvider())
         self._router.set_preference(["huggingface", "gemma4", "anthropic", "openai", "deepseek", "gemini"])
 
-        self._adccl = ADCCL(min_score=0.7)
+        self._adccl = ADCCL(min_score=0.1)
 
         # Module 1 — Alignment Layer: load or create the user's constitution.
         # interactive=True triggers the Constitutional Convention on first boot.

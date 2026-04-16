@@ -226,14 +226,19 @@ async function fetchOpenAIResponse(
   const apiKey = getOptionalEnv('OPENAI_API_KEY')
   if (!apiKey) throw new Error('Missing required env var: OPENAI_API_KEY')
 
-  const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+  const baseUrl = getOptionalEnv('OPENAI_API_BASE') ?? 'https://api.openai.com/v1'
+  const endpoint = `${baseUrl.replace(/\/$/, '')}/chat/completions`
+
+  const resp = await fetch(endpoint, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
+      'HTTP-Referer': 'https://chyren.org',
+      'X-Title': 'Chyren Web App',
     },
     body: JSON.stringify({
-      model: getOptionalEnv('OPENAI_MODEL') ?? 'gpt-4.1-mini',
+      model: getOptionalEnv('OPENAI_MODEL') ?? 'gpt-4o-mini',
       messages: [{ role: 'system', content: systemPrompt }, ...history],
       temperature,
     }),
@@ -424,11 +429,14 @@ export async function POST(req: NextRequest) {
     }
 
     const providers: Array<() => Promise<Response>> = [
+      () => fetchOpenAIResponse(history, systemPrompt, profile.temperature),
       () => fetchGeminiResponse(history, systemPrompt, profile.temperature),
       () => fetchAnthropicResponse(history, systemPrompt, profile.temperature),
       () => fetchGroqResponse(history, systemPrompt, profile.temperature),
-      () => fetchOpenAIResponse(history, systemPrompt, profile.temperature),
     ]
+
+    // Manually override OpenAI provider to point to local Ollama if OPENAI_API_BASE is set
+    // This is handled inside fetchOpenAIResponse implicitly by using env vars.
 
     let lastProviderError = 'No AI providers are configured.'
     for (const provider of providers) {

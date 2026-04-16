@@ -18,7 +18,7 @@ class OpenAIProvider:
 
     def __init__(self, api_key: str | None = None, model: str | None = None):
         self._api_key = api_key or os.environ.get("OPENAI_API_KEY", "")
-        self._model = model or self.DEFAULT_MODEL
+        self._model = model or os.environ.get("MODEL", self.DEFAULT_MODEL)
         base = os.environ.get("OPENAI_API_BASE", "https://api.openai.com/v1")
         if not base.endswith("/chat/completions"):
             self.API_URL = f"{base.rstrip('/')}/chat/completions"
@@ -62,11 +62,13 @@ class OpenAIProvider:
             headers={
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {self._api_key}",
+                "HTTP-Referer": "https://chyren.org",
+                "X-Title": "Chyren CLI",
             },
         )
 
         try:
-            with urllib.request.urlopen(req, timeout=60) as resp:
+            with urllib.request.urlopen(req, timeout=120) as resp:
                 data = json.loads(resp.read().decode())
                 text = data["choices"][0]["message"]["content"]
                 usage = data.get("usage", {})
