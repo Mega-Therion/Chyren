@@ -14,7 +14,7 @@ from providers.base import ProviderRequest, ProviderResponse, ProviderStatus
 
 class OpenAIProvider:
     API_URL = os.environ.get("OPENAI_API_BASE", "https://api.openai.com/v1/chat/completions")
-    DEFAULT_MODEL = "gpt-4o-mini"
+    DEFAULT_MODEL = "openai/gpt-4o-mini"
 
     def __init__(self, api_key: str | None = None, model: str | None = None):
         self._api_key = api_key or os.environ.get("OPENAI_API_KEY", "")
@@ -49,6 +49,7 @@ class OpenAIProvider:
             messages.append({"role": "system", "content": request.system})
         messages.append({"role": "user", "content": request.prompt})
 
+        print(f"DEBUG: Using model {model}")
         payload = json.dumps({
             "model": model,
             "messages": messages,
@@ -62,6 +63,8 @@ class OpenAIProvider:
             headers={
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {self._api_key}",
+                "HTTP-Referer": "https://chyren.org",
+                "X-Title": "Chyren CLI",
                 "HTTP-Referer": "https://chyren.org",
                 "X-Title": "Chyren CLI",
             },
