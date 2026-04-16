@@ -19,6 +19,11 @@ class OpenAIProvider:
     def __init__(self, api_key: str | None = None, model: str | None = None):
         self._api_key = api_key or os.environ.get("OPENAI_API_KEY", "")
         self._model = model or self.DEFAULT_MODEL
+        base = os.environ.get("OPENAI_API_BASE", "https://api.openai.com/v1")
+        if not base.endswith("/chat/completions"):
+            self.API_URL = f"{base.rstrip('/')}/chat/completions"
+        else:
+            self.API_URL = base
 
     @property
     def name(self) -> str:
