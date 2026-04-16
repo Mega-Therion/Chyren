@@ -2,16 +2,14 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-import dynamic from 'next/dynamic'
-import { AlertCircle, Loader2, Volume2, VolumeX } from 'lucide-react'
+import { AlertCircle } from 'lucide-react'
 import { ChatMessage } from '@/components/ChatMessage'
 import { ChatInput } from '@/components/ChatInput'
-import { MetricsDashboard } from '@/components/MetricsDashboard';
 import { startHeartbeat, stopHeartbeat } from '@/lib/haptics-ry'
 import { clearDraft } from '@/lib/draft-ry'
 import { createTtsEngine, type TtsEngine, playLatencyChime } from '@/lib/tts-ry'
 
-const NeuralBrain = dynamic(() => import('@/components/NeuralBrain'), { ssr: false })
+import { NeuralBrain, type BrainState } from '@/components/NeuralBrain'
 
 interface Message {
   id: string
@@ -58,20 +56,25 @@ function consumeSseBuffer(buffer: string): {
   return { events, remaining }
 }
 
-
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isStreaming, setIsStreaming] = useState(false)
   const [streamingId, setStreamingId] = useState<string | null>(null)
-  const [ttsEnabled, setTtsEnabled] = useState(true)
+  const [ttsEnabled, _setTtsEnabled] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [sessionId] = useState<string>(() => crypto.randomUUID().replace(/-/g, ''))
-  const [audioLevel, setAudioLevel] = useState(0) // 0–1 from mic
+  const [audioLevel, setAudioLevel] = useState(0)
   const [quotedText, setQuotedText] = useState<string | undefined>()
+  const [isListening, setIsListening] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatWindowRef = useRef<HTMLDivElement>(null)
   const ttsRef = useRef<TtsEngine | null>(null)
+
+  // Determine the overall state for colors
+  const brainState: BrainState = isStreaming 
+    ? (streamingId ? 'speaking' : 'thinking')
+    : (isListening ? 'listening' : 'idle');
 
   useEffect(() => {
     ttsRef.current = createTtsEngine()
@@ -180,65 +183,44 @@ export default function ChatPage() {
     }
   }, [isStreaming, messages, scrollToBottom, sessionId, ttsEnabled])
 
-  const headerLoadClass = isStreaming ? 'header-title--active' : ''
+  // Get color for OmegA based on state
+  const getSigilColor = (s: BrainState) => {
+    switch (s) {
+      case 'speaking': return '#00f2ff'; // Cyan
+      case 'thinking': return '#ff2d75'; // Rose
+      case 'listening': return '#bc13fe'; // Violet
+      default: return '#f59e0b'; // Amber
+    }
+  };
 
   return (
-    <div className="omega-viewport">
+    <div className="omega-viewport bg-black">
       <div className="omega-bg-fx">
-        <NeuralBrain isActive={isStreaming} audioLevel={audioLevel} />
+        <NeuralBrain _isActive={brainState !== 'idle'} audioLevel={audioLevel} state={brainState} />
       </div>
 
-      <div className="omega-orb orb-1" />
-      <div className="omega-orb orb-2" />
-
-      <main className="phone-container">
-        <div className="phone-notch" />
-
-        <header className="phone-chrome">
-          <h1 className={`phone-title ${headerLoadClass}`}>CHYREN</h1>
-          <div className="sovereign-seal">R.W.&#x03DC;.Y. &mdash; SOVEREIGN INTELLIGENCE</div>
-          {isStreaming && (
-            <span className="header-inference-badge">
-              <span className="header-pulse-dot" />
-              PROCESSING
-            </span>
-          )}
+      <main className="phone-container !bg-black/40 !border-white/5 !shadow-2xl">
+        <header className="phone-chrome !border-b-0 !bg-transparent pt-12">
+          <h1 className="phone-title !text-white opacity-80 !tracking-[0.5em]">CHYREN</h1>
         </header>
-
-        {/* Pipeline status bar */}
-        <div className="pipeline-bar" aria-label="Pipeline stages">
-          {(['ALIGN', 'AEON', 'PROVIDER', 'ADCCL', 'LEDGER'] as const).map((stage, i, arr) => (
-            <React.Fragment key={stage}>
-              <span className={`pipeline-stage${isStreaming ? ' pipeline-stage--active' : ''}`}>
-                <span className="pipeline-dot" />
-                {stage}
-              </span>
-              {i < arr.length - 1 && <span className="pipeline-sep" aria-hidden="true" />}
-            </React.Fragment>
-          ))}
-        </div>
-
-        <MetricsDashboard />
 
         <section
           ref={chatWindowRef}
           className="chat-window"
           aria-label="Chat transcript"
-          onClick={(e) => {
-            const target = e.target as HTMLElement
-            if (!target.closest('textarea') && !target.closest('button')) {
-              ;(document.activeElement as HTMLElement | null)?.blur()
-            }
-          }}
         >
           {messages.length === 0 ? (
             <div className="empty-state">
               <div className="empty-state-inner">
-                {/* Minimalist splash for Absolute Sovereignty */}
                 <motion.div 
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="empty-state-sigil opacity-20"
+                  animate={{ 
+                    scale: brainState === 'idle' ? 1 : [1, 1.1, 1],
+                    color: getSigilColor(brainState),
+                    textShadow: `0 0 40px ${getSigilColor(brainState)}`
+                  }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                  className="empty-state-sigil"
+                  style={{ color: getSigilColor(brainState) }}
                 >Ω</motion.div>
               </div>
             </div>
@@ -257,7 +239,6 @@ export default function ChatPage() {
               />
             ))
           )}
-
           <div ref={messagesEndRef} className="h-0.5" />
         </section>
 
@@ -267,36 +248,18 @@ export default function ChatPage() {
           </div>
         )}
 
-        <footer className="input-dock">
-          <div className="input-dock-controls">
-            <button
-              type="button"
-              className="p-2 opacity-40 hover:opacity-100 transition-opacity"
-              aria-label={ttsEnabled ? 'Disable text to speech' : 'Enable text to speech'}
-              aria-pressed={ttsEnabled ? 'true' : 'false'}
-              onClick={() => setTtsEnabled(v => !v)}
-            >
-              {ttsEnabled ? <Volume2 size={16} className="text-cyan-400" /> : <VolumeX size={16} />}
-            </button>
-          </div>
-
+        <footer className="input-dock !bg-transparent">
           <ChatInput
             onSend={(t) => { void sendMessage(t) }}
             onBargeIn={handleBargeIn}
             quotedText={quotedText}
             onQuoteConsumed={() => setQuotedText(undefined)}
             onAudioLevel={setAudioLevel}
+            onRecordingState={setIsListening}
             disabled={false}
             isLoading={isStreaming}
             sessionId={sessionId}
           />
-
-          {isStreaming && (
-            <div className="streaming-indicator">
-              <Loader2 size={11} className="animate-spin opacity-60" />
-              <span>Generating…</span>
-            </div>
-          )}
         </footer>
       </main>
     </div>

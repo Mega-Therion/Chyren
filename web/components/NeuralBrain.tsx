@@ -21,12 +21,16 @@ interface Spark {
   startedAt: number;
 }
 
-export default function NeuralBrain({
-  isActive = false,
+export type BrainState = 'idle' | 'listening' | 'thinking' | 'speaking';
+
+export function NeuralBrain({
+  _isActive = false,
   audioLevel = 0,
+  state = 'idle',
 }: {
-  isActive?: boolean;
+  _isActive?: boolean;
   audioLevel?: number;
+  state?: BrainState;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef<number>(0);
@@ -81,12 +85,22 @@ export default function NeuralBrain({
     stateRef.current.nodes = nodes;
     stateRef.current.sparks = [];
 
-    const INDIGO = (a: number) => `rgba(99,102,241,${a})`;
-    const EMERALD = (a: number) => `rgba(52,211,153,${a})`;
-    const VIOLET  = (a: number) => `rgba(139,92,246,${a})`;
+    // Dynamic colors based on user request:
+    // Blue for speaking (responding)
+    // Pink for thinking (processing)
+    // Purple for listening
+    const getBaseColor = (s: BrainState, a: number) => {
+      switch (s) {
+        case 'speaking': return `rgba(0, 242, 255, ${a})`; // Cyan/Blue
+        case 'thinking': return `rgba(255, 45, 117, ${a})`; // Rose/Pink
+        case 'listening': return `rgba(188, 19, 254, ${a})`; // Violet/Purple
+        default: return `rgba(245, 158, 11, ${a})`; // Amber/Idle
+      }
+    };
 
     // Bridge: read audioLevel from dataset each frame to avoid closure staleness
     const readAudioLevel = () => parseFloat(canvas.dataset.audioLevel ?? '0') || 0;
+    const readState = () => (canvas.dataset.brainState as BrainState) || 'idle';
 
     const spawnSpark = () => {
       const { nodes, sparks } = stateRef.current;
@@ -106,12 +120,11 @@ export default function NeuralBrain({
       const H = canvas.height;
       stateRef.current.t += 0.016;
 
-      // Read live audioLevel from dataset bridge (zero-GC, no closure staleness)
       const al = readAudioLevel();
+      const s = readState();
 
       ctx.clearRect(0, 0, W, H);
 
-      // Move nodes — voice level boosts velocity slightly for reactive feel
       const boost = 1 + al * 1.4;
       nodes.forEach(n => {
         n.x += n.vx * boost;
@@ -121,7 +134,6 @@ export default function NeuralBrain({
         n.pulsePhase += n.pulseSpeed;
       });
 
-      // Draw edges — voice level brightens them
       const edgeBoost = 0.18 + al * 0.22;
       for (let i = 0; i < nodes.length; i++) {
         const a = nodes[i];
@@ -132,7 +144,7 @@ export default function NeuralBrain({
           const dy = b.y - a.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           const alpha = Math.max(0, (1 - dist / 220) * edgeBoost);
-          ctx.strokeStyle = INDIGO(alpha);
+          ctx.strokeStyle = getBaseColor(s, alpha);
           ctx.lineWidth = 0.8 + al * 0.6;
           ctx.beginPath();
           ctx.moveTo(a.x, a.y);
@@ -141,30 +153,26 @@ export default function NeuralBrain({
         }
       }
 
-      // Draw nodes
       nodes.forEach(n => {
         const pulse = Math.sin(n.pulsePhase) * 0.5 + 0.5;
         const r = n.radius + pulse * 1.5;
         const alpha = 0.4 + pulse * 0.4;
 
-        // Glow
         const grd = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, r * 3);
-        grd.addColorStop(0, INDIGO(alpha * 0.6));
-        grd.addColorStop(1, INDIGO(0));
+        grd.addColorStop(0, getBaseColor(s, alpha * 0.6));
+        grd.addColorStop(1, getBaseColor(s, 0));
         ctx.fillStyle = grd;
         ctx.beginPath();
         ctx.arc(n.x, n.y, r * 3, 0, Math.PI * 2);
         ctx.fill();
 
-        // Core
-        ctx.fillStyle = INDIGO(alpha);
+        ctx.fillStyle = getBaseColor(s, alpha);
         ctx.beginPath();
         ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
         ctx.fill();
       });
 
-      // Spawn sparks — rate increases with audio level
-      const spawnInterval = isActive
+      const spawnInterval = s !== 'idle'
         ? Math.max(80, 400 - al * 300)
         : Math.max(400, 1800 - al * 1400);
       if (Date.now() - lastSpawn > spawnInterval) {
@@ -172,15 +180,13 @@ export default function NeuralBrain({
         lastSpawn = Date.now();
       }
 
-      // Animate sparks
       stateRef.current.sparks = sparks.filter(s => s.progress < 1);
-      stateRef.current.sparks.forEach(s => {
-        s.progress = Math.min(1, s.progress + s.speed);
-        const from = nodes[s.fromNode];
-        const to = nodes[s.toNode];
-        const p = s.progress;
+      stateRef.current.sparks.forEach(spk => {
+        spk.progress = Math.min(1, spk.progress + spk.speed);
+        const from = nodes[spk.fromNode];
+        const to = nodes[spk.toNode];
+        const p = spk.progress;
 
-        // Pulsating radius — peaks at midpoint
         const midFactor = Math.sin(p * Math.PI);
         const sparkR = 1.5 + midFactor * 3.5;
         const opacity = 0.3 + midFactor * 0.7;
@@ -188,19 +194,16 @@ export default function NeuralBrain({
         const sx = from.x + (to.x - from.x) * p;
         const sy = from.y + (to.y - from.y) * p;
 
-        // Glow halo
         const sgrd = ctx.createRadialGradient(sx, sy, 0, sx, sy, sparkR * 4);
-        const color = isActive ? EMERALD : VIOLET;
-        sgrd.addColorStop(0, color(opacity * 0.8));
-        sgrd.addColorStop(0.5, color(opacity * 0.3));
-        sgrd.addColorStop(1, color(0));
+        sgrd.addColorStop(0, getBaseColor(s, opacity * 0.8));
+        sgrd.addColorStop(0.5, getBaseColor(s, opacity * 0.3));
+        sgrd.addColorStop(1, getBaseColor(s, 0));
         ctx.fillStyle = sgrd;
         ctx.beginPath();
         ctx.arc(sx, sy, sparkR * 4, 0, Math.PI * 2);
         ctx.fill();
 
-        // Core spark
-        ctx.fillStyle = color(opacity);
+        ctx.fillStyle = getBaseColor(s, opacity);
         ctx.beginPath();
         ctx.arc(sx, sy, sparkR, 0, Math.PI * 2);
         ctx.fill();
@@ -215,17 +218,15 @@ export default function NeuralBrain({
       window.removeEventListener('resize', resize);
       cancelAnimationFrame(animRef.current);
     };
-  // Re-run only when isActive changes; audioLevel is read from a ref each frame
-  }, [isActive]);
+  }, []); // Only once
 
-  // Sync audioLevel into the ref used by the draw loop (no remount needed)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    // Write to the draw-loop ref via a globally accessible side-channel not possible
-    // in this closure architecture — we use a dataset attribute as a zero-GC bridge
     canvas.dataset.audioLevel = String(audioLevel);
-  }, [audioLevel]);
+    canvas.dataset.brainState = state;
+  }, [audioLevel, state]);
+
 
   return (
     <canvas

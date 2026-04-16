@@ -12,6 +12,7 @@ interface ChatInputProps {
   quotedText?: string
   onQuoteConsumed?: () => void
   onAudioLevel?: (level: number) => void
+  onRecordingState?: (isRecording: boolean) => void
   disabled?: boolean
   isLoading?: boolean
   sessionId?: string
@@ -23,6 +24,7 @@ export function ChatInput({
   quotedText,
   onQuoteConsumed,
   onAudioLevel,
+  onRecordingState,
   disabled = false,
   isLoading = false,
   sessionId = 'global',
@@ -76,6 +78,10 @@ export function ChatInput({
   })
 
   // Drive parent with audio level even when not sending
+  useEffect(() => {
+    onRecordingState?.(isRecording)
+  }, [isRecording, onRecordingState])
+
   useEffect(() => {
     if (isRecording) onAudioLevel?.(audioLevel)
   }, [audioLevel, isRecording, onAudioLevel])
