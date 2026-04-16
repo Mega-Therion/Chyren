@@ -13,7 +13,7 @@ from providers.base import ProviderRequest, ProviderResponse, ProviderStatus
 
 
 class OpenAIProvider:
-    API_URL = "https://api.openai.com/v1/chat/completions"
+    API_URL = os.environ.get("OPENAI_API_BASE", "https://api.openai.com/v1/chat/completions")
     DEFAULT_MODEL = "gpt-4o-mini"
 
     def __init__(self, api_key: str | None = None, model: str | None = None):
