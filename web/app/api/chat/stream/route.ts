@@ -231,13 +231,25 @@ async function fetchOpenAIResponse(
 
   // Auto-detect OpenRouter vs OpenAI based on key prefix
   const isOpenRouter = apiKey.startsWith('sk-or-')
-  const defaultBase = isOpenRouter ? 'https://openrouter.ai/api/v1' : 'https://api.openai.com/v1'
-  const baseUrl = getOptionalEnv('OPENAI_API_BASE') ?? defaultBase
+  let baseUrl = getOptionalEnv('OPENAI_API_BASE')
+  
+  if (baseUrl?.includes('openrouter') && !isOpenRouter) {
+    logger.warn('[OPENAI] Mismatch: OPENAI_API_BASE is OpenRouter, but key is standard OpenAI. Overriding to api.openai.com.')
+    baseUrl = 'https://api.openai.com/v1'
+  } else if (!baseUrl) {
+    baseUrl = isOpenRouter ? 'https://openrouter.ai/api/v1' : 'https://api.openai.com/v1'
+  }
+  
   const endpoint = `${baseUrl.replace(/\/$/, '')}/chat/completions`
 
   logger.info(`[OPENAI] Attempting via ${baseUrl} (Auto-detected: ${isOpenRouter ? 'OpenRouter' : 'OpenAI'})`)
   
-  const model = getOptionalEnv('OPENAI_MODEL') ?? (isOpenRouter ? 'mistralai/mistral-nemo' : 'gpt-4o-mini')
+  let model = getOptionalEnv('OPENAI_MODEL')
+  if (model?.includes('mistral') && !isOpenRouter) {
+     model = 'gpt-4o-mini' // override mismatch
+  } else if (!model) {
+     model = isOpenRouter ? 'mistralai/mistral-nemo' : 'gpt-4o-mini'
+  }
 
   const resp = await fetch(endpoint, {
     method: 'POST',
@@ -475,8 +487,8 @@ export async function POST(req: NextRequest) {
     logError('[CHAT] Upstream failure', err, { hubFailure })
 
     const offlineMessage = hubFailure
-      ? 'Chyren is temporarily unavailable right now. Please try again in a moment.'
-      : 'Chyren is not fully configured yet. Please try again in a moment.'
+      ? `Chyren is temporarily unavailable right now. (Diagnostic: ${_errMsg})`
+      : `Chyren is not fully configured yet. (Diagnostic: ${_errMsg})`
 
     return createSingleSseTextResponse(offlineMessage)
   }
