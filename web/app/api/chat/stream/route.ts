@@ -468,7 +468,7 @@ export async function POST(req: NextRequest) {
     ]
 
     let lastProviderError = 'No AI providers are configured.'
-    let allErrors: string[] = []
+    const allErrors: string[] = []
     for (const provider of providers) {
       try {
         const resp = await provider()
