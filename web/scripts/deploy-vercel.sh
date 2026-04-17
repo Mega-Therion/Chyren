@@ -1,6 +1,18 @@
 #!/usr/bin/env bash
 # Deploy chyren-web to Vercel with env from config/.omega/one-true.env (override with CHYREN_ENV_FILE).
+# Usage: deploy-vercel.sh [--dry-run] [--prod] [extra vercel deploy flags...]
 set -euo pipefail
+
+# ── Flags ──────────────────────────────────────────────────────────────────────
+DRY_RUN=0
+PASSTHROUGH_ARGS=()
+for arg in "$@"; do
+  if [[ "$arg" == "--dry-run" ]]; then
+    DRY_RUN=1
+  else
+    PASSTHROUGH_ARGS+=("$arg")
+  fi
+done
 
 WEB_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 ENV_FILE="${CHYREN_ENV_FILE:-$WEB_ROOT/../config/.omega/one-true.env}"
@@ -22,6 +34,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# ── Preflight: required env vars ──────────────────────────────────────────────
 if [[ -f "$ENV_FILE" ]]; then
   set -a
   # shellcheck source=/dev/null
@@ -30,6 +43,29 @@ if [[ -f "$ENV_FILE" ]]; then
   echo "Loaded environment from $ENV_FILE"
 else
   echo "No env file at $ENV_FILE (optional); continuing with current shell env."
+fi
+
+REQUIRED_VARS=(ANTHROPIC_API_KEY OPENAI_API_KEY GEMINI_API_KEY OMEGA_DB_URL)
+MISSING_VARS=()
+for req in "${REQUIRED_VARS[@]}"; do
+  if [[ -z "${!req:-}" ]]; then
+    MISSING_VARS+=("$req")
+  fi
+done
+if [[ "${#MISSING_VARS[@]}" -gt 0 ]]; then
+  echo "ERROR: the following required env vars are not set:"
+  for m in "${MISSING_VARS[@]}"; do
+    echo "  - $m"
+  done
+  echo "  Source $ENV_FILE or set them in your shell."
+  exit 1
+fi
+
+if [[ "$DRY_RUN" == "1" ]]; then
+  echo "[DRY RUN] Preflight passed. Would deploy from $(pwd) to Vercel."
+  echo "[DRY RUN] Pass --prod to promote to production."
+  echo "[DRY RUN] No changes applied. Re-run without --dry-run to deploy."
+  exit 0
 fi
 
 read_project_setting() {
@@ -136,13 +172,14 @@ fi
 if [[ -n "$VERCEL_SCOPE" ]]; then
   deploy_args+=(--scope "$VERCEL_SCOPE")
 fi
-if [[ "$#" -gt 0 ]]; then
-  deploy_args+=("$@")
+if [[ "${#PASSTHROUGH_ARGS[@]}" -gt 0 ]]; then
+  deploy_args+=("${PASSTHROUGH_ARGS[@]}")
 fi
 
 "${vercel_cmd[@]}" "${deploy_args[@]}" | tee "$TMP_OUT"
 
-if [[ "$*" == *"--prod"* ]]; then
+# ── Post-deploy health check ───────────────────────────────────────────────────
+if [[ " ${PASSTHROUGH_ARGS[*]:-} " == *"--prod"* ]]; then
   deployed_url="$(node -e '
     const fs = require("fs");
     const raw = fs.readFileSync(process.argv[1], "utf8").trim();
@@ -166,5 +203,19 @@ if [[ "$*" == *"--prod"* ]]; then
     curl -sf -X POST "${target}/api/cron/warm-context" \
       -H "Authorization: Bearer ${warm_secret}" \
       -w "  HTTP:%{http_code} TIME:%{time_total}s\n" || echo "  (warmup skipped — endpoint error)"
+  fi
+
+  # Health check: verify the deployed URL responds with HTTP 200
+  echo "Running post-deploy health check..."
+  HEALTH_URL="${target}/api/health"
+  HTTP_CODE="$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$HEALTH_URL" || echo "000")"
+  if [[ "$HTTP_CODE" == "200" ]]; then
+    echo "  [PASS] Health check passed — $HEALTH_URL returned HTTP $HTTP_CODE"
+  elif [[ "$HTTP_CODE" == "000" ]]; then
+    echo "  [WARN] Health check timed out or connection refused — $HEALTH_URL"
+    echo "         Deploy may still be propagating. Check manually."
+  else
+    echo "  [WARN] Health check returned HTTP $HTTP_CODE — $HEALTH_URL"
+    echo "         Deployment may have issues. Inspect Vercel dashboard."
   fi
 fi
