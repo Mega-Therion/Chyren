@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { motion } from 'framer-motion'
 import { Ghost, Home } from 'lucide-react'
 
 export default function NotFound() {
