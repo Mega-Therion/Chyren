@@ -468,6 +468,7 @@ export async function POST(req: NextRequest) {
     ]
 
     let lastProviderError = 'No AI providers are configured.'
+    let allErrors: string[] = []
     for (const provider of providers) {
       try {
         const resp = await provider()
@@ -477,11 +478,12 @@ export async function POST(req: NextRequest) {
         return resp
       } catch (error) {
         lastProviderError = error instanceof Error ? error.message : 'unknown provider failure'
+        allErrors.push(lastProviderError)
         logError(`[CHAT] Provider attempt failed`, error)
       }
     }
 
-    throw new Error(lastProviderError)
+    throw new Error(`All providers failed:\n${allErrors.join(' | ')}`)
   } catch (err: unknown) {
     const _errMsg = err instanceof Error ? err.message : 'unknown error'
     logError('[CHAT] Upstream failure', err, { hubFailure })
