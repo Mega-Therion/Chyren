@@ -434,14 +434,18 @@ export async function POST(req: NextRequest) {
   let hubFailure: string | null = null
   try {
     if (getOptionalEnv('CHYREN_API_URL')) {
-      const hubResp = await fetchHubStream(content, session, profile, memberContext)
-      if (hubResp.ok && hubResp.body) {
-        logger.info('[CHAT] Routing via Sovereign Hub')
-        return new Response(hubResp.body, { headers: sseHeaders() })
+      try {
+        const hubResp = await fetchHubStream(content, session, profile, memberContext)
+        if (hubResp.ok && hubResp.body) {
+          logger.info('[CHAT] Routing via Sovereign Hub')
+          return new Response(hubResp.body, { headers: sseHeaders() })
+        }
+        hubFailure = await hubResp.text().catch(() => `Hub status ${hubResp.status}`)
+        logger.warn(`[HUB] Non-OK response, falling back: ${hubFailure}`)
+      } catch (hubErr: unknown) {
+        hubFailure = hubErr instanceof Error ? hubErr.message : 'Unknown hub fetch error'
+        logger.warn(`[HUB] Fetch failed, falling back: ${hubFailure}`)
       }
-
-      hubFailure = await hubResp.text().catch(() => `Hub status ${hubResp.status}`)
-      logger.warn(`[HUB] Non-OK response, falling back: ${hubFailure}`)
     }
 
     const providers: Array<() => Promise<Response>> = [
