@@ -281,15 +281,56 @@ def verify_transition(prev_state: State, next_state: State, proof: Proof) -> boo
 - Include Mermaid diagrams for flows
 - Reference the Chiral Thesis for mathematical foundations
 
+## 🌿 Branch Naming Convention
+
+All branches must follow this pattern:
+
+```
+<type>/<short-description>
+```
+
+| Type | When to use |
+|------|-------------|
+| `feat/` | New features |
+| `fix/` | Bug fixes |
+| `chore/` | Maintenance, deps, config |
+| `docs/` | Documentation only |
+| `refactor/` | Code restructuring |
+| `security/` | Security patches or hardening |
+| `test/` | Adding or updating tests |
+| `release/` | Release preparation |
+
+Examples:
+```
+feat/adccl-gradient-thresholds
+fix/ledger-signature-mismatch
+security/rotate-api-keys
+chore/update-rust-toolchain
+```
+
+Avoid using personal names, ticket numbers alone, or vague names like `my-branch` or `wip`.
+
+---
+
 ## 🔄 Pull Request Process
+
+### How to Open a PR
+
+1. Create a branch from `main` following the naming convention above.
+2. Make your changes, commit using [Conventional Commits](https://www.conventionalcommits.org/).
+3. Push your branch and open a PR against `main`.
+4. Fill in the PR template (below).
+5. Wait for CI to complete — all required checks must be green before a reviewer is assigned.
+6. Address review comments, then re-request review.
+7. Once approved and all checks pass, the maintainer merges (squash or merge commit).
 
 ### Before Submitting
 
-- [ ] Tests pass locally: `cargo test && pytest`
-- [ ] Code is formatted: `cargo fmt && black .`
-- [ ] Lints pass: `cargo clippy`
-- [ ] Documentation updated
-- [ ] Commit messages follow conventions
+- [ ] Tests pass locally: `cargo test --workspace && pytest`
+- [ ] Code is formatted: `cargo fmt --all` and `black .` (Python)
+- [ ] Lints pass: `cargo clippy --workspace -- -D warnings`
+- [ ] Documentation updated for any API or behaviour changes
+- [ ] Commit messages follow Conventional Commits
 - [ ] Branch is up-to-date with `main`
 
 ### PR Template
@@ -319,19 +360,53 @@ def verify_transition(prev_state: State, next_state: State, proof: Proof) -> boo
 - [ ] Changelog entry added
 ```
 
+### What Reviewers to Expect
+
+All PRs touching any path listed in `.github/CODEOWNERS` require a review from `@viewsbyryan` (the Code Owner). GitHub will automatically request this review when branch protection is configured.
+
+| Area touched | Required reviewer |
+|---|---|
+| `medulla/` — Rust core runtime | `@viewsbyryan` |
+| `web/` — Next.js frontend | `@viewsbyryan` |
+| `cortex/` — Python identity layer | `@viewsbyryan` |
+| `gateway/` — Vite/React gateway | `@viewsbyryan` |
+| `.github/workflows/` — CI/CD | `@viewsbyryan` |
+| `ops/` — Operations scripts | `@viewsbyryan` |
+| `docs/` — Documentation | `@viewsbyryan` |
+| Root config files | `@viewsbyryan` |
+
+For any PR, expect:
+1. An automated CI run (results visible within ~10 minutes of push).
+2. A code review focusing on correctness, security, and alignment with architecture principles.
+3. A security review for any changes touching `omega-aegis`, `omega-adccl`, ledger code, or secrets handling.
+
+### What CI Must Pass Before Merge
+
+All four status checks from `.github/workflows/ci.yml` are required:
+
+| Check | What it validates |
+|---|---|
+| `Medulla (Rust)` | `cargo check`, `cargo test --workspace`, `cargo clippy -- -D warnings`, `cargo fmt --check` |
+| `Web (Next.js)` | `tsc --noEmit`, `eslint` (max-warnings=0), `next build` |
+| `Gateway (Vite)` | `tsc --noEmit`, `eslint`, `vite build` |
+| `Cortex (Python)` | Syntax checks on dream-mode maintenance scripts |
+
+A PR that breaks any of these checks will not be merged regardless of review approval.
+
 ### Review Process
 
-1. **Automated checks** must pass (CI/CD)
-2. **Code review** by at least one maintainer
-3. **Architecture review** for significant changes
-4. **Security review** for cryptographic changes
+1. **Automated checks** must pass (all four CI jobs above)
+2. **Code review** by at least one maintainer (`@viewsbyryan`)
+3. **Architecture review** for significant changes to Medulla crates or conductor pipeline
+4. **Security review** for cryptographic changes, secrets handling, or ADCCL threshold adjustments
 
 ### Merge Criteria
 
-- All checks green ✅
-- Approved by maintainer(s)
-- No unresolved conversations
+- All required CI checks green
+- At least one approval from a Code Owner
+- No unresolved review conversations
 - Branch up-to-date with `main`
+- Stale reviews dismissed (any new push after approval requires re-review)
 
 ## 🏆 Recognition
 
