@@ -1,21 +1,47 @@
 #!/usr/bin/env bash
 # Push selected env vars from config/.omega/one-true.env into the linked Vercel project.
 # Browser-visible vars stay NEXT_PUBLIC_*; server secrets that the web runtime needs are synced too.
+# Usage: sync-vercel-env-from-one-true.sh [--dry-run]
 set -euo pipefail
+
+DRY_RUN=0
+for arg in "$@"; do
+  if [[ "$arg" == "--dry-run" ]]; then
+    DRY_RUN=1
+  fi
+done
 
 WEB_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 ENV_FILE="${CHYREN_ENV_FILE:-$WEB_ROOT/../config/.omega/one-true.env}"
 PROJECT_JSON="$WEB_ROOT/.vercel/project.json"
 
 if [[ ! -f "$ENV_FILE" ]]; then
-  echo "Missing $ENV_FILE"
+  echo "ERROR: env file not found at $ENV_FILE"
+  echo "  Set CHYREN_ENV_FILE or create $HOME/.omega/one-true.env"
   exit 1
 fi
 
+# Preflight: verify required keys are present in the env file
+REQUIRED_SYNC_VARS=(ANTHROPIC_API_KEY OPENAI_API_KEY GEMINI_API_KEY OMEGA_DB_URL)
 set -a
 # shellcheck source=/dev/null
 source "$ENV_FILE"
 set +a
+
+MISSING_SYNC=()
+for req in "${REQUIRED_SYNC_VARS[@]}"; do
+  if [[ -z "${!req:-}" ]]; then
+    MISSING_SYNC+=("$req")
+  fi
+done
+
+if [[ "${#MISSING_SYNC[@]}" -gt 0 ]]; then
+  echo "ERROR: the following required vars are missing from $ENV_FILE:"
+  for m in "${MISSING_SYNC[@]}"; do
+    echo "  - $m"
+  done
+  exit 1
+fi
 
 cd "$WEB_ROOT"
 
@@ -47,9 +73,15 @@ sync_one() {
   # shellcheck disable=SC2086
   local val="${!name-}"
   if [[ -z "${val}" ]]; then
-    echo "Skip $name (not set in $ENV_FILE)"
+    echo "  [SKIP] $name (not set in $ENV_FILE)"
     return 0
   fi
+  if [[ "$DRY_RUN" == "1" ]]; then
+    local masked="${val:0:6}…"
+    echo "  [DRY-RUN] would sync $name (value: $masked) → production + development"
+    return 0
+  fi
+  echo "  [SYNC] $name"
   "${vercel_cmd[@]}" env add "$name" production --value "$val" --yes --force ${VERCEL_SCOPE:+--scope "$VERCEL_SCOPE"}
   "${vercel_cmd[@]}" env add "$name" development --value "$val" --yes --force ${VERCEL_SCOPE:+--scope "$VERCEL_SCOPE"}
   # Preview is branch-scoped on Vercel; use dashboard or: vercel env add NAME preview <branch>
@@ -72,4 +104,10 @@ sync_one GOOGLE_TTS_API_KEY
 sync_one CRON_SECRET
 sync_one OMEGA_DB_URL
 
-echo "Done. Run '${vercel_cmd[*]} env ls' to verify."
+if [[ "$DRY_RUN" == "1" ]]; then
+  echo ""
+  echo "[DRY RUN] No changes applied. Re-run without --dry-run to apply."
+else
+  echo ""
+  echo "Done. Run '${vercel_cmd[*]} env ls' to verify."
+fi
