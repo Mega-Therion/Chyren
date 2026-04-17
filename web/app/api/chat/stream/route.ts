@@ -460,7 +460,7 @@ export async function POST(req: NextRequest) {
 
     throw new Error(lastProviderError)
   } catch (err: unknown) {
-    const errMsg = err instanceof Error ? err.message : 'unknown error'
+    const _errMsg = err instanceof Error ? err.message : 'unknown error'
     logError('[CHAT] Upstream failure', err, { hubFailure })
 
     const offlineMessage = hubFailure
