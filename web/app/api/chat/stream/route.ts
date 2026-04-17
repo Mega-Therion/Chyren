@@ -229,10 +229,16 @@ async function fetchOpenAIResponse(
   const apiKey = getOptionalEnv('OPENAI_API_KEY')
   if (!apiKey) throw new Error('Missing required env var: OPENAI_API_KEY')
 
-  const baseUrl = getOptionalEnv('OPENAI_API_BASE') ?? 'https://api.openai.com/v1'
+  // Auto-detect OpenRouter vs OpenAI based on key prefix
+  const isOpenRouter = apiKey.startsWith('sk-or-')
+  const defaultBase = isOpenRouter ? 'https://openrouter.ai/api/v1' : 'https://api.openai.com/v1'
+  const baseUrl = getOptionalEnv('OPENAI_API_BASE') ?? defaultBase
   const endpoint = `${baseUrl.replace(/\/$/, '')}/chat/completions`
 
-  logger.info(`[OPENAI] Attempting via ${baseUrl}`)
+  logger.info(`[OPENAI] Attempting via ${baseUrl} (Auto-detected: ${isOpenRouter ? 'OpenRouter' : 'OpenAI'})`)
+  
+  const model = getOptionalEnv('OPENAI_MODEL') ?? (isOpenRouter ? 'mistralai/mistral-nemo' : 'gpt-4o-mini')
+
   const resp = await fetch(endpoint, {
     method: 'POST',
     headers: {
@@ -242,7 +248,7 @@ async function fetchOpenAIResponse(
       'X-Title': 'Chyren Web App',
     },
     body: JSON.stringify({
-      model: getOptionalEnv('OPENAI_MODEL') ?? 'gpt-4o-mini',
+      model,
       messages: [{ role: 'system', content: systemPrompt }, ...history],
       temperature,
     }),
@@ -250,7 +256,8 @@ async function fetchOpenAIResponse(
 
   if (!resp.ok) {
     const errorBody = await resp.text().catch(() => `${resp.status} ${resp.statusText}`)
-    throw new Error(`OpenAI fallback failed: ${errorBody}`)
+    logger.warn(`[OPENAI] Provider returned ${resp.status}: ${errorBody}`)
+    throw new Error(`OpenAI/OpenRouter failed (${resp.status}): ${errorBody}`)
   }
 
   const payload = (await resp.json().catch(() => ({}))) as {

@@ -19,7 +19,10 @@ let _fetchInFlight: Promise<string> | null = null
 async function fetchFromSupabase(): Promise<string> {
   const supabaseUrl = process.env.SUPABASE_URL
   const supabaseKey = process.env.SUPABASE_SERVICE_KEY
-  if (!supabaseUrl || !supabaseKey) return ''
+  if (!supabaseUrl || !supabaseKey) {
+    console.warn('[neon-context] Supabase credentials missing.')
+    return ''
+  }
 
   try {
     const base = supabaseUrl.replace(/\/$/, '')
@@ -28,6 +31,7 @@ async function fetchFromSupabase(): Promise<string> {
       Authorization: `Bearer ${supabaseKey}`,
     }
 
+    console.log(`[neon-context] Fetching from Supabase: ${base}`)
     const [familyResp, knowledgeResp, memoryResp] = await Promise.all([
       fetch(`${base}/rest/v1/family_profiles?select=name,last_name,relationship,location,occupation,ry_notes,notes_for_omega,how_to_greet,fun_facts&order=id`, { headers }),
       fetch(`${base}/rest/v1/public_knowledge?select=title,content,category,importance&category=in.(biography,creator,concept,quote)&order=importance.desc.nullslast&limit=15`, { headers }),
@@ -38,9 +42,13 @@ async function fetchFromSupabase(): Promise<string> {
     const knowledgeRows = knowledgeResp.ok ? await knowledgeResp.json() : []
     const memoryRows = memoryResp.ok ? await memoryResp.json() : []
 
+    if (!familyResp.ok) console.warn(`[neon-context] Supabase family_profiles status: ${familyResp.status}`)
+    if (!knowledgeResp.ok) console.warn(`[neon-context] Supabase public_knowledge status: ${knowledgeResp.status}`)
+    if (!memoryResp.ok) console.warn(`[neon-context] Supabase memories status: ${memoryResp.status}`)
+
     return buildContextString(familyRows, knowledgeRows, memoryRows)
   } catch (err) {
-    console.warn('[neon-context] Supabase fetch failed:', (err as Error)?.message)
+    console.warn('[neon-context] Supabase fetch error:', (err as Error)?.message || 'Unknown network error')
     return ''
   }
 }
