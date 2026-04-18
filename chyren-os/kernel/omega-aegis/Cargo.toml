@@ -1,0 +1,21 @@
+[package]
+name = "omega-aegis"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[lib]
+
+[dependencies]
+omega-core = { path = "../omega-core" }
+omega-telemetry = { path = "../omega-telemetry" }
+omega-myelin = { path = "../omega-myelin" }
+omega-phylactery = { path = "../omega-phylactery" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "1"
+regex = "1"
+sha2 = { workspace = true }
+hex = { workspace = true }
+hmac = { workspace = true }

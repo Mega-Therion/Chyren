@@ -310,3 +310,101 @@ pub trait MasterLedger: Send + Sync {
     /// Retrieve a historical run envelope by its run ID.
     fn get_run(&self, run_id: &str) -> Option<RunEnvelope>;
 }
+
+// ── Agent Mesh Types ──────────────────────────────────────────────────────────
+
+/// Persistent agent capability classification.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum AgentCapability {
+    ToolExecution,
+    ContentIngestion,
+    FormalVerification,
+    KnowledgeCompression,
+}
+
+/// A unit of work dispatched to a persistent agent.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AgentTask {
+    pub task_id: String,
+    pub run_id: String,
+    pub agent_id: String,
+    /// Raw payload — format is agent-specific (lean proof text, URL, etc.)
+    pub payload: String,
+    pub constraints: Vec<String>,
+}
+
+/// Result returned by a persistent agent after executing a task.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AgentResult {
+    pub task_id: String,
+    pub run_id: String,
+    pub agent_id: String,
+    pub success: bool,
+    pub output: String,
+    /// ADCCL-compatible score (0.0–1.0); None if the agent did not score output.
+    pub adccl_score: Option<f64>,
+    pub error: Option<String>,
+    pub completed_at: f64,
+}
+
+// ── Formal Knowledge Types ────────────────────────────────────────────────────
+
+/// A proof-level constraint that indexes knowledge nodes in the Neocortex.
+/// Chyren queries by constraint predicate, not algorithm name.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ProofConstraint {
+    pub id: String,
+    /// Formal predicate, e.g. "∀n∈ℕ: IsPrime(n) ↔ ∀d∈[2,√n]: n mod d ≠ 0"
+    pub predicate: String,
+    pub domain: String,
+    /// IDs of other ProofConstraints this one axiomatically depends on.
+    pub depends_on: Vec<String>,
+}
+
+/// A formal knowledge unit absorbed into the Neocortex.
+/// The Lean 4 proof is the canonical truth; everything else is metadata.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct KnowledgeNode {
+    /// SHA-256 of lean_proof — also the cold-store content-address key.
+    pub content_hash: String,
+    pub lean_proof: String,
+    pub summary: String,
+    pub constraints: Vec<ProofConstraint>,
+    pub source_url: Option<String>,
+    pub absorbed_at: f64,
+    /// UNIX timestamp of last retrieval; used for 30-day stratum eviction.
+    pub last_accessed: f64,
+    /// content_hashes of nodes this can be fully derived from (enables compression).
+    pub derivable_from: Vec<String>,
+}
+
+impl KnowledgeNode {
+    pub fn new(
+        lean_proof: String,
+        summary: String,
+        constraints: Vec<ProofConstraint>,
+        source_url: Option<String>,
+    ) -> Self {
+        use sha2::{Digest, Sha256};
+        let content_hash = hex::encode(Sha256::digest(lean_proof.as_bytes()));
+        let t = now();
+        Self {
+            content_hash,
+            lean_proof,
+            summary,
+            constraints,
+            source_url,
+            absorbed_at: t,
+            last_accessed: t,
+            derivable_from: vec![],
+        }
+    }
+}
+
+pub mod mesh;
+pub mod axioms;
+
+pub use axioms::{
+    AxiomTrait, AxiomCheckResult, EpistemicNode, EpistemicNodeType,
+    ChiralEdge, EdgePolarity, check_all_axioms, sovereign_axioms,
+};

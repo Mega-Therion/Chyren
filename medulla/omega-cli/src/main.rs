@@ -1,9 +1,18 @@
+mod theme;
+
 use clap::{CommandFactory, Parser, Subcommand};
 use clap_complete::{generate, Shell};
 use clap_mangen::Man;
 use omega_cli::conductor::{Conductor, ConductorError};
 use omega_core::{now, EvidencePacket, RunEnvelope, RunStatus};
+use omega_conductor::agents::{
+    ingestor::IngestorAgent,
+    millennium::{MillenniumProblem, SearchAndExtendAgent},
+};
+use omega_myelin::Service as MyelinService;
+use omega_neocortex::{cold_store::ColdStore, proof_index::ProofConstraintIndex, Neocortex};
 use std::sync::Arc;
+use tokio::sync::Mutex;
 use tracing::{info, warn};
 
 fn init_tracing() {
@@ -66,6 +75,15 @@ enum Commands {
     },
     /// Generate a man page for this CLI (stdout).
     Man,
+    /// Target a Millennium Prize Problem: crawl Mathlib4 precursors and absorb into Neocortex.
+    Solve {
+        /// Which problem: riemann | pvsnp | navier | yang | hodge | birch
+        #[arg(value_name = "PROBLEM")]
+        problem: String,
+        /// How many import levels deep to crawl (default: 3)
+        #[arg(long, default_value_t = 3)]
+        depth: usize,
+    },
 }
 
 #[derive(serde::Serialize)]
@@ -107,6 +125,10 @@ fn exit_code_for_error(e: &anyhow::Error) -> i32 {
 async fn main() -> anyhow::Result<()> {
     init_tracing();
     let cli = Cli::parse();
+
+    if !cli.json {
+        theme::print_banner();
+    }
 
     // Launch The Eye (Prometheus Observability)
     let _ = omega_telemetry::start_metrics_server(9090).await;
@@ -157,21 +179,17 @@ async fn main() -> anyhow::Result<()> {
                     error: None,
                 });
             } else {
-                println!("--- HEMISPHERE R (MEDULLA — Execution/Performance/Memory) ---");
-                println!("Yettragrammaton: R.W.Ϝ.Y.");
-                println!("Integrity: SEALED");
                 let n = conductor.dream_episode_count();
                 let top = conductor.dream_top_pattern();
                 let top_str = top
-                    .map(|(label, count)| format!("\"{}\" ({}x)", label, count))
-                    .unwrap_or_else(|| "none".to_string());
-                eprintln!("[DREAM] {} failure episodes recorded. Top pattern: {}", n, top_str);
+                    .map(|(label, count)| format!("\"{}\" ({}×)", label, count));
+                theme::print_status_block("SEALED", n, top_str.as_deref());
             }
             return Ok(());
         }
         Some(Commands::Server) => {
             if !cli.json {
-                println!("[BOOT] Launching API Server...");
+                println!("{}", theme::info("[BOOT] Launching API Server on :8080 ..."));
             }
             omega_cli::api::start_api_server(conductor).await?;
             return Ok(());
@@ -201,11 +219,11 @@ async fn main() -> anyhow::Result<()> {
 
             if conductor.reset_persistent_store().await? {
                 if !cli.json {
-                    println!("[OK] Persistent store reset (Postgres/Neon tables cleared).");
-                    println!("[NOTE] External vector store (Qdrant) was not cleared.");
+                    println!("{}", theme::ok("[OK] Persistent store reset — Postgres/Neon tables cleared."));
+                    println!("{}", theme::warn("[NOTE] External vector store (Qdrant) was not cleared."));
                 }
             } else if !cli.json {
-                println!("[WARN] No persistent store configured; clearing ephemeral state only.");
+                println!("{}", theme::warn("[WARN] No persistent store configured; clearing ephemeral state only."));
             }
 
             conductor.reset_ephemeral_state().await;
@@ -221,13 +239,13 @@ async fn main() -> anyhow::Result<()> {
                     error: None,
                 });
             } else {
-                println!("[OK] Ephemeral in-process state cleared.");
+                println!("{}", theme::ok("[OK] Ephemeral in-process state cleared."));
             }
             return Ok(());
         }
         Some(Commands::Ingest { path }) => {
             if !cli.json {
-                println!("[TASK] Ingesting MatrixProgram from: {}", path);
+                println!("{} {}", theme::info("[INGEST]"), theme::value(path));
             }
             let content = std::fs::read_to_string(path)?;
             let program: omega_core::MatrixProgram = serde_json::from_str(&content)?;
@@ -248,8 +266,73 @@ async fn main() -> anyhow::Result<()> {
                     error: None,
                 });
             } else {
-                println!("[SUCCESS] Program integrated into memory graph.");
+                println!("{}", theme::ok("[SUCCESS] Program integrated into memory graph."));
             }
+            return Ok(());
+        }
+        Some(Commands::Solve { problem, depth }) => {
+            let problem_key = problem.to_lowercase();
+            let target = match problem_key.as_str() {
+                "riemann" | "riemann_hypothesis" => MillenniumProblem::RiemannHypothesis,
+                "pvsnp" | "p_vs_np" => MillenniumProblem::PVsNP,
+                "navier" | "navier_stokes" => MillenniumProblem::NavierStokes,
+                "yang" | "yang_mills" => MillenniumProblem::YangMills,
+                "hodge" => MillenniumProblem::HodgeConjecture,
+                "birch" | "birch_swinnerton_dyer" => MillenniumProblem::BirchSwinnertonDyer,
+                other => {
+                    eprintln!("[ERROR] Unknown problem '{}'. Use: riemann | pvsnp | navier | yang | hodge | birch", other);
+                    std::process::exit(1);
+                }
+            };
+
+            println!(
+                "{} {}  {}  depth={}",
+                theme::tier("[TIER-2]"),
+                theme::info("[SOLVE]"),
+                theme::gradient(&target.name().to_uppercase(), 0),
+                theme::value(&depth.to_string()),
+            );
+            println!("{}", theme::info("[SOLVE] Building Neocortex agent stack..."));
+
+            let myelin = Arc::new(MyelinService::new());
+            let neocortex = Arc::new(Neocortex::new());
+            let cold_store = Arc::new(
+                ColdStore::default_store()
+                    .unwrap_or_else(|_| ColdStore::new("/tmp/chyren_cold").expect("cold store init failed"))
+            );
+            let proof_index = Arc::new(Mutex::new(ProofConstraintIndex::new()));
+
+            let ingestor = IngestorAgent::new(
+                myelin,
+                neocortex,
+                cold_store,
+                proof_index,
+            );
+            let agent = SearchAndExtendAgent::new(ingestor);
+
+            println!("{}", theme::warn("[SOLVE] Crawling Mathlib4 precursors — this may take several minutes..."));
+            let report = agent.run(target, *depth).await;
+
+            println!(
+                "{}  {}  {}  {}",
+                theme::ok("[SOLVE] Complete."),
+                theme::label(&format!("modules={}", report.modules_crawled)),
+                theme::ok(&format!("absorbed={}", report.absorbed_hashes.len())),
+                if report.errors.is_empty() {
+                    theme::ok("errors=0")
+                } else {
+                    theme::fail(&format!("errors={}", report.errors.len()))
+                },
+            );
+
+            if !report.absorbed_hashes.is_empty() {
+                println!("  {} {}", theme::label("first-hash"), theme::run_id(&report.absorbed_hashes[0]));
+            }
+
+            if cli.json {
+                println!("{}", serde_json::to_string_pretty(&report).unwrap_or_default());
+            }
+
             return Ok(());
         }
         Some(Commands::Completions { shell }) => {
@@ -278,7 +361,11 @@ async fn main() -> anyhow::Result<()> {
                 };
 
                 if !cli.json {
-                    println!("[PLANNING] Analysing task: \"{}\"", task_text);
+                    println!(
+                        "{} {}",
+                        theme::info("[PLANNING]"),
+                        theme::value(&format!("\"{}\"", task_text)),
+                    );
                 }
 
                 let plan = match conductor.plan_task(&task_text).await {
@@ -297,6 +384,7 @@ async fn main() -> anyhow::Result<()> {
                                 error: Some("Rejected(adversarial)".to_string()),
                             });
                         } else {
+                            println!("{}", theme::warn("[AEGIS] Task deflected — adversarial pattern detected."));
                             println!("{deflection_text}");
                         }
                         std::process::exit(10);
@@ -322,7 +410,7 @@ async fn main() -> anyhow::Result<()> {
                 };
 
                 if !cli.json {
-                    println!("[EXECUTING] Routing through sovereign pipeline...");
+                    println!("{}", theme::info("[EXECUTING] Routing through sovereign pipeline..."));
                 }
 
                 // Apply generation overrides at the CLI boundary (keeps API defaults stable).
@@ -372,13 +460,21 @@ async fn main() -> anyhow::Result<()> {
                         error: None,
                     });
                 } else {
-                    println!("\n{}", "=".repeat(60));
-                    println!("Result Status: {:?}", result.status);
-                    if let Some(v) = result.verification {
-                        println!("ADCCL Score  : {:.2}", v.score);
-                    }
-                    println!("{}", "=".repeat(60));
-                    println!("\n{}", result.response_text);
+                    let provider_str = result
+                        .spoke_response
+                        .as_ref()
+                        .map(|r| r.provider.as_str())
+                        .unwrap_or("unknown");
+                    let adccl_v = result.verification.as_ref().map(|v| v.score as f64).unwrap_or(0.0);
+                    let status_str = format!("{:?}", result.status);
+                    theme::print_result_header(
+                        &envelope.run_id,
+                        &status_str,
+                        adccl_v,
+                        provider_str,
+                    );
+                    theme::print_response(&result.response_text);
+                    println!();
                 }
             } else if cli.json {
                 print_json(JsonOut {
@@ -393,7 +489,7 @@ async fn main() -> anyhow::Result<()> {
                 });
                 std::process::exit(2);
             } else {
-                println!("Run `chyren --help` for usage.");
+                println!("{}", theme::label("Run `chyren --help` for usage."));
             }
         }
     }

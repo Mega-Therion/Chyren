@@ -139,6 +139,11 @@ impl SpokeRegistry {
         }
     }
 
+    /// List all registered spoke names.
+    pub fn list_spokes(&self) -> Vec<String> {
+        self.spokes.keys().cloned().collect()
+    }
+
     /// Load default spokes from environment configuration.
     pub fn from_env() -> Self {
         let mut reg = Self::new();
@@ -161,6 +166,7 @@ impl SpokeRegistry {
             ("firebase", 203),
             ("zapier", 204),
             ("manus", 205),
+            ("openrouter", 15),
         ];
 
         for (p, priority) in providers {
@@ -189,6 +195,7 @@ impl SpokeRegistry {
                 "firebase" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-firebase"]))),
                 "zapier" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-zapier"]))),
                 "manus" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-manus"]))),
+                "openrouter" => Some(Arc::new(spokes::OpenRouterSpoke::new(config))),
                 _ => None,
             };
 
@@ -282,6 +289,20 @@ impl SpokeRegistry {
         request: &SpokeRequest,
         preferred: Option<&str>,
     ) -> anyhow::Result<SpokeResponse> {
+        self.route_with_model(request, preferred, None).await
+    }
+
+    /// Route a chat request with an optional model override injected into the spoke input.
+    ///
+    /// Spokes that support a `"model"` field in their `chat_completion` input (e.g.
+    /// OpenRouterSpoke, OllamaSpoke) will use `model_hint` instead of their default.
+    /// Spokes that ignore it continue working normally.
+    pub async fn route_with_model(
+        &self,
+        request: &SpokeRequest,
+        preferred: Option<&str>,
+        model_hint: Option<&str>,
+    ) -> anyhow::Result<SpokeResponse> {
         let name = preferred
             .map(|n| n.to_string())
             .unwrap_or_else(|| self.preference.first().cloned().unwrap_or_default());
@@ -291,17 +312,22 @@ impl SpokeRegistry {
             .get(&name)
             .ok_or_else(|| anyhow::anyhow!("Spoke {} not found", name))?;
 
+        let mut input = serde_json::json!({
+            "prompt": request.prompt,
+            "system": request.system,
+            "max_tokens": request.max_tokens,
+            "temperature": request.temperature,
+        });
+        if let Some(model) = model_hint {
+            input["model"] = serde_json::Value::String(model.to_string());
+        }
+
         // Translate SpokeRequest to a ToolInvocation of "chat_completion".
         let start = std::time::Instant::now();
         let result = spoke
             .invoke_tool(ToolInvocation {
                 tool: "chat_completion".to_string(),
-                input: serde_json::json!({
-                    "prompt": request.prompt,
-                    "system": request.system,
-                    "max_tokens": request.max_tokens,
-                    "temperature": request.temperature,
-                }),
+                input,
             })
             .await
             .map_err(|e| anyhow::anyhow!("Spoke invocation error: {}", e))?;

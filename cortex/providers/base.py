@@ -49,7 +49,7 @@ class ProviderResponse:
         return self.status == ProviderStatus.SUCCESS
 
 
-class BaseProvider(Protocol):
+class ProviderBase(Protocol):
     """Interface every provider must satisfy."""
 
     @property
@@ -67,10 +67,10 @@ class ProviderRouter:
     """
 
     def __init__(self):
-        self._providers: dict[str, BaseProvider] = {}
+        self._providers: dict[str, ProviderBase] = {}
         self._order: list[str] = []
 
-    def register(self, provider: BaseProvider) -> None:
+    def register(self, provider: ProviderBase) -> None:
         self._providers[provider.name] = provider
         if provider.name not in self._order:
             self._order.append(provider.name)

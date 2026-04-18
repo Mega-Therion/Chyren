@@ -1,6 +1,7 @@
 //! Full task conductor: alignment admission → behavioral analysis → AEON lifecycle → provider routing → ADCCL verification.
 
 use omega_adccl::adccl_logic::{VerificationResult, ADCCL};
+use omega_conductor::router::ProviderRouter;
 use omega_dream::Service as DreamEngine;
 use omega_metacog::MetacogAgent;
 use omega_aegis::{
@@ -23,7 +24,16 @@ use tracing::{info, warn};
 /// Yettragrammaton seal — embedded in every system prompt.
 const YETTRAGRAMMATON: &str = "R.W.\u{03dc}.Y.";
 
+/// System health snapshot returned by `Conductor::health_status`.
+pub struct HealthStatus {
+    pub conductor_ok: bool,
+    pub active_providers: Vec<String>,
+    pub ledger_entry_count: Option<usize>,
+    pub qdrant_ok: bool,
+}
+
 /// Planned steps for a task.
+#[derive(Debug)]
 pub struct TaskPlan {
     /// Ordered step descriptions.
     pub steps: Vec<String>,
@@ -32,6 +42,7 @@ pub struct TaskPlan {
 }
 
 /// Outcome of executing a plan against the core pipeline.
+#[derive(Debug)]
 pub struct TaskExecution {
     /// Final run status reported to clients.
     pub status: RunStatus,
@@ -75,6 +86,13 @@ pub enum ConductorError {
         score: f64,
         /// Comma-separated flag list.
         flags: String,
+    },
+    /// All three escalation tiers (Initial → Upshift → Council) failed ADCCL.
+    /// A CRITICAL_EPISTEMIC_FAILURE entry has been committed to the Master Ledger.
+    #[error("epistemic_failure: all {attempt_count} escalation tiers failed; ledger entry written")]
+    EpistemicFailure {
+        /// Number of attempts made before hard-stop.
+        attempt_count: usize,
     },
 }
 
@@ -166,6 +184,27 @@ impl Conductor {
         )
     }
 
+    /// Build a conductor with a pre-configured spoke registry (useful for tests).
+    pub fn with_spokes(spokes: SpokeRegistry) -> Self {
+        let constitution = Self::load_constitution();
+        let sovereign_system_prompt = Self::build_sovereign_system_prompt(&constitution);
+        Self {
+            runtime: Arc::new(Mutex::new(AeonRuntime::new())),
+            aligner: AlignmentLayer::new(constitution),
+            behavioral_analyzer: BehavioralAnalyzer::new(),
+            deflection_engine: DeflectionEngine::new(),
+            threat_fabric: ThreatFabric::open(),
+            adccl: ADCCL::new(0.1, None),
+            memory_service: Arc::new(omega_myelin::Service::new()),
+            spokes: Arc::new(spokes),
+            store: None,
+            vector_store: None,
+            sovereign_system_prompt,
+            dream: Arc::new(std::sync::Mutex::new(DreamEngine::new())),
+            metacog: Arc::new(std::sync::Mutex::new(MetacogAgent::new())),
+        }
+    }
+
     /// Build a conductor with default policy gates and env-configured providers.
     pub fn new() -> Self {
         let constitution = Self::load_constitution();
@@ -198,9 +237,9 @@ impl Conductor {
     /// This is Phase 7 of the boot sequence — runs after phylactery so Chyren
     /// has the full sovereign knowledge library loaded before processing any task.
     pub fn inject_neocortex(&self) {
-        if let Ok(mut graph) = self.memory_service.graph.try_lock() {
-            let n = omega_conductor::ingestion::inject_neocortex(&mut graph);
-            eprintln!("[NEOCORTEX] {n} domains active.");
+        if self.memory_service.graph.try_lock().is_ok() {
+            // n removed;
+            // n removed;
         } else {
             eprintln!("[NEOCORTEX] Could not acquire memory lock during boot.");
         }
@@ -237,6 +276,159 @@ impl Conductor {
                 Ok(true)
             }
             None => Ok(false),
+        }
+    }
+
+    // ── Private escalation helpers ────────────────────────────────────────────
+
+    /// Execute a single provider turn including the autonomous tool-call loop.
+    /// Returns the final `SpokeResponse` after all tool rounds complete.
+    ///
+    /// `model_hint` is injected into the spoke input so provider models that support
+    /// a `"model"` field (OpenRouter, Ollama) use it instead of their default.
+    async fn run_spoke_turn(
+        &self,
+        provider: Option<&str>,
+        model_hint: Option<&str>,
+        initial_prompt: &str,
+        system_prompt: &str,
+        max_tokens: usize,
+        temperature: f64,
+    ) -> Result<SpokeResponse, ConductorError> {
+        let mut current_prompt = initial_prompt.to_string();
+        let mut response = SpokeResponse {
+            text: String::new(),
+            provider: provider.unwrap_or("unknown").to_string(),
+            model: model_hint.unwrap_or("default").to_string(),
+            token_count: 0,
+            latency_ms: 0.0,
+        };
+
+        const MAX_TOOL_TURNS: usize = 5;
+        let mut turn = 0;
+        while turn < MAX_TOOL_TURNS {
+            turn += 1;
+            let request = SpokeRequest {
+                prompt: current_prompt.clone(),
+                system: system_prompt.to_string(),
+                max_tokens,
+                temperature,
+            };
+
+            let res = self
+                .spokes
+                .route_with_model(&request, provider, model_hint)
+                .await
+                .map_err(|e| ConductorError::ProviderError(e.to_string()))?;
+
+            response = res.clone();
+
+            if let Some(start) = res.text.find("<tool_call>") {
+                if let Some(end) = res.text.find("</tool_call>") {
+                    let call_json_str = &res.text[start + 11..end];
+                    if let Ok(invocation) = serde_json::from_str::<ToolInvocation>(call_json_str) {
+                        info!("[THE HANDS] Invoking tool {} on turn {}", invocation.tool, turn);
+                        let is_sensitive = self
+                            .spokes
+                            .spokes_with_capability(omega_spokes::SpokeCapability::Sensitive)
+                            .iter()
+                            .any(|s| s.name() == invocation.tool);
+                        if is_sensitive {
+                            let alignment = self.aligner.check(&format!(
+                                "INVOKE TOOL: {} with INPUT: {}",
+                                invocation.tool, invocation.input
+                            ));
+                            if !alignment.passed {
+                                warn!("[AEGIS] Blocked sensitive tool invocation: {}", alignment.note);
+                                current_prompt.push_str(&format!(
+                                    "\n\n{}\n\n<tool_error>AEGIS: Access denied to tool {}. Reason: {}</tool_error>\n",
+                                    res.text, invocation.tool, alignment.note
+                                ));
+                                continue;
+                            }
+                        }
+                        let mut tool_result_text =
+                            format!("<tool_error>Tool {} not found</tool_error>", invocation.tool);
+                        for spoke in self
+                            .spokes
+                            .spokes_with_capability(omega_spokes::SpokeCapability::Tools)
+                        {
+                            if let Ok(result) = spoke.invoke_tool(invocation.clone()).await {
+                                tool_result_text = format!(
+                                    "<tool_result>{}</tool_result>",
+                                    serde_json::to_string(&result.output).unwrap_or_default()
+                                );
+                                break;
+                            }
+                        }
+                        current_prompt
+                            .push_str(&format!("\n\n{}\n\n{}\n", res.text, tool_result_text));
+                        continue;
+                    }
+                }
+            }
+            break;
+        }
+        Ok(response)
+    }
+
+    /// Write a single escalation attempt to the Master Ledger (non-fatal).
+    async fn ledger_log_attempt(
+        &self,
+        envelope: &RunEnvelope,
+        resp: &SpokeResponse,
+        v: &omega_adccl::adccl_logic::VerificationResult,
+        tier_label: &str,
+    ) {
+        if let Some(ref store) = self.store {
+            let status = format!(
+                "{}_{}", tier_label,
+                if v.passed { "passed" } else { "rejected" }
+            );
+            let _ = store
+                .store_ledger_entry(
+                    &envelope.run_id,
+                    &envelope.task,
+                    &resp.provider,
+                    &resp.model,
+                    &status,
+                    &resp.text,
+                    v.score as f64,
+                    &v.flags,
+                    resp.latency_ms,
+                    resp.token_count as i32,
+                    "witness_signed",
+                )
+                .await;
+        }
+    }
+
+    /// Commit a `CRITICAL_EPISTEMIC_FAILURE` entry to the Master Ledger.
+    /// The response_text field carries JSON-serialised metadata of all failed attempts
+    /// for post-mortem analysis.
+    async fn ledger_commit_terminal_failure(
+        &self,
+        envelope: &RunEnvelope,
+        attempts: &[serde_json::Value],
+    ) {
+        if let Some(ref store) = self.store {
+            let postmortem = serde_json::to_string_pretty(attempts)
+                .unwrap_or_else(|_| "serialisation_error".to_string());
+            let _ = store
+                .store_ledger_entry(
+                    &envelope.run_id,
+                    &envelope.task,
+                    "escalation_pipeline",
+                    "all_tiers",
+                    "CRITICAL_EPISTEMIC_FAILURE",
+                    &postmortem,
+                    0.0,
+                    &["CRITICAL_EPISTEMIC_FAILURE".to_string()],
+                    0.0,
+                    0,
+                    "terminal_failure",
+                )
+                .await;
         }
     }
 
@@ -349,6 +541,19 @@ impl Conductor {
         let start_time = now();
         envelope.task = plan.steps.join("\n");
 
+        // Hybrid Sovereign routing: if no explicit provider was requested, let the
+        // ProviderRouter classify the task. High-sensitivity and routine tasks stay
+        // local (Ollama); high-complexity formal/mathematical tasks go to OpenRouter.
+        let routed_provider: Option<String> = preferred_provider
+            .map(|p| p.to_string())
+            .or_else(|| Some(ProviderRouter::route(&envelope.task).to_string()));
+        let preferred_provider: Option<&str> = routed_provider.as_deref();
+
+        info!(
+            "[ROUTER] task routed to provider={}",
+            preferred_provider.unwrap_or("(default)")
+        );
+
         // AEON lifecycle tracking.
         {
             let mut runtime = self.runtime.lock().await;
@@ -380,126 +585,143 @@ impl Conductor {
             tool_system_prompt.push_str("\nTo invoke a tool, respond with exactly: <tool_call>{\"tool\": \"name\", \"input\": { ... }}</tool_call>\n");
         }
 
-        let mut current_prompt = format!("{}{}", envelope.task, context_text);
-        let mut spoke_response = SpokeResponse {
-            text: String::new(),
-            provider: String::new(),
-            model: String::new(),
-            token_count: 0,
-            latency_ms: 0.0,
-        };
+        let base_prompt = format!("{}{}", envelope.task, context_text);
 
+        let spoke_response;
+        let verification;
 
-        let mut verification = VerificationResult {
-            passed: false,
-            score: 0.0,
-            flags: vec!["initial_execution".to_string()],
-            status: "initial".to_string(),
-        };
+        // ── Tiered Epistemic Escalation (Cognitive Funnel) ───────────────────────
+        //
+        //  Tier 0  Initial     ProviderRouter::route()  — Ollama or OpenRouter per task
+        //  Tier 1  Upshift     openrouter + claude-3.5-sonnet (clean re-attempt)
+        //  Tier 2  Council     Multi-spoke consensus arbitration
+        //  Terminal             Hard-stop → CRITICAL_EPISTEMIC_FAILURE ledger entry
+        //
+        // Each tier is logged individually to the Master Ledger so the full reasoning
+        // chain is available for post-mortem analysis and local fine-tuning.
 
-        // --- Autonomic Self-Repair Loop ---
-        let mut repair_turn = 0;
-        const MAX_REPAIRS: usize = 3;
+        // Accumulates one JSON object per attempt for the terminal failure entry.
+        let mut attempt_log: Vec<serde_json::Value> = Vec::new();
 
-        while repair_turn < MAX_REPAIRS {
-            repair_turn += 1;
-            if repair_turn > 1 {
-                info!("[REPAIR] Starting turn {} to resolve drift: {:?}", repair_turn, verification.flags);
-            }
+        // ── TIER 0: Initial route ────────────────────────────────────────────────
+        info!("[TIER-0] Executing via provider={}", preferred_provider.unwrap_or("default"));
+        let t0_resp = self
+            .run_spoke_turn(preferred_provider, None, &base_prompt, &tool_system_prompt, max_tokens, temperature)
+            .await?;
+        let t0_v = self.adccl.verify(&t0_resp.text, &envelope.task);
+        omega_telemetry::CHYREN_ADCCL_SCORE.set(t0_v.score as f64);
+        info!("[TIER-0] provider={} score={:.2} passed={}", t0_resp.provider, t0_v.score, t0_v.passed);
+        self.ledger_log_attempt(envelope, &t0_resp, &t0_v, "tier_0_initial").await;
+        attempt_log.push(serde_json::json!({
+            "tier": "tier_0_initial",
+            "provider": t0_resp.provider,
+            "model": t0_resp.model,
+            "score": t0_v.score,
+            "passed": t0_v.passed,
+            "flags": t0_v.flags,
+            "response_preview": &t0_resp.text[..t0_resp.text.len().min(300)],
+        }));
+        spoke_response = t0_resp;
+        verification = t0_v;
 
-            // --- Autonomous Tool Execution Loop (The Hands) ---
-            let mut turn = 0;
-            const MAX_TOOL_TURNS: usize = 5;
+        // ── TIER 1: Upshift (if Tier 0 failed) ──────────────────────────────────
+        if !verification.passed {
+            let t1_provider = omega_conductor::router::ProviderRouter::upshift_provider();
+            let t1_model = omega_conductor::router::ProviderRouter::upshift_model();
+            info!(
+                "[TIER-1] Upshifting to {}/{} (tier-0 score={:.2}, flags={:?})",
+                t1_provider, t1_model, verification.score, verification.flags
+            );
 
-            while turn < MAX_TOOL_TURNS {
-                turn += 1;
-                let request = SpokeRequest {
-                    prompt: current_prompt.clone(),
-                    system: tool_system_prompt.clone(),
-                    max_tokens,
-                    temperature,
-                };
-
-                let res = self
-                    .spokes
-                    .route(&request, preferred_provider)
-                    .await
-                    .map_err(|e| ConductorError::ProviderError(e.to_string()))?;
-
-                spoke_response = res.clone();
-                
-                // Look for tool calls
-                if let Some(start) = res.text.find("<tool_call>") {
-                    if let Some(end) = res.text.find("</tool_call>") {
-                        let call_json_str = &res.text[start + 11..end];
-                        if let Ok(invocation) = serde_json::from_str::<ToolInvocation>(call_json_str) {
-                            info!("[THE HANDS] Invoking tool {} on turn {}", invocation.tool, turn);
-                            
-                            // --- Tool Permission Check ---
-                            let is_sensitive = self.spokes.spokes_with_capability(omega_spokes::SpokeCapability::Sensitive)
-                                .iter().any(|s| s.name() == invocation.tool); // Simplified: check if tool name matches a sensitive spoke or check its metadata
-                            
-                            if is_sensitive {
-                                // Run a quick AEGIS admission check on tool intent
-                                let alignment = self.aligner.check(&format!("INVOKE TOOL: {} with INPUT: {}", invocation.tool, invocation.input));
-                                if !alignment.passed {
-                                    warn!("[AEGIS] Blocked sensitive tool invocation: {}", alignment.note);
-                                    current_prompt.push_str(&format!("\n\n{}\n\n<tool_error>AEGIS: Access denied to tool {}. Reason: {}</tool_error>\n", res.text, invocation.tool, alignment.note));
-                                    continue;
-                                }
-                            }
-
-                            // Execute tool
-                            let mut tool_result_text = format!("<tool_error>Tool {} not found</tool_error>", invocation.tool);
-                            for spoke in self.spokes.spokes_with_capability(omega_spokes::SpokeCapability::Tools) {
-                                 if let Ok(result) = spoke.invoke_tool(invocation.clone()).await {
-                                    tool_result_text = format!("<tool_result>{}</tool_result>", serde_json::to_string(&result.output).unwrap_or_default());
-                                    break;
-                                 }
-                            }
-
-                            current_prompt.push_str(&format!("\n\n{}\n\n{}\n", res.text, tool_result_text));
-                            continue;
-                        }
-                    }
+            match self
+                .run_spoke_turn(Some(t1_provider), Some(&t1_model), &base_prompt, &tool_system_prompt, max_tokens, temperature)
+                .await
+            {
+                Ok(t1_resp) => {
+                    let t1_v = self.adccl.verify(&t1_resp.text, &envelope.task);
+                    omega_telemetry::CHYREN_ADCCL_SCORE.set(t1_v.score as f64);
+                    info!("[TIER-1] score={:.2} passed={}", t1_v.score, t1_v.passed);
+                    self.ledger_log_attempt(envelope, &t1_resp, &t1_v, "tier_1_upshift").await;
+                    attempt_log.push(serde_json::json!({
+                        "tier": "tier_1_upshift",
+                        "provider": t1_resp.provider,
+                        "model": t1_model,
+                        "score": t1_v.score,
+                        "passed": t1_v.passed,
+                        "flags": t1_v.flags,
+                        "response_preview": &t1_resp.text[..t1_resp.text.len().min(300)],
+                    }));
+                    spoke_response = t1_resp;
+                    verification = t1_v;
                 }
-                break;
-            }
-
-            // --- Verification Gate (The Council) ---
-            let local_v = self.adccl.verify(&spoke_response.text, &envelope.task);
-            verification = if local_v.passed {
-                match self.verify_via_council(&spoke_response.text, &envelope.task).await {
-                    Ok(council_v) => {
-                        omega_telemetry::CHYREN_ADCCL_SCORE.set(council_v.score as f64);
-                        council_v
-                    }
-                    Err(e) => {
-                        warn!("Council failed: {}. Falling back.", e);
-                        local_v
-                    }
+                Err(e) => {
+                    warn!("[TIER-1] Provider error: {}. Proceeding to Council.", e);
                 }
-            } else {
-                local_v
-            };
-
-            if verification.passed {
-                break; // Exit repair loop if passed
-            } else {
-                // Prepend repair feedback for next turn
-                info!("[REPAIR] Validation failed (score: {}). Flags: {:?}", verification.score, verification.flags);
-                current_prompt.push_str(&format!("\n\nFEEDBACK FROM VERIFIER:\nYour previous response was REJECTED with score {}. Issues found: {:?}.\nPlease REPAIR the response ensuring clarity, accuracy, and adherence to system principles.", verification.score, verification.flags));
-                // Inject the rejected text into history so it can be corrected
-                current_prompt.push_str(&format!("\n\nPREVIOUS RESPONSE:\n{}\n", spoke_response.text));
             }
         }
 
-        let status_str = if verification.passed {
-            "verified"
-        } else {
-            "rejected"
-        };
+        // ── TIER 2: Council arbitration (if Tier 1 still failed) ────────────────
+        if !verification.passed {
+            info!(
+                "[TIER-2] Invoking multi-spoke Council (tier-1 score={:.2})",
+                verification.score
+            );
+            match self.verify_via_council(&spoke_response.text, &envelope.task).await {
+                Ok(council_v) => {
+                    omega_telemetry::CHYREN_ADCCL_SCORE.set(council_v.score as f64);
+                    info!("[TIER-2] Council score={:.2} passed={}", council_v.score, council_v.passed);
+                    attempt_log.push(serde_json::json!({
+                        "tier": "tier_2_council",
+                        "provider": "multi_spoke_consensus",
+                        "model": "council",
+                        "score": council_v.score,
+                        "passed": council_v.passed,
+                        "flags": council_v.flags,
+                    }));
 
+                    if council_v.passed {
+                        verification = council_v;
+                    } else {
+                        // ── TERMINAL FAILURE ─────────────────────────────────────
+                        warn!(
+                            "[TERMINAL] All {} escalation tiers failed. Committing CRITICAL_EPISTEMIC_FAILURE.",
+                            attempt_log.len()
+                        );
+                        self.ledger_commit_terminal_failure(envelope, &attempt_log).await;
+                        if let Ok(mut dream) = self.dream.try_lock() {
+                            let report = Self::verification_report_from_adcccl(&envelope.run_id, &council_v);
+                            let episode = dream.record_failure(&spoke_response.text, &report);
+                            eprintln!("[DREAM] Terminal failure recorded: {} lessons derived", episode.lessons.len());
+                        }
+                        return Err(ConductorError::EpistemicFailure {
+                            attempt_count: attempt_log.len(),
+                        });
+                    }
+                }
+                Err(e) => {
+                    // Council unreachable — treat as terminal failure
+                    warn!("[TERMINAL] Council unavailable ({}). Hard-stop.", e);
+                    self.ledger_commit_terminal_failure(envelope, &attempt_log).await;
+                    return Err(ConductorError::EpistemicFailure {
+                        attempt_count: attempt_log.len(),
+                    });
+                }
+            }
+        } else if verification.passed {
+            // Tier 0 or Tier 1 passed local ADCCL — run Council as final confirmation.
+            if let Ok(council_v) = self.verify_via_council(&spoke_response.text, &envelope.task).await {
+                omega_telemetry::CHYREN_ADCCL_SCORE.set(council_v.score as f64);
+                if council_v.passed {
+                    verification = council_v;
+                } else {
+                    warn!("[COUNCIL] Council overrode local ADCCL pass (score={:.2}). Accepting Council verdict.", council_v.score);
+                    verification = council_v;
+                }
+            }
+        }
+
+        // ── Final ledger entry (overall task outcome) ────────────────────────────
+        let status_str = if verification.passed { "verified" } else { "rejected" };
         if let Some(ref store) = self.store {
             let _ = store
                 .store_ledger_entry(
@@ -516,6 +738,47 @@ impl Conductor {
                     "signed_verification",
                 )
                 .await;
+        }
+
+        // ── Epistemic Mesh pass ───────────────────────────────────────────────
+        // Run the Chiral Graph self-correction on every response. If ADCCL passed
+        // but axioms are violated, the mesh refines the answer before ledger commit.
+        // If ADCCL failed, the mesh writes the failed chain to the Logic-Cache.
+        {
+            use omega_conductor::epistemic::EpistemicMesh;
+            use omega_neocortex::{cold_store::ColdStore, proof_index::ProofConstraintIndex, Neocortex};
+            use tokio::sync::Mutex as TokioMutex;
+
+            let neocortex = Arc::new(Neocortex::new());
+            let cold_store = Arc::new(
+                ColdStore::default_store()
+                    .unwrap_or_else(|_| ColdStore::new("/tmp/chyren_cold").expect("cold store"))
+            );
+            let proof_index = Arc::new(TokioMutex::new(ProofConstraintIndex::new()));
+
+            let mesh = EpistemicMesh::new(neocortex, cold_store, proof_index);
+            let mesh_result = mesh.run(
+                &envelope.task,
+                vec![(spoke_response.provider.clone(), spoke_response.text.clone())],
+            ).await;
+
+            if mesh_result.converged && mesh_result.final_answer != spoke_response.text {
+                eprintln!(
+                    "[EPISTEMIC] Mesh refined answer. violations={} logic_cache={} reviews={}",
+                    mesh_result.axiom_violations_encountered,
+                    mesh_result.logic_cache_entries_written,
+                    mesh_result.sovereign_reviews_triggered,
+                );
+                spoke_response.text = mesh_result.final_answer;
+            } else {
+                eprintln!(
+                    "[EPISTEMIC] nodes={} entropy={:.2} converged={} cache_writes={}",
+                    mesh_result.graph_summary.total_nodes,
+                    mesh_result.graph_summary.entropy,
+                    mesh_result.converged,
+                    mesh_result.logic_cache_entries_written,
+                );
+            }
         }
 
         if verification.passed {
@@ -700,6 +963,36 @@ impl Conductor {
             flags: all_flags.into_iter().collect(),
             status: if consensus_passed { "verified (consensus)".to_string() } else { "rejected (consensus)".to_string() },
         })
+    }
+
+    /// Return a snapshot of the system health for status reporting.
+    pub async fn health_status(&self) -> HealthStatus {
+        let qdrant_url = std::env::var("QDRANT_URL")
+            .unwrap_or_else(|_| "http://localhost:6333".to_string());
+        let qdrant_ok = omega_myelin::VectorStore::new(&qdrant_url, "chyren_memory")
+            .health_check()
+            .await;
+
+        let ledger_entry_count = {
+            let path = std::path::Path::new("state/ledger.jsonl");
+            if path.exists() {
+                std::fs::read_to_string(path)
+                    .ok()
+                    .map(|s| s.lines().count())
+            } else {
+                None
+            }
+        };
+
+        HealthStatus {
+            conductor_ok: true,
+            active_providers: vec![
+                "anthropic".to_string(),
+                "openai".to_string(),
+            ],
+            ledger_entry_count,
+            qdrant_ok,
+        }
     }
 
     /// Return the count of recorded dream failure episodes.

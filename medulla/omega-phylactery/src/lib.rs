@@ -104,7 +104,7 @@ pub struct PolicyGates {
 pub async fn bootstrap_kernel(memory: &MemoryService) -> Result<(), String> {
     // In a production environment, this would be loaded from a signed file or TPM.
     // For OmegA-Next, we use the embedded kernel definition.
-    let kernel_data = include_str!("../../../cortex/chyren_py/phylactery_kernel.json");
+    let kernel_data = include_str!("../../data/phylactery_kernel.json");
     let kernel_json: Value = serde_json::from_str(kernel_data)
         .map_err(|e| format!("Failed to parse phylactery kernel: {}", e))?;
 

@@ -119,6 +119,15 @@ Every provider response is scored before ledger commit:
 ### Provider Injection Pattern
 All provider spokes receive: system prompt with sovereign identity + Yettragrammaton integrity hash + current ledger state as context.
 
+### Agent Mesh (in-progress, `cursor/integration-hardening` branch)
+An MQTT-based agent orchestration layer being added to `omega-conductor`:
+- `omega-core/src/mesh.rs` — `TaskContract` (typed task routing envelope) + `AgentCapability` + `AgentRegistry`
+- `omega-conductor/src/dispatcher.rs` — Routes `TaskContract`s to agents via MQTT (broker at `localhost:1883`)
+- `omega-conductor/src/bus.rs` — Async `EventBus` (tokio mpsc channel) feeding `AgentResult`s back into the Conductor pipeline
+- `omega-conductor/src/registry.rs` — Re-exports `AgentRegistry` from `omega-core::mesh`
+- `omega-conductor/src/agents/` — Per-domain agent implementations (e.g. `math_spoke`)
+- `omega-spokes/src/spokes/witness.rs` — `WitnessEnvelope`: signs response payload hashes with `YETTRAGRAMMATON_SECRET` for integrity verification
+
 ## Configuration
 
 All secrets come from `~/.omega/one-true.env` (not in git):

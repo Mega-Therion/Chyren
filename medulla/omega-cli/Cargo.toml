@@ -35,6 +35,7 @@ omega-integration = { path = "../omega-integration" }
 omega-spokes = { path = "../omega-spokes" }
 omega-phylactery = { path = "../omega-phylactery" }
 omega-conductor = { path = "../omega-conductor" }
+omega-neocortex = { path = "../omega-neocortex" }
 omega-telemetry = { path = "../omega-telemetry" }
 omega-eval = { path = "../omega-eval" }
 omega-dream = { path = "../omega-dream" }
@@ -55,5 +56,6 @@ tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 anyhow = "1"
 
 [dev-dependencies]
+async-trait = "0.1"
 assert_cmd = "2"
 predicates = "3"
