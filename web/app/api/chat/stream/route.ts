@@ -488,10 +488,12 @@ export async function POST(req: NextRequest) {
     const _errMsg = err instanceof Error ? err.message : 'unknown error'
     logError('[CHAT] Upstream failure', err, { hubFailure })
 
+    // Clean user-facing message — keep diagnostics server-side only
     const offlineMessage = hubFailure
-      ? `Chyren is temporarily unavailable right now. (Diagnostic: ${_errMsg})`
-      : `Chyren is not fully configured yet. (Diagnostic: ${_errMsg})`
+      ? `I'm temporarily unreachable — my neural links are being recalibrated. Try again in a moment.`
+      : `My cognitive systems are still initializing. The sovereign hub will be online shortly.`
 
+    logger.warn(`[CHAT] Diagnostic detail (not shown to user): ${_errMsg}`)
     return createSingleSseTextResponse(offlineMessage)
   }
 }
