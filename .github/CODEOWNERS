@@ -1,0 +1,42 @@
+# CODEOWNERS
+# Defines review ownership for security-sensitive and core areas.
+# GitHub enforces these when "Require review from Code Owners" is enabled
+# on the branch protection rule for `main`.
+#
+# Owner: @viewsbyryan (Chyren Admin — viewsbyryan@gmail.com)
+# Last updated: 2026-04-17
+
+# ── Default fallback ──────────────────────────────────────────────────────────
+# Any path not matched below requires review from the default owner.
+*                           @viewsbyryan
+
+# ── CI/CD workflows (highest sensitivity — secret access, deploy triggers) ────
+.github/workflows/          @viewsbyryan
+.github/CODEOWNERS          @viewsbyryan
+
+# ── Root configuration and governance files ───────────────────────────────────
+CLAUDE.md                   @viewsbyryan
+Cargo.toml                  @viewsbyryan
+Cargo.lock                  @viewsbyryan
+.gitleaks.toml              @viewsbyryan
+Makefile                    @viewsbyryan
+pytest.ini                  @viewsbyryan
+docker-compose.yml          @viewsbyryan
+
+# ── Medulla — Rust core runtime (security gates, ledger, identity) ────────────
+medulla/                    @viewsbyryan
+
+# ── Web — Next.js cognitive shell frontend ────────────────────────────────────
+web/                        @viewsbyryan
+
+# ── Cortex — Python identity synthesis and data ops ──────────────────────────
+cortex/                     @viewsbyryan
+
+# ── Gateway — Vite/React 19 external spoke gateway ───────────────────────────
+gateway/                    @viewsbyryan
+
+# ── Ops — operational scripts and infrastructure ─────────────────────────────
+ops/                        @viewsbyryan
+
+# ── Docs — public-facing documentation ───────────────────────────────────────
+docs/                       @viewsbyryan

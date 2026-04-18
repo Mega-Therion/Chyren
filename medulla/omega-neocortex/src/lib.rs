@@ -27,6 +27,8 @@
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::collections::HashMap;
+use std::convert::Infallible;
+use std::str::FromStr;
 use thiserror::Error;
 
 // ── Errors ────────────────────────────────────────────────────────────────────
@@ -95,9 +97,13 @@ impl Domain {
             Domain::Custom(s) => s.as_str(),
         }
     }
+}
 
-    pub fn from_str(s: &str) -> Self {
-        match s {
+impl FromStr for Domain {
+    type Err = Infallible;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(match s {
             "identity" => Domain::Identity,
             "lineage" => Domain::Lineage,
             "philosophy" => Domain::Philosophy,
@@ -109,7 +115,7 @@ impl Domain {
             "communication_style" => Domain::CommunicationStyle,
             "failure_memory" => Domain::FailureMemory,
             other => Domain::Custom(other.to_string()),
-        }
+        })
     }
 }
 
@@ -198,7 +204,7 @@ impl ProgramLibrary {
         let should_insert = self
             .programs
             .get(&key)
-            .map_or(true, |existing| program.version > existing.version);
+            .is_none_or(|existing| program.version > existing.version);
         if should_insert {
             self.programs.insert(key, program);
         }
@@ -339,6 +345,49 @@ impl Default for Neocortex {
         Self::new()
     }
 }
+
+impl Neocortex {
+    /// Project a likely outcome for a given failure pattern string.
+    /// Used by the DreamSimulationWorker to test patterns against loaded programs.
+    pub async fn project_outcome(&self, pattern: &str) -> Option<String> {
+        // Walk programs in importance order; return the first domain whose payload
+        // JSON contains the pattern keyword. This is a heuristic projection, not
+        // a formal proof — the FormalVerification path uses KnowledgeNode instead.
+        let pattern_lower = pattern.to_lowercase();
+        for program in self.library.all_sorted() {
+            if let Ok(val) = program.decode() {
+                if val.to_string().to_lowercase().contains(&pattern_lower) {
+                    return Some(format!(
+                        "domain='{}' contains relevant context for pattern '{}'",
+                        program.domain.as_str(),
+                        pattern
+                    ));
+                }
+            }
+        }
+        None
+    }
+
+    /// Absorb a formally-verified KnowledgeNode into the Neocortex.
+    ///
+    /// Records the node in both the ColdStore (permanent content-addressed disk)
+    /// and the ProofConstraintIndex (hot reasoning-first lookup). Returns the
+    /// content_hash that can be used to retrieve the node later.
+    pub fn absorb_knowledge(
+        &self,
+        node: &omega_core::KnowledgeNode,
+        cold_store: &cold_store::ColdStore,
+        proof_index: &mut proof_index::ProofConstraintIndex,
+    ) -> Result<String, cold_store::ColdStoreError> {
+        let hash = cold_store.store(node)?;
+        proof_index.insert(&hash, &node.constraints);
+        Ok(hash)
+    }
+}
+
+pub mod cold_store;
+pub mod proof_index;
+pub mod math_programs;
 
 // ── Seed Library ──────────────────────────────────────────────────────────────
 
@@ -680,6 +729,9 @@ pub fn seed_library() -> ProgramLibrary {
         .expect("seed failure memory"),
     );
 
+    // Mathematics knowledge programs
+    math_programs::register_all(&mut lib);
+
     lib
 }
 
@@ -719,7 +771,7 @@ mod tests {
     #[test]
     fn seed_library_has_expected_programs() {
         let lib = seed_library();
-        assert!(lib.len() >= 9);
+        assert!(lib.len() >= 15);
         assert!(lib.get(&Domain::Identity).is_some());
         assert!(lib.get(&Domain::Lineage).is_some());
         assert!(lib.get(&Domain::Philosophy).is_some());
@@ -768,7 +820,7 @@ mod tests {
             Domain::Philosophy,
             Domain::Custom("x".into()),
         ] {
-            assert_eq!(d.as_str(), Domain::from_str(d.as_str()).as_str());
+            assert_eq!(d.as_str(), d.as_str().parse::<Domain>().unwrap().as_str());
         }
     }
 

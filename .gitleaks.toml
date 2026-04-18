@@ -1,0 +1,97 @@
+# Gitleaks configuration for Chyren
+# https://github.com/gitleaks/gitleaks
+
+title = "Chyren Secret Scanning"
+
+[extend]
+# Use the default gitleaks ruleset as a base
+useDefault = true
+
+# ── Custom rules ────────────────────────────────────────────────────────────
+
+[[rules]]
+id = "anthropic-api-key"
+description = "Anthropic API Key"
+regex = '''(?i)(anthropic[_\-]?api[_\-]?key|ANTHROPIC_API_KEY)[^\S\r\n]*[=:][^\S\r\n]*['\"]?(sk-ant-[a-zA-Z0-9\-_]{32,})['\"]?'''
+secretGroup = 2
+tags = ["anthropic", "ai"]
+
+[[rules]]
+id = "openrouter-api-key"
+description = "OpenRouter API Key"
+regex = '''(?i)(openrouter[_\-]?api[_\-]?key|OPENROUTER_API_KEY)[^\S\r\n]*[=:][^\S\r\n]*['\"]?(sk-or-[a-zA-Z0-9\-_]{32,})['\"]?'''
+secretGroup = 2
+tags = ["openrouter", "ai"]
+
+[[rules]]
+id = "deepseek-api-key"
+description = "DeepSeek API Key"
+regex = '''(?i)(deepseek[_\-]?api[_\-]?key|DEEPSEEK_API_KEY)[^\S\r\n]*[=:][^\S\r\n]*['\"]?(sk-[a-zA-Z0-9]{32,})['\"]?'''
+secretGroup = 2
+tags = ["deepseek", "ai"]
+
+[[rules]]
+id = "gemini-api-key"
+description = "Gemini / Google AI API Key"
+regex = '''(?i)(gemini[_\-]?api[_\-]?key|GEMINI_API_KEY)[^\S\r\n]*[=:][^\S\r\n]*['\"]?(AIza[0-9A-Za-z\-_]{35})['\"]?'''
+secretGroup = 2
+tags = ["gemini", "google", "ai"]
+
+[[rules]]
+id = "neon-connection-string"
+description = "Neon / PostgreSQL connection string with credentials"
+regex = '''postgres(?:ql)?://[^:]+:[^@\s'"]+@[^\s'"]+'''
+tags = ["database", "neon", "postgres"]
+
+[[rules]]
+id = "qdrant-api-key"
+description = "Qdrant API Key"
+regex = '''(?i)(qdrant[_\-]?api[_\-]?key|QDRANT_API_KEY)[^\S\r\n]*[=:][^\S\r\n]*['\"]?([a-zA-Z0-9\-_]{32,})['\"]?'''
+secretGroup = 2
+tags = ["qdrant", "vector-db"]
+
+[[rules]]
+id = "omega-env-file"
+description = "Omega secrets env file content"
+regex = '''one-true\.env'''
+tags = ["env", "secrets"]
+
+# ── Allowlist ────────────────────────────────────────────────────────────────
+
+[allowlist]
+description = "Global allowlist for test fixtures and known false positives"
+
+# Specific commits that introduced allowed/rotated values
+commits = []
+
+# Paths that should never be scanned
+paths = [
+  # Lock files and generated artifacts
+  '''(^|/)Cargo\.lock$''',
+  '''(^|/)package-lock\.json$''',
+  '''(^|/)yarn\.lock$''',
+  # Test fixture directories
+  '''(^|/)tests?/fixtures?/''',
+  '''(^|/)tests?/testdata/''',
+  # Documentation that talks about secret formats
+  '''(^|/)docs/SECURITY_RUNBOOK\.md$''',
+  '''(^|/)CLAUDE\.md$''',
+  # This config file itself
+  '''(^|/)\.gitleaks\.toml$''',
+]
+
+# Regex patterns that are known-safe across all files
+regexes = [
+  # Placeholder / example values used in docs and tests
+  '''sk-ant-EXAMPLE''',
+  '''sk-or-EXAMPLE''',
+  '''AIza-EXAMPLE''',
+  '''your[-_]api[-_]key''',
+  '''<YOUR_API_KEY>''',
+  '''REPLACE_ME''',
+  # Rust test constants that look like keys but are not
+  '''test_secret''',
+  '''fake_key''',
+  # env var references without values
+  '''(?i)\$\{?[A-Z_]+_API_KEY\}?''',
+]

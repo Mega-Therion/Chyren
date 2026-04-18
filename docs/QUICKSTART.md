@@ -1,393 +1,221 @@
-# 🚀 Chyren Quickstart Guide
+# Chyren Quickstart — First 10 Minutes
 
-Get Chyren up and running in minutes. This guide walks you through setup, basic usage, and your first ADCCL verification.
+Get Chyren running from a fresh clone. All commands match the current repo structure.
 
-## Table of Contents
-
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [First Run](#first-run)
-- [Basic Usage](#basic-usage)
-- [Next Steps](#next-steps)
+---
 
 ## Prerequisites
 
-Before installing Chyren, ensure you have:
+| Requirement | Version | Install |
+|---|---|---|
+| Rust toolchain | stable (1.75+) | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` |
+| Python | 3.11+ | [python.org](https://www.python.org/downloads/) |
+| Node.js | 18+ | [nodejs.org](https://nodejs.org/) |
+| Docker (optional) | any recent | For full-stack local run with Postgres + Qdrant |
 
-- **Rust**: Version 1.70 or later
-  ```bash
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-  ```
-
-- **Python**: Version 3.8+ (for Python bindings, optional)
-  ```bash
-  python --version
-  ```
-
-- **Git**: For cloning the repository
-  ```bash
-  git --version
-  ```
-
-## Installation
-
-### Option 1: From Source (Recommended)
-
+Verify before proceeding:
 ```bash
-# Clone the repository
-git clone https://github.com/Mega-Therion/Chyren.git
-cd Chyren
-
-# Build the project
-cargo build --release
-
-# Run tests to verify installation
-cargo test
-```
-
-### Option 2: Using Cargo
-
-```bash
-# Install directly from crates.io (once published)
-cargo install chyren
-```
-
-### Verify Installation
-
-```bash
-# Check Chyren CLI is available
-cargo run -- --version
-```
-
-## Configuration
-
-### 1. Environment Setup
-
-Create a `.env` file in the project root:
-
-```bash
-# Copy the example environment file
-cp .env.example .env
-```
-
-### 2. Configure Core Parameters
-
-Edit `.env` with your settings:
-
-```env
-# Chyren Core Configuration
-CHYREN_LOG_LEVEL=info
-CHYREN_WORKSPACE_PATH=./omega_workspace
-
-# ADCCL Parameters
-ADCCL_STRICTNESS=0.5
-ADCCL_ENABLE_PREFLIGHT=true
-ADCCL_GATE_THRESHOLD=0.7
-
-# OmegA Integration (optional)
-OMEGA_API_ENDPOINT=http://localhost:8080
-OMEGA_AUTH_TOKEN=your_token_here
-```
-
-### 3. Initialize Workspace
-
-```bash
-# Create and initialize the OmegA workspace
-cargo run -- init
-```
-
-This creates:
-- `omega_workspace/` - Main workspace directory
-- State files for ADCCL tracking
-- Provider configuration templates
-
-## First Run
-
-### Run a Simple ADCCL Check
-
-```bash
-# Check a simple action for ADCCL compliance
-cargo run -- check --action "user_data_access" --context "read_profile"
-```
-
-Expected output:
-```
-✓ ADCCL Preflight Check PASSED
-  Strictness: 0.50
-  Gate Status: OPEN (score: 0.85)
-  Chirality: RIGHT-HANDED
-  Recommendation: PROCEED
-```
-
-### Run Your First Provider
-
-```bash
-# Start a basic AI provider with ADCCL verification
-cargo run -- run-provider --name "gemini" --config ./providers/gemini.yaml
-```
-
-## Basic Usage
-
-### CLI Commands
-
-#### Check ADCCL Compliance
-
-```bash
-# Basic compliance check
-chyren check --action <ACTION> --context <CONTEXT>
-
-# With custom strictness
-chyren check --action user_delete --strictness 0.8
-
-# Detailed output
-chyren check --action data_export --verbose
-```
-
-#### CLI (Unified Entry Point)
-
-Chyren exposes a thin “brain-stem” wrapper at `./chyren` which routes:
-- Cortex (Python): `thought`, `sense`, `verify`, `identity`
-- Medulla (Rust): `action`, `flex`, `shard`, `ingest`, `memory`
-
-```bash
-# Show high-level system status
-./chyren status
-
-# Run the Medulla API server (for the Next.js frontend)
-./chyren action server
-
-# Execute a task through the Medulla pipeline
-./chyren action "summarize the current architecture in 5 bullets"
-
-# Ingest a MatrixProgram JSON file
-./chyren action ingest --path ./docs/examples/matrix_program.json
-```
-
-#### Destructive Reset (Opt-In)
-
-Reset clears Postgres/Neon tables if `OMEGA_DB_URL` is configured, and also clears
-in-process ephemeral state. External vector stores (Qdrant) are not cleared.
-
-```bash
-CHYREN_ALLOW_RESET=1 ./chyren reset
-```
-
-### Programmatic Usage (Rust)
-
-```rust
-use chyren::{
-    core::adccl::AdcclGate,
-    state::State,
-};
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Initialize ADCCL gate
-    let gate = AdcclGate::new(0.5)?;
-    
-    // Create state for action
-    let state = State::new("user_data_access")?;
-    
-    // Run preflight check
-    let result = gate.preflight_check(&state).await?;
-    
-    if result.is_approved() {
-        println!("✓ Action approved: {}", result.chirality());
-        // Proceed with action
-    } else {
-        println!("✗ Action blocked: {}", result.reason());
-    }
-    
-    Ok(())
-}
-```
-
-### Programmatic Usage (Python)
-
-```python
-from chyren import AdcclGate, State
-
-# Initialize ADCCL gate
-gate = AdcclGate(strictness=0.5)
-
-# Create state
-state = State(action="user_data_access")
-
-# Run preflight check
-result = gate.preflight_check(state)
-
-if result.is_approved:
-    print(f"✓ Action approved: {result.chirality}")
-    # Proceed with action
-else:
-    print(f"✗ Action blocked: {result.reason}")
-```
-
-## Example Workflows
-
-### Workflow 1: Verify AI Provider Actions
-
-```bash
-# Start Chyren with Gemini provider
-chyren run-provider --name gemini --adccl-strictness 0.6
-
-# Send a request (Chyren automatically applies ADCCL verification)
-curl -X POST http://localhost:8080/api/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "Explain quantum computing"}'
-
-# Check ADCCL audit log
-chyren audit --provider gemini --last 10
-```
-
-### Workflow 2: Batch Compliance Checks
-
-```bash
-# Create a batch check file
-cat > actions.yaml << EOF
-actions:
-  - action: user_login
-    context: web_app
-  - action: data_export
-    context: gdpr_request
-  - action: model_training
-    context: user_consent
-EOF
-
-# Run batch check
-chyren check-batch --file actions.yaml --output results.json
-```
-
-### Workflow 3: Integration with OmegA Stack
-
-```bash
-# Configure OmegA integration
-export OMEGA_API_ENDPOINT="https://omega.example.com"
-export OMEGA_AUTH_TOKEN="your_token"
-
-# Start Chyren as OmegA middleware
-chyren serve --mode omega-middleware --port 8080
-
-# OmegA requests now flow through Chyren's ADCCL verification
-```
-
-## Understanding ADCCL Output
-
-### Gate Status Indicators
-
-| Status | Symbol | Meaning |
-|--------|--------|----------|
-| OPEN | ✓ | Action complies with ADCCL principles |
-| CLOSED | ✗ | Action violates ADCCL principles |
-| PENDING | ⚠ | Requires manual review |
-
-### Chirality Types
-
-- **RIGHT-HANDED**: Aligns with deterministic, verifiable outcomes
-- **LEFT-HANDED**: Shows probabilistic or uncertain characteristics
-- **ACHIRAL**: Neutral with respect to ADCCL principles
-
-### Strictness Levels
-
-- `0.0 - 0.3`: **Permissive** - Most actions pass
-- `0.4 - 0.6`: **Balanced** - Moderate filtering
-- `0.7 - 0.9`: **Strict** - High compliance requirements
-- `0.9 - 1.0`: **Maximum** - Only deterministic actions pass
-
-## Troubleshooting
-
-### Common Issues
-
-#### Build Errors
-
-```bash
-# Update Rust toolchain
-rustup update stable
-
-# Clean and rebuild
-cargo clean
-cargo build --release
-```
-
-#### ADCCL Gate Always Closes
-
-```bash
-# Check strictness setting (may be too high)
-echo $ADCCL_STRICTNESS
-
-# Lower strictness temporarily
-export ADCCL_STRICTNESS=0.3
-```
-
-#### Provider Connection Issues
-
-```bash
-# Verify provider configuration
-chyren providers check --name gemini
-
-# Check logs
-chyren logs --provider gemini --tail 50
-```
-
-### Enable Debug Logging
-
-```bash
-# Set log level to debug
-export CHYREN_LOG_LEVEL=debug
-export RUST_LOG=chyren=debug
-
-# Run with verbose output
-cargo run -- check --action test --verbose
-```
-
-## Next Steps
-
-### Learn More
-
-- 📖 [Architecture Overview](./docs/ARCHITECTURE.md) - Deep dive into Chyren's design
-- 🔬 [Chiral Thesis](./docs/chiral_thesis.md) - Mathematical foundations
-- 🎯 [ADCCL Principles](./README.md#adccl-principles) - Core verification concepts
-- 🧪 [Examples](./examples/) - Sample implementations
-
-### Advanced Topics
-
-- **Custom Providers**: Build your own ADCCL-verified AI providers
-- **Vettagrammaton Signatures**: Implement ledger-based verification
-- **Python SDK**: Use Chyren from Python applications
-- **CI/CD Integration**: Add ADCCL checks to your pipeline
-
-### Get Involved
-
-- 🐛 [Report Issues](https://github.com/Mega-Therion/Chyren/issues)
-- 💡 [Request Features](https://github.com/Mega-Therion/Chyren/issues/new?template=feature_request.md)
-- 🤝 [Contributing Guide](./CONTRIBUTING.md)
-- 💬 [Discussions](https://github.com/Mega-Therion/Chyren/discussions)
-
-## Quick Reference Card
-
-```bash
-# Installation
-git clone https://github.com/Mega-Therion/Chyren.git && cd Chyren && cargo build --release
-
-# Initialize
-cargo run -- init
-
-# Quick check
-cargo run -- check --action <ACTION>
-
-# Run provider
-cargo run -- run-provider --name <PROVIDER>
-
-# View status
-cargo run -- workspace status
-
-# Get help
-cargo run -- --help
+rustc --version
+python3 --version
+node --version
 ```
 
 ---
 
-**Ready to build sovereign intelligence? 🚀**
+## 1. Clone and Enter the Repo
 
-For questions or support, see [SUPPORT.md](./SUPPORT.md) or join our [discussions](https://github.com/Mega-Therion/Chyren/discussions).
+```bash
+git clone https://github.com/Mega-Therion/Chyren.git
+cd Chyren
+```
+
+---
+
+## 2. Set Up Environment Secrets
+
+Create `~/.omega/one-true.env` with your API keys. This file is never committed to git.
+
+```bash
+mkdir -p ~/.omega
+cat > ~/.omega/one-true.env << 'EOF'
+ANTHROPIC_API_KEY=sk-ant-...
+OPENAI_API_KEY=sk-...
+DEEPSEEK_API_KEY=...
+GEMINI_API_KEY=...
+OMEGA_DB_URL=postgresql://...     # Neon PostgreSQL connection string
+QDRANT_URL=http://localhost:6333  # Qdrant vector store (or hosted URL)
+EOF
+```
+
+Source it into your shell:
+```bash
+source ~/.omega/one-true.env
+```
+
+You can add the source line to your `~/.bashrc` or `~/.zshrc` so it loads automatically.
+
+---
+
+## 3. Build Medulla (Rust Runtime)
+
+```bash
+cd medulla
+cargo build
+```
+
+A release build (slower compile, faster runtime):
+```bash
+cargo build --release
+```
+
+Verify the build passes tests:
+```bash
+cargo test --workspace
+```
+
+---
+
+## 4. Run a Thought
+
+Return to the repo root and run the Brain Stem CLI:
+
+```bash
+cd ..   # back to repo root
+source ~/.omega/one-true.env
+./chyren thought "Hello, Chyren"
+```
+
+Expected: the sovereign reasoning pipeline executes, the response passes ADCCL, and is committed to the ledger.
+
+Check system status:
+```bash
+./chyren status
+```
+
+---
+
+## 5. Run the Web Frontend
+
+```bash
+cd web
+npm install
+npm run dev
+```
+
+Open `http://localhost:3000` in your browser. The frontend connects to the Medulla API server on port 8080, which starts automatically with `./chyren live` (from the repo root).
+
+To start both the API and web together:
+```bash
+# Terminal 1 — from repo root
+./chyren live
+
+# Terminal 2 — web dev server
+cd web && npm run dev
+```
+
+---
+
+## Full Stack with Docker (Optional)
+
+If you prefer to run Postgres and Qdrant via Docker instead of external services:
+
+```bash
+cd medulla
+docker-compose up
+```
+
+This starts:
+- `chyren-api` on port 8080
+- `chyren-web` on port 3000
+- PostgreSQL
+- Qdrant
+
+---
+
+## Maintenance: Identity Synthesis
+
+To refresh the Phylactery identity kernel (only needed if the kernel is stale):
+
+```bash
+./chyren dream
+```
+
+This runs `cortex/chyren_py/identity_synthesis.py` and regenerates `cortex/chyren_py/phylactery_kernel.json`.
+
+---
+
+## Troubleshooting
+
+### Missing or silent API key errors
+
+Chyren fails silently on missing keys. If you get no output or unexpected errors:
+
+```bash
+# Verify keys are loaded in your shell
+echo $ANTHROPIC_API_KEY
+echo $OMEGA_DB_URL
+
+# Re-source if needed
+source ~/.omega/one-true.env
+```
+
+### Port 8080 already in use
+
+Another process is using the Medulla API port:
+
+```bash
+# Find and kill the process
+lsof -ti:8080 | xargs kill -9
+```
+
+### Port 3000 already in use
+
+```bash
+lsof -ti:3000 | xargs kill -9
+```
+
+### Rust build errors
+
+```bash
+# Update toolchain
+rustup update stable
+
+# Clean and rebuild
+cd medulla
+cargo clean
+cargo build
+```
+
+### ADCCL rejecting all responses
+
+The ADCCL threshold is 0.7. Do not lower it. If all responses are rejected:
+- Check that your provider API keys are valid
+- Check that `OMEGA_DB_URL` is reachable
+- Run `./chyren status` to inspect system state
+
+### Phylactery kernel stale
+
+```bash
+./chyren dream
+```
+
+---
+
+## CLI Command Reference
+
+| Command | Description |
+|---|---|
+| `./chyren thought "..."` | Sovereign reasoning pipeline (Medulla) |
+| `./chyren action "..."` | Execution, memory, sharding, ingestion (Medulla) |
+| `./chyren status` | System status |
+| `./chyren live` | Start web + API |
+| `./chyren dream` | Maintenance: identity synthesis + catalog indexing |
+
+---
+
+## Next Steps
+
+- Architecture deep-dive: [docs/ARCHITECTURE.md](./ARCHITECTURE.md)
+- Crate-level details: root `CLAUDE.md`
+- Mathematical foundations (Chiral Invariant): [docs/CHIRAL_THESIS.md](./CHIRAL_THESIS.md)
+- Full ops runbook: [docs/RUNBOOK.md](./RUNBOOK.md)

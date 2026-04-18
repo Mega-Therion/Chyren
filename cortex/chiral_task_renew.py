@@ -2,10 +2,9 @@ import os
 import sys
 sys.path.append('Chyren/cortex')
 
-# Hardcode the key for the task to ensure it works in this context
-os.environ["OPENAI_API_KEY"] = "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"
-os.environ["OPENAI_API_BASE"] = "https://openrouter.ai/api/v1"
-os.environ["MODEL"] = "openai/gpt-4o-mini"
+# Require runtime env vars instead of hardcoded secrets.
+os.environ.setdefault("OPENAI_API_BASE", "https://openrouter.ai/api/v1")
+os.environ.setdefault("MODEL", "openai/gpt-4o-mini")
 
 from providers.base import ProviderRouter
 from providers.openai import OpenAIProvider

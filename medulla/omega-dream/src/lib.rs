@@ -209,6 +209,12 @@ impl Default for Service {
     }
 }
 
+/// Dream synthesis and recursive compression engine.
+pub mod synthesis;
+pub mod simulation;
+
+pub use synthesis::{CompressionReport, DerivationRule, DreamCompressor};
+
 #[cfg(test)]
 mod tests {
     use super::*;
