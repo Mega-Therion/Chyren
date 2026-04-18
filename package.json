@@ -1,0 +1,17 @@
+{
+  "name": "chyren",
+  "version": "1.0.0",
+  "description": "Alexa skill backend hosted on Vercel",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "ask-sdk-core": "^2.14.0",
+    "ask-sdk-model": "^1.85.0"
+  },
+  "devDependencies": {
+    "vercel": "^latest"
+  }
+}
