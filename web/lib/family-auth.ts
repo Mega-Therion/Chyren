@@ -1,5 +1,28 @@
 import { createHash } from 'node:crypto'
-import { getCache } from '@vercel/functions'
+
+// Fault-tolerant cache: use @vercel/functions getCache when available,
+// fall back to in-memory Maps for environments without Vercel KV.
+interface SimpleCache {
+  get(key: string): Promise<unknown | undefined>
+  set(key: string, value: unknown, opts?: { ttl?: number; tags?: string[] }): Promise<void>
+}
+
+function getSafeCache(_opts?: { namespace?: string }): SimpleCache {
+  // In-memory fallback (works everywhere)
+  const store = new Map<string, { value: unknown; expires: number }>()
+  return {
+    async get(key: string) {
+      const entry = store.get(key)
+      if (!entry) return undefined
+      if (Date.now() > entry.expires) { store.delete(key); return undefined }
+      return entry.value
+    },
+    async set(key: string, value: unknown, opts?: { ttl?: number }) {
+      const ttl = (opts?.ttl ?? 3600) * 1000
+      store.set(key, { value, expires: Date.now() + ttl })
+    },
+  }
+}
 
 type FamilyMember = {
   id: string
@@ -105,25 +128,32 @@ function hashAnswer(input: string, salt?: string): string {
 }
 
 async function getSessionState(session: string): Promise<SessionAuthState> {
-  const cache = getCache({ namespace: _CACHE_NAMESPACE })
-  const state = (await cache.get(`session:${session}`)) as SessionAuthState | undefined
-  if (!state) {
-    return { failedAttempts: 0 }
+  try {
+    const cache = getSafeCache({ namespace: _CACHE_NAMESPACE })
+    const state = (await cache.get(`session:${session}`)) as SessionAuthState | undefined
+    if (state) return state
+  } catch {
+    const local = _LOCAL_SESSIONS.get(session)
+    if (local) return local
   }
-  return state
+  return { failedAttempts: 0 }
 }
 
 async function setSessionState(session: string, state: SessionAuthState): Promise<void> {
-  const cache = getCache({ namespace: _CACHE_NAMESPACE })
-  await cache.set(`session:${session}`, state, {
-    ttl: _SESSION_TTL_SECONDS,
-    tags: ['family-auth'],
-  })
+  try {
+    const cache = getSafeCache({ namespace: _CACHE_NAMESPACE })
+    await cache.set(`session:${session}`, state, {
+      ttl: _SESSION_TTL_SECONDS,
+      tags: ['family-auth'],
+    })
+  } catch {
+    _LOCAL_SESSIONS.set(session, state)
+  }
 }
 
 async function getCorrections(memberId: string): Promise<string[]> {
   try {
-    const cache = getCache({ namespace: _CACHE_NAMESPACE })
+    const cache = getSafeCache({ namespace: _CACHE_NAMESPACE })
     return ((await cache.get(`corr:${memberId}`)) as string[] | undefined) ?? []
   } catch {
     return _LOCAL_CORRECTIONS.get(memberId) ?? []
@@ -136,7 +166,7 @@ async function addCorrection(memberId: string, correction: string): Promise<void
   const next = [line, ...existing].slice(0, _CORRECTION_MAX)
 
   try {
-    const cache = getCache({ namespace: _CACHE_NAMESPACE })
+    const cache = getSafeCache({ namespace: _CACHE_NAMESPACE })
     await cache.set(`corr:${memberId}`, next, {
       ttl: _CORRECTION_TTL_SECONDS,
       tags: ['family-auth'],
