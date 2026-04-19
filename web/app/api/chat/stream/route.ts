@@ -8,6 +8,7 @@ import {
 import { logger, logError } from '@/lib/logger'
 import { checkRateLimit, checkPromptInjection, clientIp } from '@/lib/hardening'
 import { runAnthropicWithTools } from '@/lib/mcp/anthropic-tools'
+import { semanticKnowledgeSearch } from '@/lib/librarian/knowledge-vector'
 
 // Base system prompt is resolved per-request (async) so live-fetched Neon
 // context is available even when the build-time bake was empty (quota issues, etc.)
@@ -125,6 +126,20 @@ async function buildSystemPrompt(
     prompt += `\n\n${memberContext}`
   }
   return { prompt, profile }
+}
+
+async function buildKnowledgeContext(userMessage: string): Promise<string> {
+  if (!process.env.OMEGA_CATALOG_DB_URL) return ''
+  try {
+    const domains = await semanticKnowledgeSearch(userMessage, 4)
+    if (domains.length === 0) return ''
+    const lines = domains
+      .map((d) => `[${d.name} — ${d.reasoning_mode}] ${d.reasoning_primer}`)
+      .join('\n')
+    return `\n\nACTIVE DOMAIN REASONING PROGRAMS:\n${lines}`
+  } catch {
+    return ''
+  }
 }
 
 const MAX_HISTORY_MESSAGES = 6
@@ -462,7 +477,9 @@ export async function POST(req: NextRequest) {
 
   const memberContext = await getVerifiedMemberContext(session)
   const history = toChatHistory(messages, content)
-  const { prompt: systemPrompt, profile } = await buildSystemPrompt(session, memberContext)
+  const { prompt: baseSystemPrompt, profile } = await buildSystemPrompt(session, memberContext)
+  const knowledgeContext = await buildKnowledgeContext(content)
+  const systemPrompt = knowledgeContext ? baseSystemPrompt + knowledgeContext : baseSystemPrompt
   let hubFailure: string | null = null
 
   // Tool-use path: when Anthropic + LIC catalog are both configured, let Claude

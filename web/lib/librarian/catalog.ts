@@ -77,3 +77,85 @@ export async function totalCards(): Promise<number> {
   const rows = await sql()`SELECT COUNT(*)::int AS n FROM omega_library_catalog`
   return (rows as unknown as Array<{ n: number }>)[0]?.n ?? 0
 }
+
+// ─── Knowledge Matrix ─────────────────────────────────────────────────────────
+
+export interface KnowledgeDomain {
+  domain_id: string
+  slug: string
+  name: string
+  parent_slug: string | null
+  level: number
+  realm: string
+  reasoning_mode: string
+  description: string | null
+  reasoning_primer: string | null
+  score: number
+}
+
+export interface MatrixProgram {
+  domain_id: string
+  slug: string
+  name: string
+  parent_slug: string | null
+  level: number
+  realm: string
+  reasoning_mode: string
+  description: string | null
+  purpose: string | null
+  core_axioms: string[]
+  key_methods: string[]
+  key_figures: string[]
+  sister_slugs: string[]
+  query_patterns: string[]
+  reasoning_primer: string | null
+  updated_at: string
+}
+
+export async function searchKnowledgeDomains(
+  query: string,
+  realmHint?: string,
+  maxRows: number = 8,
+): Promise<KnowledgeDomain[]> {
+  const rows = await sql()`
+    SELECT domain_id::text AS domain_id, slug, name, parent_slug, level, realm,
+           reasoning_mode, description, reasoning_primer, score
+    FROM omega_knowledge_search(${query}, ${realmHint ?? null}, ${maxRows})
+  `
+  return rows as unknown as KnowledgeDomain[]
+}
+
+export async function getMatrixProgram(slug: string): Promise<MatrixProgram | null> {
+  const rows = await sql()`
+    SELECT domain_id::text AS domain_id, slug, name, parent_slug, level, realm,
+           reasoning_mode, description, purpose,
+           COALESCE(core_axioms, '[]'::jsonb) AS core_axioms,
+           COALESCE(key_methods, '[]'::jsonb) AS key_methods,
+           COALESCE(key_figures, '[]'::jsonb) AS key_figures,
+           COALESCE(sister_slugs, '[]'::jsonb) AS sister_slugs,
+           COALESCE(query_patterns, '[]'::jsonb) AS query_patterns,
+           reasoning_primer,
+           updated_at::text AS updated_at
+    FROM omega_knowledge_domains
+    WHERE slug = ${slug}
+    LIMIT 1
+  `
+  const r = rows as unknown as MatrixProgram[]
+  return r[0] ?? null
+}
+
+export async function getDomainsByRealm(
+  realm: string,
+  maxRows: number = 20,
+): Promise<KnowledgeDomain[]> {
+  const rows = await sql()`
+    SELECT domain_id::text AS domain_id, slug, name, parent_slug, level, realm,
+           reasoning_mode, description, reasoning_primer,
+           0.0::float AS score
+    FROM omega_knowledge_domains
+    WHERE realm = ${realm}
+    ORDER BY level ASC, sort_order ASC
+    LIMIT ${maxRows}
+  `
+  return rows as unknown as KnowledgeDomain[]
+}

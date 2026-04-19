@@ -277,6 +277,46 @@ impl Conductor {
             }
         }
 
+        // Query the Knowledge Matrix for relevant domain reasoning programs.
+        // Uses the librarian spoke (HTTP MCP) when CHYREN_API_URL is configured.
+        // Failures are silently skipped — the matrix is enhancement, not a gate.
+        if let Some(librarian) = self.spokes.get_spoke("librarian") {
+            match librarian.invoke_tool(ToolInvocation {
+                tool: "librarian_knowledge_search".to_string(),
+                input: serde_json::json!({
+                    "query": t,
+                    "max_results": 4
+                }),
+            }).await {
+                Ok(result) if result.success => {
+                    if let Some(domains) = result.output
+                        .get("content")
+                        .and_then(|c| c.get(0))
+                        .and_then(|o| o.get("text"))
+                        .and_then(|t| t.as_str())
+                        .and_then(|s| serde_json::from_str::<serde_json::Value>(s).ok())
+                        .as_ref()
+                        .and_then(|v| v.get("domains"))
+                        .and_then(|d| d.as_array())
+                    {
+                        let primers: Vec<String> = domains.iter()
+                            .filter_map(|d| {
+                                let name = d.get("name")?.as_str()?;
+                                let mode = d.get("reasoning_mode")?.as_str()?;
+                                let primer = d.get("reasoning_primer")?.as_str()?;
+                                Some(format!("[{} — {}] {}", name, mode, primer))
+                            })
+                            .collect();
+                        if !primers.is_empty() {
+                            final_system_prompt.push_str("\n\nACTIVE DOMAIN REASONING PROGRAMS:\n");
+                            final_system_prompt.push_str(&primers.join("\n"));
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+
         Ok(TaskPlan {
             steps: vec![t.to_string()],
             system_prompt: final_system_prompt,
