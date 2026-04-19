@@ -587,8 +587,8 @@ impl Conductor {
 
         let base_prompt = format!("{}{}", envelope.task, context_text);
 
-        let spoke_response;
-        let verification;
+        let mut spoke_response;
+        let mut verification;
 
         // ── Tiered Epistemic Escalation (Cognitive Funnel) ───────────────────────
         //

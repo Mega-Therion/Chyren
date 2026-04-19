@@ -85,10 +85,24 @@ pub fn help_response() -> String {
     "/start — Sovereign identity introduction\n\
      /status — System health and provider status\n\
      /clear — Reset your conversation context\n\
+     /chatid — Show this chat's ID (useful for group setup)\n\
      /help — This message\n\n\
      Any other message is routed through the full Chyren pipeline: \
-     AEGIS screening → alignment → provider execution → ADCCL verification → ledger commit."
+     AEGIS screening → alignment → provider execution → ADCCL verification → ledger commit.\n\n\
+     Group note: if I only respond to commands and ignore plain text, my Group Privacy mode \
+     is on. Open @BotFather → /mybots → me → Bot Settings → Group Privacy → Turn off."
         .to_string()
+}
+
+/// Reply for `/chatid` — surfaces the current chat ID so operators can wire
+/// proactive outbound messaging to the correct group/supergroup/channel.
+/// Supergroups have IDs like `-1001234567890`; private DMs have positive IDs.
+pub fn chatid_response(chat_id: i64, chat_type: &str, title: Option<&str>) -> String {
+    let label = title.unwrap_or("(no title)");
+    format!(
+        "Chat ID: `{chat_id}`\nType: {chat_type}\nTitle: {label}\n\n\
+         Set TELEGRAM_TARGET_CHAT_ID={chat_id} in your env to receive proactive messages here."
+    )
 }
 
 /// Reply for `/clear`.
@@ -228,6 +242,11 @@ pub async fn run_bridge(token: String) -> Result<(), Box<dyn std::error::Error +
                         let mut store = sessions.lock().await;
                         store.insert(user_id, SessionContext::new());
                         clear_response()
+                    }
+                    "/chatid" => {
+                        let chat_type = format!("{:?}", msg.chat.kind);
+                        let title = msg.chat.title().map(|t| t.to_string());
+                        chatid_response(msg.chat.id.0, &chat_type, title.as_deref())
                     }
                     "/status" => {
                         // Best-effort status: conductor health info.
