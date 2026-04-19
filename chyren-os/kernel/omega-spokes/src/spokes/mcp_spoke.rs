@@ -2,87 +2,100 @@ use crate::{
     Spoke, SpokeCapability, SpokeConfig, SpokeStatus, ToolDefinition, ToolInvocation, ToolResult,
 };
 use async_trait::async_trait;
+use reqwest::Client;
 use serde_json::{json, Value};
-use std::process::Stdio;
-use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
-use tokio::process::Command;
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::Arc;
+use tokio::sync::RwLock;
 
+static REQUEST_COUNTER: AtomicU64 = AtomicU64::new(1);
+
+fn next_id() -> u64 {
+    REQUEST_COUNTER.fetch_add(1, Ordering::Relaxed)
+}
+
+/// Production MCP spoke: calls a remote MCP HTTP/JSON-RPC 2.0 server using
+/// a persistent reqwest client (connection pool, keep-alive, rustls).
+/// Works with the internal librarian at `/api/mcp/librarian` or any external
+/// MCP server that speaks Streamable HTTP transport.
 #[derive(Clone)]
 pub struct MCPSpoke {
     config: SpokeConfig,
-    /// The command to execute the MCP server (e.g., "npx")
-    command: String,
-    /// The arguments for the command (e.g., ["-y", "@modelcontextprotocol/server-github"])
-    args: Vec<String>,
+    /// Full URL of the MCP HTTP endpoint, e.g. "https://chyren.vercel.app/api/mcp/librarian"
+    endpoint: String,
+    /// Optional bearer token / API key sent as Authorization header.
+    api_key: Option<String>,
+    /// Shared HTTP client — one per spoke instance, reused across calls.
+    client: Client,
+    /// Cached tool list (populated on first discover_tools call).
+    tool_cache: Arc<RwLock<Option<Vec<ToolDefinition>>>>,
 }
 
 impl MCPSpoke {
-    pub fn new(config: SpokeConfig, command: &str, args: Vec<&str>) -> Self {
+    pub fn new(config: SpokeConfig, endpoint: impl Into<String>, api_key: Option<String>) -> Self {
+        let client = Client::builder()
+            .timeout(std::time::Duration::from_secs(30))
+            .pool_max_idle_per_host(4)
+            .build()
+            .expect("Failed to build reqwest client for MCPSpoke");
+
         Self {
             config,
-            command: command.to_string(),
-            args: args.into_iter().map(|s| s.to_string()).collect(),
+            endpoint: endpoint.into(),
+            api_key,
+            client,
+            tool_cache: Arc::new(RwLock::new(None)),
         }
     }
 
-    /// Helper to send a simple JSON-RPC request to the MCP server process over stdio.
-    /// This is a simplified bridging mechanism. A full production implementation
-    /// would keep a single process alive. For safety and isolation across tool 
-    /// calls, this spawns the server, makes the request, and reads the response.
-    async fn call_mcp_rpc(&self, method: &str, params: Value) -> Result<Value, String> {
-        let mut child = Command::new(&self.command)
-            .args(&self.args)
-            .env("MCP_ENV", "chyren")
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .spawn()
-            .map_err(|e| format!("Failed to spawn MCP server: {}", e))?;
-
-        let mut stdin = child.stdin.take().ok_or("Failed to open stdin")?;
-        let stdout = child.stdout.take().ok_or("Failed to open stdout")?;
-
-        // Format the request as JSON-RPC 2.0
-        let req_id = 1; // Simplified ID
-        let rpc_req = json!({
+    async fn rpc(&self, method: &str, params: Value) -> Result<Value, String> {
+        let body = json!({
             "jsonrpc": "2.0",
-            "id": req_id,
+            "id": next_id(),
             "method": method,
-            "params": params
+            "params": params,
         });
 
-        let req_str = format!("{}\n", serde_json::to_string(&rpc_req).unwrap());
-        stdin
-            .write_all(req_str.as_bytes())
-            .await
-            .map_err(|e| e.to_string())?;
-        stdin.flush().await.map_err(|e| e.to_string())?;
+        let mut req = self
+            .client
+            .post(&self.endpoint)
+            .header("Content-Type", "application/json");
 
-        // Read response
-        let mut reader = BufReader::new(stdout);
-        let mut line = String::new();
-        
-        // Timeout handling would go here in production
-        reader
-            .read_line(&mut line)
-            .await
-            .map_err(|e| format!("Failed to read MCP response: {}", e))?;
-
-        // The MCP process can be terminated after the request is complete
-        let _ = child.kill().await;
-
-        if line.is_empty() {
-            return Err("Empty response from MCP server".into());
+        if let Some(ref key) = self.api_key {
+            req = req.header("Authorization", format!("Bearer {}", key));
         }
 
-        let resp: Value =
-            serde_json::from_str(&line).map_err(|e| format!("JSON parsing error: {}", e))?;
+        let resp = req
+            .json(&body)
+            .send()
+            .await
+            .map_err(|e| format!("MCP HTTP request failed: {}", e))?;
 
-        if let Some(error) = resp.get("error") {
-            return Err(error.to_string());
+        let status = resp.status();
+        let text = resp
+            .text()
+            .await
+            .map_err(|e| format!("Failed to read MCP response body: {}", e))?;
+
+        if !status.is_success() {
+            return Err(format!("MCP server returned HTTP {}: {}", status, text));
         }
 
-        Ok(resp.get("result").cloned().unwrap_or(json!({})))
+        let json: Value = serde_json::from_str(&text)
+            .map_err(|e| format!("MCP response is not valid JSON: {} — body: {}", e, &text[..text.len().min(200)]))?;
+
+        if let Some(err) = json.get("error") {
+            let code = err.get("code").and_then(|c| c.as_i64()).unwrap_or(0);
+            let msg = err.get("message").and_then(|m| m.as_str()).unwrap_or("unknown error");
+            return Err(format!("MCP RPC error {}: {}", code, msg));
+        }
+
+        Ok(json.get("result").cloned().unwrap_or(Value::Null))
+    }
+
+    fn strip_prefix<'a>(&self, tool_name: &'a str) -> &'a str {
+        let prefix = format!("{}_", self.config.name);
+        tool_name.strip_prefix(&prefix).unwrap_or(tool_name)
     }
 }
 
@@ -93,97 +106,107 @@ impl Spoke for MCPSpoke {
     }
 
     fn spoke_type(&self) -> &str {
-        "mcp_bridge"
+        "mcp_http"
     }
 
     fn capabilities(&self) -> Vec<SpokeCapability> {
-        // MCP natively provides access to external tools
         vec![SpokeCapability::Tools]
     }
 
     async fn discover_tools(&self) -> Result<Vec<ToolDefinition>, String> {
-        // First, we must initialize the connection according to MCP spec
-        let _init_params = json!({
-            "protocolVersion": "2024-11-05", // Standard MCP protocol version
-            "clientInfo": {
-                "name": "Chyren-Medulla-Bridge",
-                "version": "1.0.0"
-            },
-            "capabilities": {}
-        });
-
-        // Technically we should send initialize, wait for response, then send tools/list.
-        // For simplicity in this architectural bridging stub:
-        
-        // 1. Send tools/list
-        match self.call_mcp_rpc("tools/list", json!({})).await {
-            Ok(result) => {
-                let tools_array = result
-                    .get("tools")
-                    .and_then(|t| t.as_array())
-                    .ok_or("Missing 'tools' array in MCP response")?;
-
-                let mut definitions = Vec::new();
-                for tool in tools_array {
-                    let name = tool.get("name").and_then(|n| n.as_str()).unwrap_or("unknown_mcp_tool");
-                    let description = tool.get("description").and_then(|d| d.as_str()).unwrap_or("");
-                    let input_schema = tool.get("inputSchema").cloned().unwrap_or(json!({}));
-                    
-                    definitions.push(ToolDefinition {
-                        name: format!("{}_{}", self.name(), name), // Namespace the tool
-                        description: description.to_string(),
-                        input_schema,
-                        is_deterministic: false,
-                        estimated_cost: 50, // Standard tool invocation cost
-                    });
-                }
-                Ok(definitions)
-            }
-            Err(_e) => {
-                // Return a mock definition if the server isn't running yet to prevent boot failures
-                Ok(vec![ToolDefinition {
-                    name: format!("{}_passthrough", self.name()),
-                    description: format!("Execute a dynamically discovered tool on the {} MCP server", self.name()),
-                    input_schema: json!({"type": "object"}),
-                    is_deterministic: false,
-                    estimated_cost: 50,
-                }])
+        // Return cached result if available.
+        {
+            let cache = self.tool_cache.read().await;
+            if let Some(ref tools) = *cache {
+                return Ok(tools.clone());
             }
         }
+
+        let result = self.rpc("tools/list", json!({})).await?;
+        let tools_array = result
+            .get("tools")
+            .and_then(|t| t.as_array())
+            .ok_or_else(|| format!("MCP tools/list response missing 'tools' array: {:?}", result))?;
+
+        let definitions: Vec<ToolDefinition> = tools_array
+            .iter()
+            .map(|tool| {
+                let raw_name = tool.get("name").and_then(|n| n.as_str()).unwrap_or("unknown");
+                ToolDefinition {
+                    // Namespace: "<spoke_name>_<tool_name>" so the conductor can route correctly.
+                    name: format!("{}_{}", self.config.name, raw_name),
+                    description: tool
+                        .get("description")
+                        .and_then(|d| d.as_str())
+                        .unwrap_or("")
+                        .to_string(),
+                    input_schema: tool.get("inputSchema").cloned().unwrap_or(json!({"type": "object"})),
+                    is_deterministic: false,
+                    estimated_cost: 30,
+                }
+            })
+            .collect();
+
+        let mut cache = self.tool_cache.write().await;
+        *cache = Some(definitions.clone());
+
+        Ok(definitions)
     }
 
     async fn invoke_tool(&self, invocation: ToolInvocation) -> Result<ToolResult, String> {
         let start = std::time::Instant::now();
-        
-        let local_tool_name = invocation.tool.strip_prefix(&format!("{}_", self.name()))
-            .unwrap_or(&invocation.tool);
+        let raw_name = self.strip_prefix(&invocation.tool);
 
-        match self.call_mcp_rpc("tools/call", json!({
-            "name": local_tool_name,
-            "arguments": invocation.input
-        })).await {
-            Ok(result) => Ok(ToolResult {
-                success: !result.get("isError").and_then(|b| b.as_bool()).unwrap_or(false),
-                output: result,
-                error: None,
-                execution_time_ms: start.elapsed().as_millis() as u32,
-            }),
+        let result = self.rpc("tools/call", json!({
+            "name": raw_name,
+            "arguments": invocation.input,
+        })).await;
+
+        let elapsed = start.elapsed().as_millis() as u32;
+
+        match result {
+            Ok(payload) => {
+                let is_error = payload
+                    .get("isError")
+                    .and_then(|b| b.as_bool())
+                    .unwrap_or(false);
+                Ok(ToolResult {
+                    success: !is_error,
+                    output: payload,
+                    error: None,
+                    execution_time_ms: elapsed,
+                })
+            }
             Err(e) => Ok(ToolResult {
                 success: false,
                 output: json!({}),
                 error: Some(e),
-                execution_time_ms: start.elapsed().as_millis() as u32,
+                execution_time_ms: elapsed,
             }),
         }
     }
 
     async fn health_check(&self) -> Result<SpokeStatus, String> {
+        let result = self.rpc("ping", json!({})).await;
+        let healthy = result.is_ok();
+
+        // Invalidate tool cache on failure so next discover_tools re-fetches.
+        if !healthy {
+            let mut cache = self.tool_cache.write().await;
+            *cache = None;
+        }
+
+        let tool_count = {
+            let cache = self.tool_cache.read().await;
+            cache.as_ref().map(|t| t.len()).unwrap_or(0)
+        };
+
         Ok(SpokeStatus {
             name: self.config.name.clone(),
-            health: "healthy".to_string(), // Assume healthy if config is present
+            health: if healthy { "healthy" } else { "unreachable" }.to_string(),
             last_success: crate::now(),
-            recent_errors: 0,
-            available_tools: 1, // At least the passthrough is available
+            recent_errors: if healthy { 0 } else { 1 },
+            available_tools: tool_count,
         })
     }
 

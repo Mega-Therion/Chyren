@@ -131,6 +131,17 @@ pub struct SpokeRegistry {
     preference: Vec<String>,
 }
 
+/// Build an MCP HTTP spoke from env vars. Returns None if the URL var is unset/empty
+/// so missing optional integrations never crash the spoke registry at boot.
+fn mcp_http_spoke(config: SpokeConfig, url_env: &str, token_env: &str) -> Option<Arc<dyn Spoke>> {
+    let url = std::env::var(url_env).unwrap_or_default();
+    if url.is_empty() {
+        return None;
+    }
+    let token = std::env::var(token_env).ok().filter(|s| !s.is_empty());
+    Some(Arc::new(spokes::MCPSpoke::new(config, url, token)))
+}
+
 impl SpokeRegistry {
     pub fn new() -> Self {
         Self {
@@ -159,7 +170,8 @@ impl SpokeRegistry {
             ("search", 90),
             ("neon", 100),
             ("sovereign", 0),
-            // Explicit MCP bridges
+            // MCP HTTP spokes
+            ("librarian", 110),
             ("github", 200),
             ("vercel", 201),
             ("supabase", 202),
@@ -187,13 +199,22 @@ impl SpokeRegistry {
                 "neon" => Some(Arc::new(spokes::NeonSpoke::new(config))),
                 "sovereign" => Some(Arc::new(spokes::DeepSeekSpoke::new(config))),
                 
-                // MCP Hub Initializations 
-                "github" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-github"]))),
-                "vercel" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-vercel"]))),
-                "supabase" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-supabase"]))),
-                "firebase" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-firebase"]))),
-                "zapier" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-zapier"]))),
-                "manus" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-manus"]))),
+                // MCP HTTP spokes — each requires a <NAME>_MCP_URL env var pointing at an
+                // MCP Streamable-HTTP server.  Skip registration silently if unset so that
+                // missing optional integrations never crash the spoke registry at boot.
+                "librarian" => {
+                    let base = std::env::var("CHYREN_API_URL").unwrap_or_default();
+                    if base.is_empty() { None } else {
+                        let endpoint = format!("{}/api/mcp/librarian", base.trim_end_matches('/'));
+                        Some(Arc::new(spokes::MCPSpoke::new(config, endpoint, None)))
+                    }
+                }
+                "github" => mcp_http_spoke(config, "GITHUB_MCP_URL", "GITHUB_MCP_TOKEN"),
+                "vercel" => mcp_http_spoke(config, "VERCEL_MCP_URL", "VERCEL_MCP_TOKEN"),
+                "supabase" => mcp_http_spoke(config, "SUPABASE_MCP_URL", "SUPABASE_ACCESS_TOKEN"),
+                "firebase" => mcp_http_spoke(config, "FIREBASE_MCP_URL", "FIREBASE_MCP_TOKEN"),
+                "zapier" => mcp_http_spoke(config, "ZAPIER_MCP_URL", "ZAPIER_MCP_TOKEN"),
+                "manus" => mcp_http_spoke(config, "MANUS_MCP_URL", "MANUS_MCP_TOKEN"),
                 _ => None,
             };
 
