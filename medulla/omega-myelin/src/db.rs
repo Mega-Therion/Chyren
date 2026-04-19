@@ -35,6 +35,8 @@ impl MemoryStore {
         let pool = sqlx::PgPool::connect(url).await?;
 
         // Ensure the schema exists — idempotent.
+        // We split these into separate queries because sqlx::query() with multiple statements 
+        // can fail as a "prepared statement" on some Postgres drivers/proxies (e.g. Neon).
         sqlx::query(
             r#"
             CREATE TABLE IF NOT EXISTS memory_nodes (
@@ -45,7 +47,13 @@ impl MemoryStore {
                 created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
                 updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
             );
+            "#,
+        )
+        .execute(&pool)
+        .await?;
 
+        sqlx::query(
+            r#"
             CREATE TABLE IF NOT EXISTS memory_edges (
                 id          SERIAL PRIMARY KEY,
                 from_label  TEXT NOT NULL DEFAULT '',
@@ -54,14 +62,26 @@ impl MemoryStore {
                 to_id       TEXT NOT NULL REFERENCES memory_nodes(node_id) ON DELETE CASCADE,
                 created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
             );
+            "#,
+        )
+        .execute(&pool)
+        .await?;
 
+        sqlx::query(
+            r#"
             CREATE TABLE IF NOT EXISTS threat_entries (
                 pattern_id  TEXT PRIMARY KEY,
                 severity    TEXT NOT NULL DEFAULT 'low',
                 labels      JSONB NOT NULL DEFAULT '[]',
                 created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
             );
+            "#,
+        )
+        .execute(&pool)
+        .await?;
 
+        sqlx::query(
+            r#"
             CREATE TABLE IF NOT EXISTS ledger_entries (
                 run_id      TEXT PRIMARY KEY,
                 task        TEXT NOT NULL DEFAULT '',
