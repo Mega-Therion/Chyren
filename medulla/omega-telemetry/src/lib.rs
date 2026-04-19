@@ -102,9 +102,19 @@ lazy_static! {
     pub static ref CHYREN_ADCCL_SCORE: Gauge = register_gauge!(
         opts!("chyren_adccl_score", "Most recent ADCCL alignment score")
     ).unwrap();
+
+    /// Global event bus for WebSockets
+    pub static ref EVENT_CHANNEL: tokio::sync::broadcast::Sender<SystemEvent> = {
+        let (tx, _) = tokio::sync::broadcast::channel(100);
+        tx
+    };
 }
 
-/// Start the Prometheus metrics server on the specified port.
+use actix_web::{web, Error, HttpRequest};
+use actix_ws::Message;
+use futures_util::StreamExt as _;
+
+/// Start the Prometheus and WebSocket metrics server on the specified port.
 /// This runs in a background thread and does not block.
 pub async fn start_metrics_server(port: u16) -> std::io::Result<()> {
     info!("[THE EYE] Starting metrics server on 0.0.0.0:{}", port);
@@ -112,7 +122,9 @@ pub async fn start_metrics_server(port: u16) -> std::io::Result<()> {
     // Spawn the server as a background task
     tokio::spawn(async move {
         let server = HttpServer::new(|| {
-            App::new().service(metrics_endpoint)
+            App::new()
+                .service(metrics_endpoint)
+                .service(web::resource("/ws").route(web::get().to(websocket_handler)))
         })
         .bind(("0.0.0.0", port))
         .expect("Failed to bind metrics server")
@@ -124,6 +136,46 @@ pub async fn start_metrics_server(port: u16) -> std::io::Result<()> {
     });
 
     Ok(())
+}
+
+async fn websocket_handler(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, Error> {
+    let (response, mut session, mut msg_stream) = actix_ws::handle(&req, stream)?;
+    
+    let mut rx = EVENT_CHANNEL.subscribe();
+
+    actix_web::rt::spawn(async move {
+        loop {
+            tokio::select! {
+                Ok(event) = rx.recv() => {
+                    if let Ok(json) = serde_json::to_string(&event) {
+                        if session.text(json).await.is_err() {
+                            break;
+                        }
+                    }
+                }
+                Some(Ok(msg)) = msg_stream.next() => {
+                    match msg {
+                        Message::Text(text) => {
+                            if let Ok(event) = serde_json::from_str::<SystemEvent>(&text) {
+                                // Re-broadcast incoming events from other layers (like Cortex)
+                                TelemetryBus::broadcast(event);
+                            }
+                        }
+                        Message::Ping(bytes) => {
+                            if session.pong(&bytes).await.is_err() {
+                                break;
+                            }
+                        }
+                        Message::Close(_) => break,
+                        _ => {}
+                    }
+                }
+                else => break,
+            }
+        }
+    });
+
+    Ok(response)
 }
 
 #[get("/metrics")]
@@ -231,6 +283,9 @@ impl TelemetryBus {
         for sink in sinks {
             sink.record(&event);
         }
+        
+        // Broadcast to WebSocket clients
+        let _ = EVENT_CHANNEL.send(event);
     }
 
     /// Record a metric to stdout and the Prometheus-text sink.
