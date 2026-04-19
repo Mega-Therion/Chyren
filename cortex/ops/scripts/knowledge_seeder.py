@@ -1052,6 +1052,188 @@ D("intelligence_studies", "Intelligence Studies", "interdisciplinary", "mixed", 
 D("environmental_studies_inter", "Environmental Studies", "interdisciplinary", "mixed", level=1, parent="interdisciplinary")
 D("global_studies", "Global Studies", "interdisciplinary", "mixed", level=1, parent="interdisciplinary")
 
+# ─── Mathematical Proofs & Formal Methods ─────────────────────────────────────
+D("mathematical_proofs", "Mathematical Proofs & Proof Theory", "mathematics", "formal", level=1, parent="mathematics",
+  desc="The art, science, and formal theory of mathematical proof — from direct proofs to automated theorem proving.",
+  purpose="Establish mathematical truth beyond doubt through rigorous logical derivation.",
+  axioms=["A proof must be logically valid from accepted axioms.", "Proof methods include direct, contradiction, induction, and construction.", "Gödel incompleteness: not all truths are provable within a consistent system."],
+  methods=["Direct proof", "Proof by contradiction", "Mathematical induction", "Transfinite induction", "Diagonalization", "Probabilistic proof", "Computer-assisted proof (Coq, Lean, Isabelle)"],
+  figures=["Euclid", "Gödel", "Hilbert", "Turing", "de Bruijn", "Appel & Haken (4-color theorem)"],
+  primer="When proving mathematical claims: identify proof strategy (direct, contradiction, induction), cite axioms explicitly, and verify each logical step. Flag when a result is non-constructive or relies on choice axiom.")
+
+D("proof_by_induction", "Mathematical Induction", "mathematics", "formal", level=2, parent="mathematical_proofs",
+  desc="Proving a statement holds for all natural numbers via base case and inductive step.",
+  axioms=["Base case must hold.", "Inductive step: P(k) → P(k+1) for all k≥base."],
+  methods=["Weak induction", "Strong induction", "Structural induction", "Transfinite induction"],
+  primer="Always verify base case explicitly. For strong induction, assume all prior cases hold.")
+
+D("proof_by_contradiction", "Proof by Contradiction (Reductio ad Absurdum)", "mathematics", "formal", level=2, parent="mathematical_proofs",
+  desc="Assume the negation of the theorem, derive a contradiction, conclude the theorem holds.",
+  axioms=["Law of excluded middle: P ∨ ¬P.", "Deriving ⊥ from ¬P proves P."],
+  primer="Assume negation, derive contradiction clearly, state conclusion. Note when the law of excluded middle is used.")
+
+D("constructive_proof", "Constructive Proof", "mathematics", "formal", level=2, parent="mathematical_proofs",
+  desc="Proofs that explicitly construct the mathematical object claimed to exist.",
+  axioms=["Existence must be witnessed by explicit construction.", "No law of excluded middle assumed."],
+  figures=["Brouwer", "Bishop", "Martin-Löf"],
+  primer="Provide explicit witnesses; avoid non-constructive existence arguments unless noted.")
+
+D("automated_theorem_proving", "Automated Theorem Proving & Proof Assistants", "mathematics", "computational", level=2, parent="mathematical_proofs",
+  desc="Software systems (Coq, Lean 4, Isabelle, HOL) that mechanically verify or discover proofs.",
+  methods=["Type theory (Curry-Howard correspondence)", "SAT/SMT solving", "Resolution", "Unification", "Dependent types"],
+  figures=["de Bruijn", "Gonthier", "Avigad", "Buzzard"],
+  primer="Reference the formal system (Lean 4, Coq, etc.) when discussing machine-checked proofs. Note that proof assistants use constructive logic by default unless classical axioms are added.")
+
+# ─── Academic & Scientific Publication ────────────────────────────────────────
+D("academic_publishing", "Academic Publishing & Scholarly Communication", "interdisciplinary", "mixed", level=1, parent="interdisciplinary",
+  desc="The processes, norms, formats, and institutions that govern how knowledge is formally disseminated.",
+  purpose="Ensure reliable, peer-reviewed dissemination of new knowledge across all disciplines.",
+  axioms=["Peer review is the gold standard for knowledge validation.", "Citation gives credit and enables verification.", "Open access expands reach and reproducibility."],
+  methods=["Peer review (single-blind, double-blind, open)", "Pre-registration", "Preprint servers (arXiv, bioRxiv, SSRN)", "Systematic review", "Meta-analysis", "Replication studies"],
+  figures=["Merton", "Kuhn", "Popper", "Ziman"],
+  primer="When citing academic work: prefer primary sources, note publication venue tier, distinguish preprint from peer-reviewed, and flag retracted papers.")
+
+D("citation_styles", "Citation Styles & Reference Management", "interdisciplinary", "mixed", level=2, parent="academic_publishing",
+  desc="Formal systems for attributing sources: APA, MLA, Chicago, Vancouver, IEEE, AMS, and others.",
+  methods=["APA 7th edition (social sciences)", "MLA 9th (humanities)", "Chicago/Turabian (history, humanities)", "Vancouver/NLM (medicine)", "IEEE (engineering/CS)", "AMS (mathematics)"],
+  primer="Match citation style to field: APA for social sciences, Chicago for history, IEEE for CS/engineering, AMS for mathematics. Always include DOI when available.")
+
+D("academic_databases", "Academic Databases & Research Repositories", "interdisciplinary", "mixed", level=2, parent="academic_publishing",
+  desc="Digital archives and indexes of scholarly literature: arXiv, PubMed, JSTOR, Scopus, Web of Science, Google Scholar, Semantic Scholar.",
+  methods=["Boolean search operators", "Citation graph traversal", "h-index and impact factor", "Preprint vs. published version tracking"],
+  primer="For literature searches, prefer Semantic Scholar or Google Scholar for broad coverage, PubMed for biomedicine, arXiv for physics/math/CS preprints, JSTOR for humanities.")
+
+D("peer_review_process", "Peer Review & Scientific Validation", "interdisciplinary", "empirical", level=2, parent="academic_publishing",
+  desc="Evaluation of research by domain experts before publication.",
+  methods=["Single-blind review", "Double-blind review", "Open peer review", "Post-publication review", "Statistical review"],
+  primer="Distinguish preprint (not peer-reviewed) from published. Note major replication crises in psychology, medicine, and nutrition when assessing empirical claims.")
+
+# ─── Scientific & Mathematical Notation ───────────────────────────────────────
+D("mathematical_notation", "Mathematical Notation & Symbolic Language", "mathematics", "formal", level=1, parent="mathematics",
+  desc="The formal symbolic language used to express mathematical ideas precisely and concisely.",
+  purpose="Enable unambiguous communication of mathematical structures across cultures and disciplines.",
+  axioms=["Notation must be unambiguous within its defined context.", "Good notation compresses thought without losing precision.", "Standard notation enables cross-disciplinary communication."],
+  methods=["Set-builder notation", "Summation/product notation (Σ, Π)", "Quantifiers (∀, ∃)", "Limits and continuity notation (ε-δ)", "Big-O notation", "Matrix notation", "Integral/differential notation", "Logical connectives (∧, ∨, ¬, →, ↔)"],
+  figures=["Leibniz", "Euler", "Peano", "Russell", "Bourbaki"],
+  primer="Always render mathematics in standard notation. Prefer LaTeX-style symbolic expressions. Define all symbols on first use. When ambiguous, disambiguate with context (e.g., × vs ⊗ vs ·).")
+
+D("latex_typesetting", "LaTeX & Mathematical Typesetting", "mathematics", "computational", level=2, parent="mathematical_notation",
+  desc="The de facto standard system for typesetting mathematics, science, and academic documents.",
+  methods=["AMS-LaTeX packages (amsmath, amsthm)", "BibTeX/BibLaTeX bibliography", "TikZ diagrams", "Beamer presentations", "Overleaf collaborative editing"],
+  primer="When producing mathematical content, use LaTeX notation. Wrap inline math in $...$ and display equations in $$...$$ or \\[...\\]. Use \\begin{proof}...\\end{proof} for proofs.")
+
+D("scientific_notation_systems", "Scientific Notation & Units", "natural_science", "empirical", level=2, parent="mathematical_notation",
+  desc="SI units, scientific notation for large/small numbers, significant figures, and dimensional analysis.",
+  methods=["SI base units (meter, kilogram, second, ampere, kelvin, mole, candela)", "Scientific notation (a × 10^n)", "Significant figures and rounding", "Dimensional analysis (unit tracking)"],
+  primer="Always include units for physical quantities. Use SI unless the field convention differs (e.g., eV in particle physics). Track significant figures through calculations.")
+
+D("chemical_notation", "Chemical Notation & IUPAC Nomenclature", "natural_science", "formal", level=2, parent="mathematical_notation",
+  desc="Standard system for naming compounds, writing equations, and representing molecular structure.",
+  methods=["IUPAC nomenclature", "Lewis structures", "Chemical equations (balancing)", "Molecular formula vs. structural formula", "SMILES notation"],
+  primer="Name compounds per IUPAC; balance equations by atom count; specify oxidation states when relevant.")
+
+D("music_notation", "Musical Notation & Theory Symbols", "humanities", "interpretive", level=2, parent="mathematical_notation",
+  desc="Standard notation for pitch, rhythm, dynamics, and structure in Western music.",
+  methods=["Staff notation", "Clef systems", "Note values", "Time signatures", "Key signatures", "Dynamic markings", "Lead sheet notation", "Tablature"],
+  primer="Describe musical structure using standard notation terms. Distinguish Western staff notation from alternative systems (ABC notation, tablature) when relevant.")
+
+# ─── Wolfram / Computational Knowledge ───────────────────────────────────────
+D("computational_knowledge", "Computational Knowledge & Algorithmic Answers", "computer_science", "computational", level=1, parent="computer_science",
+  desc="The discipline of encoding world knowledge in computable, queryable form — exemplified by Wolfram|Alpha and Mathematica.",
+  purpose="Enable automated symbolic and numerical reasoning over structured world knowledge.",
+  axioms=["Knowledge can be formally represented and computed.", "Computable answers are more precise than natural language answers.", "The Wolfram Language unifies symbolic math, data, and computation."],
+  methods=["Wolfram|Alpha natural language queries", "Mathematica symbolic computation", "Wolfram Language (pattern matching, functional programming, symbolic evaluation)", "CAS (Computer Algebra Systems)", "Numerical methods (NDSolve, NIntegrate)", "Wolfram Data Repository", "Wolfram MathWorld reference"],
+  figures=["Stephen Wolfram", "Theodore Gray"],
+  primer="For math/science queries requiring exact symbolic answers, frame them as Wolfram|Alpha-style queries. Distinguish symbolic (exact) from numerical (approximate) computation. Cite Wolfram MathWorld for definitions when precision is paramount.")
+
+D("computer_algebra_systems", "Computer Algebra Systems (CAS)", "computer_science", "computational", level=2, parent="computational_knowledge",
+  desc="Software for symbolic manipulation of mathematical expressions: Mathematica, Maple, SageMath, SymPy, Maxima.",
+  methods=["Symbolic differentiation/integration", "Polynomial factorization", "Equation solving (Solve, NSolve)", "Series expansion", "Linear algebra (MatrixExp, Eigensystem)", "Simplification (FullSimplify)", "Groebner bases"],
+  primer="When a user asks for an exact symbolic result, identify the appropriate CAS operation. Prefer Wolfram Language syntax as canonical; note equivalents in SymPy (Python) or SageMath when relevant.")
+
+D("numerical_methods_comp", "Numerical Methods & Scientific Computing", "computer_science", "computational", level=2, parent="computational_knowledge",
+  desc="Algorithms for numerical approximation of mathematical problems: ODEs, PDEs, optimization, linear systems.",
+  methods=["Runge-Kutta ODE solvers", "Finite element method", "Fast Fourier Transform (FFT)", "Newton-Raphson root finding", "Gradient descent", "Monte Carlo methods", "LU/QR decomposition"],
+  figures=["Gauss", "Runge", "Kutta", "Cooley", "Tukey"],
+  primer="Distinguish numerical from analytic solutions. Always state numerical precision and step size. Warn when methods may diverge or produce spurious results.")
+
+D("wolfram_alpha_queries", "Wolfram|Alpha Query Patterns", "computer_science", "computational", level=2, parent="computational_knowledge",
+  desc="How to formulate questions for Wolfram|Alpha: math, science, data, geography, astronomy, music, and more.",
+  methods=["Plain English math queries ('integrate x^2 from 0 to 1')", "Unit conversion queries", "Data lookup queries ('population of France')", "Sequence identification (OEIS)", "Equation solving ('solve x^2 - 5x + 6 = 0')", "Geometric queries ('volume of sphere radius 5')", "Statistical queries ('mean of {1,2,3,4,5}')"],
+  primer="Translate user math/science questions into Wolfram|Alpha query format when exact computation is needed. Wolfram|Alpha handles calculus, linear algebra, statistics, chemistry, astronomy, music theory, and factual data. For computational output, present both symbolic and numerical results.")
+
+# ─── OEIS & Mathematical Sequences ────────────────────────────────────────────
+D("integer_sequences", "Integer Sequences & OEIS", "mathematics", "formal", level=2, parent="combinatorics",
+  desc="The study and cataloging of integer sequences — epitomized by the Online Encyclopedia of Integer Sequences (OEIS).",
+  methods=["Recurrence relations", "Generating functions", "Asymptotic analysis", "EIS lookup by terms"],
+  figures=["Neil Sloane"],
+  primer="When a sequence is mentioned, check if it matches a known OEIS entry. Reference OEIS A-numbers (e.g., A000045 for Fibonacci). Use generating functions to unify sequence properties.")
+
+# ─── Epistemology of Science & Research Methods ───────────────────────────────
+D("research_methods", "Research Methods & Scientific Inquiry", "interdisciplinary", "empirical", level=1, parent="interdisciplinary",
+  desc="The methodological foundations common to scientific inquiry across disciplines.",
+  purpose="Ensure reliable, reproducible, and valid knowledge production.",
+  axioms=["Hypotheses must be falsifiable (Popper).", "Controls eliminate confounds.", "Replication validates findings.", "Effect size matters as much as significance."],
+  methods=["Experimental design (RCT, factorial)", "Observational study", "Survey & questionnaire design", "Grounded theory (qualitative)", "Mixed methods", "Systematic review", "Power analysis", "p-value and confidence intervals", "Effect size (Cohen's d, r, η²)"],
+  figures=["Popper", "Kuhn", "Feyerabend", "Fisher", "Neyman", "Pearson"],
+  primer="Always distinguish correlation from causation. Check sample size and power. Report effect sizes alongside p-values. Flag p-hacking and HARKing (Hypothesizing After Results are Known).")
+
+D("replication_crisis", "Replication Crisis & Open Science", "interdisciplinary", "empirical", level=2, parent="research_methods",
+  desc="The ongoing methodological crisis across psychology, medicine, and social science where many published findings fail to replicate.",
+  methods=["Pre-registration", "Registered Reports", "Open data & materials", "Bayesian statistics", "Meta-analysis with heterogeneity testing"],
+  figures=["Ioannidis", "Nosek", "Simmons"],
+  primer="Flag high-profile non-replications (priming effects, power posing). Prefer pre-registered studies. Be skeptical of small-n, high-p studies in psychology and nutrition.")
+
+D("statistical_inference", "Statistical Inference & Hypothesis Testing", "mathematics", "empirical", level=2, parent="probability_statistics",
+  desc="Formal methods for drawing conclusions about populations from samples.",
+  methods=["Null hypothesis significance testing (NHST)", "Bayesian inference", "Confidence intervals", "Power analysis", "Multiple comparisons correction (Bonferroni, FDR)", "Non-parametric tests"],
+  figures=["Fisher", "Neyman", "Pearson", "Bayes", "Jeffreys"],
+  primer="Always state H₀ and H₁ explicitly. Report p-value, confidence interval, and effect size together. Prefer two-sided tests unless directional hypothesis is pre-registered. Adjust for multiple comparisons.")
+
+# ─── Philosophy of Mathematics ────────────────────────────────────────────────
+D("philosophy_of_mathematics", "Philosophy of Mathematics", "philosophy", "dialectical", level=1, parent="philosophy",
+  desc="Foundational questions about the nature, ontology, and epistemology of mathematical objects and truth.",
+  purpose="Interrogate what mathematical objects are, whether they exist independently, and how mathematics applies to physical reality.",
+  axioms=["Mathematical objects may be abstract (Platonism) or constructed (Constructivism).", "Unreasonable effectiveness: mathematics describes reality despite apparent abstraction.", "Foundations: ZFC set theory underlies most of modern mathematics."],
+  methods=["Philosophical analysis", "Formal axiomatic systems", "Historical case study"],
+  figures=["Plato", "Frege", "Russell", "Wittgenstein", "Gödel", "Benacerraf", "Maddy"],
+  primer="Distinguish Platonism (mathematical objects exist independently), formalism (math is symbol manipulation), intuitionism (math is mental construction), and structuralism (math studies abstract structures). Ground claims in the position's ontological commitments.")
+
+D("foundations_of_mathematics", "Foundations of Mathematics", "mathematics", "formal", level=2, parent="philosophy_of_mathematics",
+  desc="Axiomatic foundations underpinning all of mathematics: ZFC set theory, type theory, category theory as foundations.",
+  methods=["ZFC axioms", "Peano axioms", "Homotopy Type Theory (HoTT)", "Category-theoretic foundations", "Reverse mathematics"],
+  figures=["Zermelo", "Fraenkel", "von Neumann", "Gödel", "Cohen", "Voevodsky"],
+  primer="Reference ZFC as the default foundation. Note when the axiom of choice (AC) or continuum hypothesis (CH) is invoked. Distinguish first-order from second-order arithmetic.")
+
+# ─── History of Mathematics ───────────────────────────────────────────────────
+D("history_of_mathematics", "History of Mathematics", "mathematics", "interpretive", level=1, parent="mathematics",
+  desc="The development of mathematical ideas across civilizations from Mesopotamia to the present.",
+  purpose="Understand how mathematical knowledge accumulated, which problems drove progress, and how notation and proof evolved.",
+  methods=["Historical textual analysis", "Mathematical reconstruction", "Comparative civilizational study"],
+  figures=["Euclid", "Archimedes", "Al-Khwarizmi", "Newton", "Leibniz", "Euler", "Gauss", "Cauchy", "Cantor", "Hilbert", "Poincaré", "Ramanujan"],
+  primer="When placing a theorem historically: identify who first proved it, the era's dominant methods, and how the result was later generalized or formalized.")
+
+# ─── Logic in Computer Science ────────────────────────────────────────────────
+D("type_theory", "Type Theory & Type Systems", "computer_science", "formal", level=2, parent="programming_languages_cs",
+  desc="Formal systems that assign types to expressions to ensure correctness — from simple types to dependent types.",
+  axioms=["Every expression has a type.", "Well-typed programs don't go wrong (Milner).", "Curry-Howard: proofs ≅ programs, propositions ≅ types."],
+  methods=["Hindley-Milner type inference", "Dependent types (Coq, Lean, Agda)", "Gradual typing", "Subtyping", "Parametric polymorphism (generics)"],
+  figures=["Church", "Curry", "Howard", "Milner", "Martin-Löf"],
+  primer="Always distinguish static from dynamic typing, nominal from structural subtyping, and monomorphic from polymorphic types. When discussing proof assistants, note the Curry-Howard isomorphism.")
+
+D("formal_verification", "Formal Verification & Model Checking", "computer_science", "formal", level=2, parent="theory_of_computation",
+  desc="Mathematically rigorous methods to prove software and hardware systems correct with respect to a specification.",
+  methods=["Model checking (SPIN, NuSMV)", "Theorem proving (Coq, Isabelle, Lean)", "Abstract interpretation", "SAT/SMT solvers (Z3, CVC5)", "Hoare logic / Separation logic", "TLA+ (temporal logic of actions)"],
+  figures=["Floyd", "Hoare", "Dijkstra", "Clarke", "Emerson", "Lamport"],
+  primer="Distinguish model checking (exhaustive state space) from deductive verification (theorem proving). Note scalability limits of model checking and the proof burden of theorem proving.")
+
+D("lambda_calculus", "Lambda Calculus & Computability", "mathematics", "formal", level=2, parent="theory_of_computation",
+  desc="Church's formal model of computation via function abstraction and application; foundation of functional programming and type theory.",
+  axioms=["β-reduction: (λx.M) N → M[N/x]", "Church-Turing thesis: all effective computations are Turing-computable.", "λ-calculus and Turing machines are computationally equivalent."],
+  methods=["α-renaming", "β-reduction", "η-conversion", "Normal form analysis", "Church numerals", "Fixed-point combinators (Y combinator)"],
+  figures=["Church", "Turing", "Kleene", "Scott"],
+  primer="Trace β-reductions step by step. Identify normal forms. Note when divergence (infinite reduction) occurs. Connect to Haskell/Lisp semantics where relevant.")
+
 
 # ─── Key cross-domain edges ───────────────────────────────────────────────────
 
@@ -1067,8 +1249,8 @@ EDGES: list[tuple[str, str, str, float]] = [
     ("mathematics", "physics", "applies_to", 1.0),
     ("mathematics", "computer_science", "prerequisite", 0.9),
     ("mathematics", "economics", "applies_to", 0.8),
-    ("mathematics", "statistics", "overlaps", 0.9),
-    ("philosophy", "science", "critiques", 0.7),
+    ("mathematics", "probability_statistics", "overlaps", 0.9),
+    ("philosophy", "natural_sciences", "critiques", 0.7),
     ("ethics", "applied_ethics", "extends", 1.0),
     ("cognitive_science", "neuroscience", "overlaps", 0.9),
     ("cognitive_science", "psychology", "extends", 0.9),
@@ -1078,14 +1260,35 @@ EDGES: list[tuple[str, str, str, float]] = [
     ("game_theory", "political_science", "applies_to", 0.7),
     ("information_theory", "cryptography_cs", "prerequisite", 0.8),
     ("information_theory", "machine_learning", "prerequisite", 0.7),
-    ("statistics", "machine_learning", "prerequisite", 0.9),
-    ("probability_theory", "statistics", "prerequisite", 1.0),
+    ("probability_statistics", "machine_learning", "prerequisite", 0.9),
+    ("probability_theory", "probability_statistics", "prerequisite", 1.0),
     ("algebra", "cryptography_math", "prerequisite", 0.8),
     ("topology", "differential_geometry", "prerequisite", 0.8),
     ("philosophy_of_mind", "cognitive_science", "overlaps", 0.9),
     ("neuroscience", "biology", "extends", 0.8),
     ("biochemistry", "molecular_biology", "overlaps", 0.9),
     ("evolutionary_biology", "genetics", "overlaps", 0.8),
+    # New domain edges
+    ("mathematical_proofs", "mathematical_logic", "formalizes", 1.0),
+    ("mathematical_proofs", "mathematics", "prerequisite", 1.0),
+    ("automated_theorem_proving", "mathematical_proofs", "applies_to", 0.9),
+    ("type_theory", "mathematical_logic", "formalizes", 0.9),
+    ("type_theory", "programming_languages_cs", "applies_to", 0.9),
+    ("formal_verification", "type_theory", "extends", 0.8),
+    ("lambda_calculus", "type_theory", "prerequisite", 0.9),
+    ("computer_algebra_systems", "mathematical_notation", "applies_to", 0.8),
+    ("computational_knowledge", "mathematics", "applies_to", 0.9),
+    ("wolfram_alpha_queries", "computational_knowledge", "instantiates", 1.0),
+    ("mathematical_notation", "mathematics", "prerequisite", 1.0),
+    ("latex_typesetting", "academic_publishing", "applies_to", 0.8),
+    ("academic_publishing", "research_methods", "overlaps", 0.7),
+    ("philosophy_of_mathematics", "mathematics", "critiques", 0.8),
+    ("philosophy_of_mathematics", "philosophy", "extends", 0.9),
+    ("foundations_of_mathematics", "mathematical_logic", "extends", 0.9),
+    ("statistical_inference", "research_methods", "applies_to", 0.9),
+    ("replication_crisis", "research_methods", "critiques", 0.8),
+    ("integer_sequences", "combinatorics", "extends", 0.8),
+    ("history_of_mathematics", "mathematics", "overlaps", 0.7),
 ]
 
 
