@@ -95,7 +95,7 @@ impl SovereignDiscipline {
             Self::Arithmetic => &[
                 "Mathlib/Data/Nat/Basic",
                 "Mathlib/Data/Int/Basic",
-                "Mathlib/Data/Rat/Basic",
+                "Mathlib/Data/Rat/Defs",
             ],
             Self::NumberTheory => &[
                 "Mathlib/NumberTheory/PrimeCounting",
