@@ -24,32 +24,62 @@ interface QdrantHit {
   }
 }
 
-async function embedText(text: string, apiKey: string): Promise<number[] | null> {
-  try {
-    const resp = await fetch('https://api.openai.com/v1/embeddings', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({ model: 'text-embedding-3-small', input: text }),
-      signal: AbortSignal.timeout(8000),
-    })
-    if (!resp.ok) return null
-    const data = (await resp.json()) as { data: Array<{ embedding: number[] }> }
-    return data.data[0]?.embedding ?? null
-  } catch {
-    return null
+async function embedText(text: string): Promise<number[] | null> {
+  // Prefer Gemini (gemini-embedding-001, dim=3072) — fall back to OpenAI (dim=1536)
+  const geminiKey = process.env.GEMINI_API_KEY
+  const openaiKey = process.env.OPENAI_API_KEY
+
+  if (geminiKey) {
+    try {
+      const resp = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key=${geminiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'models/gemini-embedding-001',
+            content: { parts: [{ text }] },
+          }),
+          signal: AbortSignal.timeout(8000),
+        },
+      )
+      if (resp.ok) {
+        const data = (await resp.json()) as { embedding: { values: number[] } }
+        return data.embedding?.values ?? null
+      }
+    } catch {
+      // fall through to OpenAI
+    }
   }
+
+  if (openaiKey) {
+    try {
+      const resp = await fetch('https://api.openai.com/v1/embeddings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${openaiKey}` },
+        body: JSON.stringify({ model: 'text-embedding-3-small', input: text }),
+        signal: AbortSignal.timeout(8000),
+      })
+      if (resp.ok) {
+        const data = (await resp.json()) as { data: Array<{ embedding: number[] }> }
+        return data.data[0]?.embedding ?? null
+      }
+    } catch {
+      return null
+    }
+  }
+
+  return null
 }
 
 async function qdrantSearch(vector: number[], topK: number): Promise<QdrantHit[]> {
   try {
-    const resp = await fetch(`${QDRANT_URL}/collections/${COLLECTION}/points/search`, {
+    // Qdrant v1.7+ uses /points/query; fall back to /points/search for older versions
+    const resp = await fetch(`${QDRANT_URL}/collections/${COLLECTION}/points/query`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        vector,
+        query: vector,
         limit: topK,
         with_payload: true,
         score_threshold: 0.35,
@@ -57,8 +87,8 @@ async function qdrantSearch(vector: number[], topK: number): Promise<QdrantHit[]
       signal: AbortSignal.timeout(5000),
     })
     if (!resp.ok) return []
-    const data = (await resp.json()) as { result: QdrantHit[] }
-    return data.result ?? []
+    const data = (await resp.json()) as { result: { points: QdrantHit[] } }
+    return data.result?.points ?? []
   } catch {
     return []
   }
@@ -87,12 +117,12 @@ export async function semanticKnowledgeSearch(
   query: string,
   topK: number = 5,
 ): Promise<SemanticDomainResult[]> {
-  const openaiKey = process.env.OPENAI_API_KEY
   const resultMap = new Map<string, SemanticDomainResult>()
 
   // ── Vector search ────────────────────────────────────────────────────────
-  if (openaiKey) {
-    const vector = await embedText(query, openaiKey)
+  const hasEmbedProvider = !!(process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY)
+  if (hasEmbedProvider) {
+    const vector = await embedText(query)
     if (vector) {
       const hits = await qdrantSearch(vector, topK)
       for (const hit of hits) {
