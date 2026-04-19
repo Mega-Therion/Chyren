@@ -47,10 +47,6 @@ struct Cli {
     /// Generation temperature (provider permitting).
     #[arg(long, global = true, default_value_t = 0.3)]
     temperature: f64,
-
-    /// Optional task text for legacy/direct invocation
-    #[arg(last = true)]
-    task: Vec<String>,
 }
 
 #[derive(Subcommand)]
@@ -97,14 +93,38 @@ enum Commands {
     Insights,
 
     // Reasoning Passthroughs
-    Thought { args: Vec<String> },
-    Action { args: Vec<String> },
-    Sense { args: Vec<String> },
-    Verify { args: Vec<String> },
-    Identity { args: Vec<String> },
-    Flex { args: Vec<String> },
-    Shard { args: Vec<String> },
-    Memory { args: Vec<String> },
+    Thought { 
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String> 
+    },
+    Action { 
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String> 
+    },
+    Sense { 
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String> 
+    },
+    Verify { 
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String> 
+    },
+    Identity { 
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String> 
+    },
+    Flex { 
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String> 
+    },
+    Shard { 
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String> 
+    },
+    Memory { 
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String> 
+    },
 }
 
 #[derive(serde::Serialize)]
@@ -447,153 +467,173 @@ async fn main() -> anyhow::Result<()> {
             man.render(&mut std::io::stdout())?;
             return Ok(());
         }
-        None => {
-            if let Some(task_text) = cli.task {
-                let mut envelope = RunEnvelope {
-                    task_id: format!("t-{}", uuid::Uuid::new_v4()),
-                    run_id: format!("r-{}", uuid::Uuid::new_v4()),
-                    task: task_text.clone(),
-                    task_text: task_text.clone(),
-                    created_at: now(),
-                    status: RunStatus::Pending,
-                    risk_score: 0.0,
-                    verified_payload: None,
-                    evidence_packet: EvidencePacket::new(),
-                };
-
-                if !cli.json {
-                    println!(
-                        "{} {}",
-                        theme::info("[PLANNING]"),
-                        theme::value(&format!("\"{}\"", task_text)),
-                    );
-                }
-
-                let plan = match conductor.plan_task(&task_text).await {
-                    Ok(p) => p,
-                    Err(ConductorError::Deflected(deflection_text)) => {
-                        // Adversarial input: show the deflection response as output, not as an error.
-                        if cli.json {
-                            print_json(JsonOut {
-                                ok: false,
-                                command: "task",
-                                status: Some("DEFLECTED".to_string()),
-                                run_id: None,
-                                response_text: Some(deflection_text),
-                                adccl_score: None,
-                                provider: None,
-                                error: Some("Rejected(adversarial)".to_string()),
-                            });
-                        } else {
-                            println!("{}", theme::warn("[AEGIS] Task deflected — adversarial pattern detected."));
-                            println!("{deflection_text}");
-                        }
-                        std::process::exit(10);
-                    }
-                    Err(e) => {
-                        let err = anyhow::anyhow!(e.to_string());
-                        if cli.json {
-                            print_json(JsonOut {
-                                ok: false,
-                                command: "task",
-                                status: None,
-                                run_id: None,
-                                response_text: None,
-                                adccl_score: None,
-                                provider: cli.provider.clone(),
-                                error: Some(err.to_string()),
-                            });
-                        } else {
-                            eprintln!("{err}");
-                        }
-                        std::process::exit(exit_code_for_error(&err));
-                    }
-                };
-
-                if !cli.json {
-                    println!("{}", theme::info("[EXECUTING] Routing through sovereign pipeline..."));
-                }
-
-                // Apply generation overrides at the CLI boundary (keeps API defaults stable).
-                let result = match conductor
-                    .execute_plan_with_overrides(
-                        plan,
-                        &mut envelope,
-                        cli.provider.as_deref(),
-                        cli.max_tokens,
-                        cli.temperature,
-                    )
-                    .await
-                {
-                    Ok(r) => r,
-                    Err(e) => {
-                        let err = anyhow::anyhow!(e.to_string());
-                        if cli.json {
-                            print_json(JsonOut {
-                                ok: false,
-                                command: "task",
-                                status: None,
-                                run_id: Some(envelope.run_id.clone()),
-                                response_text: None,
-                                adccl_score: None,
-                                provider: cli.provider.clone(),
-                                error: Some(err.to_string()),
-                            });
-                        } else {
-                            eprintln!("{err}");
-                        }
-                        std::process::exit(exit_code_for_error(&err));
-                    }
-                };
-
-                if cli.json {
-                    print_json(JsonOut {
-                        ok: true,
-                        command: "task",
-                        status: Some(format!("{:?}", result.status)),
-                        run_id: Some(envelope.run_id.clone()),
-                        response_text: Some(result.response_text.clone()),
-                        adccl_score: result.verification.as_ref().map(|v| v.score as f64),
-                        provider: cli
-                            .provider
-                            .clone()
-                            .or_else(|| result.spoke_response.as_ref().map(|r| r.provider.clone())),
-                        error: None,
-                    });
-                } else {
-                    let provider_str = result
-                        .spoke_response
-                        .as_ref()
-                        .map(|r| r.provider.as_str())
-                        .unwrap_or("unknown");
-                    let adccl_v = result.verification.as_ref().map(|v| v.score as f64).unwrap_or(0.0);
-                    let status_str = format!("{:?}", result.status);
-                    theme::print_result_header(
-                        &envelope.run_id,
-                        &status_str,
-                        adccl_v,
-                        provider_str,
-                    );
-                    theme::print_response(&result.response_text);
-                    println!();
-                }
-            } else if cli.json {
-                print_json(JsonOut {
-                    ok: false,
-                    command: "help",
-                    status: None,
-                    run_id: None,
-                    response_text: None,
-                    adccl_score: None,
-                    provider: None,
-                    error: Some("No task or subcommand provided".to_string()),
-                });
-                std::process::exit(2);
-            } else {
-                println!("{}", theme::label("Run `chyren --help` for usage."));
-            }
-        }
+        _ => {}
     }
 
+    // 2. Determine task text from either reasoning commands or legacy positional arg
+    let task_text = match &cli.command {
+        Some(Commands::Thought { args }) |
+        Some(Commands::Action { args }) |
+        Some(Commands::Sense { args }) |
+        Some(Commands::Verify { args }) |
+        Some(Commands::Identity { args }) |
+        Some(Commands::Flex { args }) |
+        Some(Commands::Shard { args }) |
+        Some(Commands::Memory { args }) => {
+            if args.is_empty() {
+                None
+            } else {
+                Some(args.join(" "))
+            }
+        }
+        _ => None,
+    };
+
+    if let Some(task_text) = task_text {
+        let mut envelope = RunEnvelope {
+            task_id: format!("t-{}", uuid::Uuid::new_v4()),
+            run_id: format!("r-{}", uuid::Uuid::new_v4()),
+            task: task_text.clone(),
+            task_text: task_text.clone(),
+            created_at: now(),
+            status: RunStatus::Pending,
+            risk_score: 0.0,
+            verified_payload: None,
+            evidence_packet: EvidencePacket::new(),
+        };
+
+        if !cli.json {
+            println!(
+                "{} {}",
+                theme::info("[PLANNING]"),
+                theme::value(&format!("\"{}\"", task_text)),
+            );
+        }
+
+        let plan = match conductor.plan_task(&task_text).await {
+            Ok(p) => p,
+            Err(ConductorError::Deflected(deflection_text)) => {
+                // Adversarial input: show the deflection response as output, not as an error.
+                if cli.json {
+                    print_json(JsonOut {
+                        ok: false,
+                        command: "task",
+                        status: Some("DEFLECTED".to_string()),
+                        run_id: None,
+                        response_text: Some(deflection_text),
+                        adccl_score: None,
+                        provider: None,
+                        error: Some("Rejected(adversarial)".to_string()),
+                    });
+                } else {
+                    println!("{}", theme::warn("[AEGIS] Task deflected — adversarial pattern detected."));
+                    println!("{deflection_text}");
+                }
+                std::process::exit(10);
+            }
+            Err(e) => {
+                let err = anyhow::anyhow!(e.to_string());
+                if cli.json {
+                    print_json(JsonOut {
+                        ok: false,
+                        command: "task",
+                        status: None,
+                        run_id: None,
+                        response_text: None,
+                        adccl_score: None,
+                        provider: cli.provider.clone(),
+                        error: Some(err.to_string()),
+                    });
+                } else {
+                    eprintln!("{err}");
+                }
+                std::process::exit(exit_code_for_error(&err));
+            }
+        };
+
+        if !cli.json {
+            println!("{}", theme::info("[EXECUTING] Routing through sovereign pipeline..."));
+        }
+
+        // Apply generation overrides at the CLI boundary (keeps API defaults stable).
+        let result = match conductor
+            .execute_plan_with_overrides(
+                plan,
+                &mut envelope,
+                cli.provider.as_deref(),
+                cli.max_tokens,
+                cli.temperature,
+            )
+            .await
+        {
+            Ok(r) => r,
+            Err(e) => {
+                let err = anyhow::anyhow!(e.to_string());
+                if cli.json {
+                    print_json(JsonOut {
+                        ok: false,
+                        command: "task",
+                        status: None,
+                        run_id: Some(envelope.run_id.clone()),
+                        response_text: None,
+                        adccl_score: None,
+                        provider: cli.provider.clone(),
+                        error: Some(err.to_string()),
+                    });
+                } else {
+                    eprintln!("{err}");
+                }
+                std::process::exit(exit_code_for_error(&err));
+            }
+        };
+
+        if cli.json {
+            print_json(JsonOut {
+                ok: true,
+                command: "task",
+                status: Some(format!("{:?}", result.status)),
+                run_id: Some(envelope.run_id.clone()),
+                response_text: Some(result.response_text.clone()),
+                adccl_score: result.verification.as_ref().map(|v| v.score as f64),
+                provider: cli
+                    .provider
+                    .clone()
+                    .or_else(|| result.spoke_response.as_ref().map(|r| r.provider.clone())),
+                error: None,
+            });
+        } else {
+            let provider_str = result
+                .spoke_response
+                .as_ref()
+                .map(|r| r.provider.as_str())
+                .unwrap_or("unknown");
+            let adccl_v = result.verification.as_ref().map(|v| v.score as f64).unwrap_or(0.0);
+            let status_str = format!("{:?}", result.status);
+            theme::print_result_header(
+                &envelope.run_id,
+                &status_str,
+                adccl_v,
+                provider_str,
+            );
+            theme::print_response(&result.response_text);
+            println!();
+        }
+    } else {
+        if cli.json {
+            print_json(JsonOut {
+                ok: false,
+                command: "help",
+                status: None,
+                run_id: None,
+                response_text: None,
+                adccl_score: None,
+                provider: None,
+                error: Some("No task or subcommand provided".to_string()),
+            });
+            std::process::exit(2);
+        } else {
+            println!("{}", theme::label("Run `chyren --help` for usage."));
+        }
+    }
     Ok(())
 }
