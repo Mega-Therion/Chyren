@@ -312,44 +312,6 @@ async function fetchOpenAIResponse(
   return createSingleSseTextResponse(content)
 }
 
-async function fetchAnthropicResponse(
-  history: ChatMsg[],
-  systemPrompt: string,
-  temperature: number,
-): Promise<Response> {
-  const apiKey = getOptionalEnv('ANTHROPIC_API_KEY')
-  if (!apiKey) throw new Error('Missing required env var: ANTHROPIC_API_KEY')
-
-  logger.info('[ANTHROPIC] Attempting provider')
-  const resp = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: getOptionalEnv('ANTHROPIC_MODEL') ?? 'claude-3-5-haiku-latest',
-      system: systemPrompt,
-      max_tokens: 1024,
-      temperature,
-      messages: history.map((entry) => ({ role: entry.role, content: entry.content })),
-    }),
-  })
-
-  if (!resp.ok) {
-    const errorBody = await resp.text().catch(() => `${resp.status} ${resp.statusText}`)
-    throw new Error(`Anthropic fallback failed: ${errorBody}`)
-  }
-
-  const payload = (await resp.json().catch(() => ({}))) as {
-    content?: Array<{ text?: string }>
-  }
-  const content = payload.content?.map((part) => part.text ?? '').join('').trim() ?? ''
-  if (!content) throw new Error('Anthropic fallback failed: empty response')
-
-  return createSingleSseTextResponse(content)
-}
 
 async function fetchGeminiResponse(
   history: ChatMsg[],
@@ -487,21 +449,21 @@ export async function POST(req: NextRequest) {
   const systemPrompt = knowledgeContext ? baseSystemPrompt + knowledgeContext : baseSystemPrompt
   let hubFailure: string | null = null
 
-  // Tool-use path: when Anthropic + LIC catalog are both configured, let Claude
-  // call librarian (and any other registered MCP) tools before answering. Falls
-  // through to the standard provider chain on any failure.
-  const anthropicKey = getOptionalEnv('ANTHROPIC_API_KEY')
+  // Tool-use path: when a provider key + LIC catalog are both present, let the
+  // model call librarian tools before answering. Uses OpenAI-compatible format
+  // so it works with OpenRouter (OPENAI_API_KEY=sk-or-...) or Gemini directly.
+  // Falls through to the provider chain on any failure.
+  const hasToolProvider = !!(getOptionalEnv('OPENAI_API_KEY') || getOptionalEnv('GEMINI_API_KEY'))
   const catalogConfigured = Boolean(getOptionalEnv('OMEGA_CATALOG_DB_URL'))
-  if (anthropicKey && catalogConfigured) {
+  if (hasToolProvider && catalogConfigured) {
     try {
-      const model = getOptionalEnv('ANTHROPIC_MODEL') ?? 'claude-3-5-haiku-latest'
       const userAssistantHistory = history.filter(
         (m): m is { role: 'user' | 'assistant'; content: string } =>
           m.role === 'user' || m.role === 'assistant',
       )
       const { text, toolCalls } = await runAnthropicWithTools(
-        anthropicKey,
-        model,
+        '',
+        '',
         systemPrompt,
         userAssistantHistory,
         profile.temperature,
@@ -512,10 +474,10 @@ export async function POST(req: NextRequest) {
         }
         return createSingleSseTextResponse(text)
       }
-      logger.warn('[CHAT] Anthropic tool-use returned empty text — falling back')
+      logger.warn('[CHAT] Tool-use returned empty text — falling back')
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'unknown tool-use error'
-      logger.warn(`[CHAT] Anthropic tool-use failed, falling back: ${msg}`)
+      logger.warn(`[CHAT] Tool-use failed, falling back: ${msg}`)
     }
   }
 
@@ -536,9 +498,8 @@ export async function POST(req: NextRequest) {
     }
 
     const providers: Array<() => Promise<Response>> = [
-      () => fetchAnthropicResponse(history, systemPrompt, profile.temperature),
+      () => fetchOpenAIResponse(history, systemPrompt, profile.temperature),   // OpenRouter or OpenAI
       () => fetchGeminiResponse(history, systemPrompt, profile.temperature),
-      () => fetchOpenAIResponse(history, systemPrompt, profile.temperature),
       () => fetchGroqResponse(history, systemPrompt, profile.temperature),
     ]
 
