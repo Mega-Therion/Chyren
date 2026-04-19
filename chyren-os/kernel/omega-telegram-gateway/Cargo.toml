@@ -10,7 +10,7 @@ name = "chyren-telegram"
 path = "src/main.rs"
 
 [dependencies]
-omega-cli = { path = "../omega-cli" }
+chyren-cli = { path = "../omega-cli" }
 omega-core = { path = "../omega-core" }
 serde.workspace = true
 serde_json.workspace = true

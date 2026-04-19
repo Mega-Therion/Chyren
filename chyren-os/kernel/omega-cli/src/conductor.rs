@@ -457,6 +457,7 @@ impl Conductor {
                             current_prompt.push_str(&format!("\n\n{}\n\n{}\n", res.text, tool_result_text));
                             continue;
                         }
+                        }
                     }
                 }
                 break;
@@ -656,9 +657,7 @@ impl Conductor {
                             
                             votes.push((provider, score, passed, flags));
                         }
-                    }
-                }
-            }
+                        }            }
         }
 
         if votes.is_empty() {
@@ -740,5 +739,4 @@ pub mod ingestion {
             let _ = graph.write_node(node_content, MemoryStratum::Canonical);
             Ok(())
         }
-    }
-}
+        }

@@ -488,6 +488,42 @@ dependencies = [
 ]
 
 [[package]]
+name = "chyren-cli"
+version = "0.1.0"
+dependencies = [
+ "actix-web",
+ "anyhow",
+ "assert_cmd",
+ "async-trait",
+ "clap",
+ "clap_complete",
+ "clap_mangen",
+ "futures",
+ "omega-adccl",
+ "omega-aegis",
+ "omega-aeon",
+ "omega-conductor",
+ "omega-core",
+ "omega-dream",
+ "omega-eval",
+ "omega-integration",
+ "omega-metacog",
+ "omega-myelin",
+ "omega-phylactery",
+ "omega-spokes",
+ "omega-telemetry",
+ "predicates",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-stream",
+ "tracing",
+ "tracing-subscriber",
+ "uuid",
+]
+
+[[package]]
 name = "clap"
 version = "4.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1974,42 +2010,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "omega-cli"
-version = "0.1.0"
-dependencies = [
- "actix-web",
- "anyhow",
- "assert_cmd",
- "async-trait",
- "clap",
- "clap_complete",
- "clap_mangen",
- "futures",
- "omega-adccl",
- "omega-aegis",
- "omega-aeon",
- "omega-conductor",
- "omega-core",
- "omega-dream",
- "omega-eval",
- "omega-integration",
- "omega-metacog",
- "omega-myelin",
- "omega-phylactery",
- "omega-spokes",
- "omega-telemetry",
- "predicates",
- "serde",
- "serde_json",
- "thiserror 2.0.18",
- "tokio",
- "tokio-stream",
- "tracing",
- "tracing-subscriber",
- "uuid",
-]
-
-[[package]]
 name = "omega-conductor"
 version = "0.1.0"
 dependencies = [
@@ -2163,7 +2163,7 @@ name = "omega-telegram-gateway"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "omega-cli",
+ "chyren-cli",
  "omega-core",
  "serde",
  "serde_json",
