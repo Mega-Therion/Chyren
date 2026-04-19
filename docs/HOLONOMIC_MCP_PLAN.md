@@ -34,14 +34,14 @@ The "Holonomic Fractal Hub-and-Spoke" model is a radical evolution of the standa
 ### Phase 1: The Left Brain Bridge (Python Cortex)
 - [x] Install the official `mcp` SDK into the `cortex/venv`.
 - [x] Create `mcp_hub.py` to serve as the Secondary Hub switchboard for SaaS/UI integration.
-- [ ] Connect the first actual MCP server (e.g., Notion or Zapier) to `mcp_hub.py` to validate dynamic tool discovery.
-- [ ] Integrate `mcp_hub.py` into `main.py` (Cortex orchestrator) so that "Thought" commands can access SaaS tools via the hub before sending the plan to Medulla.
+- [x] Connect the first actual MCP server (e.g., Notion or Zapier) to `mcp_hub.py` to validate dynamic tool discovery.
+- [x] Integrate `mcp_hub.py` into `main.py` (Cortex orchestrator) so that "Thought" commands can access SaaS tools via the hub before sending the plan to Medulla.
 
 ### Phase 2: The Right Brain Bridge (Rust Medulla)
-- [ ] Create `mcp_spoke.rs` in `medulla/omega-spokes`.
-- [ ] Implement the `Spoke` trait for `McpSpoke`, mapping `discover_tools` and `invoke_tool` to raw JSON-RPC over STDIO.
-- [ ] Wire the Medulla to a secure, local MCP server (e.g., filesystem or local database) to ensure the execution layer has high-performance access to system primitives.
+- [x] Create `mcp_spoke.rs` in `medulla/omega-spokes`.
+- [x] Implement the `Spoke` trait for `McpSpoke`, mapping `discover_tools` and `invoke_tool` to raw JSON-RPC over STDIO.
+- [x] Wire the Medulla to a secure, local MCP server (e.g., filesystem or local database) to ensure the execution layer has high-performance access to system primitives.
 
 ### Phase 3: The Nervous System (WebSockets)
-- [ ] Upgrade the communication layer between Cortex and Medulla (and between Cortex and the UI) from single-shot HTTP/CLI to persistent WebSocket streams.
-- [ ] Stream execution logs and ADCCL metrics in real-time.
+- [x] Upgrade the communication layer between Cortex and Medulla (and between Cortex and the UI) from single-shot HTTP/CLI to persistent WebSocket streams.
+- [x] Stream execution logs and ADCCL metrics in real-time.

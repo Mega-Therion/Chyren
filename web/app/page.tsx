@@ -9,6 +9,7 @@ import { ChatInput } from '@/components/ChatInput'
 import { startHeartbeat, stopHeartbeat } from '@/lib/haptics-ry'
 import { clearDraft } from '@/lib/draft-ry'
 import { createTtsEngine, type TtsEngine, playLatencyChime } from '@/lib/tts-ry'
+import { MetricsDashboard } from '@/components/MetricsDashboard'
 
 import type { BrainState } from '@/components/NeuralBrain'
 
@@ -200,14 +201,25 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="omega-viewport bg-black">
+    <div className="omega-viewport bg-black flex w-full h-full relative">
       <div className="omega-bg-fx">
         <NeuralBrain _isActive={brainState !== 'idle'} audioLevel={audioLevel} state={brainState} />
         <div className="omega-orb orb-1" />
         <div className="omega-orb orb-2" />
       </div>
 
-      <main className="phone-container !bg-black/40 !border-white/5 !shadow-2xl">
+      {/* Real-time Nervous System Telemetry (visible on desktop) */}
+      <div className="hidden xl:flex flex-col w-[450px] z-10 h-full overflow-hidden p-6 absolute left-0 top-0 bottom-0">
+        <div className="mb-4">
+          <h2 className="text-xl font-mono text-white/80 tracking-[0.2em] uppercase">Holonomic Core</h2>
+          <p className="text-xs text-white/40 font-mono mt-1">Real-time MCP Spoke & Cortex Telemetry</p>
+        </div>
+        <div className="flex-1 overflow-hidden bg-black/60 rounded-2xl border border-white/10 backdrop-blur-md shadow-2xl">
+          <MetricsDashboard />
+        </div>
+      </div>
+
+      <main className="phone-container !bg-black/40 !border-white/5 !shadow-2xl relative z-20 mx-auto">
         <header className="phone-chrome !border-b-0 !bg-transparent pt-12">
           <h1 className="phone-title !text-white opacity-80 !tracking-[0.5em]">CHYREN</h1>
         </header>

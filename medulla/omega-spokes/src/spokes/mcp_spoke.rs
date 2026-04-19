@@ -41,48 +41,85 @@ impl MCPSpoke {
 
         let mut stdin = child.stdin.take().ok_or("Failed to open stdin")?;
         let stdout = child.stdout.take().ok_or("Failed to open stdout")?;
+        let mut reader = BufReader::new(stdout);
 
-        // Format the request as JSON-RPC 2.0
-        let req_id = 1; // Simplified ID
+        // 1. Send initialize
+        let init_req = json!({
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "initialize",
+            "params": {
+                "protocolVersion": "2024-11-05",
+                "capabilities": {},
+                "clientInfo": {
+                    "name": "Chyren-Medulla-Bridge",
+                    "version": "1.0.0"
+                }
+            }
+        });
+        
+        let req_str = format!("{}\n", serde_json::to_string(&init_req).unwrap());
+        stdin.write_all(req_str.as_bytes()).await.map_err(|e| e.to_string())?;
+        stdin.flush().await.map_err(|e| e.to_string())?;
+
+        // Read until we get id: 1 response
+        loop {
+            let mut line = String::new();
+            let n = reader.read_line(&mut line).await.map_err(|e| e.to_string())?;
+            if n == 0 { return Err("MCP server closed stdout before initialize".into()); }
+            if let Ok(resp) = serde_json::from_str::<Value>(&line) {
+                if resp.get("id").and_then(|id| id.as_u64()) == Some(1) {
+                    if resp.get("error").is_some() {
+                        let _ = child.kill().await;
+                        return Err(format!("Initialize failed: {}", resp["error"]));
+                    }
+                    break;
+                }
+            }
+        }
+
+        // 2. Send initialized notification
+        let init_notif = json!({
+            "jsonrpc": "2.0",
+            "method": "notifications/initialized"
+        });
+        let notif_str = format!("{}\n", serde_json::to_string(&init_notif).unwrap());
+        stdin.write_all(notif_str.as_bytes()).await.map_err(|e| e.to_string())?;
+        stdin.flush().await.map_err(|e| e.to_string())?;
+
+        // 3. Send actual request
+        let req_id = 2;
         let rpc_req = json!({
             "jsonrpc": "2.0",
             "id": req_id,
             "method": method,
             "params": params
         });
-
-        let req_str = format!("{}\n", serde_json::to_string(&rpc_req).unwrap());
-        stdin
-            .write_all(req_str.as_bytes())
-            .await
-            .map_err(|e| e.to_string())?;
+        
+        let req_str2 = format!("{}\n", serde_json::to_string(&rpc_req).unwrap());
+        stdin.write_all(req_str2.as_bytes()).await.map_err(|e| e.to_string())?;
         stdin.flush().await.map_err(|e| e.to_string())?;
 
-        // Read response
-        let mut reader = BufReader::new(stdout);
-        let mut line = String::new();
-        
-        // Timeout handling would go here in production
-        reader
-            .read_line(&mut line)
-            .await
-            .map_err(|e| format!("Failed to read MCP response: {}", e))?;
+        // Read response for id 2
+        let mut result_val = None;
+        loop {
+            let mut line = String::new();
+            let n = reader.read_line(&mut line).await.map_err(|e| e.to_string())?;
+            if n == 0 { break; } // EOF
+            if let Ok(resp) = serde_json::from_str::<Value>(&line) {
+                if resp.get("id").and_then(|id| id.as_u64()) == Some(2) {
+                    if let Some(err) = resp.get("error") {
+                        let _ = child.kill().await;
+                        return Err(err.to_string());
+                    }
+                    result_val = Some(resp.get("result").cloned().unwrap_or(json!({})));
+                    break;
+                }
+            }
+        }
 
-        // The MCP process can be terminated after the request is complete
         let _ = child.kill().await;
-
-        if line.is_empty() {
-            return Err("Empty response from MCP server".into());
-        }
-
-        let resp: Value =
-            serde_json::from_str(&line).map_err(|e| format!("JSON parsing error: {}", e))?;
-
-        if let Some(error) = resp.get("error") {
-            return Err(error.to_string());
-        }
-
-        Ok(resp.get("result").cloned().unwrap_or(json!({})))
+        result_val.ok_or_else(|| "Empty response or early EOF from MCP server".into())
     }
 }
 
