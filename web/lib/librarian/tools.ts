@@ -1,4 +1,4 @@
-import { searchCatalog, listShards, getShardCards, searchKnowledgeDomains, getMatrixProgram, getDomainsByRealm } from './catalog'
+import { searchCatalog, listShards, getShardCards, searchKnowledgeDomains, getMatrixProgram, getDomainsByRealm, getSealedDomains, getMillenniumTargets, updateDomainStatus } from './catalog'
 
 export interface MCPToolDef {
   name: string
@@ -84,6 +84,40 @@ export const LIBRARIAN_TOOLS: MCPToolDef[] = [
     },
   },
   {
+    name: 'get_sealed_domains',
+    description:
+      'Fetch all formally sealed knowledge domains (status=sealed). ' +
+      'Used by the Memory Dream cycle to load verified axiom sets into the Neocortex library. ' +
+      'Sealed domains have a formal_anchor (e.g. Mathlib4) and verified core_axioms.',
+    inputSchema: { type: 'object', properties: {} },
+  },
+  {
+    name: 'get_millennium_targets',
+    description:
+      'Fetch all Millennium Prize Problem domains (millennium_target=true). ' +
+      'These are the 6 active unsolved problems Chyren tracks for automated deduction attempts.',
+    inputSchema: { type: 'object', properties: {} },
+  },
+  {
+    name: 'update_domain_status',
+    description:
+      'Advance a knowledge domain\'s status in the catalog. ' +
+      'Valid transitions: unmapped → ingesting → formalized → sealed. ' +
+      'Only call this after the domain\'s axioms have been verified against the formal_anchor.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        slug: { type: 'string', description: 'Domain slug to update' },
+        status: {
+          type: 'string',
+          enum: ['unmapped', 'ingesting', 'formalized', 'sealed'],
+          description: 'New status value',
+        },
+      },
+      required: ['slug', 'status'],
+    },
+  },
+  {
     name: 'get_domain_by_realm',
     description:
       'List all knowledge domains within a specific realm. Useful for getting a full map of a field.',
@@ -161,5 +195,49 @@ export const LIBRARIAN_HANDLERS: Record<string, ToolHandler> = {
     const maxResults = typeof args.max_results === 'number' ? args.max_results : 20
     const domains = await getDomainsByRealm(realm, maxResults)
     return { realm, count: domains.length, domains }
+  },
+  get_sealed_domains: async () => {
+    const domains = await getSealedDomains()
+    return {
+      count: domains.length,
+      domains: domains.map((d) => ({
+        slug: d.slug,
+        name: d.name,
+        realm: d.realm,
+        formal_anchor: d.formal_anchor,
+        core_axioms: d.core_axioms,
+        key_methods: d.key_methods,
+        reasoning_primer: d.reasoning_primer,
+        status: d.status,
+      })),
+    }
+  },
+  get_millennium_targets: async () => {
+    const domains = await getMillenniumTargets()
+    return {
+      count: domains.length,
+      domains: domains.map((d) => ({
+        slug: d.slug,
+        name: d.name,
+        realm: d.realm,
+        parent_slug: d.parent_slug,
+        formal_anchor: d.formal_anchor,
+        status: d.status,
+        description: d.description,
+        core_axioms: d.core_axioms,
+        reasoning_primer: d.reasoning_primer,
+      })),
+    }
+  },
+  update_domain_status: async (args) => {
+    const slug = String(args.slug ?? '').trim()
+    const status = String(args.status ?? '').trim()
+    if (!slug) throw new Error('update_domain_status: "slug" is required')
+    const valid = ['unmapped', 'ingesting', 'formalized', 'sealed']
+    if (!valid.includes(status)) {
+      throw new Error(`update_domain_status: status must be one of ${valid.join(', ')}`)
+    }
+    await updateDomainStatus(slug, status)
+    return { updated: true, slug, status }
   },
 }

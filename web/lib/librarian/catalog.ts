@@ -159,3 +159,59 @@ export async function getDomainsByRealm(
   `
   return rows as unknown as KnowledgeDomain[]
 }
+
+export interface DreamDomain extends MatrixProgram {
+  status: string
+  formal_anchor: string | null
+  millennium_target: boolean
+}
+
+export async function getSealedDomains(): Promise<DreamDomain[]> {
+  const rows = await sql()`
+    SELECT domain_id::text AS domain_id, slug, name, parent_slug, level, realm,
+           reasoning_mode, description, purpose,
+           COALESCE(core_axioms, '[]'::jsonb)   AS core_axioms,
+           COALESCE(key_methods, '[]'::jsonb)   AS key_methods,
+           COALESCE(key_figures, '[]'::jsonb)   AS key_figures,
+           COALESCE(sister_slugs, '[]'::jsonb)  AS sister_slugs,
+           COALESCE(query_patterns, '[]'::jsonb) AS query_patterns,
+           reasoning_primer,
+           updated_at::text AS updated_at,
+           status,
+           formal_anchor,
+           millennium_target
+    FROM omega_knowledge_domains
+    WHERE status = 'sealed'
+    ORDER BY level ASC, sort_order ASC
+  `
+  return rows as unknown as DreamDomain[]
+}
+
+export async function getMillenniumTargets(): Promise<DreamDomain[]> {
+  const rows = await sql()`
+    SELECT domain_id::text AS domain_id, slug, name, parent_slug, level, realm,
+           reasoning_mode, description, purpose,
+           COALESCE(core_axioms, '[]'::jsonb)   AS core_axioms,
+           COALESCE(key_methods, '[]'::jsonb)   AS key_methods,
+           COALESCE(key_figures, '[]'::jsonb)   AS key_figures,
+           COALESCE(sister_slugs, '[]'::jsonb)  AS sister_slugs,
+           COALESCE(query_patterns, '[]'::jsonb) AS query_patterns,
+           reasoning_primer,
+           updated_at::text AS updated_at,
+           status,
+           formal_anchor,
+           millennium_target
+    FROM omega_knowledge_domains
+    WHERE millennium_target = true
+    ORDER BY slug
+  `
+  return rows as unknown as DreamDomain[]
+}
+
+export async function updateDomainStatus(slug: string, status: string): Promise<void> {
+  await sql()`
+    UPDATE omega_knowledge_domains
+    SET status = ${status}, updated_at = now()
+    WHERE slug = ${slug}
+  `
+}

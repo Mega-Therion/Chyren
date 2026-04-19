@@ -2,6 +2,7 @@
 
 use omega_adccl::adccl_logic::{VerificationResult, ADCCL};
 use omega_dream::Service as DreamEngine;
+use omega_neocortex;
 use omega_metacog::MetacogAgent;
 use omega_aegis::{
     classify_threat_level, AlignmentLayer, BehavioralAnalyzer, Constitution, DeflectionEngine,
@@ -195,10 +196,24 @@ impl Conductor {
 
     /// Inject all Neocortex seed programs into the MemoryGraph.
     ///
-    /// This is Phase 7 of the boot sequence — runs after phylactery so Chyren
-    /// has the full sovereign knowledge library loaded before processing any task.
-        if let Ok(mut graph) = self.memory_service.graph.try_lock() {
-        } else {
+    /// Phase 7 of the boot sequence — loads the sovereign ProgramLibrary (identity,
+    /// philosophy, lineage, architecture, etc.) into the MemoryGraph as Canonical nodes.
+    pub fn inject_neocortex(&self) {
+        use omega_neocortex::{seed_library, Neocortex};
+        let mut nc = Neocortex::new();
+        nc.library = seed_library();
+        match nc.ingest_all() {
+            Ok(mind) => {
+                info!(
+                    "[NEOCORTEX] {} programs loaded: {}",
+                    mind.load_report.loaded,
+                    mind.load_report.domains_loaded.join(", ")
+                );
+                if mind.load_report.failed > 0 {
+                    warn!("[NEOCORTEX] {} programs failed integrity gate", mind.load_report.failed);
+                }
+            }
+            Err(e) => warn!("[NEOCORTEX] ingest_all failed: {e}"),
         }
     }
 
@@ -752,6 +767,143 @@ impl Conductor {
             .ok()
             .and_then(|d| d.get_failure_patterns().into_iter().next())
     }
+
+    /// Run the Knowledge Memory Dream cycle.
+    ///
+    /// Queries the catalog for sealed and millennium-target domains,
+    /// loads their axioms as Neocortex programs, and records millennium
+    /// targets as active proof-attempt dream episodes.
+    ///
+    /// Returns a report of what was loaded and what was registered.
+    pub async fn run_knowledge_dream(&self) -> KnowledgeDreamReport {
+        use omega_neocortex::{Domain, Neocortex, Program};
+        let mut report = KnowledgeDreamReport::default();
+
+        let librarian = match self.spokes.get_spoke("librarian") {
+            Some(s) => s,
+            None => {
+                report.error = Some("Librarian spoke not registered — is CHYREN_API_URL set?".into());
+                return report;
+            }
+        };
+
+        // ── Fetch sealed domains ──────────────────────────────────────────────
+        let sealed_result = librarian.invoke_tool(ToolInvocation {
+            tool: "librarian_get_sealed_domains".to_string(),
+            input: serde_json::json!({}),
+        }).await;
+
+        let mut nc = Neocortex::new();
+        nc.library = omega_neocortex::seed_library();
+
+        if let Ok(res) = sealed_result {
+            if let Some(domains) = res.output
+                .get("content").and_then(|c| c.get(0))
+                .and_then(|o| o.get("text")).and_then(|t| t.as_str())
+                .and_then(|s| serde_json::from_str::<serde_json::Value>(s).ok())
+                .as_ref().and_then(|v| v.get("domains")).and_then(|d| d.as_array())
+            {
+                for domain in domains {
+                    let slug = domain.get("slug").and_then(|s| s.as_str()).unwrap_or("");
+                    let name = domain.get("name").and_then(|n| n.as_str()).unwrap_or(slug);
+                    let anchor = domain.get("formal_anchor").and_then(|a| a.as_str()).unwrap_or("unknown");
+                    let axioms = domain.get("core_axioms").cloned().unwrap_or(serde_json::json!([]));
+                    let primer = domain.get("reasoning_primer").and_then(|p| p.as_str()).unwrap_or("");
+
+                    let payload = serde_json::json!({
+                        "slug": slug,
+                        "name": name,
+                        "formal_anchor": anchor,
+                        "core_axioms": axioms,
+                        "reasoning_primer": primer,
+                        "status": "sealed",
+                    });
+
+                    match Program::from_knowledge(
+                        Domain::Custom(slug.to_string()),
+                        "dream-1.0",
+                        &payload,
+                        format!("Sealed knowledge: {} [{}]", name, anchor),
+                        0.95,
+                    ) {
+                        Ok(program) => {
+                            nc.library.register(program);
+                            report.sealed_loaded.push(slug.to_string());
+                        }
+                        Err(e) => {
+                            warn!("[DREAM] Failed to create program for sealed domain '{slug}': {e}");
+                        }
+                    }
+                }
+            }
+        }
+
+        // ── Ingest into MemoryGraph ───────────────────────────────────────────
+        match nc.ingest_all() {
+            Ok(mind) => {
+                report.programs_ingested = mind.load_report.loaded;
+                info!("[DREAM] {} programs ingested into neocortex", mind.load_report.loaded);
+            }
+            Err(e) => warn!("[DREAM] Neocortex ingest failed: {e}"),
+        }
+
+        // ── Fetch millennium targets ──────────────────────────────────────────
+        let millennium_result = librarian.invoke_tool(ToolInvocation {
+            tool: "librarian_get_millennium_targets".to_string(),
+            input: serde_json::json!({}),
+        }).await;
+
+        if let Ok(res) = millennium_result {
+            if let Some(domains) = res.output
+                .get("content").and_then(|c| c.get(0))
+                .and_then(|o| o.get("text")).and_then(|t| t.as_str())
+                .and_then(|s| serde_json::from_str::<serde_json::Value>(s).ok())
+                .as_ref().and_then(|v| v.get("domains")).and_then(|d| d.as_array())
+            {
+                if let Ok(mut dream) = self.dream.try_lock() {
+                    for domain in domains {
+                        let slug = domain.get("slug").and_then(|s| s.as_str()).unwrap_or("");
+                        let name = domain.get("name").and_then(|n| n.as_str()).unwrap_or(slug);
+                        let desc = domain.get("description").and_then(|d| d.as_str()).unwrap_or("");
+
+                        // Register as a proof-attempt episode — "dreaming" of solving the problem.
+                        let episode = omega_dream::DreamEpisode {
+                            episode_id: format!("millennium-{slug}"),
+                            failed_response: format!("MILLENNIUM TARGET: {name}"),
+                            failure_report: desc.to_string(),
+                            corrected_response: None,
+                            lessons: vec![
+                                format!("Active proof target: {name}"),
+                                "Formal verification required before status advances to 'formalized'".into(),
+                                "Cross-reference with Mathlib4 and automated theorem provers".into(),
+                            ],
+                            timestamp: omega_spokes::now(),
+                        };
+                        dream.episodes.push(episode);
+                        report.millennium_registered.push(slug.to_string());
+                    }
+                }
+            }
+        }
+
+        report.timestamp = omega_spokes::now();
+        report
+    }
+}
+
+/// Report from a Knowledge Memory Dream cycle run.
+#[derive(Debug, Default, serde::Serialize)]
+pub struct KnowledgeDreamReport {
+    /// Sealed domain slugs successfully loaded as Neocortex programs.
+    pub sealed_loaded: Vec<String>,
+    /// Total programs ingested into the Neocortex (seed + sealed).
+    pub programs_ingested: usize,
+    /// Millennium prize problem slugs registered as proof-attempt episodes.
+    pub millennium_registered: Vec<String>,
+    /// Error message if the cycle could not complete.
+    pub error: Option<String>,
+    /// Unix timestamp of the cycle.
+    pub timestamp: f64,
 }
 
 impl Default for Conductor {

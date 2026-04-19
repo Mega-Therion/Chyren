@@ -50,7 +50,7 @@ impl Default for DreamConfig {
 #[derive(Clone, Debug)]
 pub struct Service {
     config: DreamConfig,
-    episodes: Vec<DreamEpisode>,
+    pub episodes: Vec<DreamEpisode>,
     pattern_cache: HashMap<String, usize>,
 }
 

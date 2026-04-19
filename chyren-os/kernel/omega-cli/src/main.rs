@@ -66,6 +66,12 @@ enum Commands {
     },
     /// Generate a man page for this CLI (stdout).
     Man,
+    /// Run the Knowledge Memory Dream cycle.
+    ///
+    /// Fetches sealed and millennium-target domains from the catalog,
+    /// loads their axioms as Neocortex programs, and records millennium
+    /// problems as active proof-attempt dream episodes.
+    Dream,
 }
 
 #[derive(serde::Serialize)]
@@ -166,6 +172,33 @@ async fn main() -> anyhow::Result<()> {
                     .map(|(label, count)| format!("\"{}\" ({}x)", label, count))
                     .unwrap_or_else(|| "none".to_string());
                 eprintln!("[DREAM] {} failure episodes recorded. Top pattern: {}", n, top_str);
+            }
+            return Ok(());
+        }
+        Some(Commands::Dream) => {
+            if !cli.json {
+                println!("[DREAM] Starting Knowledge Memory Dream cycle...");
+            }
+            let dream_report = conductor.run_knowledge_dream().await;
+            if cli.json {
+                println!("{}", serde_json::to_string(&dream_report).unwrap_or_default());
+            } else {
+                if let Some(err) = &dream_report.error {
+                    eprintln!("[DREAM] ERROR: {err}");
+                } else {
+                    println!(
+                        "[DREAM] Sealed domains loaded: {} — {}",
+                        dream_report.sealed_loaded.len(),
+                        dream_report.sealed_loaded.join(", ")
+                    );
+                    println!(
+                        "[DREAM] Millennium targets registered: {} — {}",
+                        dream_report.millennium_registered.len(),
+                        dream_report.millennium_registered.join(", ")
+                    );
+                    println!("[DREAM] Total Neocortex programs active: {}", dream_report.programs_ingested);
+                    println!("[DREAM] Cycle complete. Knowledge matrix dream sealed.");
+                }
             }
             return Ok(());
         }
