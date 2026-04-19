@@ -1,0 +1,19 @@
+services:
+  chyren:
+    build:
+      context: ../..
+      dockerfile: ops/sovereign/Dockerfile.sovereign
+    volumes:
+      # Map the repository
+      - ../..:/workspaces/Chyren
+      # Map the secrets (host path is relative to user home usually, 
+      # but we use an environment variable for flexibility)
+      - ${OMEGA_SECRETS_DIR:-~/.omega}:/root/.omega
+    working_dir: /workspaces/Chyren
+    environment:
+      - OMEGA_CATALOG_DB_URL=${OMEGA_CATALOG_DB_URL}
+      - OMEGA_DB_URL=${OMEGA_DB_URL}
+      - OMEGA_DB2_URL=${OMEGA_DB2_URL}
+    network_mode: host # Allows access to local DBs or tunnels if running on host
+    stdin_open: true
+    tty: true

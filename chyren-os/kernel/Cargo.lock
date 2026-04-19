@@ -509,6 +509,7 @@ dependencies = [
  "omega-integration",
  "omega-metacog",
  "omega-myelin",
+ "omega-neocortex",
  "omega-phylactery",
  "omega-spokes",
  "omega-telemetry",
