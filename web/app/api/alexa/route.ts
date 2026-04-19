@@ -5,6 +5,12 @@
  * Routes voice queries through the Chyren chat stream API and returns
  * both spoken responses and APL visual cards for Echo Show devices.
  *
+ * Features:
+ *   - Persistent conversational session (no need to re-invoke the skill)
+ *   - Multi-turn conversation history via Alexa session attributes
+ *   - SSML pronunciation: "Chyren" → /ˈkaɪ.ɹən/ (KY-ren)
+ *   - APL visual display for Echo Show devices
+ *
  * Endpoint: POST https://chyren-web.vercel.app/api/alexa
  */
 
@@ -16,6 +22,22 @@ export const maxDuration = 30
 // ── Configuration ─────────────────────────────────────────────────────────────
 
 const CHYREN_CHAT_TIMEOUT_MS = 14_000
+const MAX_SESSION_HISTORY = 10  // keep last N turns (user+assistant pairs)
+
+// ── SSML Pronunciation ────────────────────────────────────────────────────────
+
+/** IPA pronunciation for "Chyren" → KY-ren (like "siren" with a K) */
+const CHYREN_PHONEME = '<phoneme alphabet="ipa" ph="ˈkaɪ.ɹən">Chyren</phoneme>'
+
+/**
+ * Replace occurrences of "Chyren" in speech text with the SSML phoneme.
+ * Returns SSML-wrapped speech.
+ */
+function wrapSsml(text: string): string {
+  // Replace "Chyren" (case-insensitive) with the phoneme tag
+  const withPhonemes = text.replace(/\bChyren\b/gi, CHYREN_PHONEME)
+  return `<speak>${withPhonemes}</speak>`
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -42,14 +64,50 @@ function parseSseText(raw: string): string | null {
   return parts.join('') || null
 }
 
-/** Call the Chyren chat API and return the text response. */
-async function askChyren(query: string): Promise<string | null> {
-  // Use internal Next.js route — same origin, no cold start
+// ── Session History ───────────────────────────────────────────────────────────
+
+type ChatMessage = { role: 'user' | 'assistant'; content: string }
+
+/** Extract conversation history from Alexa session attributes. */
+function getSessionHistory(
+  envelope: AlexaRequest,
+): ChatMessage[] {
+  const attrs = envelope.session?.attributes as
+    | Record<string, unknown>
+    | undefined
+  const history = attrs?.conversationHistory
+  if (Array.isArray(history)) {
+    return history as ChatMessage[]
+  }
+  return []
+}
+
+/** Trim history to the last N message pairs to stay within limits. */
+function trimHistory(history: ChatMessage[]): ChatMessage[] {
+  if (history.length <= MAX_SESSION_HISTORY * 2) return history
+  return history.slice(-(MAX_SESSION_HISTORY * 2))
+}
+
+// ── Chyren API ────────────────────────────────────────────────────────────────
+
+/**
+ * Call the Chyren chat API with full conversation history for context.
+ */
+async function askChyren(
+  query: string,
+  history: ChatMessage[],
+): Promise<string | null> {
   const base =
     getOptionalEnv('NEXT_PUBLIC_API_BASE_URL') || 'https://chyren-web.vercel.app'
   const endpoint = `${base}/api/chat/stream`
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), CHYREN_CHAT_TIMEOUT_MS)
+
+  // Build the full message array with history + new query
+  const messages: ChatMessage[] = [
+    ...history,
+    { role: 'user', content: query },
+  ]
 
   try {
     const res = await fetch(endpoint, {
@@ -57,7 +115,7 @@ async function askChyren(query: string): Promise<string | null> {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         message: query,
-        messages: [{ role: 'user', content: query }],
+        messages,
       }),
       signal: controller.signal,
     })
@@ -95,7 +153,7 @@ function cleanForSpeech(text: string | null): string | null {
 }
 
 /** Truncate text for Alexa speech (keep under 8000 char SSML limit). */
-function truncateForSpeech(text: string | null, maxLen = 6000): string | null {
+function truncateForSpeech(text: string | null, maxLen = 5500): string | null {
   if (!text) return text
   if (text.length <= maxLen) return text
   return text.slice(0, maxLen) + '... I have more, but that covers the key points.'
@@ -232,7 +290,12 @@ function buildAplDirective(title: string, bodyText: string): AplDirective {
 
 interface AlexaRequest {
   version: string
-  session?: Record<string, unknown>
+  session?: {
+    new?: boolean
+    sessionId?: string
+    attributes?: Record<string, unknown>
+    [key: string]: unknown
+  }
   context?: {
     System?: {
       device?: {
@@ -274,6 +337,7 @@ function supportsAPL(envelope: AlexaRequest): boolean {
 
 interface AlexaResponse {
   version: string
+  sessionAttributes?: Record<string, unknown>
   response: {
     outputSpeech?: {
       type: string
@@ -288,12 +352,30 @@ interface AlexaResponse {
     reprompt?: {
       outputSpeech: {
         type: string
-        text: string
+        text?: string
+        ssml?: string
       }
     }
     directives?: AplDirective[]
     shouldEndSession: boolean
   }
+}
+
+/** Conversational reprompts — rotated for natural feel */
+const CONVERSATIONAL_REPROMPTS = [
+  "What else is on your mind?",
+  "Go ahead, I'm still here.",
+  "Anything else you'd like to know?",
+  "I'm listening.",
+  "What's next?",
+  "Still here. Ask away.",
+  "What else?",
+]
+
+function pickReprompt(): string {
+  return CONVERSATIONAL_REPROMPTS[
+    Math.floor(Math.random() * CONVERSATIONAL_REPROMPTS.length)
+  ]
 }
 
 function buildResponse(opts: {
@@ -302,21 +384,31 @@ function buildResponse(opts: {
   card?: { title: string; content: string }
   apl?: AplDirective
   endSession?: boolean
+  sessionAttributes?: Record<string, unknown>
 }): AlexaResponse {
+  const ssml = wrapSsml(opts.speech)
+  const repromptText = opts.reprompt || pickReprompt()
+  const repromptSsml = wrapSsml(repromptText)
+
   const response: AlexaResponse = {
     version: '1.0',
     response: {
       outputSpeech: {
-        type: 'PlainText',
-        text: opts.speech,
+        type: 'SSML',
+        ssml,
       },
       shouldEndSession: opts.endSession ?? false,
     },
   }
 
-  if (opts.reprompt) {
+  // Persist session attributes for multi-turn conversation
+  if (opts.sessionAttributes) {
+    response.sessionAttributes = opts.sessionAttributes
+  }
+
+  if (!opts.endSession) {
     response.response.reprompt = {
-      outputSpeech: { type: 'PlainText', text: opts.reprompt },
+      outputSpeech: { type: 'SSML', ssml: repromptSsml },
     }
   }
 
@@ -341,14 +433,20 @@ async function handleRequest(envelope: AlexaRequest): Promise<AlexaResponse> {
   const reqType = envelope.request.type
   const intentName = envelope.request.intent?.name
 
-  console.log(`[ALEXA] ${reqType}${intentName ? ` → ${intentName}` : ''}`)
+  // Recover existing conversation history from the session
+  const history = getSessionHistory(envelope)
+
+  console.warn(
+    `[ALEXA] ${reqType}${intentName ? ` → ${intentName}` : ''} | ` +
+    `session turns: ${Math.floor(history.length / 2)}`
+  )
 
   // ─ LaunchRequest
   if (reqType === 'LaunchRequest') {
-    const speech = 'Chyren online. What would you like to know?'
     return buildResponse({
-      speech,
-      reprompt: 'I am listening. Ask me anything.',
+      speech: "Chyren online. What would you like to know?",
+      reprompt: "I'm listening. Ask me anything.",
+      sessionAttributes: { conversationHistory: [] },
       apl: supportsAPL(envelope)
         ? buildAplDirective('Chyren', 'Sovereign Intelligence — Awaiting your command.')
         : undefined,
@@ -357,7 +455,7 @@ async function handleRequest(envelope: AlexaRequest): Promise<AlexaResponse> {
 
   // ─ SessionEndedRequest
   if (reqType === 'SessionEndedRequest') {
-    console.log('[ALEXA] Session ended:', envelope.request.reason)
+    console.warn('[ALEXA] Session ended:', envelope.request.reason)
     return buildResponse({ speech: '', endSession: true })
   }
 
@@ -371,20 +469,28 @@ async function handleRequest(envelope: AlexaRequest): Promise<AlexaResponse> {
           return buildResponse({
             speech: "I didn't catch that. What would you like to ask?",
             reprompt: 'Go ahead, ask me anything.',
+            sessionAttributes: { conversationHistory: history },
           })
         }
 
-        console.log(`[ALEXA] AskChyrenIntent query: "${query}"`)
-        const rawResponse = await askChyren(query)
+        console.warn(`[ALEXA] Query: "${query}"`)
+        const rawResponse = await askChyren(query, history)
         const cleanResponse = cleanForSpeech(rawResponse)
         const speech =
           truncateForSpeech(cleanResponse) ||
           'My neural links are recalibrating. Try again in a moment.'
 
+        // Append this exchange to session history
+        const updatedHistory = trimHistory([
+          ...history,
+          { role: 'user' as const, content: query },
+          { role: 'assistant' as const, content: rawResponse || speech },
+        ])
+
         return buildResponse({
           speech,
-          reprompt: 'Anything else?',
           card: { title: 'Chyren', content: rawResponse || speech },
+          sessionAttributes: { conversationHistory: updatedHistory },
           apl: supportsAPL(envelope)
             ? buildAplDirective('Chyren', rawResponse || speech)
             : undefined,
@@ -393,10 +499,11 @@ async function handleRequest(envelope: AlexaRequest): Promise<AlexaResponse> {
 
       case 'AMAZON.HelpIntent': {
         const helpText =
-          'You can ask me anything. Try saying: ask Chyren what is your primary mission.'
+          'Just talk to me naturally. After I respond, keep asking follow-up questions ' +
+          "— I'll remember our conversation. Say stop when you're done."
         return buildResponse({
           speech: helpText,
-          reprompt: 'What would you like to ask?',
+          sessionAttributes: { conversationHistory: history },
           apl: supportsAPL(envelope)
             ? buildAplDirective('Help', helpText)
             : undefined,
@@ -416,20 +523,26 @@ async function handleRequest(envelope: AlexaRequest): Promise<AlexaResponse> {
 
       case 'AMAZON.FallbackIntent':
       default: {
-        // Route unmatched intents through Chyren
+        // Route ALL unmatched intents through Chyren as freeform queries
         const fallbackQuery =
           envelope.request.intent?.slots?.query?.value || 'hello'
-        console.log(`[ALEXA] Fallback → routing to Chyren: "${fallbackQuery}"`)
+        console.warn(`[ALEXA] Fallback → routing: "${fallbackQuery}"`)
 
-        const rawFb = await askChyren(fallbackQuery)
+        const rawFb = await askChyren(fallbackQuery, history)
         const cleanFb = cleanForSpeech(rawFb)
         const speechFb =
           truncateForSpeech(cleanFb) ||
           "I couldn't process that. Try rephrasing your question."
 
+        const updatedHistory = trimHistory([
+          ...history,
+          { role: 'user' as const, content: fallbackQuery },
+          { role: 'assistant' as const, content: rawFb || speechFb },
+        ])
+
         return buildResponse({
           speech: speechFb,
-          reprompt: 'What else would you like to know?',
+          sessionAttributes: { conversationHistory: updatedHistory },
           apl: supportsAPL(envelope)
             ? buildAplDirective('Chyren', rawFb || speechFb)
             : undefined,
