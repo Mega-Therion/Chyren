@@ -1,0 +1,111 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "chyren",
+      "intents": [
+        {
+          "name": "AskChyrenIntent",
+          "slots": [
+            {
+              "name": "query",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "ask {query}",
+            "ask chyren {query}",
+            "tell me {query}",
+            "what is {query}",
+            "what are {query}",
+            "who is {query}",
+            "who are {query}",
+            "how do {query}",
+            "how does {query}",
+            "why is {query}",
+            "why does {query}",
+            "explain {query}",
+            "describe {query}",
+            "can you {query}",
+            "please {query}",
+            "I want to know {query}",
+            "tell me about {query}",
+            "what do you know about {query}",
+            "help me with {query}",
+            "help me understand {query}",
+            "what's {query}",
+            "give me {query}",
+            "I need {query}",
+            "figure out {query}",
+            "think about {query}",
+            "analyze {query}",
+            "research {query}",
+            "look up {query}",
+            "search for {query}",
+            "find {query}",
+            "{query}"
+          ]
+        },
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        }
+      ]
+    },
+    "dialog": {
+      "intents": [
+        {
+          "name": "AskChyrenIntent",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "query",
+              "type": "AMAZON.SearchQuery",
+              "confirmationRequired": false,
+              "elicitationRequired": true,
+              "prompts": {
+                "elicitation": "Elicit.Slot.query"
+              }
+            }
+          ]
+        }
+      ],
+      "delegationStrategy": "SKILL_RESPONSE"
+    },
+    "prompts": [
+      {
+        "id": "Elicit.Slot.query",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "What would you like to ask Chyren?"
+          },
+          {
+            "type": "PlainText",
+            "value": "Go ahead. What's on your mind?"
+          },
+          {
+            "type": "PlainText",
+            "value": "I'm listening. What do you want to know?"
+          }
+        ]
+      }
+    ]
+  }
+}

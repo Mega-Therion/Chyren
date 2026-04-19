@@ -16,6 +16,7 @@
  */
 
 import { type NextRequest, NextResponse } from 'next/server'
+import { checkRateLimit, clientIp } from '@/lib/hardening'
 
 export const runtime = 'nodejs'
 
@@ -144,6 +145,9 @@ async function tryGoogleTts(
 // ─── Route handler ───────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  if (!(await checkRateLimit(clientIp(req)))) {
+    return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429, headers: { 'Retry-After': '60' } })
+  }
   try {
     const body = await req.json().catch(() => ({}))
     const text = (body.text ?? '').trim()
@@ -188,6 +192,9 @@ export async function POST(req: NextRequest) {
 
 // Also support GET for simple integration
 export async function GET(req: NextRequest) {
+  if (!(await checkRateLimit(clientIp(req)))) {
+    return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429, headers: { 'Retry-After': '60' } })
+  }
   const text = req.nextUrl.searchParams.get('text') ?? ''
   const voice = req.nextUrl.searchParams.get('voice') ?? undefined
   const rate = req.nextUrl.searchParams.get('rate')

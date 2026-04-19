@@ -31,6 +31,7 @@ async function fetchFromSupabase(): Promise<string> {
       Authorization: `Bearer ${supabaseKey}`,
     }
 
+    // eslint-disable-next-line no-console
     console.log(`[neon-context] Fetching from Supabase: ${base}`)
     const [familyResp, knowledgeResp, memoryResp] = await Promise.all([
       fetch(`${base}/rest/v1/family_profiles?select=name,last_name,relationship,location,occupation,ry_notes,notes_for_omega,how_to_greet,fun_facts&order=id`, { headers }),

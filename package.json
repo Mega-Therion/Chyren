@@ -12,6 +12,6 @@
     "ask-sdk-model": "^1.85.0"
   },
   "devDependencies": {
-    "vercel": "^latest"
+    "vercel": "latest"
   }
 }

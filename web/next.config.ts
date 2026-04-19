@@ -1,45 +1,33 @@
 import type { NextConfig } from 'next'
 import path from 'node:path'
+import bundleAnalyzer from '@next/bundle-analyzer'
+
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+  openAnalyzer: false,
+})
 
 /** Public API base baked into the client bundle at build time. */
 function publicApiBaseUrl(): string {
   if (process.env.NEXT_PUBLIC_API_BASE_URL) {
     return process.env.NEXT_PUBLIC_API_BASE_URL
   }
-  // Vercel sets VERCEL_URL (hostname only) during build - same-origin API routes work.
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}`
   }
   return 'http://localhost:8080'
 }
 
-/** Returns the list of allowed origins for Server Actions, filtering out empty strings */
-function _allowedServerActionOrigins(): string[] {
-  return [
-    'localhost:3000',
-    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '',
-    process.env.NEXT_PUBLIC_API_BASE_URL ?? '',
-  ].filter(Boolean) as string[]
-}
-
-/** Security headers for production hardening */
+/**
+ * Static security headers applied to every response.
+ * NOTE: Content-Security-Policy is set per-request in middleware.ts so it can
+ * include a fresh nonce for inline scripts/styles. Do not duplicate it here.
+ */
 const securityHeaders = [
-  {
-    key: 'X-DNS-Prefetch-Control',
-    value: 'on',
-  },
-  {
-    key: 'X-Frame-Options',
-    value: 'DENY',
-  },
-  {
-    key: 'X-Content-Type-Options',
-    value: 'nosniff',
-  },
-  {
-    key: 'Referrer-Policy',
-    value: 'strict-origin-when-cross-origin',
-  },
+  { key: 'X-DNS-Prefetch-Control', value: 'on' },
+  { key: 'X-Frame-Options', value: 'DENY' },
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
   {
     key: 'Permissions-Policy',
     value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()',
@@ -48,33 +36,30 @@ const securityHeaders = [
     key: 'Strict-Transport-Security',
     value: 'max-age=63072000; includeSubDomains; preload',
   },
-  {
-    key: 'Content-Security-Policy',
-    value: [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https:",
-      "font-src 'self' data:",
-      "connect-src 'self' https: wss:",
-      "media-src 'none'",
-      "object-src 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-      "frame-ancestors 'none'",
-      "upgrade-insecure-requests",
-    ].join('; '),
-  },
+  { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+  { key: 'Cross-Origin-Resource-Policy', value: 'same-origin' },
 ]
 
 const nextConfig: NextConfig = {
-  // Docker/self-host uses standalone; Vercel uses its own Next runtime
   ...(process.env.VERCEL ? {} : { output: 'standalone' as const }),
-  // Avoid tracing the wrong workspace when other lockfiles exist under $HOME
   outputFileTracingRoot: path.join(process.cwd()),
   reactStrictMode: true,
+  poweredByHeader: false,
+  compress: true,
+  productionBrowserSourceMaps: false,
   typescript: {
     tsconfigPath: './tsconfig.json',
+  },
+  experimental: {
+    optimizePackageImports: [
+      'lucide-react',
+      'framer-motion',
+      '@ai-sdk/anthropic',
+      '@ai-sdk/google',
+      '@ai-sdk/groq',
+      '@ai-sdk/openai',
+      '@ai-sdk/react',
+    ],
   },
   env: {
     NEXT_PUBLIC_API_BASE_URL: publicApiBaseUrl(),
@@ -89,4 +74,4 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default nextConfig
+export default withBundleAnalyzer(nextConfig)

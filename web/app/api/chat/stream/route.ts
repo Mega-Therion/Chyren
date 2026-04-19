@@ -6,6 +6,7 @@ import {
   processFamilyAuthMessage,
 } from '@/lib/family-auth'
 import { logger, logError } from '@/lib/logger'
+import { checkRateLimit, checkPromptInjection, clientIp } from '@/lib/hardening'
 
 // Base system prompt is resolved per-request (async) so live-fetched Neon
 // context is available even when the build-time bake was empty (quota issues, etc.)
@@ -422,15 +423,33 @@ function createSingleSseTextResponse(text: string): Response {
 }
 
 export async function POST(req: NextRequest) {
+  const ip = clientIp(req)
+  const allowed = await checkRateLimit(ip)
+  if (!allowed) {
+    logger.warn(`[CHAT] Rate limit exceeded for ${ip}`)
+    return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please slow down.' }), {
+      status: 429,
+      headers: { 'Content-Type': 'application/json', 'Retry-After': '60' },
+    })
+  }
+
   const { message, messages } = await req.json().catch(() => ({}))
   const session = req.nextUrl.searchParams.get('session') ?? 'global'
-  
-  const content = messages?.length 
-    ? messages[messages.length - 1].content 
+
+  const content = messages?.length
+    ? messages[messages.length - 1].content
     : message;
 
   if (!content) {
     return new Response(JSON.stringify({ error: 'Message is required' }), { status: 400 });
+  }
+
+  if (typeof content === 'string' && checkPromptInjection(content)) {
+    logger.warn(`[CHAT] Prompt injection attempt blocked from ${ip}`)
+    return new Response(
+      JSON.stringify({ error: 'Request blocked by integrity gate.' }),
+      { status: 400, headers: { 'Content-Type': 'application/json' } },
+    )
   }
 
   logger.info(`[CHAT] Session ${session.slice(0, 8)}… — incoming message`)

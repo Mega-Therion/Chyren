@@ -10,6 +10,7 @@
  */
 
 import { type NextRequest, NextResponse } from 'next/server'
+import { checkRateLimit, clientIp } from '@/lib/hardening'
 
 export const runtime = 'nodejs'
 
@@ -83,6 +84,9 @@ async function tryGroqWhisper(audioBlob: Blob): Promise<string | null> {
 // ─── Route handler ───────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  if (!(await checkRateLimit(clientIp(req)))) {
+    return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429, headers: { 'Retry-After': '60' } })
+  }
   try {
     const formData = await req.formData()
     const audioFile = formData.get('audio')

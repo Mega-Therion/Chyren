@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
 import { AlertCircle } from 'lucide-react'
 import { ChatMessage } from '@/components/ChatMessage'
@@ -9,7 +10,12 @@ import { startHeartbeat, stopHeartbeat } from '@/lib/haptics-ry'
 import { clearDraft } from '@/lib/draft-ry'
 import { createTtsEngine, type TtsEngine, playLatencyChime } from '@/lib/tts-ry'
 
-import { NeuralBrain, type BrainState } from '@/components/NeuralBrain'
+import type { BrainState } from '@/components/NeuralBrain'
+
+const NeuralBrain = dynamic(
+  () => import('@/components/NeuralBrain').then(m => m.NeuralBrain),
+  { ssr: false, loading: () => null },
+)
 
 interface Message {
   id: string

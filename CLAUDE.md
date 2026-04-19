@@ -56,9 +56,18 @@ npm run typecheck    # tsc --noEmit
 ### Gateway
 ```bash
 cd gateway
-npm run dev          # Vite dev server
-npm run build        # tsc -b && vite build
-npm run lint         # ESLint
+pnpm install         # Gateway uses pnpm, not npm
+pnpm dev             # Vite dev server
+pnpm build           # tsc -b && vite build
+pnpm lint            # ESLint
+```
+
+### Makefile shortcuts (from repo root)
+```bash
+make ci              # Rust fmt + clippy + test (local CI equivalent)
+make cortex-test     # Python tests (PYTHONPATH=cortex pytest tests/)
+make web-ci          # Next.js: typecheck + lint + build
+make gateway-ci      # Gateway: tsc + lint + build
 ```
 
 ### Full Stack (Docker)
@@ -84,7 +93,7 @@ docker-compose up    # Starts chyren-api (8080), chyren-web (3000), postgres, qd
 - `cortex/ops/scripts/` — Data pipeline utilities (catalog, ingestion) run during maintenance
 - `cortex/core/`, `cortex/providers/`, `cortex/main.py` — Legacy Python runtime (no longer used for live requests; retained as reference)
 
-### Medulla (Rust — 16 crates)
+### Medulla (Rust — 17 crates)
 | Crate | Role |
 |---|---|
 | `omega-core` | Foundation types, contracts, task envelopes |
@@ -98,6 +107,7 @@ docker-compose up    # Starts chyren-api (8080), chyren-web (3000), postgres, qd
 | `omega-cli` | Clap-based CLI + actix-web API server (port 8080) |
 | `omega-dream` | Long-term memory and pattern synthesis |
 | `omega-metacog` | Self-reflection and introspection |
+| `omega-neocortex` | Higher-order reasoning integration layer |
 | `omega-worldmodel` | Environmental state and context management |
 | `omega-telemetry` | Instrumentation — all events must route through here |
 | `omega-integration` | Cross-crate routing |
