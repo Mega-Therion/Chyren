@@ -7,6 +7,7 @@ import {
 } from '@/lib/family-auth'
 import { logger, logError } from '@/lib/logger'
 import { checkRateLimit, checkPromptInjection, clientIp } from '@/lib/hardening'
+import { runAnthropicWithTools } from '@/lib/mcp/anthropic-tools'
 
 // Base system prompt is resolved per-request (async) so live-fetched Neon
 // context is available even when the build-time bake was empty (quota issues, etc.)
@@ -463,6 +464,39 @@ export async function POST(req: NextRequest) {
   const history = toChatHistory(messages, content)
   const { prompt: systemPrompt, profile } = await buildSystemPrompt(session, memberContext)
   let hubFailure: string | null = null
+
+  // Tool-use path: when Anthropic + LIC catalog are both configured, let Claude
+  // call librarian (and any other registered MCP) tools before answering. Falls
+  // through to the standard provider chain on any failure.
+  const anthropicKey = getOptionalEnv('ANTHROPIC_API_KEY')
+  const catalogConfigured = Boolean(getOptionalEnv('OMEGA_CATALOG_DB_URL'))
+  if (anthropicKey && catalogConfigured) {
+    try {
+      const model = getOptionalEnv('ANTHROPIC_MODEL') ?? 'claude-3-5-haiku-latest'
+      const userAssistantHistory = history.filter(
+        (m): m is { role: 'user' | 'assistant'; content: string } =>
+          m.role === 'user' || m.role === 'assistant',
+      )
+      const { text, toolCalls } = await runAnthropicWithTools(
+        anthropicKey,
+        model,
+        systemPrompt,
+        userAssistantHistory,
+        profile.temperature,
+      )
+      if (text) {
+        if (toolCalls.length > 0) {
+          logger.info(`[CHAT] Tool-use path: ${toolCalls.length} call(s) — ${toolCalls.map((c) => c.name).join(', ')}`)
+        }
+        return createSingleSseTextResponse(text)
+      }
+      logger.warn('[CHAT] Anthropic tool-use returned empty text — falling back')
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'unknown tool-use error'
+      logger.warn(`[CHAT] Anthropic tool-use failed, falling back: ${msg}`)
+    }
+  }
+
   try {
     if (getOptionalEnv('CHYREN_API_URL')) {
       try {
