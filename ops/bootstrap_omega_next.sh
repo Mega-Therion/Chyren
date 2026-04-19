@@ -285,7 +285,7 @@ cat > "$NEW_WORKSPACE/canon/machine_identity.json" << IDENTITY_EOF
 {
   "runtime_identity": "chyren-$EDITION-$(date +%s)",
   "continuity_mode": "pre-canon",
-  "host_cache": "~/.omega-host-cache/$EDITION",
+  "host_cache": "$NEW_WORKSPACE/.omega-local-cache/$EDITION",
   "workspace_root": "$NEW_WORKSPACE"
 }
 IDENTITY_EOF
@@ -307,7 +307,8 @@ else
   export OMEGA_ROOT="${OMEGA_ROOT:-$(pwd)}"
 fi
 
-export OMEGA_HOST_CACHE="${OMEGA_HOST_CACHE:-$HOME/.omega-host-cache/chyren}"
+# Create local cache directory if it doesn't exist
+export OMEGA_HOST_CACHE="${OMEGA_HOST_CACHE:-$OMEGA_ROOT/.omega-local-cache}"
 mkdir -p "$OMEGA_HOST_CACHE"
 
 echo "OmegA Workspace: $OMEGA_ROOT"

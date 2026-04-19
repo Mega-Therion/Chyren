@@ -21,3 +21,5 @@ brain/
 config/
 .claude/worktrees/
 .claude/worktrees/
+.worktrees/
+.worktrees/

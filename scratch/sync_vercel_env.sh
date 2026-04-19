@@ -11,25 +11,40 @@ fi
 
 echo "Starting Vercel environment sync for $PROJECT..."
 
-# Read only the lines that are key=value pairs and not comments
-grep -v "^#" "$ENV_FILE" | grep "=" | while read -r line; do
+# Read only the lines that are key=value pairs and not comments using a dedicated FD
+while read -r line <&3; do
     KEY=$(echo "$line" | cut -d'=' -f1)
     VALUE=$(echo "$line" | cut -d'=' -f2- | tr -d '"' | tr -d "'")
     
     if [ -n "$KEY" ] && [ -n "$VALUE" ]; then
         echo "Syncing $KEY..."
-        # We use printf to handle special characters and pass to vercel env add
-        # We specify production, preview, and development environments
-        printf "%s" "$VALUE" | vercel env add "$KEY" production preview development --force 2>/dev/null
-        if [ $? -eq 0 ]; then
+        # Attempt to remove if it exists
+        vercel env rm "$KEY" production -y >/dev/null 2>&1
+        vercel env rm "$KEY" preview -y >/dev/null 2>&1
+        vercel env rm "$KEY" development -y >/dev/null 2>&1
+        
+        # Add to environments individually
+        success=true
+        # Note: Added -y to all and trying to handle preview's branch prompt
+        for env in production preview development; do
+            if [ "$env" = "preview" ]; then
+                # Try to add to all preview branches by omitting the branch argument but keeping options
+                if ! vercel env add "$KEY" "$env" --value "$VALUE" --yes >/dev/null 2>&1; then
+                    success=false
+                fi
+            else
+                if ! vercel env add "$KEY" "$env" --value "$VALUE" --yes >/dev/null 2>&1; then
+                    success=false
+                fi
+            fi
+        done
+        
+        if [ "$success" = true ]; then
             echo "Successfully synced $KEY."
         else
-            # If add fails (e.g. already exists and --force didn't overwrite correctly), try remove and add
-            vercel env rm "$KEY" production preview development -y 2>/dev/null
-            printf "%s" "$VALUE" | vercel env add "$KEY" production preview development 2>/dev/null
-            echo "Re-synced $KEY."
+            echo "Error syncing $KEY."
         fi
     fi
-done
+done 3< <(grep -v "^#" "$ENV_FILE" | grep "=")
 
 echo "Vercel sync complete."

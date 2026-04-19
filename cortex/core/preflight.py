@@ -4,10 +4,8 @@ core/preflight.py — Phase 0: System Preflight & Initialization.
 Executed before any Chyren node spins up. Verifies the host environment
 meets the minimum requirements for sovereign operation:
 
-  1. Python version (3.10+ required for structural pattern matching and
-     union type hints used throughout the codebase).
-  2. Required stdlib modules are importable (sanity check against corrupt
-     or stripped Python installs).
+  1. Python version (3.10+ required).
+  2. Required stdlib modules are importable.
   3. Required environment variables are set (at least one provider key).
   4. State directory exists and is writable.
   5. Python package dependencies from requirements.txt are importable.
@@ -20,6 +18,7 @@ import importlib
 import os
 import sys
 from pathlib import Path
+from core.secrets import ConfigLoader
 
 # Minimum Python version required.
 _MIN_PYTHON = (3, 10)
@@ -28,14 +27,6 @@ _MIN_PYTHON = (3, 10)
 _REQUIRED_STDLIB = [
     "json", "hmac", "hashlib", "threading", "subprocess",
     "uuid", "time", "re", "dataclasses", "typing",
-]
-
-# At least one of these env vars must be set for the hub to be useful.
-_PROVIDER_KEYS = [
-    "ANTHROPIC_API_KEY",
-    "OPENAI_API_KEY",
-    "DEEPSEEK_API_KEY",
-    "GEMINI_API_KEY",
 ]
 
 # State directory relative to the project root (one level up from core/).
@@ -77,12 +68,17 @@ def run_preflight(strict: bool = False) -> list[str]:
         )
 
     # Check 3: At least one provider key
-    available_keys = [k for k in _PROVIDER_KEYS if os.environ.get(k)]
+    available_keys = []
+    schema = ConfigLoader._load_schema()
+    for provider in schema.get("providers", {}).values():
+        if ConfigLoader.get(provider.get("key", "")):
+            available_keys.append(provider.get("key", ""))
+            
     if not available_keys:
         msg = (
             "PREFLIGHT WARN: No provider API keys found. "
-            f"Set at least one of: {', '.join(_PROVIDER_KEYS)} "
-            f"in ~/.omega/one-true.env before running tasks."
+            "Set required provider keys in Chyren/config/schema.yaml "
+            "and export them in your environment."
         )
         warnings.append(msg)
         hard_warnings.append(msg)
