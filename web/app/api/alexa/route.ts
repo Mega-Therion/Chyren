@@ -24,19 +24,36 @@ export const maxDuration = 30
 const CHYREN_CHAT_TIMEOUT_MS = 14_000
 const MAX_SESSION_HISTORY = 10  // keep last N turns (user+assistant pairs)
 
-// ── SSML Pronunciation ────────────────────────────────────────────────────────
+// ── SSML Voice & Pronunciation ────────────────────────────────────────────────
 
 /** IPA pronunciation for "Chyren" → KY-ren (like "siren" with a K) */
 const CHYREN_PHONEME = '<phoneme alphabet="ipa" ph="ˈkaɪ.ɹən">Chyren</phoneme>'
 
 /**
- * Replace occurrences of "Chyren" in speech text with the SSML phoneme.
- * Returns SSML-wrapped speech.
+ * Amazon Polly voice configuration.
+ *
+ * "Matthew" (Neural) is the closest match to the web app's Google Neural2-D:
+ *   - Male, American English, natural cadence
+ *   - Pitch lowered 8% to approximate the web app's -1.0 pitch shift
+ *   - Rate at 96% for a measured, authoritative delivery
+ *
+ * The <amazon:domain name="conversational"> tag activates Polly's
+ * conversational speaking style — less robotic, more human pacing.
  */
 function wrapSsml(text: string): string {
   // Replace "Chyren" (case-insensitive) with the phoneme tag
   const withPhonemes = text.replace(/\bChyren\b/gi, CHYREN_PHONEME)
-  return `<speak>${withPhonemes}</speak>`
+  return (
+    `<speak>` +
+    `<voice name="Matthew">` +
+    `<amazon:domain name="conversational">` +
+    `<prosody pitch="-8%" rate="96%">` +
+    withPhonemes +
+    `</prosody>` +
+    `</amazon:domain>` +
+    `</voice>` +
+    `</speak>`
+  )
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
