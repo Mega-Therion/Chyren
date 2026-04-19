@@ -161,6 +161,11 @@ impl Service {
         let mut graph = self.graph.lock().await;
         graph.write_node(content, stratum)
     }
+
+    pub async fn create_edge(&self, from: String, to: String, edge_type: String, weight: f64) {
+        let mut graph = self.graph.lock().await;
+        graph.create_edge(from, to, edge_type, weight);
+    }
 }
 
 impl Default for Service {

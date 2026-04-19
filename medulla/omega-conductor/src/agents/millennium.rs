@@ -13,6 +13,163 @@ use omega_core::{now, AgentCapability, AgentResult, AgentTask};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashSet, VecDeque};
 
+// ── Sovereign Disciplines ─────────────────────────────────────────────────────
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum SovereignDiscipline {
+    Arithmetic,
+    NumberTheory,
+    QuantumTheory,
+    TheoreticalPhysics,
+    AlgebraicGeometry,
+    ComplexAnalysis,
+    EuclideanGeometry,
+    NonEuclideanGeometry,
+    DifferentialEquations,
+    LinearAlgebra,
+    AbstractAlgebra,
+    Topology,
+    Calculus,
+    Trigonometry,
+    Kinematics,
+    Optics,
+    Cryptography,
+    Statistics,
+    LogicAndRhetoric,
+    ClassicalPhilosophy,
+}
+
+impl SovereignDiscipline {
+    pub fn name(&self) -> &'static str {
+        match self {
+            Self::Arithmetic => "Pure Arithmetic",
+            Self::NumberTheory => "Advanced Number Theory",
+            Self::QuantumTheory => "Quantum Mechanics and Hilbert Spaces",
+            Self::TheoreticalPhysics => "Theoretical Physics and Manifolds",
+            Self::AlgebraicGeometry => "Algebraic Geometry",
+            Self::ComplexAnalysis => "Complex Analysis",
+            Self::EuclideanGeometry => "Euclidean and Analytic Geometry",
+            Self::NonEuclideanGeometry => "Non-Euclidean and Geodesic Geometry",
+            Self::DifferentialEquations => "Linear and Non-Linear Differential Equations",
+            Self::LinearAlgebra => "Linear Algebra and Vector Spaces",
+            Self::AbstractAlgebra => "Abstract Algebra and Group Theory",
+            Self::Topology => "General and Algebraic Topology",
+            Self::Calculus => "Differential and Integral Calculus",
+            Self::Trigonometry => "Trigonometry and Periodic Functions",
+            Self::Kinematics => "Classical Kinematics and Dynamics",
+            Self::Optics => "Geometric and Wave Optics",
+            Self::Cryptography => "Cryptography and Information Theory",
+            Self::Statistics => "Probability and Statistics",
+            Self::LogicAndRhetoric => "Formal Logic and Rhetorical Argumentation",
+            Self::ClassicalPhilosophy => "Socratic and Aristotelian Philosophy",
+        }
+    }
+
+    pub fn domain(&self) -> &'static str {
+        match self {
+            Self::Arithmetic => "arithmetic",
+            Self::NumberTheory => "number_theory",
+            Self::QuantumTheory => "quantum_physics",
+            Self::TheoreticalPhysics => "theoretical_physics",
+            Self::AlgebraicGeometry => "algebraic_geometry",
+            Self::ComplexAnalysis => "analysis",
+            Self::EuclideanGeometry => "geometry",
+            Self::NonEuclideanGeometry => "geometry",
+            Self::DifferentialEquations => "analysis",
+            Self::LinearAlgebra => "algebra",
+            Self::AbstractAlgebra => "algebra",
+            Self::Topology => "topology",
+            Self::Calculus => "analysis",
+            Self::Trigonometry => "analysis",
+            Self::Kinematics => "physics",
+            Self::Optics => "physics",
+            Self::Cryptography => "computer_science",
+            Self::Statistics => "statistics",
+            Self::LogicAndRhetoric => "philosophy",
+            Self::ClassicalPhilosophy => "philosophy",
+        }
+    }
+
+    pub fn mathlib4_entry_modules(&self) -> &'static [&'static str] {
+        match self {
+            Self::Arithmetic => &[
+                "Mathlib/Data/Nat/Basic",
+                "Mathlib/Data/Int/Basic",
+                "Mathlib/Data/Rat/Basic",
+            ],
+            Self::NumberTheory => &[
+                "Mathlib/NumberTheory/PrimeCounting",
+                "Mathlib/NumberTheory/ZetaValues",
+            ],
+            Self::QuantumTheory => &[
+                "Mathlib/Analysis/InnerProductSpace/Basic",
+                "Mathlib/Algebra/Lie/Basic",
+            ],
+            Self::TheoreticalPhysics => &[
+                "Mathlib/Geometry/Manifold/VectorBundle/Basic",
+                "Mathlib/Geometry/Manifold/RealInstances",
+            ],
+            Self::EuclideanGeometry => &[
+                "Mathlib/Geometry/Euclidean/Basic",
+                "Mathlib/Geometry/Euclidean/Sphere/Basic",
+            ],
+            Self::NonEuclideanGeometry => &[
+                "Mathlib/Geometry/Manifold/Basic",
+                "Mathlib/Geometry/Manifold/Metric",
+            ],
+            Self::DifferentialEquations => &[
+                "Mathlib/Analysis/ODE/PicardLindelof",
+                "Mathlib/Analysis/Calculus/Deriv/Basic",
+            ],
+            Self::LinearAlgebra => &[
+                "Mathlib/LinearAlgebra/Basis",
+                "Mathlib/LinearAlgebra/Matrix/Basic",
+            ],
+            Self::AbstractAlgebra => &[
+                "Mathlib/Algebra/Group/Basic",
+                "Mathlib/Algebra/Ring/Basic",
+            ],
+            Self::Topology => &[
+                "Mathlib/Topology/Basic",
+                "Mathlib/Topology/Algebra/Group/Basic",
+            ],
+            Self::Calculus => &[
+                "Mathlib/Analysis/Calculus/Deriv/Basic",
+                "Mathlib/Analysis/Calculus/Integral/Basic",
+            ],
+            Self::Trigonometry => &[
+                "Mathlib/Analysis/SpecialFunctions/Trigonometric/Basic",
+                "Mathlib/Analysis/SpecialFunctions/Exp",
+            ],
+            Self::Kinematics => &[
+                "Mathlib/Analysis/Calculus/Deriv/Basic",
+                "Mathlib/Geometry/Manifold/VectorBundle/Basic",
+            ],
+            Self::Optics => &[
+                "Mathlib/Analysis/SpecialFunctions/Trigonometric/Basic",
+                "Mathlib/Geometry/Euclidean/Basic",
+            ],
+            Self::Cryptography => &[
+                "Mathlib/NumberTheory/ZMod/Basic",
+                "Mathlib/Algebra/Field/Basic",
+            ],
+            Self::Statistics => &[
+                "Mathlib/Probability/Kernel/Basic",
+                "Mathlib/Probability/ProbabilityMassFunction/Basic",
+            ],
+            Self::LogicAndRhetoric => &[
+                "Mathlib/Logic/Basic",
+                "Mathlib/Logic/Equiv/Basic",
+            ],
+            Self::ClassicalPhilosophy => &[
+                "Mathlib/Logic/Basic",
+                "Mathlib/Order/Basic",
+            ],
+            _ => &["Mathlib/Logic/Basic"],
+        }
+    }
+}
+
 // ── Millennium Prize Problems ─────────────────────────────────────────────────
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -298,6 +455,46 @@ impl SearchAndExtendAgent {
 
         report
     }
+
+    pub async fn run_discipline(&self, discipline: SovereignDiscipline, max_depth: usize) -> SearchExtendReport {
+        let mut report = SearchExtendReport {
+            problem: discipline.name().to_string(),
+            modules_crawled: 0,
+            absorbed_hashes: vec![],
+            errors: vec![],
+        };
+
+        let mut crawler = MathlibCrawler::new();
+        for entry in discipline.mathlib4_entry_modules() {
+            crawler
+                .crawl(entry, discipline.domain(), discipline.name(), max_depth)
+                .await;
+        }
+
+        let queue = crawler.into_queue();
+        report.modules_crawled = queue.len();
+
+        eprintln!(
+            "[SearchAndExtend] {} modules queued for discipline {}",
+            queue.len(),
+            discipline.name()
+        );
+
+        for req in &queue {
+            match self.ingestor.ingest_url(req).await {
+                Ok(hash) => {
+                    eprintln!("[SearchAndExtend] absorbed {hash} ← {}", req.url);
+                    report.absorbed_hashes.push(hash);
+                }
+                Err(e) => {
+                    eprintln!("[SearchAndExtend] error for {}: {e}", req.url);
+                    report.errors.push(format!("{}: {e}", req.url));
+                }
+            }
+        }
+
+        report
+    }
 }
 
 #[derive(Debug, Serialize)]
@@ -333,25 +530,55 @@ impl PersistentAgent for SearchAndExtendAgent {
          You skip any module that cannot be fetched or formalized."
     }
 
-    /// Payload JSON: `{"problem": "riemann" | "pvsnp" | "navier" | "yang" | "hodge" | "birch", "max_depth": 3}`
+    /// Payload JSON: `{"problem": "riemann" | "pvsnp" | "navier" | "yang" | "hodge" | "birch", "discipline": "arithmetic" | "quantum" | "physics", "max_depth": 3}`
     async fn execute(&self, task: AgentTask) -> AgentResult {
         let v: serde_json::Value =
             serde_json::from_str(&task.payload).unwrap_or(serde_json::Value::Null);
 
-        let problem_key = v["problem"].as_str().unwrap_or("riemann").to_lowercase();
+        let problem_key = v["problem"].as_str().unwrap_or("").to_lowercase();
+        let discipline_key = v["discipline"].as_str().unwrap_or("").to_lowercase();
         let max_depth = v["max_depth"].as_u64().unwrap_or(3) as usize;
 
-        let problem = match problem_key.as_str() {
-            "riemann" | "riemann_hypothesis" => MillenniumProblem::RiemannHypothesis,
-            "pvsnp" | "p_vs_np" | "p vs np" => MillenniumProblem::PVsNP,
-            "navier" | "navier_stokes" => MillenniumProblem::NavierStokes,
-            "yang" | "yang_mills" => MillenniumProblem::YangMills,
-            "hodge" => MillenniumProblem::HodgeConjecture,
-            "birch" | "birch_swinnerton_dyer" => MillenniumProblem::BirchSwinnertonDyer,
-            _ => MillenniumProblem::RiemannHypothesis,
+        let report = if !problem_key.is_empty() {
+            let problem = match problem_key.as_str() {
+                "riemann" | "riemann_hypothesis" => MillenniumProblem::RiemannHypothesis,
+                "pvsnp" | "p_vs_np" | "p vs np" => MillenniumProblem::PVsNP,
+                "navier" | "navier_stokes" => MillenniumProblem::NavierStokes,
+                "yang" | "yang_mills" => MillenniumProblem::YangMills,
+                "hodge" => MillenniumProblem::HodgeConjecture,
+                "birch" | "birch_swinnerton_dyer" => MillenniumProblem::BirchSwinnertonDyer,
+                _ => MillenniumProblem::RiemannHypothesis,
+            };
+            self.run(problem, max_depth).await
+        } else if !discipline_key.is_empty() {
+            let discipline = match discipline_key.as_str() {
+                "arithmetic" | "arith" => SovereignDiscipline::Arithmetic,
+                "number_theory" | "nt" => SovereignDiscipline::NumberTheory,
+                "quantum" | "quantum_theory" => SovereignDiscipline::QuantumTheory,
+                "physics" | "theoretical_physics" => SovereignDiscipline::TheoreticalPhysics,
+                "geometry" | "algebraic_geometry" => SovereignDiscipline::AlgebraicGeometry,
+                "analysis" | "complex_analysis" => SovereignDiscipline::ComplexAnalysis,
+                "euclidean" | "euclidean_geometry" => SovereignDiscipline::EuclideanGeometry,
+                "non_euclidean" | "non_euclidean_geometry" | "geodesic" => SovereignDiscipline::NonEuclideanGeometry,
+                "differential_equations" | "ode" | "pde" | "non_linear" => SovereignDiscipline::DifferentialEquations,
+                "linear_algebra" | "vectors" => SovereignDiscipline::LinearAlgebra,
+                "abstract_algebra" | "algebra" => SovereignDiscipline::AbstractAlgebra,
+                "topology" => SovereignDiscipline::Topology,
+                "calculus" => SovereignDiscipline::Calculus,
+                "trigonometry" | "trig" => SovereignDiscipline::Trigonometry,
+                "kinematics" => SovereignDiscipline::Kinematics,
+                "optics" => SovereignDiscipline::Optics,
+                "cryptography" | "crypto" => SovereignDiscipline::Cryptography,
+                "statistics" | "prob" => SovereignDiscipline::Statistics,
+                "logic" | "rhetoric" | "argument" => SovereignDiscipline::LogicAndRhetoric,
+                "philosophy" | "socratic" | "aristotelian" => SovereignDiscipline::ClassicalPhilosophy,
+                _ => SovereignDiscipline::Arithmetic,
+            };
+            self.run_discipline(discipline, max_depth).await
+        } else {
+            // Default to Riemann if nothing specified
+            self.run(MillenniumProblem::RiemannHypothesis, max_depth).await
         };
-
-        let report = self.run(problem, max_depth).await;
 
         let success = !report.absorbed_hashes.is_empty();
         let output = serde_json::to_string_pretty(&report).unwrap_or_default();

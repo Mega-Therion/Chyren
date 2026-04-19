@@ -84,6 +84,15 @@ enum Commands {
         #[arg(long, default_value_t = 3)]
         depth: usize,
     },
+    /// Ingest a broad mathematical or physical discipline.
+    Discipline {
+        /// Which discipline: arithmetic | geometry | logic | etc.
+        #[arg(value_name = "DISCIPLINE")]
+        discipline: String,
+        /// How many import levels deep to crawl (default: 3)
+        #[arg(long, default_value_t = 3)]
+        depth: usize,
+    },
 }
 
 #[derive(serde::Serialize)]
@@ -328,6 +337,78 @@ async fn main() -> anyhow::Result<()> {
             if !report.absorbed_hashes.is_empty() {
                 println!("  {} {}", theme::label("first-hash"), theme::run_id(&report.absorbed_hashes[0]));
             }
+
+            if cli.json {
+                println!("{}", serde_json::to_string_pretty(&report).unwrap_or_default());
+            }
+
+            return Ok(());
+        }
+        Some(Commands::Discipline { discipline, depth }) => {
+            use omega_conductor::agents::millennium::SovereignDiscipline;
+            let discipline_key = discipline.to_lowercase();
+            let target = match discipline_key.as_str() {
+                "arithmetic" | "arith" => SovereignDiscipline::Arithmetic,
+                "number_theory" | "nt" => SovereignDiscipline::NumberTheory,
+                "quantum" | "quantum_theory" => SovereignDiscipline::QuantumTheory,
+                "physics" | "theoretical_physics" => SovereignDiscipline::TheoreticalPhysics,
+                "geometry" | "algebraic_geometry" => SovereignDiscipline::AlgebraicGeometry,
+                "analysis" | "complex_analysis" => SovereignDiscipline::ComplexAnalysis,
+                "euclidean" | "euclidean_geometry" => SovereignDiscipline::EuclideanGeometry,
+                "non_euclidean" | "non_euclidean_geometry" | "geodesic" => SovereignDiscipline::NonEuclideanGeometry,
+                "differential_equations" | "ode" | "pde" | "non_linear" => SovereignDiscipline::DifferentialEquations,
+                "linear_algebra" | "vectors" => SovereignDiscipline::LinearAlgebra,
+                "abstract_algebra" | "algebra" => SovereignDiscipline::AbstractAlgebra,
+                "topology" => SovereignDiscipline::Topology,
+                "calculus" => SovereignDiscipline::Calculus,
+                "trigonometry" | "trig" => SovereignDiscipline::Trigonometry,
+                "kinematics" => SovereignDiscipline::Kinematics,
+                "optics" => SovereignDiscipline::Optics,
+                "cryptography" | "crypto" => SovereignDiscipline::Cryptography,
+                "statistics" | "prob" => SovereignDiscipline::Statistics,
+                "logic" | "rhetoric" | "argument" => SovereignDiscipline::LogicAndRhetoric,
+                "philosophy" | "socratic" | "aristotelian" => SovereignDiscipline::ClassicalPhilosophy,
+                _ => SovereignDiscipline::Arithmetic,
+            };
+
+            println!(
+                "{} {}  {}  depth={}",
+                theme::tier("[TIER-3]"),
+                theme::info("[DISCIPLINE]"),
+                theme::gradient(&target.name().to_uppercase(), 1),
+                theme::value(&depth.to_string()),
+            );
+
+            let myelin = Arc::new(MyelinService::new());
+            let neocortex = Arc::new(Neocortex::new());
+            let cold_store = Arc::new(
+                ColdStore::default_store()
+                    .unwrap_or_else(|_| ColdStore::new("/tmp/chyren_cold").expect("cold store init failed"))
+            );
+            let proof_index = Arc::new(Mutex::new(ProofConstraintIndex::new()));
+
+            let ingestor = IngestorAgent::new(
+                myelin,
+                neocortex,
+                cold_store,
+                proof_index,
+            );
+            let agent = SearchAndExtendAgent::new(ingestor);
+
+            println!("{}", theme::warn("[DISCIPLINE] Absorbing sovereign domain — total synthesis in progress..."));
+            let report = agent.run_discipline(target, *depth).await;
+
+            println!(
+                "{}  {}  {}  {}",
+                theme::ok("[DISCIPLINE] Ingestion cycle complete."),
+                theme::label(&format!("modules={}", report.modules_crawled)),
+                theme::ok(&format!("absorbed={}", report.absorbed_hashes.len())),
+                if report.errors.is_empty() {
+                    theme::ok("errors=0")
+                } else {
+                    theme::fail(&format!("errors={}", report.errors.len()))
+                },
+            );
 
             if cli.json {
                 println!("{}", serde_json::to_string_pretty(&report).unwrap_or_default());

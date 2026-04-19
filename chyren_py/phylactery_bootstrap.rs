@@ -7,19 +7,13 @@ use omega_core::MemoryStratum;
 use std::fs;
 
 /// Bootstrap phylactery kernel from JSON file.
-///
-/// Loads the identity foundation kernel from the specified path and initializes
-/// the L6 Canonical stratum with identity anchors, values, goals, and policies.
-pub fn bootstrap_phylactery_kernel(
-    memory: &mut Service,
-    kernel_path: &str,
-) -> Result<(), String> {
+pub fn bootstrap_phylactery_kernel(memory: &mut Service, kernel_path: &str) -> Result<(), String> {
     // Load kernel JSON from file
     let kernel_data = fs::read_to_string(kernel_path)
         .map_err(|e| format!("Failed to read phylactery kernel file: {}", e))?;
 
     // Parse kernel JSON
-    let kernel: serde_json::Value = serde_json::from_str(&kernel_data)
+    let kernel: serde_json::Value = serde_json::from_str(kernel_data)
         .map_err(|e| format!("Failed to parse phylactery kernel: {}", e))?;
 
     // Extract identity anchors
@@ -91,10 +85,10 @@ pub fn bootstrap_phylactery_kernel(
     );
 
     println!("✓ Phylactery kernel fully bootstrapped to L6 (Canonical)");
-    println!("  - Identity anchors: OK");
-    println!("  - Value anchors: OK");
-    println!("  - Goal anchors: OK");
-    println!("  - Policy gates: OK");
+    println!("  - Identity anchors: LOADED");
+    println!("  - Value anchors: LOADED");
+    println!("  - Goal anchors: LOADED");
+    println!("  - Policy gates: LOADED");
 
     Ok(())
 }

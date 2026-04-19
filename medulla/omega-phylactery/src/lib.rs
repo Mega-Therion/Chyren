@@ -138,7 +138,39 @@ pub async fn bootstrap_kernel(memory: &MemoryService) -> Result<(), String> {
         }
     }
 
-    // 3. Anchor Policy Gates
+    // 3. Anchor Mathematical Axioms (Millennium Prize Foundation)
+    if let Some(axioms) = phylactery["anchors"]["axioms"].as_array() {
+        for (i, v) in axioms.iter().enumerate() {
+            if let Some(val) = v.as_str() {
+                let node =
+                    mem.write_node(format!("AXIOM[{}]: {}", i, val), MemoryStratum::Canonical);
+                mem.create_edge(
+                    root_node.node_id.clone(),
+                    node.node_id,
+                    "defines_axiom".to_string(),
+                    1.0,
+                );
+            }
+        }
+    }
+
+    // 4. Anchor Goals
+    if let Some(goals) = phylactery["anchors"]["goals"].as_array() {
+        for (i, v) in goals.iter().enumerate() {
+            if let Some(val) = v.as_str() {
+                let node =
+                    mem.write_node(format!("GOAL[{}]: {}", i, val), MemoryStratum::Canonical);
+                mem.create_edge(
+                    root_node.node_id.clone(),
+                    node.node_id,
+                    "defines_goal".to_string(),
+                    1.0,
+                );
+            }
+        }
+    }
+
+    // 5. Anchor Policy Gates
     let policy_content = format!(
         "POLICY_GATE: Root={} | Expression={} | Priority={}",
         phylactery["policy_gates"]["root_authority"],
