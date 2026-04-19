@@ -292,3 +292,22 @@ pub fn print_status_block(
     println!("{}", thin_div(width));
     println!();
 }
+
+pub fn print_insights(insights: &[String]) {
+    let width = 60;
+    println!("{}", divider(width));
+    println!("  {}", paint_bold("METACOGNITIVE REFLECTION / BOOT EPIPHANIES", 51));
+    println!("{}", divider(width));
+    
+    for (i, insight) in insights.iter().enumerate() {
+        let idx = (i * SPECTRUM.len() / insights.len().max(1)) % SPECTRUM.len();
+        println!("  {} {}", paint("◈", SPECTRUM[idx]), insight);
+    }
+    
+    if insights.is_empty() {
+        println!("  {}", label("No significant cognitive drifts detected in this boot cycle."));
+    }
+    
+    println!("{}", thin_div(width));
+    println!();
+}

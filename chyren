@@ -44,7 +44,7 @@ DREAM_LOCK = STATE_DIR / ".dream.lock"
 
 LOG = logging.getLogger("chyren")
 
-MEDULLA_REASONING_CMDS = {"thought", "sense", "verify", "identity"}
+MEDULLA_REASONING_CMDS = {"thought", "sense", "verify", "identity", "insights"}
 MEDULLA_EXECUTION_CMDS = {"action", "flex", "shard", "ingest", "memory", "solve", "discipline"}
 MEDULLA_PASSTHROUGH = MEDULLA_REASONING_CMDS | MEDULLA_EXECUTION_CMDS
 

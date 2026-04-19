@@ -28,7 +28,6 @@ fn init_tracing() {
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
-struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,
 
@@ -48,9 +47,9 @@ struct Cli {
     #[arg(long, global = true, default_value_t = 0.3)]
     temperature: f64,
 
-    /// Task to execute
-    #[arg(index = 1)]
-    task: Option<String>,
+    /// Optional task text for legacy/direct invocation
+    #[arg(last = true)]
+    task: Vec<String>,
 }
 
 #[derive(Subcommand)]
@@ -93,6 +92,18 @@ enum Commands {
         #[arg(long, default_value_t = 3)]
         depth: usize,
     },
+    /// View metacognitive epiphanies from the boot cycle
+    Insights,
+
+    // Reasoning Passthroughs
+    Thought { args: Vec<String> },
+    Action { args: Vec<String> },
+    Sense { args: Vec<String> },
+    Verify { args: Vec<String> },
+    Identity { args: Vec<String> },
+    Flex { args: Vec<String> },
+    Shard { args: Vec<String> },
+    Memory { args: Vec<String> },
 }
 
 #[derive(serde::Serialize)]
@@ -201,6 +212,14 @@ async fn main() -> anyhow::Result<()> {
                 println!("{}", theme::info("[BOOT] Launching API Server on :8080 ..."));
             }
             omega_cli::api::start_api_server(conductor).await?;
+            return Ok(());
+        }
+        Some(Commands::Insights) => {
+            if cli.json {
+                println!("{}", serde_json::to_string_pretty(&insights).unwrap_or_default());
+            } else {
+                theme::print_insights(&insights);
+            }
             return Ok(());
         }
         Some(Commands::Reset) => {
