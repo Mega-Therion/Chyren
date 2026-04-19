@@ -1,42 +1,120 @@
 {
-  "active_primary": "postgresql://neondb_owner:npg_JB7pAw8cioPm@ep-little-moon-amazbflr.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require",
-  "pool": [
-    {
-      "id": "primary_sweet_glade",
-      "platform": "neon",
-      "url": "postgresql://neondb_owner:npg_HbW1Zlkjd7NI@ep-sweet-glade-anvm0pwn.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require",
-      "status": "quota_limit",
-      "region": "us-east-1",
-      "created_at": "2026-04-10T15:00:00Z"
+  "version": 2,
+  "schema_doc": "cortex/ops/LIBRARY_INDEX_SOP.md",
+  "secret_policy": "All credentials referenced by env-var name only. Never store URLs/keys in this file.",
+  "master_catalog": {
+    "platform": "neon",
+    "project_id": "fancy-shape-98445838",
+    "project_name": "omega-db3-metadata",
+    "url_env": "OMEGA_CATALOG_DB_URL",
+    "table": "omega_library_catalog",
+    "_note": "Smallest-utilization Neon project; ideal for the global catalog. URL env var must be added to ~/.omega/one-true.env."
+  },
+  "platforms": {
+    "neon": {
+      "shards": [
+        {
+          "id": "neon_omega",
+          "project_id": "shy-wave-51974271",
+          "project_name": "OmegA",
+          "region": "us-east-1",
+          "url_env": "TODO_NEON_OMEGA_URL",
+          "role": "origin",
+          "created_at": "2026-03-22T23:29:42Z"
+        },
+        {
+          "id": "neon_technical",
+          "project_id": "long-queen-57196333",
+          "project_name": "omega-technical-db",
+          "region": "us-west-2",
+          "url_env": "OMEGA_DB2_URL",
+          "role": "primary",
+          "size_bytes": 537215016,
+          "created_at": "2026-03-26T21:14:10Z",
+          "_note": "Largest data shard (~537MB)."
+        },
+        {
+          "id": "neon_database3",
+          "project_id": "purple-bread-84628881",
+          "project_name": "database3neon",
+          "region": "us-east-1",
+          "url_env": "TODO_NEON_DATABASE3_URL",
+          "role": "secondary",
+          "created_at": "2026-03-31T22:36:37Z"
+        },
+        {
+          "id": "neon_metadata",
+          "project_id": "fancy-shape-98445838",
+          "project_name": "omega-db3-metadata",
+          "region": "us-east-2",
+          "url_env": "OMEGA_CATALOG_DB_URL",
+          "role": "catalog_master",
+          "created_at": "2026-04-02T21:56:17Z"
+        },
+        {
+          "id": "neon_overflow_anvm",
+          "project_id": "dry-glitter-91523521",
+          "project_name": "chyren-overflow-20260410",
+          "region": "us-east-1",
+          "url_env": "OMEGA_DB_URL_OVERFLOW_1",
+          "role": "overflow",
+          "created_at": "2026-04-11T02:52:09Z"
+        },
+        {
+          "id": "neon_overflow_aezr",
+          "project_id": "quiet-pond-74269799",
+          "project_name": "chyren-overflow-20260413",
+          "region": "us-east-2",
+          "url_env": "OMEGA_DB_URL",
+          "role": "overflow",
+          "created_at": "2026-04-13T13:24:30Z"
+        }
+      ]
     },
-    {
-      "id": "overflow_little_moon",
-      "platform": "neon",
-      "url": "postgresql://neondb_owner:npg_JB7pAw8cioPm@ep-little-moon-amazbflr.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require",
-      "status": "active",
-      "region": "us-east-1",
-      "created_at": "2026-04-11T02:52:00Z"
+    "supabase": {
+      "shards": [
+        {
+          "id": "supabase_amethyst_pillar",
+          "project_ref": "ozqsgtphovplulokejvv",
+          "url_env": "AMETHYST_PILLAR_SUPABASE_URL",
+          "anon_key_env": "AMETHYST_PILLAR_SUPABASE_ANON_KEY",
+          "service_key_env": "AMETHYST_PILLAR_SUPABASE_SERVICE_ROLE_KEY",
+          "postgres_url_env": "AMETHYST_PILLAR_POSTGRES_URL",
+          "role": "secondary"
+        },
+        {
+          "id": "supabase_chyren_sovereign",
+          "project_ref": "eletftuboucrsrnapqoq",
+          "url_env": "CHYREN_SOVEREIGN_SUPABASE_URL",
+          "anon_key_env": "CHYREN_SOVEREIGN_SUPABASE_ANON_KEY",
+          "service_key_env": "CHYREN_SOVEREIGN_SUPABASE_SERVICE_ROLE_KEY",
+          "postgres_url_env": "CHYREN_SOVEREIGN_POSTGRES_URL",
+          "role": "primary",
+          "_note": "Holds family_profiles, omega_memory_entries, omega_library_catalog (legacy local copy)."
+        },
+        {
+          "id": "supabase_default",
+          "project_ref": "sgvitxezqrjgjmduoool",
+          "url_env": "NEXT_PUBLIC_SUPABASE_URL",
+          "anon_key_env": "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+          "service_key_env": "SUPABASE_SERVICE_ROLE_KEY",
+          "role": "secondary"
+        }
+      ]
     },
-    {
-      "id": "overflow_purple_term",
-      "platform": "neon",
-      "url": "https://ep-purple-term-aezrwupz.apirest.c-2.us-east-2.aws.neon.tech/neondb/rest/v1",
-      "status": "active_rest",
-      "region": "us-east-2",
-      "created_at": "2026-04-11T02:55:00Z"
+    "cloudflare": {
+      "shards": [],
+      "_pending": "Pending: account_id from user. Will enumerate D1 / KV / R2 / Workers via Cloudflare MCP."
     },
-    {
-      "id": "supabase_sovereign",
-      "platform": "supabase",
-      "ref": "eletftuboucrsrnapqoq",
-      "rest_url": "https://eletftuboucrsrnapqoq.supabase.co/rest/v1",
-      "anon_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsZXRmdHVib3VjcnNybmFwcW9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzY5ODgsImV4cCI6MjA5MTUxMjk4OH0.riOhr5mjomDoqvjlRmW2RAJ7AIHouGsFJlw55ei8xAw",
-      "service_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsZXRmdHVib3VjcnNybmFwcW9xIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTkzNjk4OCwiZXhwIjoyMDkxNTEyOTg4fQ.TwBw-0Rwt4Te9QfiAvQ1ZlVAkWy9-0yJyyCoabS1hsg",
-      "status": "active",
-      "region": "us-east-1",
-      "tables": ["family_profiles", "public_knowledge", "memories", "omega_memory_entries", "omega_library_catalog"],
-      "created_at": "2026-04-11T19:49:48Z"
+    "firebase": {
+      "shards": [],
+      "_pending": "Pending: project IDs from user. NEXT_PUBLIC_FIREBASE_* vars not currently set."
     }
-  ],
-  "last_updated": "2026-04-11T19:55:00Z"
+  },
+  "last_updated": "2026-04-19T00:00:00Z",
+  "rotation_required": [
+    "All Neon passwords (npg_*) committed to git history before v2",
+    "All Supabase service_role JWTs committed to git history before v2",
+    "Replace each on the respective platform; update env files; do NOT re-commit secrets"
+  ]
 }
