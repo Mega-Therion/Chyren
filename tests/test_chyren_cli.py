@@ -10,10 +10,9 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
-import signal
 import subprocess
 import sys
-import time
+from importlib.machinery import SourceFileLoader
 from pathlib import Path
 from types import ModuleType
 from typing import Iterator
@@ -24,12 +23,13 @@ REPO_DIR = Path(__file__).resolve().parents[1]
 CLI_PATH = REPO_DIR / "chyren"
 
 
-def _load_cli_module() -> ModuleType:
+def _load_cli_module(name: str = "chyren_cli") -> ModuleType:
     """Import ./chyren as a module for in-process unit testing."""
-    spec = importlib.util.spec_from_file_location("chyren_cli", str(CLI_PATH))
-    assert spec and spec.loader
+    loader = SourceFileLoader(name, str(CLI_PATH))
+    spec = importlib.util.spec_from_loader(name, loader)
+    assert spec is not None
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    loader.exec_module(module)
     return module
 
 
@@ -41,10 +41,7 @@ def cli() -> ModuleType:
 @pytest.fixture
 def isolated_state(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[Path]:
     """Redirect STATE_DIR/EVENTS_LOG/DREAM_LOCK at module load."""
-    spec = importlib.util.spec_from_file_location("chyren_cli_iso", str(CLI_PATH))
-    assert spec and spec.loader
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    module = _load_cli_module("chyren_cli_iso")
     monkeypatch.setattr(module, "STATE_DIR", tmp_path)
     monkeypatch.setattr(module, "EVENTS_LOG", tmp_path / "cli_events.jsonl")
     monkeypatch.setattr(module, "DREAM_LOCK", tmp_path / ".dream.lock")
@@ -81,7 +78,7 @@ def test_help_lists_all_subcommands() -> None:
         assert cmd in res.stdout, f"missing command in --help: {cmd}"
 
 
-def test_reset_without_confirmation_refuses(tmp_path: Path) -> None:
+def test_reset_without_confirmation_refuses() -> None:
     """reset without --yes / CHYREN_ALLOW_RESET should return 2 and not exec."""
     env = {**os.environ, "CHYREN_ALLOW_RESET": "", "CHYREN_TELEMETRY_DISABLE": "1"}
     env.pop("CHYREN_ALLOW_RESET", None)
@@ -153,6 +150,7 @@ def test_dispatch_reset_yes_flag_passes(cli: ModuleType, monkeypatch: pytest.Mon
     seen: dict[str, object] = {}
 
     def fake_run(args, bin_name="chyren"):  # type: ignore[no-untyped-def]
+        del bin_name
         seen["args"] = list(args)
         return FakeProc()
 
