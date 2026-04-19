@@ -87,11 +87,36 @@ impl MemoryGraph {
             None => return vec![],
         };
 
-        let hits = vs.search(query_embedding, top_k).await.unwrap_or_default();
+        // Fetch more candidates from Qdrant so we have room to mathematically re-rank them
+        let hits = vs.search(query_embedding, top_k * 3).await.unwrap_or_default();
 
-        hits.into_iter()
-            .filter_map(|hit| self.nodes.get(&hit.id).cloned())
-            .collect()
+        let mut resonant_nodes: Vec<(MemoryNode, f32)> = hits
+            .into_iter()
+            .filter_map(|hit| {
+                self.nodes.get(&hit.id).cloned().map(|node| {
+                    // --- THE RESONANCE CALCULATION ---
+                    // 1. Frequency (Base phase alignment from Qdrant: 0.0 to 1.0)
+                    let frequency = hit.score; 
+                    
+                    // 2. Energy (The decaying wave from eviction.rs: 0.1 to 1.0)
+                    let energy = node.decay_score as f32;
+                    
+                    // 3. Amplitude (Historical weight/salience. logarithmic so it doesn't blow up)
+                    let amplitude = 1.0 + (node.retrieval_count as f32).ln_1p() * 0.15;
+                    
+                    // Final Resonance = Frequency * Energy * Amplitude
+                    let resonance = frequency * energy * amplitude;
+                    
+                    (node, resonance)
+                })
+            })
+            .collect();
+
+        // Sort descending by calculated Resonance instead of raw static vector similarity
+        resonant_nodes.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+
+        // Return the most resonant `top_k` nodes
+        resonant_nodes.into_iter().take(top_k).map(|(n, _)| n).collect()
     }
 
     pub fn create_edge(&mut self, from: String, to: String, _edge_type: String, _weight: f64) {
