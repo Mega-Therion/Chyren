@@ -79,7 +79,7 @@ export default function ChatPage() {
   const ttsRef = useRef<TtsEngine | null>(null)
 
   // Determine the overall state for colors
-  const brainState: BrainState = isStreaming 
+  const brainState: BrainState = isStreaming
     ? (streamingId ? 'speaking' : 'thinking')
     : (isListening ? 'listening' : 'idle');
 
@@ -232,8 +232,8 @@ export default function ChatPage() {
           {messages.length === 0 ? (
             <div className="empty-state">
               <div className="empty-state-inner">
-                <motion.div 
-                  animate={{ 
+                <motion.div
+                  animate={{
                     scale: brainState === 'idle' ? 1 : [1, 1.1, 1],
                     color: getSigilColor(brainState),
                     textShadow: `0 0 40px ${getSigilColor(brainState)}`
