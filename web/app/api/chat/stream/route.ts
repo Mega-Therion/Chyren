@@ -25,8 +25,9 @@ export const maxDuration = 60
 const _MODEL_CHAIN = Array.from(
   new Set([
     process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile',
+    'llama-3.1-70b-versatile',
     'llama-3.1-8b-instant',
-    'meta-llama/llama-4-scout-17b-16e-instruct',
+    'gemma2-9b-it',
   ]),
 )
 
@@ -184,7 +185,11 @@ function toChatHistory(rawMessages: unknown, fallbackContent: string): ChatMsg[]
     totalChars += nextSize
   }
 
-  return recent.reverse()
+  const ordered = recent.reverse()
+  // Anthropic requires conversations to start with a user message.
+  // Drop leading assistant turns that can appear when char truncation splits a pair.
+  const firstUser = ordered.findIndex((m) => m.role === 'user')
+  return firstUser > 0 ? ordered.slice(firstUser) : ordered
 }
 
 async function fetchGroqResponse(
@@ -354,7 +359,7 @@ async function fetchGeminiResponse(
   const apiKey = getOptionalEnv('GEMINI_API_KEY')
   if (!apiKey) throw new Error('Missing required env var: GEMINI_API_KEY')
 
-  const model = getOptionalEnv('GEMINI_MODEL') ?? 'gemini-3.1-flash-live-preview'
+  const model = getOptionalEnv('GEMINI_MODEL') ?? 'gemini-2.0-flash'
   logger.info(`[GEMINI] Attempting model: ${model}`)
   const resp = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
@@ -531,9 +536,9 @@ export async function POST(req: NextRequest) {
     }
 
     const providers: Array<() => Promise<Response>> = [
-      () => fetchOpenAIResponse(history, systemPrompt, profile.temperature),
-      () => fetchGeminiResponse(history, systemPrompt, profile.temperature),
       () => fetchAnthropicResponse(history, systemPrompt, profile.temperature),
+      () => fetchGeminiResponse(history, systemPrompt, profile.temperature),
+      () => fetchOpenAIResponse(history, systemPrompt, profile.temperature),
       () => fetchGroqResponse(history, systemPrompt, profile.temperature),
     ]
 
