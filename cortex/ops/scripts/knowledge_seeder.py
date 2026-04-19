@@ -44,6 +44,9 @@ class Domain:
     sister_slugs: list[str] = field(default_factory=list)
     query_patterns: list[str] = field(default_factory=list)
     reasoning_primer: str = ""
+    formal_anchor: str | None = None
+    millennium_target: bool = False
+    status: str = "unmapped" # unmapped, ingesting, formalized, sealed
 
 
 # ─── Complete knowledge tree ──────────────────────────────────────────────────
@@ -52,7 +55,8 @@ DOMAINS: list[Domain] = []
 _order = 0
 
 def D(slug, name, realm, mode, level=0, parent=None, desc="", purpose="",
-      axioms=None, methods=None, figures=None, sisters=None, patterns=None, primer=""):
+      axioms=None, methods=None, figures=None, sisters=None, patterns=None, primer="",
+      formal_anchor=None, millennium_target=False, status="unmapped"):
     global _order
     DOMAINS.append(Domain(
         slug=slug, name=name, realm=realm, reasoning_mode=mode,
@@ -61,6 +65,8 @@ def D(slug, name, realm, mode, level=0, parent=None, desc="", purpose="",
         core_axioms=axioms or [], key_methods=methods or [],
         key_figures=figures or [], sister_slugs=sisters or [],
         query_patterns=patterns or [], reasoning_primer=primer,
+        formal_anchor=formal_anchor, millennium_target=millennium_target,
+        status=status,
     ))
     _order += 1
 
@@ -98,12 +104,14 @@ D("rhetoric_classical", "Rhetoric (Classical)", "classical", "dialectical", leve
   primer="Frame responses rhetorically: establish credibility, engage emotion appropriately, construct logical argument.")
 
 D("arithmetic", "Arithmetic", "classical", "formal", level=1, parent="classical_liberal_arts",
+  formal_anchor="Mathlib4", status="sealed",
   desc="The study of number and basic operations.",
   purpose="Quantify and compute the fundamental properties of discrete and continuous quantities.",
   axioms=["Numbers have order", "Operations are rule-governed"],
   primer="Arithmetic is the bedrock of all quantitative reasoning. Ground numerical claims in exact computation.")
 
 D("geometry", "Geometry", "classical", "deductive", level=1, parent="classical_liberal_arts",
+  formal_anchor="Mathlib4", status="sealed",
   desc="The study of shape, space, and spatial relationships.",
   purpose="Reason about the structure of space and form with absolute rigor.",
   axioms=["Space has measurable structure", "Proof proceeds from axioms through propositions"],
@@ -142,6 +150,7 @@ D("math_foundations", "Foundations of Mathematics", "mathematics", "formal", lev
   methods=["Axiomatic method", "Formal proof", "Model construction"],
   figures=["Frege", "Russell", "Hilbert", "Gödel", "Cohen"])
 D("mathematical_logic", "Mathematical Logic", "mathematics", "deductive", level=2, parent="math_foundations",
+  formal_anchor="Mathlib4", status="sealed",
   methods=["Proof theory", "Model theory", "Completeness theorems"],
   figures=["Frege", "Gödel", "Tarski"])
 D("set_theory", "Set Theory", "mathematics", "formal", level=2, parent="math_foundations",
@@ -155,8 +164,6 @@ D("computability_theory", "Computability Theory", "mathematics", "formal", level
   figures=["Turing", "Church", "Kleene"])
 D("category_theory", "Category Theory", "mathematics", "formal", level=2, parent="math_foundations",
   figures=["Eilenberg", "Mac Lane", "Lawvere"])
-D("type_theory", "Type Theory", "mathematics", "formal", level=2, parent="math_foundations",
-  figures=["Church", "Martin-Löf", "Curry"])
 D("descriptive_set_theory", "Descriptive Set Theory", "mathematics", "formal", level=2, parent="math_foundations")
 D("reverse_mathematics", "Reverse Mathematics", "mathematics", "formal", level=2, parent="math_foundations",
   figures=["Friedman", "Simpson"])
@@ -273,7 +280,6 @@ D("stochastic_calculus", "Stochastic Calculus", "mathematics", "formal", level=2
 D("ergodic_theory", "Ergodic Theory", "mathematics", "formal", level=2, parent="probability_statistics", figures=["Birkhoff"])
 D("random_matrix_theory", "Random Matrix Theory", "mathematics", "formal", level=2, parent="probability_statistics", figures=["Wigner"])
 D("bayesian_statistics", "Bayesian Statistics", "mathematics", "formal", level=2, parent="probability_statistics", figures=["Bayes", "Laplace"])
-D("statistical_inference", "Statistical Inference", "mathematics", "empirical", level=2, parent="probability_statistics")
 D("time_series_analysis", "Time Series Analysis", "mathematics", "empirical", level=2, parent="probability_statistics")
 
 # Applied Mathematics
@@ -531,7 +537,6 @@ D("automata_theory", "Automata Theory", "computer_science", "formal", level=2, p
 D("formal_languages", "Formal Languages", "computer_science", "formal", level=2, parent="theory_of_computation", figures=["Chomsky"])
 D("computability", "Computability Theory", "computer_science", "formal", level=2, parent="theory_of_computation", figures=["Turing", "Church"])
 D("complexity_theory", "Computational Complexity Theory", "computer_science", "formal", level=2, parent="theory_of_computation", figures=["Cook", "Karp"])
-D("formal_verification", "Formal Verification", "computer_science", "formal", level=2, parent="theory_of_computation")
 D("type_theory_cs", "Type Theory", "computer_science", "formal", level=2, parent="theory_of_computation", figures=["Church", "Curry", "Howard"])
 D("program_semantics", "Program Semantics", "computer_science", "formal", level=2, parent="theory_of_computation")
 
@@ -1235,6 +1240,32 @@ D("lambda_calculus", "Lambda Calculus & Computability", "mathematics", "formal",
   primer="Trace β-reductions step by step. Identify normal forms. Note when divergence (infinite reduction) occurs. Connect to Haskell/Lisp semantics where relevant.")
 
 
+# ─── Millennium Prize Problems ────────────────────────────────────────────────
+D("riemann_hypothesis", "Riemann Hypothesis", "mathematics", "formal", level=2, parent="number_theory",
+  desc="The conjecture that the Riemann zeta function has its zeros only at the negative even integers and complex numbers with real part 1/2.",
+  millennium_target=True, formal_anchor="Mathlib4", status="ingesting")
+
+D("p_vs_np", "P vs NP Problem", "computer_science", "formal", level=2, parent="theory_of_computation",
+  desc="The question of whether every problem whose solution can be quickly verified by a computer can also be quickly solved by a computer.",
+  millennium_target=True, formal_anchor="Mathlib4", status="ingesting")
+
+D("navier_stokes", "Navier-Stokes Existence and Smoothness", "natural_science", "formal", level=2, parent="mathematical_physics",
+  desc="The problem of whether solutions to the Navier–Stokes equations always exist in three dimensions and are smooth.",
+  millennium_target=True, formal_anchor="Mathlib4", status="ingesting")
+
+D("yang_mills", "Yang-Mills Existence and Mass Gap", "natural_science", "formal", level=2, parent="mathematical_physics",
+  desc="The problem of proving that for any compact simple gauge group G, a non-trivial quantum Yang–Mills theory exists on R4 and has a mass gap Delta > 0.",
+  millennium_target=True, formal_anchor="Mathlib4", status="ingesting")
+
+D("hodge_conjecture", "Hodge Conjecture", "mathematics", "formal", level=2, parent="algebraic_geometry",
+  desc="The conjecture that for projective algebraic varieties, Hodge cycles are rational linear combinations of algebraic cycles.",
+  millennium_target=True, formal_anchor="Mathlib4", status="ingesting")
+
+D("bsd_conjecture", "Birch and Swinnerton-Dyer Conjecture", "mathematics", "formal", level=2, parent="number_theory",
+  desc="The conjecture that the rank of the abelian group of points on an elliptic curve E over a number field is equal to the order of the zero of its L-function L(E, s) at s = 1.",
+  millennium_target=True, formal_anchor="Mathlib4", status="ingesting")
+
+
 # ─── Key cross-domain edges ───────────────────────────────────────────────────
 
 EDGES: list[tuple[str, str, str, float]] = [
@@ -1298,12 +1329,14 @@ UPSERT_DOMAIN_SQL = """
 INSERT INTO omega_knowledge_domains
     (slug, name, parent_slug, level, sort_order, realm, reasoning_mode,
      description, purpose, core_axioms, key_methods, key_figures,
-     sister_slugs, query_patterns, reasoning_primer)
+     sister_slugs, query_patterns, reasoning_primer,
+     formal_anchor, millennium_target, status)
 VALUES
     (%(slug)s, %(name)s, %(parent_slug)s, %(level)s, %(sort_order)s,
      %(realm)s, %(reasoning_mode)s, %(description)s, %(purpose)s,
      %(core_axioms)s::jsonb, %(key_methods)s::jsonb, %(key_figures)s::jsonb,
-     %(sister_slugs)s::jsonb, %(query_patterns)s::jsonb, %(reasoning_primer)s)
+     %(sister_slugs)s::jsonb, %(query_patterns)s::jsonb, %(reasoning_primer)s,
+     %(formal_anchor)s, %(millennium_target)s, %(status)s)
 ON CONFLICT (slug) DO UPDATE SET
     name            = EXCLUDED.name,
     parent_slug     = EXCLUDED.parent_slug,
@@ -1319,6 +1352,9 @@ ON CONFLICT (slug) DO UPDATE SET
     sister_slugs    = EXCLUDED.sister_slugs,
     query_patterns  = EXCLUDED.query_patterns,
     reasoning_primer = EXCLUDED.reasoning_primer,
+    formal_anchor   = EXCLUDED.formal_anchor,
+    millennium_target = EXCLUDED.millennium_target,
+    status          = EXCLUDED.status,
     updated_at      = now();
 """
 
@@ -1327,6 +1363,15 @@ INSERT INTO omega_knowledge_edges (from_slug, to_slug, relationship, weight)
 VALUES (%(from_slug)s, %(to_slug)s, %(relationship)s, %(weight)s)
 ON CONFLICT (from_slug, to_slug, relationship) DO UPDATE SET weight = EXCLUDED.weight;
 """
+
+
+def ensure_schema(conn):
+    with conn.cursor() as cur:
+        print("→ Ensuring catalog schema...")
+        cur.execute("ALTER TABLE omega_knowledge_domains ADD COLUMN IF NOT EXISTS formal_anchor TEXT;")
+        cur.execute("ALTER TABLE omega_knowledge_domains ADD COLUMN IF NOT EXISTS millennium_target BOOLEAN DEFAULT FALSE;")
+        cur.execute("ALTER TABLE omega_knowledge_domains ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'unmapped';")
+    conn.commit()
 
 
 def write_domains(conn, domains: list[Domain], dry_run: bool) -> int:
@@ -1352,6 +1397,9 @@ def write_domains(conn, domains: list[Domain], dry_run: bool) -> int:
                 "sister_slugs":    json.dumps(domain.sister_slugs),
                 "query_patterns":  json.dumps(domain.query_patterns),
                 "reasoning_primer": domain.reasoning_primer,
+                "formal_anchor":   domain.formal_anchor,
+                "millennium_target": domain.millennium_target,
+                "status":          domain.status,
             })
         written += 1
     conn.commit()
@@ -1409,6 +1457,7 @@ def main() -> int:
     safe_url = urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(kept), parts.fragment))
 
     with psycopg2.connect(safe_url, connect_timeout=15) as conn:
+        ensure_schema(conn)
         if args.reset:
             with conn.cursor() as cur:
                 cur.execute("TRUNCATE omega_knowledge_edges, omega_knowledge_domains RESTART IDENTITY CASCADE;")
