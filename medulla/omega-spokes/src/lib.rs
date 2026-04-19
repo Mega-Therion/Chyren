@@ -166,6 +166,7 @@ impl SpokeRegistry {
             ("firebase", 203),
             ("zapier", 204),
             ("manus", 205),
+            ("filesystem", 206),
             ("openrouter", 15),
         ];
 
@@ -195,6 +196,7 @@ impl SpokeRegistry {
                 "firebase" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-firebase"]))),
                 "zapier" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-zapier"]))),
                 "manus" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-manus"]))),
+                "filesystem" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-filesystem", "/home/mega/Chyren"]))),
                 "openrouter" => Some(Arc::new(spokes::OpenRouterSpoke::new(config))),
                 _ => None,
             };

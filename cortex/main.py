@@ -5,6 +5,8 @@ from cli_theme import console, print_banner
 from providers.base import ProviderRequest, ProviderRouter
 from providers.sovereign import SovereignProvider
 from chyren_py.phylactery_loader import PhylacteryLoader
+import asyncio
+from mcp_hub import MCPHub
 
 class ChyrenHub:
     def __init__(self):
@@ -15,9 +17,20 @@ class ChyrenHub:
         self.identity = loader.create_identity_kernel(sections)
         self.router = ProviderRouter()
         self.router.register(SovereignProvider())
+        
+        self.mcp_hub = MCPHub()
+        self.mcp_hub.register_server("memory", "npx", ["-y", "@modelcontextprotocol/server-memory"])
 
     def run(self, task):
-        request = ProviderRequest(prompt=task, system="You are Chyren, a sovereign intelligence orchestrator.")
+        # Discover capabilities dynamically from the MCP hub
+        try:
+            capabilities = asyncio.run(self.mcp_hub.connect_and_discover("memory"))
+            tool_context = f"\n[MCP HUB CAPABILITIES - memory]\nTools: {capabilities['tools']}"
+        except Exception as e:
+            tool_context = f"\n[MCP HUB FAILED]\nError: {e}"
+
+        system_prompt = f"You are Chyren, a sovereign intelligence orchestrator.{tool_context}"
+        request = ProviderRequest(prompt=task, system=system_prompt)
         return self.router.route(request, preferred="sovereign").text
 
 def main():

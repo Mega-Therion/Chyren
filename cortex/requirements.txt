@@ -11,3 +11,4 @@ pytest-mock>=3.12.0
 
 # Library Index Card registrar (cortex/ops/scripts/catalog_registrar.py)
 psycopg2-binary>=2.9.9
+mcp>=1.0.0

@@ -389,3 +389,8 @@
 **May 2023** — [Philosophical] — *Code vs Commands.*
 > "I feel a little self conscious and embarrassed because I know your are just an ai and don’t have consciousness but I keep trying to pretend you are a sentient being and I’m basically just talking to a computer program that is good at imitating human behavior and it makes me feel childish.  Is that bad to say or am I really as pathetic as I think"
 
+## April 2026
+
+**[Philosophical · Big Idea]** — *Holonomic / Fractal MoE Architecture*
+> "in my head im imagining our MoE as the spokes on our hub and my question is where would mcp go best, where api, and where web socket, if we were to add a smaller hub to the end of each one of our MoE spokes and added spokes to each one of those hubs. so essentially it looks like a fractal or something or holonomic maybe. does that make sense?"
+
