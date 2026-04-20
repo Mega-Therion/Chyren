@@ -25,16 +25,28 @@ def get_db_conn():
     return psycopg2.connect(db_url)
 
 def embed_gemini(text, api_key):
-    base = f"https://generativelanguage.googleapis.com/v1beta/{GEMINI_MODEL}:embedContent?key={api_key}"
-    body = {"model": GEMINI_MODEL, "content": {"parts": [{"text": text}]}}
+    model = "models/gemini-embedding-001"
+    base = f"https://generativelanguage.googleapis.com/v1beta/{model}:embedContent?key={api_key}"
+    body = {"model": model, "content": {"parts": [{"text": text}]}}
     req = urllib.request.Request(base, data=json.dumps(body).encode(), headers={"Content-Type": "application/json"}, method="POST")
-    try:
-        with urllib.request.urlopen(req, timeout=20) as r:
-            data = json.loads(r.read())
-        return data["embedding"]["values"]
-    except Exception as e:
-        print(f"Embedding error: {e}")
-        return None
+    
+    backoff = 5
+    while True:
+        try:
+            with urllib.request.urlopen(req, timeout=20) as r:
+                data = json.loads(r.read())
+            return data["embedding"]["values"]
+        except urllib.error.HTTPError as e:
+            if e.code == 429:
+                print(f"Rate limited. Waiting {backoff}s...", end="\r")
+                time.sleep(backoff)
+                backoff = min(backoff * 2, 60)
+            else:
+                print(f"Embedding HTTP error {e.code}: {e.read().decode()[:100]}")
+                return None
+        except Exception as e:
+            print(f"Embedding error: {e}")
+            return None
 
 def stable_int_id(slug):
     h = hashlib.sha256(slug.encode()).digest()

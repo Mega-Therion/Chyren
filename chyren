@@ -127,6 +127,14 @@ def emit_event(event: str, **fields: object) -> None:
 
 # ─── Process helpers ──────────────────────────────────────────────────────────
 
+def get_python_exe() -> str:
+    """Prefer the cortex venv interpreter if it exists."""
+    venv_py = REPO_DIR / "cortex" / "venv" / "bin" / "python3"
+    if venv_py.is_file():
+        return str(venv_py)
+    return sys.executable
+
+
 def require_tool(tool: str) -> None:
     if shutil.which(tool) is None:
         raise SystemExit(f"[chyren] required tool not found on PATH: {tool}")
@@ -394,14 +402,15 @@ def cmd_dream(args: argparse.Namespace) -> int:
     
     if getattr(args, 'ingest_hf', False) or getattr(args, 'queue', False) or getattr(args, 'enqueue', None):
         script_dir = CORTEX_DIR / "ops" / "scripts"
+        py = get_python_exe()
         if getattr(args, 'queue', False):
-            cmd = [sys.executable, str(script_dir / "hf_queue_manager.py"), "--status"]
+            cmd = [py, str(script_dir / "hf_queue_manager.py"), "--status"]
         elif getattr(args, 'enqueue', None):
-            cmd = [sys.executable, str(script_dir / "hf_queue_manager.py"), "--prioritize", args.enqueue]
+            cmd = [py, str(script_dir / "hf_queue_manager.py"), "--prioritize", args.enqueue]
         else:
             # Default behavior for --ingest-hf: replenish and run one cycle
-            run_subprocess([sys.executable, str(script_dir / "hf_queue_manager.py"), "--replenish"])
-            cmd = [sys.executable, str(script_dir / "hf_pipeline_worker.py")]
+            run_subprocess([py, str(script_dir / "hf_queue_manager.py"), "--replenish"])
+            cmd = [py, str(script_dir / "hf_pipeline_worker.py")]
         
         # Ensure we have OMEGA_CATALOG_DB_URL
         env = os.environ.copy()
@@ -411,14 +420,15 @@ def cmd_dream(args: argparse.Namespace) -> int:
         return subprocess.run(cmd, cwd=REPO_DIR, env=env).returncode
 
     with exclusive_lock(DREAM_LOCK):
+        py = get_python_exe()
         identity = CORTEX_DIR / "chyren_py" / "identity_synthesis.py"
         catalog = CORTEX_DIR / "ops" / "scripts" / "catalog_registrar.py"
         for script in (identity, catalog):
             if not script.is_file():
                 emit_event("dream.fail", missing=str(script))
                 raise SystemExit(f"[chyren] dream script missing: {script}")
-        r1 = run_subprocess([sys.executable, str(identity)])
-        r2 = run_subprocess([sys.executable, str(catalog)])
+        r1 = run_subprocess([py, str(identity)])
+        r2 = run_subprocess([py, str(catalog)])
         if r1.returncode != 0 or r2.returncode != 0:
             emit_event("dream.fail", identity=r1.returncode, catalog=r2.returncode)
             raise SystemExit("[chyren] dream cycle failed.")
