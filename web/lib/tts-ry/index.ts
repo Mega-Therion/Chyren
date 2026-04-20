@@ -104,8 +104,8 @@ function speakBrowser(text: string): Promise<void> {
   return new Promise<void>((resolve) => {
     if (!text.trim() || typeof window === 'undefined') { resolve(); return }
     const utter = new SpeechSynthesisUtterance(text.trim())
-    utter.rate = 0.92
-    utter.pitch = 0.85
+    utter.rate = 1.08
+    utter.pitch = 0.98
     utter.volume = 1.0
     const v = getPremiumVoice()
     if (v) utter.voice = v

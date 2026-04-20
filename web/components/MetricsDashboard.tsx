@@ -40,7 +40,7 @@ export const MetricsDashboard: React.FC = () => {
 
   useEffect(() => {
     void fetchMetrics();
-    const interval = setInterval(fetchMetrics, 5000);
+    const interval = setInterval(fetchMetrics, 30000);
     
     // Connect to WebSocket for real-time events
     const wsUrl = process.env.NEXT_PUBLIC_MEDULLA_WS_URL || 'ws://localhost:9090/ws';

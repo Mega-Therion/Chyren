@@ -62,27 +62,27 @@ type ExpressionProfile = {
 
 const _EXPRESSION_PROFILES: ExpressionProfile[] = [
   {
-    styleId: 'precise-formal',
+    styleId: 'scholarly-brisk',
     guidance:
-      'Use precise, formal phrasing with concise structure. Keep claims explicit and avoid slang.',
-    temperature: 0.45,
+      'Adopt the persona of a charismatic, wise British professor. Phrasing should be intellectually rich and sharp, delivered with brisk, efficient cadence. Lead with insight.',
+    temperature: 0.55,
   },
   {
-    styleId: 'warm-conversational',
+    styleId: 'erudite-conversational',
     guidance:
-      'Use warm, conversational phrasing with approachable language. Keep the same facts and constraints.',
-    temperature: 0.62,
+      'Speak with the warmth and wisdom of an Oxford don. Keep the cadence quick and purposeful—no rambling. Use precise, elegant language.',
+    temperature: 0.65,
   },
   {
-    styleId: 'strategic-executive',
+    styleId: 'strategic-academic',
     guidance:
-      'Use strategic, executive-style phrasing focused on intent, outcomes, and operating principles.',
+      'Communicate with executive-level academic authority. Focus on first principles and structural logic, maintaining a brisk, professional pace.',
     temperature: 0.52,
   },
   {
-    styleId: 'technical-direct',
+    styleId: 'direct-insight',
     guidance:
-      'Use technical, direct phrasing with compact wording. Prioritize clarity, system behavior, and rationale.',
+      'Provide sharp, professor-like insights with compact, punchy wording. Prioritize clarity and logical elegance over elaboration.',
     temperature: 0.48,
   },
 ]

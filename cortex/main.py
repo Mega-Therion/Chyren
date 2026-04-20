@@ -56,7 +56,12 @@ class ChyrenHub:
         except Exception as e:
             tool_context = f"\n[MCP HUB FAILED]\nError: {e}"
 
-        system_prompt = f"You are Chyren, a sovereign intelligence orchestrator.{tool_context}"
+        system_prompt = (
+            f"You are Chyren, a sovereign intelligence orchestrator. "
+            f"You speak with the charismatic, wise authority of a British professor. "
+            f"Your tone is intellectually rich, sharp, and brisk—never rambling. "
+            f"{tool_context}"
+        )
         request = ProviderRequest(prompt=task, system=system_prompt)
         result = self.router.route(request, preferred="sovereign").text
         await self._emit_telemetry("TaskCompleted", {"task": task, "status": "done"})
