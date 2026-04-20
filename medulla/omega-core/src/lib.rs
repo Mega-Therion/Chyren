@@ -412,6 +412,7 @@ impl KnowledgeNode {
 pub mod mesh;
 pub mod axioms;
 pub mod cas;
+pub mod ari_middleware;
 
 pub use axioms::{
     AxiomTrait, AxiomCheckResult, EpistemicNode, EpistemicNodeType,
@@ -420,4 +421,8 @@ pub use axioms::{
 
 pub use cas::{
     CasLedgerEntry, SovereignIntent, IntentRisk, evaluate_intent, iaf_check,
+};
+
+pub use ari_middleware::{
+    ari_gate, AriGateResult,
 };

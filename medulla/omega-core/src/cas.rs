@@ -111,6 +111,24 @@ pub fn evaluate_intent(intent: SovereignIntent) -> CasLedgerEntry {
     }
 }
 
+/// Helper to create a rejected ledger entry without full C.A.S. processing.
+pub fn reject_intent(intent: SovereignIntent, reason: &str) -> CasLedgerEntry {
+    // Compute integrity hash for consistency.
+    let raw = format!(
+        "{}|{}|{}|{:.6}",
+        intent.intent, intent.acknowledgement, intent.user_anchor, intent.declared_at
+    );
+    let integrity_hash = hex::encode(Sha256::digest(raw.as_bytes()));
+    CasLedgerEntry {
+        entry_id: crate::gen_id("cas"),
+        intent,
+        integrity_hash,
+        admitted: false,
+        rejection_reason: Some(reason.to_string()),
+    }
+}
+
+
 // ── I.A.F. stub ───────────────────────────────────────────────────────────────
 
 /// I.A.F. — Immutable Alignment Fabric
