@@ -312,6 +312,123 @@ async function fetchOpenAIResponse(
   return createSingleSseTextResponse(content)
 }
 
+// ─── OpenRouter (free models, OpenAI-compatible) ─────────────────────────────
+async function fetchOpenRouterResponse(
+  history: ChatMsg[],
+  systemPrompt: string,
+  temperature: number,
+): Promise<Response> {
+  const apiKey = getOptionalEnv('OPENROUTER_API_KEY')
+  if (!apiKey) throw new Error('Missing OPENROUTER_API_KEY')
+
+  // Free models available on OpenRouter (no billing required)
+  const freeModels = [
+    'meta-llama/llama-3.3-70b-instruct:free',
+    'google/gemma-3-27b-it:free',
+    'mistralai/mistral-7b-instruct:free',
+    'deepseek/deepseek-r1-distill-llama-70b:free',
+    'nousresearch/hermes-3-llama-3.1-405b:free',
+  ]
+
+  let lastError = 'No OpenRouter models attempted'
+
+  for (const model of freeModels) {
+    try {
+      logger.info(`[OPENROUTER] Attempting: ${model}`)
+      const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://chyren-web.vercel.app',
+          'X-Title': 'Chyren Sovereign Intelligence',
+        },
+        body: JSON.stringify({
+          model,
+          messages: [{ role: 'system', content: systemPrompt }, ...history],
+          temperature,
+        }),
+      })
+
+      if (resp.ok) {
+        const payload = (await resp.json().catch(() => ({}))) as {
+          choices?: Array<{ message?: { content?: string } }>
+        }
+        const content = payload.choices?.[0]?.message?.content?.trim() ?? ''
+        if (content) return createSingleSseTextResponse(content)
+        lastError = `OpenRouter model ${model} returned empty response`
+        continue
+      }
+
+      lastError = await resp.text().catch(() => `${resp.status} ${resp.statusText}`)
+      logger.warn(`[OPENROUTER] Model ${model} failed (${resp.status}): ${lastError}`)
+    } catch (err) {
+      lastError = err instanceof Error ? err.message : 'Unknown OpenRouter error'
+      logger.warn(`[OPENROUTER] Model ${model} exception: ${lastError}`)
+    }
+  }
+
+  throw new Error(`OpenRouter fallback chain failed: ${lastError}`)
+}
+
+// ─── HuggingFace Serverless Inference API ────────────────────────────────────
+async function fetchHuggingFaceResponse(
+  history: ChatMsg[],
+  systemPrompt: string,
+  temperature: number,
+): Promise<Response> {
+  const apiKey = getOptionalEnv('HUGGINGFACE_API_KEY')
+  if (!apiKey) throw new Error('Missing HUGGINGFACE_API_KEY')
+
+  const models = [
+    'mistralai/Mistral-7B-Instruct-v0.3',
+    'HuggingFaceH4/zephyr-7b-beta',
+    'meta-llama/Meta-Llama-3-8B-Instruct',
+  ]
+
+  let lastError = 'No HuggingFace models attempted'
+
+  for (const model of models) {
+    try {
+      logger.info(`[HUGGINGFACE] Attempting: ${model}`)
+      const resp = await fetch(
+        `https://api-inference.huggingface.co/models/${model}/v1/chat/completions`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model,
+            messages: [{ role: 'system', content: systemPrompt }, ...history],
+            temperature,
+            max_tokens: 512,
+          }),
+        },
+      )
+
+      if (resp.ok) {
+        const payload = (await resp.json().catch(() => ({}))) as {
+          choices?: Array<{ message?: { content?: string } }>
+        }
+        const content = payload.choices?.[0]?.message?.content?.trim() ?? ''
+        if (content) return createSingleSseTextResponse(content)
+        lastError = `HuggingFace model ${model} returned empty response`
+        continue
+      }
+
+      lastError = await resp.text().catch(() => `${resp.status} ${resp.statusText}`)
+      logger.warn(`[HUGGINGFACE] Model ${model} failed (${resp.status}): ${lastError}`)
+    } catch (err) {
+      lastError = err instanceof Error ? err.message : 'Unknown HuggingFace error'
+      logger.warn(`[HUGGINGFACE] Model ${model} exception: ${lastError}`)
+    }
+  }
+
+  throw new Error(`HuggingFace fallback chain failed: ${lastError}`)
+}
+
 
 async function fetchGeminiResponse(
   history: ChatMsg[],
@@ -472,7 +589,7 @@ export async function POST(req: NextRequest) {
   // model call librarian tools before answering. Uses OpenAI-compatible format
   // so it works with OpenRouter (OPENAI_API_KEY=sk-or-...) or Gemini directly.
   // Falls through to the provider chain on any failure.
-  const hasToolProvider = !!(getOptionalEnv('OPENAI_API_KEY') || getOptionalEnv('GEMINI_API_KEY'))
+  const hasToolProvider = !!(getOptionalEnv('OPENAI_API_KEY') || getOptionalEnv('GEMINI_API_KEY') || getOptionalEnv('OPENROUTER_API_KEY'))
   const catalogConfigured = Boolean(getOptionalEnv('OMEGA_CATALOG_DB_URL'))
   if (hasToolProvider && catalogConfigured) {
     try {
@@ -516,11 +633,13 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Fallback order: Gemini -> Groq -> OpenAI/OpenRouter
+    // Fallback order: Gemini → OpenRouter (free) → HuggingFace → Groq → OpenAI
     const providers = [
-      { name: 'Gemini', fn: () => fetchGeminiResponse(history, systemPrompt, profile.temperature) },
-      { name: 'Groq', fn: () => fetchGroqResponse(history, systemPrompt, profile.temperature) },
-      { name: 'OpenAI/OpenRouter', fn: () => fetchOpenAIResponse(history, systemPrompt, profile.temperature) },
+      { name: 'Gemini',       fn: () => fetchGeminiResponse(history, systemPrompt, profile.temperature) },
+      { name: 'OpenRouter',   fn: () => fetchOpenRouterResponse(history, systemPrompt, profile.temperature) },
+      { name: 'HuggingFace', fn: () => fetchHuggingFaceResponse(history, systemPrompt, profile.temperature) },
+      { name: 'Groq',        fn: () => fetchGroqResponse(history, systemPrompt, profile.temperature) },
+      { name: 'OpenAI',      fn: () => fetchOpenAIResponse(history, systemPrompt, profile.temperature) },
     ]
 
     const allErrors: string[] = []
