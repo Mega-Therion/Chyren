@@ -93,9 +93,8 @@ async function tryElevenLabsTts(
   const apiKey = getOptionalEnv('ELEVENLABS_API_KEY')
   if (!apiKey) return null
 
-  // Use a natural, casual American male voice by default
-  // Adam (pNInz6obpgDQGcFmaJgB) = natural casual male
-  const voiceId = getOptionalEnv('ELEVENLABS_VOICE_ID') ?? 'pNInz6obpgDQGcFmaJgB'
+  // Use a smart-sounding British male voice (Brian)
+  const voiceId = getOptionalEnv('ELEVENLABS_VOICE_ID') ?? 'nPczCjzB2oP217iL6L8B'
 
   try {
     const res = await fetch(

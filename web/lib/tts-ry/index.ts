@@ -86,16 +86,14 @@ function getPremiumVoice(): SpeechSynthesisVoice | undefined {
   if (typeof window === 'undefined') return undefined
   const voices = window.speechSynthesis.getVoices()
   if (!voices.length) return undefined
-  // Prefer natural American English voices — casual, younger-sounding
+  // Prefer smart-sounding British male voices
   const targets = [
-    (v: SpeechSynthesisVoice) => v.name === 'Google US English',
-    (v: SpeechSynthesisVoice) => v.name.includes('Samantha'),
-    (v: SpeechSynthesisVoice) => v.name.includes('Alex'),
-    (v: SpeechSynthesisVoice) => v.name.includes('Aaron'),
-    (v: SpeechSynthesisVoice) => v.name.includes('Nicky'),
-    (v: SpeechSynthesisVoice) => v.name.includes('Google US'),
-    (v: SpeechSynthesisVoice) => v.lang === 'en-US' && !v.name.toLowerCase().includes('female'),
-    (v: SpeechSynthesisVoice) => v.lang.startsWith('en-US'),
+    (v: SpeechSynthesisVoice) => v.name.includes('Daniel'),
+    (v: SpeechSynthesisVoice) => v.name.includes('Google UK English Male'),
+    (v: SpeechSynthesisVoice) => v.name.includes('Arthur'),
+    (v: SpeechSynthesisVoice) => v.name.includes('UK English Male'),
+    (v: SpeechSynthesisVoice) => v.lang === 'en-GB' && !v.name.toLowerCase().includes('female'),
+    (v: SpeechSynthesisVoice) => v.lang.startsWith('en-GB'),
     (v: SpeechSynthesisVoice) => v.lang.startsWith('en'),
   ]
   for (const t of targets) {
