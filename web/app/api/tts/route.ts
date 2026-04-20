@@ -157,8 +157,8 @@ async function tryGoogleTts(
         body: JSON.stringify({
           input: { text },
           voice: {
-            languageCode: 'en-US',
-            name: voice ?? 'en-US-Neural2-D',
+            languageCode: 'en-GB',
+            name: voice ?? 'en-GB-Wavenet-B',
             ssmlGender: 'MALE',
           },
           audioConfig: {

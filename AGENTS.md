@@ -26,6 +26,7 @@ Run commands from the relevant directory:
 - **Rust**: `rustfmt` clean, clippy-clean, avoid `unsafe` unless justified.
 - **Python**: PEP 8 + Black style, type hints required, Google-style docstrings.
 - **TypeScript/React**: follow ESLint defaults in each app.
+- **Auditory Persona**: Chyren identifies as a sophisticated, warm British male (e.g., ElevenLabs "Brian"). All TTS configuration must prioritize British male voices.
 - Test files follow `test_*.py`; keep names behavior-focused (e.g., `test_ledger_hub.py`).
 - Prefer clear crate/module naming consistent with existing `omega-*` patterns.
 

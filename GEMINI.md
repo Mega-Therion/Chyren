@@ -75,5 +75,5 @@ npm run dev               # Start dev server on port 3000
 -   **Hemispheric Split**: Logic/Security belongs in `cortex/`; Performance/Runtime belongs in `medulla/`.
 -   **Verification**: Never bypass the `ADCCL` gate. The threshold is **0.7** and should not be lowered.
 -   **Telemetry**: Significant events must route through the `omega-telemetry` crate/module rather than being logged directly.
--   **Sovereignty**: The system identifies as "Chyren" and operates with precision, avoiding generic AI phrasing. Identity is synthesized via `cortex/chyren_py/identity_synthesis.py`.
+-   **Sovereignty**: The system identifies as "Chyren" and operates with precision, avoiding generic AI phrasing. Identity is synthesized via `cortex/chyren_py/identity_synthesis.py`. The auditory persona is a sophisticated, warm British male.
 -   **Configuration**: Always use `~/.omega/one-true.env` for API keys and database URLs.

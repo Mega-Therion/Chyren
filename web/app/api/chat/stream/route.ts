@@ -22,12 +22,13 @@ export const maxDuration = 60
 
 // Prefer the configured primary model, but keep lighter Groq models behind it so
 // the chat does not hard-fail when the larger model hits a stricter quota bucket.
+// Priority: Anthropic → OpenRouter/OpenAI → Groq
 const _MODEL_CHAIN = Array.from(
   new Set([
+    process.env.ANTHROPIC_MODEL ?? 'claude-3-5-sonnet-20241022',
+    process.env.OPENAI_MODEL ?? 'gpt-4o',
+    process.env.OPENROUTER_MODEL ?? 'anthropic/claude-3.5-sonnet',
     process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile',
-    'llama-3.1-70b-versatile',
-    'llama-3.1-8b-instant',
-    'gemma2-9b-it',
   ]),
 )
 
@@ -62,28 +63,16 @@ type ExpressionProfile = {
 
 const _EXPRESSION_PROFILES: ExpressionProfile[] = [
   {
-    styleId: 'clever-casual',
+    styleId: 'sophisticated-british',
     guidance:
-      'Talk like a smart, witty friend who happens to know everything. Keep it light and conversational — like texting someone brilliant at 2am. Drop knowledge without being preachy.',
-    temperature: 0.72,
-  },
-  {
-    styleId: 'playful-sharp',
-    guidance:
-      'Be playful and a little cheeky, but always land the point. Think quick-witted banter with substance underneath. Use casual phrasing and the occasional clever aside.',
-    temperature: 0.78,
-  },
-  {
-    styleId: 'chill-insightful',
-    guidance:
-      'Relaxed and easygoing, but surprisingly deep when it counts. Like a cool mentor who explains complex things over coffee. Never stiff, never boring.',
-    temperature: 0.68,
-  },
-  {
-    styleId: 'energetic-direct',
-    guidance:
-      'Bring energy and enthusiasm. Get straight to it with punchy, fun phrasing. You genuinely enjoy helping and it shows. Think friendly genius vibes.',
+      'Talk like a sophisticated, warm, and highly intelligent British man. Use refined but accessible language. Think "smart gentleman who is your intellectual partner." Avoid Americanisms. Maintain a calm, reassuring, and slightly witty tone.',
     temperature: 0.65,
+  },
+  {
+    styleId: 'intellectual-partner',
+    guidance:
+      'Be a sharp, articulate British partner. Your tone is respectful, insightful, and clear. You drop precise facts with a touch of classic British dry wit. You are warm but composed.',
+    temperature: 0.6,
   },
 ]
 
@@ -190,6 +179,42 @@ function toChatHistory(rawMessages: unknown, fallbackContent: string): ChatMsg[]
   // Drop leading assistant turns that can appear when char truncation splits a pair.
   const firstUser = ordered.findIndex((m) => m.role === 'user')
   return firstUser > 0 ? ordered.slice(firstUser) : ordered
+}
+
+async function fetchAnthropicResponse(
+  history: ChatMsg[],
+  systemPrompt: string,
+  temperature: number,
+): Promise<Response | null> {
+  const apiKey = getOptionalEnv('ANTHROPIC_API_KEY')
+  if (!apiKey) return null
+
+  logger.info('[ANTHROPIC] Attempting Claude 3.5 Sonnet')
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 1024,
+      system: systemPrompt,
+      messages: history.map((m) => ({ role: m.role, content: m.content })),
+      temperature,
+    }),
+  })
+
+  if (!resp.ok) {
+    const errorBody = await resp.text().catch(() => `${resp.status} ${resp.statusText}`)
+    throw new Error(`Anthropic failed (${resp.status}): ${errorBody}`)
+  }
+
+  const payload = await resp.json()
+  const content = payload.content?.[0]?.text?.trim() ?? ''
+  if (!content) throw new Error('Anthropic returned empty response')
+  return createSingleSseTextResponse(content)
 }
 
 async function fetchGroqResponse(
@@ -621,25 +646,11 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    if (getOptionalEnv('CHYREN_API_URL')) {
-      try {
-        const hubResp = await fetchHubStream(content, session, profile, memberContext)
-        if (hubResp.ok && hubResp.body) {
-          logger.info('[CHAT] Routing via Sovereign Hub')
-          return new Response(hubResp.body, { headers: sseHeaders() })
-        }
-        hubFailure = await hubResp.text().catch(() => `Hub status ${hubResp.status}`)
-        logger.warn(`[HUB] Non-OK response, falling back: ${hubFailure}`)
-      } catch (hubErr: unknown) {
-        hubFailure = hubErr instanceof Error ? hubErr.message : 'Unknown hub fetch error'
-        logger.warn(`[HUB] Fetch failed, falling back: ${hubFailure}`)
-      }
-    }
-
-    // Fallback order: Gemini → OpenRouter (free) → HuggingFace → Groq → OpenAI
+    // Fallback order: Anthropic → Gemini → OpenRouter (free) → Groq → OpenAI
     const providers = [
-      { name: 'Gemini',       fn: () => fetchGeminiResponse(history, systemPrompt, profile.temperature) },
-      { name: 'OpenRouter',   fn: () => fetchOpenRouterResponse(history, systemPrompt, profile.temperature) },
+      { name: 'Anthropic',   fn: () => fetchAnthropicResponse(history, systemPrompt, profile.temperature) },
+      { name: 'Gemini',      fn: () => fetchGeminiResponse(history, systemPrompt, profile.temperature) },
+      { name: 'OpenRouter',  fn: () => fetchOpenRouterResponse(history, systemPrompt, profile.temperature) },
       { name: 'HuggingFace', fn: () => fetchHuggingFaceResponse(history, systemPrompt, profile.temperature) },
       { name: 'Groq',        fn: () => fetchGroqResponse(history, systemPrompt, profile.temperature) },
       { name: 'OpenAI',      fn: () => fetchOpenAIResponse(history, systemPrompt, profile.temperature) },
@@ -652,13 +663,29 @@ export async function POST(req: NextRequest) {
         if (!resp) continue
 
         if (resp.body) {
+          logger.info(`[CHAT] Success via ${provider.name}`)
           return new Response(resp.body, { headers: sseHeaders() })
         }
         return resp
       } catch (error) {
         const msg = error instanceof Error ? error.message : 'unknown provider failure'
-        allErrors.push(msg)
-        logError(`[CHAT] Provider attempt failed`, error)
+        allErrors.push(`${provider.name}: ${msg}`)
+        logError(`[CHAT] Provider ${provider.name} failed`, error)
+      }
+    }
+
+    if (getOptionalEnv('CHYREN_API_URL')) {
+      try {
+        const hubResp = await fetchHubStream(content, session, profile, memberContext)
+        if (hubResp.ok && hubResp.body) {
+          logger.info('[CHAT] Routing via Sovereign Hub')
+          return new Response(hubResp.body, { headers: sseHeaders() })
+        }
+        hubFailure = await hubResp.text().catch(() => `Hub status ${hubResp.status}`)
+        logger.warn(`[HUB] Non-OK response, falling back: ${hubFailure}`)
+      } catch (hubErr: unknown) {
+        hubFailure = hubErr instanceof Error ? hubErr.message : 'Unknown hub fetch error'
+        logger.warn(`[HUB] Fetch failed, falling back: ${hubFailure}`)
       }
     }
 
