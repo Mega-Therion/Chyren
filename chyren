@@ -388,9 +388,28 @@ def cmd_live(remainder: list[str]) -> int:
         emit_event("live.stop", signal=received_signal["sig"])
 
 
-def cmd_dream(_remainder: list[str]) -> int:
+def cmd_dream(args: argparse.Namespace) -> int:
     LOG.info("Entering Dream State (Autonomous Maintenance)...")
     emit_event("dream.start")
+    
+    if getattr(args, 'ingest_hf', False) or getattr(args, 'queue', False) or getattr(args, 'enqueue', None):
+        script_dir = CORTEX_DIR / "ops" / "scripts"
+        if getattr(args, 'queue', False):
+            cmd = [sys.executable, str(script_dir / "hf_queue_manager.py"), "--status"]
+        elif getattr(args, 'enqueue', None):
+            cmd = [sys.executable, str(script_dir / "hf_queue_manager.py"), "--prioritize", args.enqueue]
+        else:
+            # Default behavior for --ingest-hf: replenish and run one cycle
+            run_subprocess([sys.executable, str(script_dir / "hf_queue_manager.py"), "--replenish"])
+            cmd = [sys.executable, str(script_dir / "hf_pipeline_worker.py")]
+        
+        # Ensure we have OMEGA_CATALOG_DB_URL
+        env = os.environ.copy()
+        if "OMEGA_CATALOG_DB_URL" not in env:
+            env["OMEGA_CATALOG_DB_URL"] = env.get("NEON_URL", "") # fallback if needed
+            
+        return subprocess.run(cmd, cwd=REPO_DIR, env=env).returncode
+
     with exclusive_lock(DREAM_LOCK):
         identity = CORTEX_DIR / "chyren_py" / "identity_synthesis.py"
         catalog = CORTEX_DIR / "ops" / "scripts" / "catalog_registrar.py"
@@ -462,7 +481,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_live = sub.add_parser("live", help="Boot Medulla API + Next.js dev server.")
     p_live.add_argument("args", nargs=argparse.REMAINDER)
 
-    sub.add_parser("dream", help="Maintenance mode: identity synthesis + catalog indexing.")
+    p_dream = sub.add_parser("dream", help="Maintenance mode: identity synthesis + catalog indexing.")
+    p_dream.add_argument("--ingest-hf", action="store_true", help="Run the autonomous HF ingestion pipeline.")
+    p_dream.add_argument("--queue", action="store_true", help="Show current HF ingestion queue status.")
+    p_dream.add_argument("--enqueue", metavar="ID", help="Prioritize a specific dataset in the HF queue.")
 
     p_sov = sub.add_parser("sovereign", help="Launch the high-integrity development workspace (Docker).")
     p_sov.add_argument("--build", action="store_true", help="Force rebuild the sovereign image.")
@@ -501,7 +523,7 @@ def dispatch(args: argparse.Namespace, raw_argv: list[str]) -> int:
     if cmd == "live":
         return cmd_live(remainder)
     if cmd == "dream":
-        return cmd_dream(remainder)
+        return cmd_dream(args)
     if cmd == "sovereign":
         return cmd_sovereign(args)
 
