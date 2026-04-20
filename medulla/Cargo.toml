@@ -14,7 +14,12 @@ members = [
     "omega-telemetry",
     "omega-conductor",
     "omega-eval",
-    "omega-cli", "omega-phylactery", "omega-telegram-gateway", "omega-neocortex",
+    "omega-cli",
+    "omega-cim",
+    "omega-ternary",
+    "omega-phylactery",
+    "omega-telegram-gateway",
+    "omega-neocortex",
 ]
 
 [workspace.dependencies]

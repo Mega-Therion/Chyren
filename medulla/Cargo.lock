@@ -2047,6 +2047,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "omega-cim"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
 name = "omega-cli"
 version = "0.1.0"
 dependencies = [
@@ -2266,6 +2276,13 @@ dependencies = [
  "tokio",
  "tracing",
  "tracing-subscriber",
+]
+
+[[package]]
+name = "omega-ternary"
+version = "0.1.0"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
