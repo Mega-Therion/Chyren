@@ -249,8 +249,16 @@ pub fn gen_id(prefix: &str) -> String {
     format!("{}-{}", prefix, uuid::Uuid::new_v4())
 }
 
-/// Root integrity marker.
+/// Root integrity marker — the Yettragrammaton seal.
 pub const YETTRAGRAMMATON: &str = "R.W.Ϝ.Y.";
+
+/// The ARI Master Axiom: the volume of inquiry must perpetually exceed the
+/// volume of resolved answers. This is the holonomy anchor of the system.
+/// Etched: 0x0000000000000001 — Truth-Axiom L0.
+pub const MASTER_AXIOM: u128 = 0x0000_0000_0000_0000_0000_0000_0000_0001;
+
+/// ARI system identity string.
+pub const ARI_IDENTITY: &str = "ARI (Artificial Real Intelligence) — Sovereign Execution Primitive";
 
 /// RunEnvelope: portable run context passed between subsystems.
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -403,8 +411,13 @@ impl KnowledgeNode {
 
 pub mod mesh;
 pub mod axioms;
+pub mod cas;
 
 pub use axioms::{
     AxiomTrait, AxiomCheckResult, EpistemicNode, EpistemicNodeType,
     ChiralEdge, EdgePolarity, check_all_axioms, sovereign_axioms,
+};
+
+pub use cas::{
+    CasLedgerEntry, SovereignIntent, IntentRisk, evaluate_intent, iaf_check,
 };
