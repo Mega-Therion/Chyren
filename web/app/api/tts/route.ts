@@ -84,6 +84,61 @@ async function trySherpaOnnx(
   }
 }
 
+// ─── ElevenLabs TTS (free tier: 10k chars/month, natural quality) ────────────
+
+async function tryElevenLabsTts(
+  text: string,
+  rate?: number,
+): Promise<Response | null> {
+  const apiKey = getOptionalEnv('ELEVENLABS_API_KEY')
+  if (!apiKey) return null
+
+  // Use a natural, casual American male voice by default
+  // Adam (pNInz6obpgDQGcFmaJgB) = natural casual male
+  const voiceId = getOptionalEnv('ELEVENLABS_VOICE_ID') ?? 'pNInz6obpgDQGcFmaJgB'
+
+  try {
+    const res = await fetch(
+      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+      {
+        method: 'POST',
+        headers: {
+          'xi-api-key': apiKey,
+          'Content-Type': 'application/json',
+          Accept: 'audio/mpeg',
+        },
+        body: JSON.stringify({
+          text,
+          model_id: 'eleven_turbo_v2_5',
+          voice_settings: {
+            stability: 0.45,
+            similarity_boost: 0.75,
+            style: 0.35,
+            use_speaker_boost: true,
+            speed: rate ?? 1.05,
+          },
+        }),
+        signal: AbortSignal.timeout(12_000),
+      },
+    )
+
+    if (!res.ok || !res.body) {
+      console.warn('[TTS] ElevenLabs failed:', res.status)
+      return null
+    }
+
+    return new Response(res.body, {
+      headers: {
+        'Content-Type': 'audio/mpeg',
+        'Cache-Control': 'public, max-age=3600',
+      },
+    })
+  } catch (err) {
+    console.error('[TTS] ElevenLabs error:', err)
+    return null
+  }
+}
+
 // ─── Google Cloud TTS fallback ───────────────────────────────────────────────
 
 async function tryGoogleTts(
@@ -158,8 +213,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Text is required' }, { status: 400 })
     }
 
-    // Pipeline: local Piper → Sherpa-ONNX → Google Cloud TTS
-    let ttsResponse = await tryLocalTts(text, voice, rate)
+    // Pipeline: ElevenLabs → local Piper → Sherpa-ONNX → Google Cloud TTS
+    let ttsResponse = await tryElevenLabsTts(text, rate)
+
+    if (!ttsResponse) {
+      ttsResponse = await tryLocalTts(text, voice, rate)
+    }
 
     if (!ttsResponse) {
       ttsResponse = await trySherpaOnnx(text, voice, rate)
@@ -206,7 +265,8 @@ export async function GET(req: NextRequest) {
   }
 
   // Reuse pipeline
-  let ttsResponse = await tryLocalTts(text, voice, rate)
+  let ttsResponse = await tryElevenLabsTts(text, rate)
+  if (!ttsResponse) ttsResponse = await tryLocalTts(text, voice, rate)
   if (!ttsResponse) ttsResponse = await trySherpaOnnx(text, voice, rate)
   if (!ttsResponse) ttsResponse = await tryGoogleTts(text, voice, rate)
 

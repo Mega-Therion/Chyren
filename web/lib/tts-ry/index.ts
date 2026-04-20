@@ -85,13 +85,18 @@ export function playLatencyChime(): void {
 function getPremiumVoice(): SpeechSynthesisVoice | undefined {
   if (typeof window === 'undefined') return undefined
   const voices = window.speechSynthesis.getVoices()
+  if (!voices.length) return undefined
+  // Prefer natural American English voices — casual, younger-sounding
   const targets = [
-    (v: SpeechSynthesisVoice) => v.name.includes('Google UK English Male'),
-    (v: SpeechSynthesisVoice) => v.name.includes('Arthur'),
-    (v: SpeechSynthesisVoice) => v.name.includes('Daniel'),
-    (v: SpeechSynthesisVoice) => v.lang.startsWith('en-GB') && v.name.includes('Male'),
-    (v: SpeechSynthesisVoice) => v.lang.startsWith('en-GB'),
+    (v: SpeechSynthesisVoice) => v.name === 'Google US English',
+    (v: SpeechSynthesisVoice) => v.name.includes('Samantha'),
+    (v: SpeechSynthesisVoice) => v.name.includes('Alex'),
+    (v: SpeechSynthesisVoice) => v.name.includes('Aaron'),
+    (v: SpeechSynthesisVoice) => v.name.includes('Nicky'),
+    (v: SpeechSynthesisVoice) => v.name.includes('Google US'),
+    (v: SpeechSynthesisVoice) => v.lang === 'en-US' && !v.name.toLowerCase().includes('female'),
     (v: SpeechSynthesisVoice) => v.lang.startsWith('en-US'),
+    (v: SpeechSynthesisVoice) => v.lang.startsWith('en'),
   ]
   for (const t of targets) {
     const m = voices.find(t)
@@ -103,15 +108,26 @@ function getPremiumVoice(): SpeechSynthesisVoice | undefined {
 function speakBrowser(text: string): Promise<void> {
   return new Promise<void>((resolve) => {
     if (!text.trim() || typeof window === 'undefined') { resolve(); return }
+    // Cancel any currently speaking utterance
+    window.speechSynthesis.cancel()
     const utter = new SpeechSynthesisUtterance(text.trim())
-    utter.rate = 1.08
-    utter.pitch = 0.98
+    utter.rate = 1.12   // slightly faster = more natural/energetic
+    utter.pitch = 1.05  // slightly higher = younger feel
     utter.volume = 1.0
-    const v = getPremiumVoice()
-    if (v) utter.voice = v
-    utter.onend = () => resolve()
-    utter.onerror = () => resolve()
-    window.speechSynthesis.speak(utter)
+    // Voices load async — get them fresh each time
+    const setVoice = () => {
+      const v = getPremiumVoice()
+      if (v) utter.voice = v
+      utter.onend = () => resolve()
+      utter.onerror = () => resolve()
+      window.speechSynthesis.speak(utter)
+    }
+    // If voices not loaded yet, wait for them
+    if (window.speechSynthesis.getVoices().length === 0) {
+      window.speechSynthesis.onvoiceschanged = () => { setVoice() }
+    } else {
+      setVoice()
+    }
   })
 }
 
