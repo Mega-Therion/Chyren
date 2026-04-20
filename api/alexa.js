@@ -27,30 +27,24 @@ function supportsAPL(handlerInput) {
  * Parse SSE-formatted response from Chyren's chat stream endpoint.
  * The stream sends lines like: data: {"choices":[{"delta":{"content":"..."}}]}
  */
-function parseSseText(raw) {
-  const lines = raw.split('\n');
-  const parts = [];
-  for (const line of lines) {
-    if (line.startsWith('data: ')) {
-      try {
-        const json = JSON.parse(line.slice(6));
-        const content = json?.choices?.[0]?.delta?.content;
-        if (content) parts.push(content);
-      } catch {
-        // skip malformed lines
-      }
-    }
-  }
-  return parts.join('') || null;
-}
+// We removed parseSseText to integrate it into the reader loop for better chunk handling.
 
 /**
  * Call the Chyren chat API and return the text response.
  */
+/**
+ * Call the Chyren chat API and return the text response.
+ * Uses a stream reader to process SSE data in real-time and avoids
+ * Alexa's 10-second timeout by returning as soon as we have sufficient content.
+ */
 async function askChyren(query) {
   const endpoint = `${CHYREN_CHAT_URL}/api/chat/stream`;
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), CHYREN_API_TIMEOUT_MS);
+  
+  // We set a slightly shorter timeout for the fetch itself, but we'll also
+  // monitor time during the stream reading to ensure we return to Alexa by 9s.
+  const fetchTimeout = setTimeout(() => controller.abort(), CHYREN_API_TIMEOUT_MS);
+  const startTime = Date.now();
 
   try {
     const res = await fetch(endpoint, {
@@ -68,13 +62,47 @@ async function askChyren(query) {
       return null;
     }
 
-    const raw = await res.text();
-    return parseSseText(raw);
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let accumulatedText = '';
+    let lineBuffer = '';
+    let done = false;
+
+    while (!done) {
+      if (Date.now() - startTime > 9000) {
+        console.warn('[ALEXA] Approaching 9s timeout, returning partial response');
+        break;
+      }
+
+      const { value, done: readerDone } = await reader.read();
+      done = readerDone;
+      
+      if (value) {
+        lineBuffer += decoder.decode(value, { stream: true });
+        const lines = lineBuffer.split('\n');
+        // Keep the last partial line in the buffer
+        lineBuffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const json = JSON.parse(line.slice(6));
+              const content = json?.choices?.[0]?.delta?.content;
+              if (content) accumulatedText += content;
+            } catch {
+              // skip malformed lines
+            }
+          }
+        }
+      }
+    }
+
+    return accumulatedText.trim() || null;
   } catch (err) {
     console.error('[ALEXA] Chyren API error:', err.message || err);
     return null;
   } finally {
-    clearTimeout(timeout);
+    clearTimeout(fetchTimeout);
   }
 }
 

@@ -42,6 +42,12 @@
             "look up {query}",
             "search for {query}",
             "find {query}",
+            "research {query}",
+            "tell me what you know about {query}",
+            "who exactly is {query}",
+            "what's the deal with {query}",
+            "can you explain {query}",
+            "status of {query}",
             "{query}"
           ]
         },

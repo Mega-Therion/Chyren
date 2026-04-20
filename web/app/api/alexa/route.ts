@@ -64,23 +64,6 @@ function getOptionalEnv(name: string): string | null {
   return val
 }
 
-/** Parse SSE-formatted text from the Chyren chat stream. */
-function parseSseText(raw: string): string | null {
-  const parts: string[] = []
-  for (const line of raw.split('\n')) {
-    if (line.startsWith('data: ')) {
-      try {
-        const json = JSON.parse(line.slice(6))
-        const content = json?.choices?.[0]?.delta?.content
-        if (content) parts.push(content)
-      } catch {
-        // skip malformed lines
-      }
-    }
-  }
-  return parts.join('') || null
-}
-
 // ── Session History ───────────────────────────────────────────────────────────
 
 type ChatMessage = { role: 'user' | 'assistant'; content: string }
@@ -105,10 +88,9 @@ function trimHistory(history: ChatMessage[]): ChatMessage[] {
   return history.slice(-(MAX_SESSION_HISTORY * 2))
 }
 
-// ── Chyren API ────────────────────────────────────────────────────────────────
-
 /**
  * Call the Chyren chat API with full conversation history for context.
+ * Uses a line-buffered stream reader to handle SSE data in real-time.
  */
 async function askChyren(
   query: string,
@@ -118,7 +100,9 @@ async function askChyren(
     getOptionalEnv('NEXT_PUBLIC_API_BASE_URL') || 'https://chyren-web.vercel.app'
   const endpoint = `${base}/api/chat/stream`
   const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), CHYREN_CHAT_TIMEOUT_MS)
+  
+  const startTime = Date.now()
+  const fetchTimeout = setTimeout(() => controller.abort(), CHYREN_CHAT_TIMEOUT_MS)
 
   // Build the full message array with history + new query
   const messages: ChatMessage[] = [
@@ -142,14 +126,50 @@ async function askChyren(
       return null
     }
 
-    const raw = await res.text()
-    return parseSseText(raw)
+    const reader = res.body?.getReader()
+    if (!reader) return null
+
+    const decoder = new TextDecoder()
+    let accumulatedText = ''
+    let lineBuffer = ''
+    let done = false
+
+    while (!done) {
+      // 9-second safety cutoff for Alexa
+      if (Date.now() - startTime > 9000) {
+        console.warn('[ALEXA] Approaching 9s timeout, returning partial response')
+        break
+      }
+
+      const { value, done: readerDone } = await reader.read()
+      done = readerDone
+
+      if (value) {
+        lineBuffer += decoder.decode(value, { stream: true })
+        const lines = lineBuffer.split('\n')
+        lineBuffer = lines.pop() || ''
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const json = JSON.parse(line.slice(6))
+              const content = json?.choices?.[0]?.delta?.content
+              if (content) accumulatedText += content
+            } catch {
+              // skip malformed
+            }
+          }
+        }
+      }
+    }
+
+    return accumulatedText.trim() || null
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'unknown'
     console.error('[ALEXA] Chyren chat API error:', msg)
     return null
   } finally {
-    clearTimeout(timeout)
+    clearTimeout(fetchTimeout)
   }
 }
 

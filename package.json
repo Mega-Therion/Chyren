@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "npx --yes vercel dev",
+    "build": "echo 'No build step required'",
     "deploy": "npx --yes vercel --prod"
   },
   "dependencies": {
