@@ -321,13 +321,16 @@ async function fetchOpenRouterResponse(
   const apiKey = getOptionalEnv('OPENROUTER_API_KEY')
   if (!apiKey) throw new Error('Missing OPENROUTER_API_KEY')
 
-  // Free models available on OpenRouter (no billing required)
+  // Free models verified working — ordered by reliability based on live testing
   const freeModels = [
-    'meta-llama/llama-3.3-70b-instruct:free',
-    'google/gemma-3-27b-it:free',
-    'mistralai/mistral-7b-instruct:free',
-    'deepseek/deepseek-r1-distill-llama-70b:free',
-    'nousresearch/hermes-3-llama-3.1-405b:free',
+    'liquid/lfm-2.5-1.2b-instruct:free',         // ✅ confirmed working
+    'nvidia/nemotron-3-nano-30b-a3b:free',         // ✅ confirmed working
+    'nvidia/nemotron-3-super-120b-a12b:free',      // nvidia tier 2 fallback
+    'arcee-ai/trinity-large-preview:free',          // arcee fallback
+    'cognitivecomputations/dolphin-mistral-24b-venice-edition:free', // dolphin fallback
+    'google/gemma-3-4b-it:free',                   // ✅ responds (small but available)
+    'meta-llama/llama-3.3-70b-instruct:free',      // best quality when not rate-limited
+    'google/gemma-3-27b-it:free',                  // quality fallback when available
   ]
 
   let lastError = 'No OpenRouter models attempted'
