@@ -9,7 +9,14 @@ import psycopg2
 import argparse
 import urllib.request
 from datetime import datetime
-from datasets import load_dataset
+print(f"Python Executable: {sys.executable}")
+print(f"Python Path: {sys.path}")
+try:
+    from datasets import load_dataset
+    print("✓ datasets imported successfully")
+except ImportError as e:
+    print(f"✗ datasets import failed: {e}")
+    sys.exit(1)
 from qdrant_client import QdrantClient
 from qdrant_client.models import PointStruct, VectorParams, Distance
 
