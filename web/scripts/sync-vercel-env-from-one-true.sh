@@ -12,11 +12,16 @@ for arg in "$@"; do
 done
 
 WEB_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-ENV_FILE="${CHYREN_ENV_FILE:-$WEB_ROOT/../config/.omega/one-true.env}"
+ENV_FILE="${CHYREN_ENV_FILE:-$HOME/.omega/one-true.env}"
 PROJECT_JSON="$WEB_ROOT/.vercel/project.json"
 
 if [[ ! -f "$ENV_FILE" ]]; then
-  echo "ERROR: env file not found at $ENV_FILE"
+  # Fallback to the repo-local config if HOME version isn't there
+  ENV_FILE="$WEB_ROOT/../config/.omega/one-true.env"
+fi
+
+if [[ ! -f "$ENV_FILE" ]]; then
+  echo "ERROR: env file not found."
   echo "  Set CHYREN_ENV_FILE or create $HOME/.omega/one-true.env"
   exit 1
 fi
@@ -101,8 +106,13 @@ sync_one OPENAI_API_KEY
 sync_one ANTHROPIC_API_KEY
 sync_one GEMINI_API_KEY
 sync_one GOOGLE_TTS_API_KEY
+sync_one ELEVENLABS_API_KEY
+sync_one ELEVENLABS_VOICE_ID
+sync_one PIPER_API_URL
+sync_one WHISPER_API_URL
 sync_one CRON_SECRET
 sync_one OMEGA_DB_URL
+sync_one OMEGA_CATALOG_DB_URL
 
 if [[ "$DRY_RUN" == "1" ]]; then
   echo ""
@@ -111,3 +121,4 @@ else
   echo ""
   echo "Done. Run '${vercel_cmd[*]} env ls' to verify."
 fi
+
