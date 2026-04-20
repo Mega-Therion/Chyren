@@ -1,11 +1,32 @@
 import os
 import json
 import time
+import uuid
+import signal
+import sys
 import requests
+from pathlib import Path
 from datetime import datetime
 
 # DREAM CYCLE: The Proactive Empathy Loop
 # Scans the Knowledge Matrix and Master Ledger for systemic failures or high-impact opportunities.
+
+STATE_DIR = Path(__file__).resolve().parent.parent / "state"
+DREAM_LOCK = STATE_DIR / ".dream.lock"
+
+def create_lock():
+    STATE_DIR.mkdir(parents=True, exist_ok=True)
+    with open(DREAM_LOCK, "w") as f:
+        f.write(f"{os.getpid()}:{uuid.uuid4().hex[:12]}\n")
+
+def remove_lock(sig=None, frame=None):
+    if DREAM_LOCK.exists():
+        DREAM_LOCK.unlink()
+    if sig:
+        sys.exit(0)
+
+signal.signal(signal.SIGINT, remove_lock)
+signal.signal(signal.SIGTERM, remove_lock)
 
 QDRANT_URL = os.environ.get("QDRANT_URL", "http://localhost:6333")
 COLLECTION = "knowledge_matrix"
@@ -31,15 +52,19 @@ def bell_the_cat(problem):
     print(f"  ✓ Solution blueprint for {problem['name']} committed to Master Ledger.", flush=True)
 
 def main():
+    create_lock()
     print("🌙 CHYREN DREAM CYCLE INITIALIZED...", flush=True)
-    while True:
-        problems = scan_for_problems()
-        for p in problems:
-            if p['impact'] > 0.8: # ADCCL Empathy Gate Threshold
-                bell_the_cat(p)
-        
-        print("🌙 Dream cycle complete. Sleeping for 1 hour...", flush=True)
-        time.sleep(3600)
+    try:
+        while True:
+            problems = scan_for_problems()
+            for p in problems:
+                if p['impact'] > 0.8: # ADCCL Empathy Gate Threshold
+                    bell_the_cat(p)
+            
+            print("🌙 Dream cycle complete. Sleeping for 1 hour...", flush=True)
+            time.sleep(3600)
+    finally:
+        remove_lock()
 
 if __name__ == "__main__":
     main()

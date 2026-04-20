@@ -14,8 +14,16 @@ import enrichmentSchema from '../../../state/ari_enrichment_schema.json';
 // ─── ARI Enrichment ──────────────────────────────────────────────────────────
 // Schema: ../../../state/ari_enrichment_schema.json
 function getCognitiveEnrichmentContext(intent: string): string[] {
-  // Logic to cross-reference intent with asset descriptions will go here
-  return enrichmentSchema.assets.alignment.map(a => a.id);
+  const context: string[] = [];
+  // Alignment check
+  if (intent.toLowerCase().includes('align') || intent.toLowerCase().includes('helpful')) {
+    context.push(...enrichmentSchema.assets.alignment.map(a => a.id));
+  }
+  // Reasoning check
+  if (intent.toLowerCase().includes('reason') || intent.toLowerCase().includes('math')) {
+    context.push(...enrichmentSchema.assets.reasoning.map(a => a.id));
+  }
+  return [...new Set(context)];
 }
 
 // ─── I.A.F. — Immutable Alignment Fabric ─────────────────────────────────────
@@ -77,6 +85,9 @@ export async function ariGate(intent: string): Promise<AriGateResult> {
   const admittedAt = new Date().toISOString()
   const trimmed    = intent.trim().slice(0, 1200)   // cap to 1 200 chars for hashing
 
+  // 0. Cognitive Enrichment
+  const enrichmentContext = getCognitiveEnrichmentContext(trimmed);
+
   // 1. I.A.F. check — hard floor
   const iafOk = iafCheck(trimmed)
   if (!iafOk) {
@@ -93,9 +104,12 @@ export async function ariGate(intent: string): Promise<AriGateResult> {
 
   // 2. C.A.S. intent risk evaluation
   const riskTier = evaluateIntentRisk(trimmed)
-  const score    = adcclScore(riskTier)
+  const baseScore = adcclScore(riskTier)
 
-  // 3. ADCCL threshold gate (must be ≥ 0.7)
+  // 3. ADCCL enrichment adjustment (boost score if enriched)
+  const score = enrichmentContext.length > 0 ? Math.min(baseScore + 0.05, 1.0) : baseScore;
+
+  // 4. ADCCL threshold gate (must be ≥ 0.7)
   if (score < 0.7) {
     return {
       allowed:          false,
@@ -104,7 +118,7 @@ export async function ariGate(intent: string): Promise<AriGateResult> {
       iafOk:            true,
       ledgerHash:       await ledgerHash(trimmed, admittedAt),
       admittedAt,
-      rejectionReason:  `ADCCL score ${score.toFixed(2)} below threshold 0.70.`,
+      rejectionReason:  `ADCCL score ${score.toFixed(2)} below threshold 0.70. (Enriched: ${enrichmentContext.length > 0})`,
     }
   }
 
