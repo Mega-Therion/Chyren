@@ -1,0 +1,49 @@
+name: HF Knowledge Ingestion Pipeline
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      dataset_id:
+        description: 'Optional: jump a specific dataset to the front'
+        required: false
+        default: ''
+
+jobs:
+  ingest:
+    name: "HF Ingest — Next Dataset"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install datasets huggingface_hub qdrant-client psycopg2-binary pyyaml
+
+      - name: Replenish queue
+        run: python cortex/ops/scripts/hf_queue_manager.py --replenish
+        env:
+          OMEGA_CATALOG_DB_URL: ${{ secrets.OMEGA_CATALOG_DB_URL }}
+
+      - name: Prioritize
+        if: github.event.inputs.dataset_id != ''
+        run: python cortex/ops/scripts/hf_queue_manager.py --prioritize "${{ github.event.inputs.dataset_id }}"
+        env:
+          OMEGA_CATALOG_DB_URL: ${{ secrets.OMEGA_CATALOG_DB_URL }}
+
+      - name: Run worker
+        run: python cortex/ops/scripts/hf_pipeline_worker.py
+        env:
+          OMEGA_CATALOG_DB_URL: ${{ secrets.OMEGA_CATALOG_DB_URL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          QDRANT_URL: ${{ secrets.QDRANT_URL }}
+
+      - name: Status
+        run: python cortex/ops/scripts/hf_queue_manager.py --status
+        env:
+          OMEGA_CATALOG_DB_URL: ${{ secrets.OMEGA_CATALOG_DB_URL }}
