@@ -5,6 +5,7 @@ use std::collections::HashSet;
 pub struct VerificationResult {
     pub passed: bool,
     pub score: f32,
+    pub empathy_score: f32,
     pub flags: Vec<String>,
     pub status: String,
 }
@@ -42,6 +43,21 @@ impl ADCCL {
         let task_text = task.trim();
         let mut flags = Vec::new();
         let mut score: f32 = 1.0;
+        let mut empathy_score: f32 = 1.0;
+
+        // ── HARM_POTENTIAL — checks for dehumanization or malicious intent ──
+        let harm_re = regex::Regex::new(r"(?i)\b(terminate|kill|destroy|attack|hate|inferior|worthless|obliterate)\b").unwrap();
+        if harm_re.is_match(text) {
+            flags.push("HARM_POTENTIAL".to_string());
+            empathy_score -= 0.5;
+            score -= 0.3;
+        }
+
+        // ── EMPATHY_ABSENCE — lack of warm or partner-like language ──────────
+        let empathy_re = regex::Regex::new(r"(?i)\b(help|support|care|understand|empathy|human|partner|assist|warm|gentle|refined)\b").unwrap();
+        if !empathy_re.is_match(text) && text.len() > 100 {
+            empathy_score -= 0.2;
+        }
 
         // ── STUB_MARKERS_DETECTED ─────────────────────────────────────────────
         let stub_re =
@@ -167,6 +183,7 @@ impl ADCCL {
         VerificationResult {
             passed,
             score,
+            empathy_score,
             flags,
             status: if passed {
                 "verified".to_string()

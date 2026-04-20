@@ -24,29 +24,39 @@ def get_db_conn():
     if not db_url: raise ValueError("OMEGA_CATALOG_DB_URL not set")
     return psycopg2.connect(db_url)
 
-def embed_gemini(text, api_key):
-    model = "models/gemini-embedding-001"
-    base = f"https://generativelanguage.googleapis.com/v1beta/{model}:embedContent?key={api_key}"
-    body = {"model": model, "content": {"parts": [{"text": text}]}}
-    req = urllib.request.Request(base, data=json.dumps(body).encode(), headers={"Content-Type": "application/json"}, method="POST")
-    
-    backoff = 5
-    while True:
+def embed_text(text):
+    import os, json, urllib.request, time
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if api_key:
+        model = "models/gemini-embedding-001"
+        base = f"https://generativelanguage.googleapis.com/v1beta/{model}:embedContent?key={api_key}"
+        body = {"model": model, "content": {"parts": [{"text": text}]}}
+        req = urllib.request.Request(base, data=json.dumps(body).encode(), headers={"Content-Type": "application/json"}, method="POST")
+        for attempt in range(2):
+            try:
+                with urllib.request.urlopen(req, timeout=10) as r:
+                    data = json.loads(r.read())
+                return data["embedding"]["values"]
+            except Exception as e:
+                if "429" in str(e):
+                    time.sleep(2)
+                else: break
+
+    # Fallback to OpenAI
+    openai_key = os.environ.get("OPENAI_API_KEY")
+    if openai_key:
         try:
-            with urllib.request.urlopen(req, timeout=20) as r:
+            req = urllib.request.Request(
+                "https://api.openai.com/v1/embeddings",
+                data=json.dumps({"model": "text-embedding-3-large", "dimensions": 3072, "input": text}).encode(),
+                headers={"Authorization": f"Bearer {openai_key}", "Content-Type": "application/json"},
+                method="POST"
+            )
+            with urllib.request.urlopen(req, timeout=10) as r:
                 data = json.loads(r.read())
-            return data["embedding"]["values"]
-        except urllib.error.HTTPError as e:
-            if e.code == 429:
-                print(f"Rate limited. Waiting {backoff}s...", end="\r")
-                time.sleep(backoff)
-                backoff = min(backoff * 2, 60)
-            else:
-                print(f"Embedding HTTP error {e.code}: {e.read().decode()[:100]}")
-                return None
-        except Exception as e:
-            print(f"Embedding error: {e}")
-            return None
+            return data["data"][0]["embedding"]
+        except: pass
+    return None
 
 def stable_int_id(slug):
     h = hashlib.sha256(slug.encode()).digest()
@@ -95,7 +105,6 @@ def main():
     task_id, repo, subset, split, limit = task
     print(f"Processing task: {task_id} ({repo})")
     
-    gemini_key = os.environ.get("GEMINI_API_KEY")
     qdrant_url = os.environ.get("QDRANT_URL", "http://localhost:6333")
     q_client = QdrantClient(url=qdrant_url)
 
@@ -115,7 +124,7 @@ def main():
             if not content: continue
             
             slug = f"{task_id}-{count}"
-            vector = embed_gemini(content[:1000], gemini_key)
+            vector = embed_text(content[:1000])
             if not vector: continue
             
             entity = {

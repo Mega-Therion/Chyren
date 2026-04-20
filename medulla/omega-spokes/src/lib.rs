@@ -168,6 +168,7 @@ impl SpokeRegistry {
             ("manus", 205),
             ("filesystem", 206),
             ("openrouter", 15),
+            ("vision", 150),
         ];
 
         for (p, priority) in providers {
@@ -198,6 +199,7 @@ impl SpokeRegistry {
                 "manus" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-manus"]))),
                 "filesystem" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-filesystem", "/home/mega/Chyren"]))),
                 "openrouter" => Some(Arc::new(spokes::OpenRouterSpoke::new(config))),
+                "vision" => Some(Arc::new(spokes::VisionSpoke::new(config))),
                 _ => None,
             };
 

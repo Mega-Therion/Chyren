@@ -13,6 +13,8 @@ pub mod mcp_spoke;
 pub mod openrouter_spoke;
 pub mod witness;
 
+pub mod vision_spoke;
+
 pub use anthropic_spoke::AnthropicSpoke;
 pub use deepseek_spoke::DeepSeekSpoke;
 pub use gemini_spoke::GeminiSpoke;
@@ -24,3 +26,4 @@ pub use openrouter_spoke::OpenRouterSpoke;
 pub use search_spoke::SearchSpoke;
 pub use perplexity_spoke::PerplexitySpoke;
 pub use mcp_spoke::MCPSpoke;
+pub use vision_spoke::VisionSpoke;

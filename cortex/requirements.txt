@@ -9,7 +9,9 @@ pytest>=8.0.0
 pytest-asyncio>=0.23.0
 pytest-mock>=3.12.0
 
-# Library Index Card registrar (cortex/ops/scripts/catalog_registrar.py)
+# Multi-Modal Ingestion Pipeline
+datasets>=2.18.0
+qdrant-client>=1.8.0
 psycopg2-binary>=2.9.9
 mcp>=1.0.0
 websockets>=12.0.0

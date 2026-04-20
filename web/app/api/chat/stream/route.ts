@@ -1,4 +1,5 @@
 import { type NextRequest } from 'next/server'
+import { streamText, type CoreMessage, fallback } from 'ai'
 import { CHYREN_SYSTEM_PROMPT } from '@/lib/phylactery'
 import { getRYContextAsync } from '@/lib/neon-context'
 import {
@@ -7,9 +8,10 @@ import {
 } from '@/lib/family-auth'
 import { logger, logError } from '@/lib/logger'
 import { checkRateLimit, checkPromptInjection, clientIp } from '@/lib/hardening'
-import { runAnthropicWithTools } from '@/lib/mcp/anthropic-tools'
 import { semanticKnowledgeSearch } from '@/lib/librarian/knowledge-vector'
 import { ariGate, type AriGateResult } from '@/lib/ari-gate'
+import { anthropic, google, groq, openai } from '@/lib/ai-gateway'
+import { getSovereignTools } from '@/lib/ai-sdk-tools'
 
 // Base system prompt is resolved per-request (async) so live-fetched Neon
 // context is available even when the build-time bake was empty (quota issues, etc.)
@@ -21,17 +23,7 @@ async function getBaseSystemPrompt(): Promise<string> {
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
-// Prefer the configured primary model, but keep lighter Groq models behind it so
-// the chat does not hard-fail when the larger model hits a stricter quota bucket.
-// Priority: Anthropic → OpenRouter/OpenAI → Groq
-const _MODEL_CHAIN = Array.from(
-  new Set([
-    process.env.ANTHROPIC_MODEL ?? 'claude-3-5-sonnet-20241022',
-    process.env.OPENAI_MODEL ?? 'gpt-4o',
-    process.env.OPENROUTER_MODEL ?? 'anthropic/claude-3.5-sonnet',
-    process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile',
-  ]),
-)
+
 
 function normalizeEnvValue(value: string | undefined): string | null {
   if (!value) return null
@@ -49,11 +41,7 @@ function getOptionalEnv(name: string): string | null {
   return normalizeEnvValue(process.env[name])
 }
 
-function getRequiredEnv(name: string): string {
-  const value = getOptionalEnv(name)
-  if (!value) throw new Error(`Missing required env var: ${name}`)
-  return value
-}
+
 
 type ChatMsg = { role: 'system' | 'user' | 'assistant'; content: string }
 type ExpressionProfile = {
@@ -182,353 +170,7 @@ function toChatHistory(rawMessages: unknown, fallbackContent: string): ChatMsg[]
   return firstUser > 0 ? ordered.slice(firstUser) : ordered
 }
 
-async function fetchAnthropicResponse(
-  history: ChatMsg[],
-  systemPrompt: string,
-  temperature: number,
-): Promise<Response | null> {
-  const apiKey = getOptionalEnv('ANTHROPIC_API_KEY')
-  if (!apiKey) return null
 
-  logger.info('[ANTHROPIC] Attempting Claude 3.5 Sonnet')
-  const resp = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 1024,
-      system: systemPrompt,
-      messages: history.map((m) => ({ role: m.role, content: m.content })),
-      temperature,
-    }),
-  })
-
-  if (!resp.ok) {
-    const errorBody = await resp.text().catch(() => `${resp.status} ${resp.statusText}`)
-    throw new Error(`Anthropic failed (${resp.status}): ${errorBody}`)
-  }
-
-  const payload = await resp.json()
-  const content = payload.content?.[0]?.text?.trim() ?? ''
-  if (!content) throw new Error('Anthropic returned empty response')
-  return createSingleSseTextResponse(content)
-}
-
-async function fetchGroqResponse(
-  history: ChatMsg[],
-  systemPrompt: string,
-  temperature: number,
-): Promise<Response> {
-  const apiKey = getRequiredEnv('GROQ_API_KEY')
-  const endpoint = 'https://api.groq.com/openai/v1/chat/completions'
-  const messages: ChatMsg[] = [{ role: 'system', content: systemPrompt }, ...history]
-  let lastError = 'unknown'
-
-  for (const model of _MODEL_CHAIN) {
-    logger.info(`[GROQ] Attempting model: ${model}`)
-    const resp = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model,
-        messages,
-        temperature,
-      }),
-    })
-
-    if (resp.ok) {
-      const payload = (await resp.json().catch(() => ({}))) as {
-        choices?: Array<{ message?: { content?: string | Array<{ text?: string }> } }>
-      }
-      const message = payload.choices?.[0]?.message?.content
-      const content =
-        typeof message === 'string'
-          ? message
-          : Array.isArray(message)
-            ? message
-                .map((part) => (typeof part?.text === 'string' ? part.text : ''))
-                .join('')
-                .trim()
-            : ''
-
-      if (content) return createSingleSseTextResponse(content)
-      lastError = `Groq model ${model} returned empty response`
-      continue
-    }
-
-    lastError = await resp.text().catch(() => `${resp.status} ${resp.statusText}`)
-  }
-
-  throw new Error(`Groq fallback failed: ${lastError}`)
-}
-
-async function fetchOpenAIResponse(
-  history: ChatMsg[],
-  systemPrompt: string,
-  temperature: number,
-): Promise<Response | null> {
-  const apiKey = getOptionalEnv('OPENAI_API_KEY')
-  if (!apiKey) return null
-
-  // Auto-detect OpenRouter vs OpenAI based on key prefix
-  const isOpenRouter = apiKey.startsWith('sk-or-')
-  let baseUrl = getOptionalEnv('OPENAI_API_BASE')
-  
-  if (baseUrl?.includes('openrouter') && !isOpenRouter) {
-    logger.warn('[OPENAI] Mismatch: OPENAI_API_BASE is OpenRouter, but key is standard OpenAI. Overriding to api.openai.com.')
-    baseUrl = 'https://api.openai.com/v1'
-  } else if (!baseUrl) {
-    baseUrl = isOpenRouter ? 'https://openrouter.ai/api/v1' : 'https://api.openai.com/v1'
-  }
-  
-  const endpoint = `${baseUrl.replace(/\/$/, '')}/chat/completions`
-
-  logger.info(`[OPENAI] Attempting via ${baseUrl} (Auto-detected: ${isOpenRouter ? 'OpenRouter' : 'OpenAI'})`)
-  
-  let model = getOptionalEnv('OPENAI_MODEL')
-  if (model?.includes('mistral') && !isOpenRouter) {
-     model = 'gpt-4o-mini' // override mismatch
-  } else if (!model) {
-     model = isOpenRouter ? 'mistralai/mistral-nemo' : 'gpt-4o-mini'
-  }
-
-  const resp = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://chyren.org',
-      'X-Title': 'Chyren Web App',
-    },
-    body: JSON.stringify({
-      model,
-      messages: [{ role: 'system', content: systemPrompt }, ...history],
-      temperature,
-    }),
-  })
-
-  if (!resp.ok) {
-    const errorBody = await resp.text().catch(() => `${resp.status} ${resp.statusText}`)
-    logger.warn(`[OPENAI] Provider returned ${resp.status}: ${errorBody}`)
-    throw new Error(`OpenAI/OpenRouter failed (${resp.status}): ${errorBody}`)
-  }
-
-  const payload = (await resp.json().catch(() => ({}))) as {
-    choices?: Array<{ message?: { content?: string | Array<{ text?: string }> } }>
-  }
-  const message = payload.choices?.[0]?.message?.content
-  const content =
-    typeof message === 'string'
-      ? message
-      : Array.isArray(message)
-        ? message
-            .map((part) => (typeof part?.text === 'string' ? part.text : ''))
-            .join('')
-            .trim()
-        : ''
-
-  if (!content) throw new Error('OpenAI fallback failed: empty response')
-  return createSingleSseTextResponse(content)
-}
-
-// ─── OpenRouter (free models, OpenAI-compatible) ─────────────────────────────
-async function fetchOpenRouterResponse(
-  history: ChatMsg[],
-  systemPrompt: string,
-  temperature: number,
-): Promise<Response> {
-  const apiKey = getOptionalEnv('OPENROUTER_API_KEY')
-  if (!apiKey) throw new Error('Missing OPENROUTER_API_KEY')
-
-  // Free models verified working — ordered by reliability based on live testing
-  const freeModels = [
-    'liquid/lfm-2.5-1.2b-instruct:free',         // ✅ confirmed working
-    'nvidia/nemotron-3-nano-30b-a3b:free',         // ✅ confirmed working
-    'nvidia/nemotron-3-super-120b-a12b:free',      // nvidia tier 2 fallback
-    'arcee-ai/trinity-large-preview:free',          // arcee fallback
-    'cognitivecomputations/dolphin-mistral-24b-venice-edition:free', // dolphin fallback
-    'google/gemma-3-4b-it:free',                   // ✅ responds (small but available)
-    'meta-llama/llama-3.3-70b-instruct:free',      // best quality when not rate-limited
-    'google/gemma-3-27b-it:free',                  // quality fallback when available
-  ]
-
-  let lastError = 'No OpenRouter models attempted'
-
-  for (const model of freeModels) {
-    try {
-      logger.info(`[OPENROUTER] Attempting: ${model}`)
-      const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://chyren-web.vercel.app',
-          'X-Title': 'Chyren Sovereign Intelligence',
-        },
-        body: JSON.stringify({
-          model,
-          messages: [{ role: 'system', content: systemPrompt }, ...history],
-          temperature,
-        }),
-      })
-
-      if (resp.ok) {
-        const payload = (await resp.json().catch(() => ({}))) as {
-          choices?: Array<{ message?: { content?: string } }>
-        }
-        const content = payload.choices?.[0]?.message?.content?.trim() ?? ''
-        if (content) return createSingleSseTextResponse(content)
-        lastError = `OpenRouter model ${model} returned empty response`
-        continue
-      }
-
-      lastError = await resp.text().catch(() => `${resp.status} ${resp.statusText}`)
-      logger.warn(`[OPENROUTER] Model ${model} failed (${resp.status}): ${lastError}`)
-    } catch (err) {
-      lastError = err instanceof Error ? err.message : 'Unknown OpenRouter error'
-      logger.warn(`[OPENROUTER] Model ${model} exception: ${lastError}`)
-    }
-  }
-
-  throw new Error(`OpenRouter fallback chain failed: ${lastError}`)
-}
-
-// ─── HuggingFace Serverless Inference API ────────────────────────────────────
-async function fetchHuggingFaceResponse(
-  history: ChatMsg[],
-  systemPrompt: string,
-  temperature: number,
-): Promise<Response> {
-  const apiKey = getOptionalEnv('HUGGINGFACE_API_KEY')
-  if (!apiKey) throw new Error('Missing HUGGINGFACE_API_KEY')
-
-  const models = [
-    'mistralai/Mistral-7B-Instruct-v0.3',
-    'HuggingFaceH4/zephyr-7b-beta',
-    'meta-llama/Meta-Llama-3-8B-Instruct',
-  ]
-
-  let lastError = 'No HuggingFace models attempted'
-
-  for (const model of models) {
-    try {
-      logger.info(`[HUGGINGFACE] Attempting: ${model}`)
-      const resp = await fetch(
-        `https://api-inference.huggingface.co/models/${model}/v1/chat/completions`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model,
-            messages: [{ role: 'system', content: systemPrompt }, ...history],
-            temperature,
-            max_tokens: 512,
-          }),
-        },
-      )
-
-      if (resp.ok) {
-        const payload = (await resp.json().catch(() => ({}))) as {
-          choices?: Array<{ message?: { content?: string } }>
-        }
-        const content = payload.choices?.[0]?.message?.content?.trim() ?? ''
-        if (content) return createSingleSseTextResponse(content)
-        lastError = `HuggingFace model ${model} returned empty response`
-        continue
-      }
-
-      lastError = await resp.text().catch(() => `${resp.status} ${resp.statusText}`)
-      logger.warn(`[HUGGINGFACE] Model ${model} failed (${resp.status}): ${lastError}`)
-    } catch (err) {
-      lastError = err instanceof Error ? err.message : 'Unknown HuggingFace error'
-      logger.warn(`[HUGGINGFACE] Model ${model} exception: ${lastError}`)
-    }
-  }
-
-  throw new Error(`HuggingFace fallback chain failed: ${lastError}`)
-}
-
-
-async function fetchGeminiResponse(
-  history: ChatMsg[],
-  systemPrompt: string,
-  temperature: number,
-): Promise<Response> {
-  const apiKey = getOptionalEnv('GEMINI_API_KEY')
-  if (!apiKey) throw new Error('Missing required env var: GEMINI_API_KEY')
-
-  const userConfiguredModel = getOptionalEnv('GEMINI_MODEL')
-  const geminiModels = Array.from(new Set([
-    userConfiguredModel,
-    'gemini-2.5-flash',
-    'gemini-2.0-flash',
-    'gemini-2.0-flash-lite',
-  ])).filter(Boolean) as string[]
-
-  let lastError = 'No Gemini models attempted'
-
-  for (const model of geminiModels) {
-    try {
-      logger.info(`[GEMINI] Attempting model: ${model}`)
-      const resp = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            system_instruction: {
-              parts: [{ text: systemPrompt }],
-            },
-            contents: history.map((entry) => ({
-              role: entry.role === 'assistant' ? 'model' : 'user',
-              parts: [{ text: entry.content }],
-            })),
-            generationConfig: {
-              temperature,
-            },
-          }),
-        },
-      )
-
-      if (resp.ok) {
-        const payload = (await resp.json().catch(() => ({}))) as {
-          candidates?: Array<{
-            content?: {
-              parts?: Array<{ text?: string }>
-            }
-          }>
-        }
-        const content =
-          payload.candidates?.[0]?.content?.parts
-            ?.map((part) => part.text ?? '')
-            .join('')
-            .trim() ?? ''
-
-        if (content) return createSingleSseTextResponse(content)
-        lastError = `Gemini model ${model} returned empty response`
-        continue
-      }
-
-      lastError = await resp.text().catch(() => `${resp.status} ${resp.statusText}`)
-      logger.warn(`[GEMINI] Model ${model} failed: ${lastError}`)
-    } catch (err) {
-      lastError = err instanceof Error ? err.message : 'Unknown Gemini error'
-      logger.warn(`[GEMINI] Model ${model} exception: ${lastError}`)
-    }
-  }
-
-  throw new Error(`Gemini fallback chain failed: ${lastError}`)
-}
 
 function sseHeaders() {
   return {
@@ -634,69 +276,50 @@ export async function POST(req: NextRequest) {
   const { prompt: baseSystemPrompt, profile } = await buildSystemPrompt(session, memberContext)
   const knowledgeContext = await buildKnowledgeContext(content)
   const systemPrompt = knowledgeContext ? baseSystemPrompt + knowledgeContext : baseSystemPrompt
-  let hubFailure: string | null = null
-
-  // Tool-use path: when a provider key + LIC catalog are both present, let the
-  // model call librarian tools before answering. Uses OpenAI-compatible format
-  // so it works with OpenRouter (OPENAI_API_KEY=sk-or-...) or Gemini directly.
-  // Falls through to the provider chain on any failure.
-  const hasToolProvider = !!(getOptionalEnv('OPENAI_API_KEY') || getOptionalEnv('GEMINI_API_KEY') || getOptionalEnv('OPENROUTER_API_KEY'))
-  const catalogConfigured = Boolean(getOptionalEnv('OMEGA_CATALOG_DB_URL'))
-  if (hasToolProvider && catalogConfigured) {
-    try {
-      const userAssistantHistory = history.filter(
-        (m): m is { role: 'user' | 'assistant'; content: string } =>
-          m.role === 'user' || m.role === 'assistant',
-      )
-      const { text, toolCalls } = await runAnthropicWithTools(
-        '',
-        '',
-        systemPrompt,
-        userAssistantHistory,
-        profile.temperature,
-      )
-      if (text) {
-        if (toolCalls.length > 0) {
-          logger.info(`[CHAT] Tool-use path: ${toolCalls.length} call(s) — ${toolCalls.map((c) => c.name).join(', ')}`)
-        }
-        return createSingleSseTextResponse(text)
-      }
-      logger.warn('[CHAT] Tool-use returned empty text — falling back')
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'unknown tool-use error'
-      logger.warn(`[CHAT] Tool-use failed, falling back: ${msg}`)
-    }
-  }
-
+  
   try {
-    // Fallback order: Anthropic → Gemini → OpenRouter (free) → Groq → OpenAI
-    const providers = [
-      { name: 'Anthropic',   fn: () => fetchAnthropicResponse(history, systemPrompt, profile.temperature) },
-      { name: 'Gemini',      fn: () => fetchGeminiResponse(history, systemPrompt, profile.temperature) },
-      { name: 'OpenRouter',  fn: () => fetchOpenRouterResponse(history, systemPrompt, profile.temperature) },
-      { name: 'HuggingFace', fn: () => fetchHuggingFaceResponse(history, systemPrompt, profile.temperature) },
-      { name: 'Groq',        fn: () => fetchGroqResponse(history, systemPrompt, profile.temperature) },
-      { name: 'OpenAI',      fn: () => fetchOpenAIResponse(history, systemPrompt, profile.temperature) },
-    ]
+    const sovereignTools = await getSovereignTools()
+    
+    // Convert history to AI SDK CoreMessage format
+    const sdkMessages: CoreMessage[] = history.map(m => ({
+      role: m.role,
+      content: m.content
+    }))
 
-    const allErrors: string[] = []
-    for (const provider of providers) {
-      try {
-        const resp = await provider.fn()
-        if (!resp) continue
-
-        if (resp.body) {
-          logger.info(`[CHAT] Success via ${provider.name}`)
-          return new Response(resp.body, { headers: sseHeaders() })
-        }
-        return resp
-      } catch (error) {
-        const msg = error instanceof Error ? error.message : 'unknown provider failure'
-        allErrors.push(`${provider.name}: ${msg}`)
-        logError(`[CHAT] Provider ${provider.name} failed`, error)
+    const result = await streamText({
+      model: fallback([
+        anthropic('claude-3-5-sonnet-20241022'),
+        google('gemini-2.0-flash'),
+        groq('llama-3.3-70b-versatile'),
+        openai('gpt-4o-mini')
+      ]),
+      system: systemPrompt,
+      messages: sdkMessages,
+      tools: sovereignTools,
+      maxSteps: 5,
+      temperature: profile.temperature,
+      experimental_telemetry: {
+        isEnabled: true,
+        functionId: 'chyren-chat-v2'
       }
-    }
+    })
 
+    return result.toDataStreamResponse({
+      headers: {
+        'X-Chyren-Session': session,
+        'X-Chyren-ARI': JSON.stringify({
+          allowed: ariResult.allowed,
+          riskTier: ariResult.riskTier,
+          adcclScore: ariResult.adcclScore
+        })
+      }
+    })
+
+  } catch (err: unknown) {
+    const _errMsg = err instanceof Error ? err.message : 'unknown error'
+    logError('[CHAT] Upstream failure', err)
+
+    // Final Sovereign Hub Fallback (direct fetch)
     if (getOptionalEnv('CHYREN_API_URL')) {
       try {
         const hubResp = await fetchHubStream(content, session, profile, memberContext)
@@ -704,25 +327,12 @@ export async function POST(req: NextRequest) {
           logger.info('[CHAT] Routing via Sovereign Hub')
           return new Response(hubResp.body, { headers: sseHeaders() })
         }
-        hubFailure = await hubResp.text().catch(() => `Hub status ${hubResp.status}`)
-        logger.warn(`[HUB] Non-OK response, falling back: ${hubFailure}`)
-      } catch (hubErr: unknown) {
-        hubFailure = hubErr instanceof Error ? hubErr.message : 'Unknown hub fetch error'
-        logger.warn(`[HUB] Fetch failed, falling back: ${hubFailure}`)
+      } catch (hubErr) {
+        logger.warn(`[HUB] Final fallback failed: ${hubErr}`)
       }
     }
 
-    throw new Error(`All providers failed or skipped:\n${allErrors.join(' | ')}`)
-  } catch (err: unknown) {
-    const _errMsg = err instanceof Error ? err.message : 'unknown error'
-    logError('[CHAT] Upstream failure', err, { hubFailure })
-
-    // Clean user-facing message — keep diagnostics server-side only
-    const offlineMessage = hubFailure
-      ? `I'm temporarily unreachable — my neural links are being recalibrated. Try again in a moment.`
-      : `My cognitive systems are still initializing. The sovereign hub will be online shortly.`
-
-    logger.warn(`[CHAT] Diagnostic detail (not shown to user): ${_errMsg}`)
+    const offlineMessage = `My cognitive systems are still initializing. The sovereign hub will be online shortly.`
     return createSingleSseTextResponse(offlineMessage)
   }
 }
