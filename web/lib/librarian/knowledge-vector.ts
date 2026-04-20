@@ -161,8 +161,20 @@ export async function semanticKnowledgeSearch(
     // FTS unavailable — rely on vector results only
   }
 
-  return Array.from(resultMap.values())
+  // ── Hierarchical Weighting (Move 1) ─────────────────────────────────────
+  const REALM_WEIGHTS: Record<string, number> = {
+    sovereign: 1.5,
+    people: 1.2,
+    external: 0.8,
+  }
+
+  const weightedResults = Array.from(resultMap.values())
     .filter((d) => d.reasoning_primer)
+    .map((d) => {
+      const weight = REALM_WEIGHTS[d.realm] ?? 1.0
+      return { ...d, score: d.score * weight }
+    })
     .sort((a, b) => b.score - a.score)
-    .slice(0, topK)
+
+  return weightedResults.slice(0, topK)
 }

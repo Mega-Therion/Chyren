@@ -8,6 +8,8 @@
 use omega_core::{
     gen_id, now, GoalContract, RunEnvelope, TaskStage, TaskStateObject, YETTRAGRAMMATON,
 };
+pub mod scheduler;
+pub use scheduler::SovereignScheduler;
 use std::collections::HashMap;
 
 /// AEON Runtime: Orchestrates the task lifecycle

@@ -232,6 +232,13 @@ async fn main() -> anyhow::Result<()> {
             if !cli.json {
                 println!("{}", theme::info("[BOOT] Launching API Server on :8080 ..."));
             }
+            
+            // Move 2: Start the AEON autonomous scheduler
+            let scheduler = Arc::new(omega_aeon::SovereignScheduler::new());
+            tokio::spawn(async move {
+                scheduler.run().await;
+            });
+
             omega_cli::api::start_api_server(conductor).await?;
             return Ok(());
         }
