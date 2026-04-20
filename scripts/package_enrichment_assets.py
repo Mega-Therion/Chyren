@@ -10,7 +10,11 @@ def verify_asset(asset_id, asset_type):
     # Use HF Datasets Server to verify
     url = f"https://datasets-server.huggingface.co/is-valid?dataset={asset_id}"
     response = requests.get(url)
-    return response.status_code == 200 and response.json().get('valid', False)
+    if response.status_code != 200:
+        return False
+    # API returns object with feature flags like 'viewer', 'preview' if valid
+    data = response.json()
+    return any(data.values())
 
 print("Verifying enrichment assets...")
 for cat, assets in schema['assets'].items():
