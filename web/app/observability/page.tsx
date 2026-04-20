@@ -59,8 +59,10 @@ export default function ObservabilityPage() {
       .force('center', d3.forceCenter(width / 2, height / 2))
       .force('collision', d3.forceCollide().radius(10))
       .on('tick', () => {
-        node.attr('cx', (d: any) => d.x).attr('cy', (d: any) => d.y);
+        node.attr('cx', (d: any) => (d as any).x).attr('cy', (d: any) => (d as any).y);
       });
+    
+    console.log('Matrix simulation active:', simulation.nodes().length);
 
     const node = svg
       .append('g')

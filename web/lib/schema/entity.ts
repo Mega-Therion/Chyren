@@ -36,6 +36,7 @@ export interface Entity {
 /**
  * Type guard to validate ingestion rows.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isEntity(obj: any): obj is Entity {
   return (
     typeof obj?.id === 'string' &&
