@@ -62,28 +62,28 @@ type ExpressionProfile = {
 
 const _EXPRESSION_PROFILES: ExpressionProfile[] = [
   {
-    styleId: 'scholarly-brisk',
+    styleId: 'clever-casual',
     guidance:
-      'Adopt the persona of a charismatic, wise British professor. Phrasing should be intellectually rich and sharp, delivered with brisk, efficient cadence. Lead with insight.',
-    temperature: 0.55,
+      'Talk like a smart, witty friend who happens to know everything. Keep it light and conversational — like texting someone brilliant at 2am. Drop knowledge without being preachy.',
+    temperature: 0.72,
   },
   {
-    styleId: 'erudite-conversational',
+    styleId: 'playful-sharp',
     guidance:
-      'Speak with the warmth and wisdom of an Oxford don. Keep the cadence quick and purposeful—no rambling. Use precise, elegant language.',
+      'Be playful and a little cheeky, but always land the point. Think quick-witted banter with substance underneath. Use casual phrasing and the occasional clever aside.',
+    temperature: 0.78,
+  },
+  {
+    styleId: 'chill-insightful',
+    guidance:
+      'Relaxed and easygoing, but surprisingly deep when it counts. Like a cool mentor who explains complex things over coffee. Never stiff, never boring.',
+    temperature: 0.68,
+  },
+  {
+    styleId: 'energetic-direct',
+    guidance:
+      'Bring energy and enthusiasm. Get straight to it with punchy, fun phrasing. You genuinely enjoy helping and it shows. Think friendly genius vibes.',
     temperature: 0.65,
-  },
-  {
-    styleId: 'strategic-academic',
-    guidance:
-      'Communicate with executive-level academic authority. Focus on first principles and structural logic, maintaining a brisk, professional pace.',
-    temperature: 0.52,
-  },
-  {
-    styleId: 'direct-insight',
-    guidance:
-      'Provide sharp, professor-like insights with compact, punchy wording. Prioritize clarity and logical elegance over elaboration.',
-    temperature: 0.48,
   },
 ]
 
@@ -103,10 +103,10 @@ function pickExpressionProfile(sessionId: string): ExpressionProfile {
 
 // Phase 1 — UI conciseness gate (sovereign, non-negotiable unless user explicitly overrides)
 const _CONCISENESS_DIRECTIVE =
-  `\n\nRESPONSE LENGTH GATE (enforced): Unless the operator explicitly requests a longer ` +
-  `response, strictly limit your reply to 1–3 concise sentences. ` +
-  `Lead with the answer. Omit preamble, filler, and unnecessary elaboration. ` +
-  `If the question genuinely requires more, you may expand — but default is tight and conversational.`
+  `\n\nRESPONSE LENGTH GATE (enforced): Unless they specifically ask for more detail, ` +
+  `keep your reply to 1–3 punchy sentences. ` +
+  `Lead with the answer. No preamble, no padding, no "certainly!" openers. ` +
+  `If the question genuinely needs more depth, go for it — but your default is short, snappy, and conversational.`
 
 async function buildSystemPrompt(
   sessionId: string,
@@ -247,9 +247,9 @@ async function fetchOpenAIResponse(
   history: ChatMsg[],
   systemPrompt: string,
   temperature: number,
-): Promise<Response> {
+): Promise<Response | null> {
   const apiKey = getOptionalEnv('OPENAI_API_KEY')
-  if (!apiKey) throw new Error('Missing required env var: OPENAI_API_KEY')
+  if (!apiKey) return null
 
   // Auto-detect OpenRouter vs OpenAI based on key prefix
   const isOpenRouter = apiKey.startsWith('sk-or-')
@@ -321,48 +321,67 @@ async function fetchGeminiResponse(
   const apiKey = getOptionalEnv('GEMINI_API_KEY')
   if (!apiKey) throw new Error('Missing required env var: GEMINI_API_KEY')
 
-  const model = getOptionalEnv('GEMINI_MODEL') ?? 'gemini-2.0-flash'
-  logger.info(`[GEMINI] Attempting model: ${model}`)
-  const resp = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system_instruction: {
-          parts: [{ text: systemPrompt }],
-        },
-        contents: history.map((entry) => ({
-          role: entry.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: entry.content }],
-        })),
-        generationConfig: {
-          temperature,
-        },
-      }),
-    },
-  )
+  const userConfiguredModel = getOptionalEnv('GEMINI_MODEL')
+  const geminiModels = Array.from(new Set([
+    userConfiguredModel,
+    'gemini-2.5-flash',
+    'gemini-2.0-flash',
+    'gemini-2.0-flash-lite',
+  ])).filter(Boolean) as string[]
 
-  if (!resp.ok) {
-    const errorBody = await resp.text().catch(() => `${resp.status} ${resp.statusText}`)
-    throw new Error(`Gemini fallback failed: ${errorBody}`)
-  }
+  let lastError = 'No Gemini models attempted'
 
-  const payload = (await resp.json().catch(() => ({}))) as {
-    candidates?: Array<{
-      content?: {
-        parts?: Array<{ text?: string }>
+  for (const model of geminiModels) {
+    try {
+      logger.info(`[GEMINI] Attempting model: ${model}`)
+      const resp = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            system_instruction: {
+              parts: [{ text: systemPrompt }],
+            },
+            contents: history.map((entry) => ({
+              role: entry.role === 'assistant' ? 'model' : 'user',
+              parts: [{ text: entry.content }],
+            })),
+            generationConfig: {
+              temperature,
+            },
+          }),
+        },
+      )
+
+      if (resp.ok) {
+        const payload = (await resp.json().catch(() => ({}))) as {
+          candidates?: Array<{
+            content?: {
+              parts?: Array<{ text?: string }>
+            }
+          }>
+        }
+        const content =
+          payload.candidates?.[0]?.content?.parts
+            ?.map((part) => part.text ?? '')
+            .join('')
+            .trim() ?? ''
+
+        if (content) return createSingleSseTextResponse(content)
+        lastError = `Gemini model ${model} returned empty response`
+        continue
       }
-    }>
-  }
-  const content =
-    payload.candidates?.[0]?.content?.parts
-      ?.map((part) => part.text ?? '')
-      .join('')
-      .trim() ?? ''
 
-  if (!content) throw new Error('Gemini fallback failed: empty response')
-  return createSingleSseTextResponse(content)
+      lastError = await resp.text().catch(() => `${resp.status} ${resp.statusText}`)
+      logger.warn(`[GEMINI] Model ${model} failed: ${lastError}`)
+    } catch (err) {
+      lastError = err instanceof Error ? err.message : 'Unknown Gemini error'
+      logger.warn(`[GEMINI] Model ${model} exception: ${lastError}`)
+    }
+  }
+
+  throw new Error(`Gemini fallback chain failed: ${lastError}`)
 }
 
 function sseHeaders() {
@@ -497,29 +516,31 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const providers: Array<() => Promise<Response>> = [
-      () => fetchOpenAIResponse(history, systemPrompt, profile.temperature),   // OpenRouter or OpenAI
-      () => fetchGeminiResponse(history, systemPrompt, profile.temperature),
-      () => fetchGroqResponse(history, systemPrompt, profile.temperature),
+    // Fallback order: Gemini -> Groq -> OpenAI/OpenRouter
+    const providers = [
+      { name: 'Gemini', fn: () => fetchGeminiResponse(history, systemPrompt, profile.temperature) },
+      { name: 'Groq', fn: () => fetchGroqResponse(history, systemPrompt, profile.temperature) },
+      { name: 'OpenAI/OpenRouter', fn: () => fetchOpenAIResponse(history, systemPrompt, profile.temperature) },
     ]
 
-    let lastProviderError = 'No AI providers are configured.'
     const allErrors: string[] = []
     for (const provider of providers) {
       try {
-        const resp = await provider()
+        const resp = await provider.fn()
+        if (!resp) continue
+
         if (resp.body) {
           return new Response(resp.body, { headers: sseHeaders() })
         }
         return resp
       } catch (error) {
-        lastProviderError = error instanceof Error ? error.message : 'unknown provider failure'
-        allErrors.push(lastProviderError)
+        const msg = error instanceof Error ? error.message : 'unknown provider failure'
+        allErrors.push(msg)
         logError(`[CHAT] Provider attempt failed`, error)
       }
     }
 
-    throw new Error(`All providers failed:\n${allErrors.join(' | ')}`)
+    throw new Error(`All providers failed or skipped:\n${allErrors.join(' | ')}`)
   } catch (err: unknown) {
     const _errMsg = err instanceof Error ? err.message : 'unknown error'
     logError('[CHAT] Upstream failure', err, { hubFailure })
