@@ -9,11 +9,11 @@ import psycopg2
 import argparse
 import urllib.request
 from datetime import datetime
-print(f"Python Executable: {sys.executable}")
-print(f"Python Path: {sys.path}")
+print(f"Python Executable: {sys.executable}", flush=True)
+print(f"Python Path: {sys.path}", flush=True)
 try:
     from datasets import load_dataset
-    print("✓ datasets imported successfully")
+    print("✓ datasets imported successfully", flush=True)
 except ImportError as e:
     print(f"✗ datasets import failed: {e}")
     sys.exit(1)

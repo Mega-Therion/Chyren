@@ -5,12 +5,21 @@ from rich.gradient import Gradient
 
 console = Console()
 
-banner_text = Text("CHYREN", style="bold cyan")
+from rich.align import Align
+
+# Define the Neon Gradient
+banner_text = Text("\n   ██████╗██╗  ██╗██╗   ██╗██████╗ ███████╗███╗   ██╗\n", style="#00ffff")
+banner_text.append("  ██╔════╝██║  ██║╚██╗ ██╔╝██╔══██╗██╔════╝████╗  ██║\n", style="#00ccff")
+banner_text.append("  ██║     ███████║ ╚████╔╝ ██████╔╝█████╗  ██╔██╗ ██║\n", style="#0099ff")
+banner_text.append("  ██║     ██╔══██║  ╚██╔╝  ██╔══██╗██╔══╝  ██║╚██╗██║\n", style="#cc00ff")
+banner_text.append("  ╚██████╗██║  ██║   ██║   ██║  ██║███████╗██║ ╚████║\n", style="#ff00ff")
+banner_text.append("   ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝\n", style="#ff00ff")
+
 panel = Panel(
-    banner_text,
-    title="[bold magenta]Sovereign Intelligence Orchestrator[/bold magenta]",
-    border_style="bright_blue",
-    padding=(1, 2)
+    Align.center(banner_text),
+    subtitle="[italic white]v0.1.0 — Sovereign Presence Active[/italic white]",
+    border_style="#333333",
+    padding=(1, 4)
 )
 
 console.print(panel)

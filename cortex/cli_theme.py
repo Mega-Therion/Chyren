@@ -1,16 +1,16 @@
 from rich.theme import Theme
 from rich.console import Console
 
-# Dracula/Neon Palette defined properly
+# Chyren Neon Palette defined properly
 RCHYTECT_THEME = Theme({
-    "info": "cyan",
-    "warning": "yellow",
-    "error": "bold red",
-    "success": "bold green",
-    "header_style": "bold #FF79C6",  # Dracula Pink
-    "border_style": "#BD93F9",      # Dracula Purple
-    "prompt_style": "bold #50FA7B",  # Dracula Green
-    "banner_style": "#8BE9FD"       # Dracula Cyan
+    "info": "#00ffff",
+    "warning": "#ffaa00",
+    "error": "bold #ff0000",
+    "success": "bold #00ff00",
+    "header_style": "bold #ff00ff",  # Neon Magenta
+    "border_style": "#8a2be2",      # Neon Purple
+    "prompt_style": "bold #00ffff",  # Neon Cyan
+    "banner_style": "#00ffff"       # Neon Cyan
 })
 
 console = Console(theme=RCHYTECT_THEME)

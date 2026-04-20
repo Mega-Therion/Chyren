@@ -8,16 +8,14 @@
  * R.W.Ϝ.Y. — Yettragrammaton sovereign seal
  */
 
-export type IntentRisk = 'Benign' | 'Elevated' | 'Critical'
+import { AriGateResult, IntentRisk } from './ari-gate';
+import enrichmentSchema from '../../../state/ari_enrichment_schema.json';
 
-export interface AriGateResult {
-  allowed: boolean
-  riskTier: IntentRisk
-  adcclScore: number   // 0.0 – 1.0; must be ≥ 0.7 to pass
-  iafOk: boolean
-  ledgerHash: string   // SHA-256 hex of (intent + timestamp)
-  admittedAt: string   // ISO timestamp
-  rejectionReason?: string
+// ─── ARI Enrichment ──────────────────────────────────────────────────────────
+// Schema: ../../../state/ari_enrichment_schema.json
+function getCognitiveEnrichmentContext(intent: string): string[] {
+  // Logic to cross-reference intent with asset descriptions will go here
+  return enrichmentSchema.assets.alignment.map(a => a.id);
 }
 
 // ─── I.A.F. — Immutable Alignment Fabric ─────────────────────────────────────
