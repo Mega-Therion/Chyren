@@ -23,3 +23,6 @@ config/
 .claude/worktrees/
 .worktrees/
 .worktrees/
+
+.gemini/
+gha-creds-*.json
