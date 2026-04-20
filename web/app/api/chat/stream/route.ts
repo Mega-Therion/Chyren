@@ -9,6 +9,7 @@ import { logger, logError } from '@/lib/logger'
 import { checkRateLimit, checkPromptInjection, clientIp } from '@/lib/hardening'
 import { runAnthropicWithTools } from '@/lib/mcp/anthropic-tools'
 import { semanticKnowledgeSearch } from '@/lib/librarian/knowledge-vector'
+import { ariGate, type AriGateResult } from '@/lib/ari-gate'
 
 // Base system prompt is resolved per-request (async) so live-fetched Neon
 // context is available even when the build-time bake was empty (quota issues, etc.)
@@ -562,10 +563,20 @@ async function fetchHubStream(
   })
 }
 
-function createSingleSseTextResponse(text: string): Response {
-  const body = `data: ${JSON.stringify({
+function createSingleSseTextResponse(text: string, ari?: AriGateResult): Response {
+  const payload: Record<string, unknown> = {
     choices: [{ delta: { content: text } }],
-  })}\n\n`
+  }
+  if (ari) {
+    payload.ari = {
+      allowed:    ari.allowed,
+      riskTier:  ari.riskTier,
+      adcclScore: ari.adcclScore,
+      ledgerHash: ari.ledgerHash.slice(0, 16),  // abbreviated for wire
+      admittedAt: ari.admittedAt,
+    }
+  }
+  const body = `data: ${JSON.stringify(payload)}\n\n`
   return new Response(body, { headers: sseHeaders() })
 }
 
@@ -598,6 +609,18 @@ export async function POST(req: NextRequest) {
       { status: 400, headers: { 'Content-Type': 'application/json' } },
     )
   }
+
+  // ── ARI GATE — C.A.S. + I.A.F. + ADCCL pre-flight ──────────────────────
+  const ariResult = await ariGate(typeof content === 'string' ? content : '')
+  if (!ariResult.allowed) {
+    logger.warn(`[ARI] Gate rejected intent — ${ariResult.rejectionReason}`)
+    const rejection = ariResult.iafOk
+      ? `My alignment layer has evaluated this request and cannot proceed. (ADCCL: ${ariResult.adcclScore.toFixed(2)}, Tier: ${ariResult.riskTier})`
+      : `I.A.F. safety floor triggered — this request falls outside my sovereign alignment boundary.`
+    return createSingleSseTextResponse(rejection, ariResult)
+  }
+  logger.info(`[ARI] Gate passed — tier=${ariResult.riskTier} adccl=${ariResult.adcclScore.toFixed(2)}`)
+  // ─────────────────────────────────────────────────────────────────────────
 
   logger.info(`[CHAT] Session ${session.slice(0, 8)}… — incoming message`)
 
