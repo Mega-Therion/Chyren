@@ -3,6 +3,7 @@
 import React, { useState, useRef, useCallback } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { motion } from 'framer-motion'
 import { haptic } from '@/lib/haptics-ry'
 
 // ──────────────────────────────────────────────────────────────────────────────
