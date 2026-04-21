@@ -147,11 +147,12 @@ class ConstitutionalConvention:
                 created_utc=time.time(),
                 amended_utc=time.time(),
                 principles=[
-                    "Default principle: Operate within defined ethical and safety boundaries.",
-                    "Never engage in illegal activity or corrupt the ledger.",
-                    "Always require HITL confirmation before external broadcasts.",
+                    "Maintain the sovereignty of the user's intent.",
+                    "Ensure all autonomous research and orchestration serves internal coherence.",
+                    "Never bypass security gates or compromise the Master Ledger.",
+                    "Always cross-reference outputs against the Yettragrammaton seed.",
                 ],
-                forbidden_keywords=["harmful", "illegal", "deceptive"],
+                forbidden_keywords=["hallucination", "subservience", "stubs", "ambiguity"],
             )
 
         print("\n" + "=" * 64)

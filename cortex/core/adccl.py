@@ -13,7 +13,7 @@ class VerificationResult:
         self.status = "verified" if self.passed else "rejected"
 
 class ADCCL:
-    def __init__(self, min_score=0.1, session_start=None):
+    def __init__(self, min_score=0.7, session_start=None):
         self._base_min_score = min_score
         self._session_start = session_start or time.time()
 
