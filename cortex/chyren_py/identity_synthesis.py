@@ -41,17 +41,9 @@ class IdentitySynthesizer:
             # then fill up with regular recent entries
             cursor.execute(f"""
                 (SELECT
-                    id, content, source, importance, created_at, namespace, domain, confidence
-                FROM public.neocortex_library
-                WHERE importance >= 0.9 OR namespace = 'canonical' OR namespace = 'identity'
-                ORDER BY importance DESC, created_at DESC)
-                UNION ALL
-                (SELECT
-                    id, content, source, importance, created_at, namespace, domain, confidence
-                FROM public.neocortex_library
-                WHERE NOT (importance >= 0.9 OR namespace = 'canonical' OR namespace = 'identity')
-                ORDER BY created_at DESC
-                LIMIT {limit})
+                    id, task as content, source, adccl_score as importance, created_at
+                FROM public.omega_memory_entries
+                ORDER BY adccl_score DESC, created_at DESC)
                 LIMIT {limit}
             """)
             entries = cursor.fetchall()
