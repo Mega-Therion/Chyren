@@ -85,81 +85,70 @@ body {
   display: flex;
   height: 100vh;
   width: 100vw;
-  padding: 24px;
-  gap: 24px;
+  padding: 0;
   position: relative;
   z-index: 10;
-}
-
-/* Glass Panels */
-.glass-panel {
-  background: var(--surface-glass);
-  backdrop-filter: var(--blur-std) saturate(180%);
-  border: var(--glass-border);
-  border-radius: 24px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
-  transition: border 0.3s ease, box-shadow 0.3s ease;
-}
-
-.glass-panel:hover {
-  border: var(--glass-border-bright);
-}
-
-/* Sidebar / Telemetry */
-.sidebar {
-  width: 400px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  justify-content: center;
 }
 
 /* Main Hub / Chat */
 .hub-core {
   flex: 1;
+  max-width: 900px;
   display: flex;
   flex-direction: column;
   position: relative;
+  z-index: 20;
+  border-left: 1px solid rgba(255,255,255,0.05);
+  border-right: 1px solid rgba(255,255,255,0.05);
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(8px);
 }
 
 /* Header Aesthetics */
 .hub-header {
-  height: 80px;
+  height: 70px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 32px;
+  padding: 0 24px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
 }
 
 .hub-title {
-  font-size: 1.8rem;
-  font-weight: 800;
-  letter-spacing: 0.5em;
-  color: var(--gold-core);
-  text-shadow: 0 0 20px var(--gold-glow);
-  text-transform: uppercase;
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: #fff;
+  text-shadow: 0 0 10px var(--gold-glow);
 }
 
-/* Message Bubbles - Refined Glass */
+/* Message Bubbles - iMessage Glassmorphism */
 .chat-window {
   flex: 1;
-  padding: 32px;
+  padding: 24px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 28px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.1) transparent;
+  gap: 16px;
+  scrollbar-width: none; /* Hide scrollbar for cleaner look */
+}
+
+.chat-window::-webkit-scrollbar {
+  display: none;
 }
 
 .message-bubble {
-  max-width: 80%;
-  padding: 20px 24px;
-  border-radius: 20px;
+  max-width: 75%;
+  padding: 14px 18px;
+  border-radius: 24px;
   font-size: 1rem;
-  line-height: 1.6;
+  line-height: 1.5;
   position: relative;
-  animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(16px);
+  animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 @keyframes slideIn {
@@ -169,40 +158,45 @@ body {
 
 .message-assistant {
   align-self: flex-start;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(20, 25, 40, 0.5);
+  border: 1px solid rgba(0, 242, 255, 0.15); /* Subtle cyan neon border */
   border-bottom-left-radius: 4px;
+  color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 15px rgba(0, 242, 255, 0.05), inset 0 0 10px rgba(0, 242, 255, 0.02);
 }
 
 .message-user {
   align-self: flex-end;
-  background: rgba(245, 158, 11, 0.05);
-  border: 1px solid rgba(245, 158, 11, 0.2);
+  background: rgba(40, 30, 20, 0.5);
+  border: 1px solid rgba(245, 158, 11, 0.15); /* Subtle gold neon border */
   border-bottom-right-radius: 4px;
+  color: #ffffff;
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.05), inset 0 0 10px rgba(245, 158, 11, 0.02);
 }
 
 /* Input Bar - Futuristic Dock */
 .hub-footer {
-  padding: 24px 32px;
-  background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
+  padding: 16px 24px;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
 }
 
 .input-container {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.05);
   backdrop-filter: var(--blur-std);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  padding: 12px 20px;
+  border-radius: 24px;
+  padding: 8px 16px;
   display: flex;
   align-items: flex-end;
-  gap: 16px;
+  gap: 12px;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
 
 .input-container:focus-within {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: var(--gold-core);
-  box-shadow: 0 0 30px rgba(245, 158, 11, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
 }
 
 /* Scrollbar Styling */

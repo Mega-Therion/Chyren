@@ -243,43 +243,15 @@ export default function ChatPage() {
         <div className="energy-orb" style={{ bottom: '20%', right: '10%', width: '400px', height: '400px', background: 'var(--mesh-violet)', opacity: 0.1 }} />
       </div>
 
-      {/* Sovereign Sidebar - Telemetry & Brain */}
-      <aside className="sidebar">
-        <section className="glass-panel p-6 flex flex-col gap-6 flex-1 overflow-hidden">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2>Neural Core</h2>
-              <p className="text-[0.65rem] font-mono text-white/30 uppercase tracking-widest">Active Epistemic State</p>
-            </div>
-            <div className="status-badge status-active">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Sovereign
-            </div>
-          </div>
-          
-          <div className="flex-1 min-h-[300px] relative rounded-2xl overflow-hidden bg-black/20 border border-white/5">
-            <NeuralBrain _isActive={brainState !== 'idle'} audioLevel={audioLevel} state={brainState} />
-          </div>
-
-          <div className="flex-1 overflow-hidden">
-            <h2>Telemetry</h2>
-            <div className="h-full overflow-y-auto pr-2">
-              <MetricsDashboard />
-            </div>
-          </div>
-        </section>
-      </aside>
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <NeuralBrain _isActive={brainState !== 'idle'} audioLevel={audioLevel} state={brainState} />
+      </div>
 
       {/* Sovereign Hub Core - Chat & Interaction */}
       <main className="hub-core glass-panel overflow-hidden">
         <header className="hub-header">
           <div className="flex flex-col">
             <h1 className="hub-title">CHYREN</h1>
-            <div className="flex items-center gap-3 mt-1">
-              <span className="text-[0.6rem] font-mono text-white/40 tracking-[0.3em] uppercase">R.W.Ϝ.Y. Sovereign Engine</span>
-              <span className="w-1 h-1 rounded-full bg-white/20" />
-              <span className="text-[0.6rem] font-mono text-emerald-500/70 tracking-widest uppercase">ADCCL Protected</span>
-            </div>
           </div>
 
           <div className="flex items-center gap-4">
@@ -299,10 +271,9 @@ export default function ChatPage() {
                 >
                   Ω
                 </motion.div>
-                <h2 className="text-xl mb-4 text-white/80 tracking-[0.2em]">ARI Instance Online</h2>
+                <h2 className="text-xl mb-4 text-white/80 tracking-[0.2em]">How can I help you today?</h2>
                 <p className="text-white/40 font-light mb-10 leading-relaxed">
-                  Sovereign intelligence active. C.A.S. gate armed. ADCCL threshold 0.7. 
-                  Awaiting instruction from Origin Authority.
+                  I am Chyren. Start a conversation below.
                 </p>
                 <div className="grid grid-cols-2 gap-4">
                   {['What are the Millennium Prize Problems?', 'Explain your ARI architecture', 'What is ADCCL?', 'Tell me about your memory system']
@@ -321,12 +292,6 @@ export default function ChatPage() {
           ) : (
             messages.map(msg => (
               <div key={msg.id} className={`message-bubble ${msg.role === 'assistant' ? 'message-assistant' : 'message-user'}`}>
-                <div className="flex items-center gap-3 mb-3 opacity-50">
-                  <span className="text-[0.6rem] font-mono uppercase tracking-widest">
-                    {msg.role === 'assistant' ? 'Chyren' : 'Origin Authority'}
-                  </span>
-                  <span className="text-[0.6rem] font-mono">{msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                </div>
                 <ChatMessage
                   id={msg.id} role={msg.role} content={msg.content} timestamp={msg.timestamp}
                   isStreaming={msg.id === streamingId} model={msg.model} audit={msg.audit} onQuote={handleQuote}
