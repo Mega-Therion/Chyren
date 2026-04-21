@@ -53,7 +53,7 @@ class SovereignProvider:
             "model": self.ollama_model,
             "messages": [{"role": "system", "content": request.system}, {"role": "user", "content": request.prompt}],
             "temperature": 0.2,
-            "stream": false
+            "stream": False
         }).encode()
         
         req = urllib.request.Request(
