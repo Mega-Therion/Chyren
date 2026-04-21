@@ -1,5 +1,7 @@
 import { type NextRequest } from 'next/server'
-import { streamText, type CoreMessage, fallback } from 'ai'
+import { streamText, type CoreMessage } from 'ai'
+import { experimental_wrapLanguageModel as wrapLanguageModel } from 'ai'
+import { fallback } from '@ai-sdk/provider'
 import { CHYREN_SYSTEM_PROMPT } from '@/lib/phylactery'
 import { getRYContextAsync } from '@/lib/neon-context'
 import {

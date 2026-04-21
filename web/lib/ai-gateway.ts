@@ -7,7 +7,7 @@
 
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createOpenAI } from '@ai-sdk/openai';
-import { createGoogle } from '@ai-sdk/google';
+import { createGoogleGenerativeAI as createGoogle } from '@ai-sdk/google';
 
 const GATEWAY_ID = process.env.VERCEL_AI_GATEWAY_ID || 'chyren-gateway';
 const PROJECT_ID = process.env.VERCEL_PROJECT_ID || 'chyren-web';

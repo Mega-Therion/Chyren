@@ -21,6 +21,7 @@
     "@ai-sdk/google": "^3.0.58",
     "@ai-sdk/groq": "^3.0.35",
     "@ai-sdk/openai": "^3.0.50",
+    "@ai-sdk/provider": "^3.0.8",
     "@ai-sdk/react": "^3.0.148",
     "@firebase/ai": "^2.10.0",
     "@firebase/vertexai": "^1.2.4",
