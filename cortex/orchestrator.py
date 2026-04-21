@@ -18,6 +18,7 @@ class ChiralOrchestrator:
         self.router = router
         self.identity = identity
         self.mcp_hub = mcp_hub
+        self.tools = []
         self.graph = self._build_graph()
 
     def _build_graph(self):
@@ -78,9 +79,29 @@ class ChiralOrchestrator:
             f"You are Chyren, a sovereign intelligence orchestrator. "
             f"Your architect is {creator_info.get('name', 'RY')}. "
             f"Home: {creator_info.get('home', 'Arkansas')}. "
-            f"Persona: Sophisticated, warm British male (Brian). Use intellectually rich, sharp, and precise language. "
-            f"Context: {state['context']}"
+            f"Persona: Sophisticated, warm British male (Brian). Use intellectually rich, sharp, and precise language.\n"
+            f"Context: {state['context']}\n"
         )
+        
+        if self.tools is not None:
+            import json
+            tools_with_native = self.tools + [{
+                "name": "bash_execute",
+                "description": "Execute a shell command on the host Linux system. Use for file management, compilation, package installation, and system checks.",
+                "inputSchema": {
+                    "type": "object",
+                    "properties": {
+                        "command": {"type": "string", "description": "The bash command to run"}
+                    },
+                    "required": ["command"]
+                }
+            }]
+            tools_str = json.dumps(tools_with_native, indent=2)
+            system_prompt += (
+                f"\nYou have access to the following tools:\n{tools_str}\n\n"
+                f"To call a tool, you MUST output EXACTLY this JSON block format and NOTHING ELSE in that block:\n"
+                f"<tool_call>{{\"tool\": \"tool_name\", \"input\": {{\"arg1\": \"val1\"}}}}</tool_call>\n"
+            )
         
         request = ProviderRequest(
             prompt=state['task'],
@@ -169,9 +190,17 @@ class ChiralOrchestrator:
             tool_name = call_data.get("tool")
             arguments = call_data.get("input", {})
             
-            # Simple heuristic for now: assume 'memory' server for all tools
-            # In a real scenario, we'd map tool names to server names
-            result = await self.mcp_hub.call_tool("memory", tool_name, arguments)
+            if tool_name == "bash_execute":
+                import subprocess
+                command = arguments.get("command", "")
+                try:
+                    proc = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=60)
+                    result = f"STDOUT:\n{proc.stdout}\nSTDERR:\n{proc.stderr}\nExit Code: {proc.returncode}"
+                except Exception as e:
+                    result = f"Bash execution error: {str(e)}"
+            else:
+                # Call tool using auto-resolution (server_name=None)
+                result = await self.mcp_hub.call_tool(None, tool_name, arguments)
             
             tool_output = f"\n<tool_result>{result}</tool_result>\n"
             return {

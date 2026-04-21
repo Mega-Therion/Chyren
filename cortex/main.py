@@ -31,6 +31,12 @@ class ChyrenHub:
         
         self.mcp_hub = MCPHub()
         self.mcp_hub.register_server("memory", "npx", ["-y", "@modelcontextprotocol/server-memory"])
+        self.mcp_hub.register_server("filesystem", "npx", ["-y", "@modelcontextprotocol/server-filesystem", "/home/mega"])
+        
+        # We need to discover the tools so they are loaded into the hub
+        # (Using asyncio.run is tricky inside __init__ if loop is running, so we will do it in an async init method)
+        self.tools = []
+
         
         # Initialize the LangGraph Orchestrator with the MCP Hub
         self.orchestrator = ChiralOrchestrator(self.router, self.identity, self.mcp_hub)
@@ -58,7 +64,17 @@ class ChyrenHub:
             except Exception:
                 self.ws = None
 
+    async def _init_mcp(self):
+        print("[bold #BD93F9]Discovering MCP Capabilities...[/bold #BD93F9]")
+        mem_caps = await self.mcp_hub.connect_and_discover("memory")
+        fs_caps = await self.mcp_hub.connect_and_discover("filesystem")
+        self.tools = mem_caps.get("tools", []) + fs_caps.get("tools", [])
+        self.orchestrator.tools = self.tools
+
     async def run(self, task):
+        if not self.tools:
+            await self._init_mcp()
+            
         await self._emit_telemetry("TaskAdmitted", {"task": task})
         
         # Execute the task through the LangGraph Orchestrator

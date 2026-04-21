@@ -16,6 +16,7 @@ class MCPHub:
         self.servers: Dict[str, StdioServerParameters] = {}
         # We hold open sessions for fast contextual access
         self._sessions: Dict[str, ClientSession] = {}
+        self._tool_to_server: Dict[str, str] = {}
 
     def register_server(self, name: str, command: str, args: List[str], env: Optional[Dict[str, str]] = None):
         """Register a new MCP server as a tertiary spoke."""
@@ -54,13 +55,30 @@ class MCPHub:
                 
                 LOG.info(f"[MCP HUB] {name} initialized. Tools: {len(tools.tools)} | Resources: {len(resources_list)}")
                 
+                tool_schemas = []
+                for t in tools.tools:
+                    tool_schemas.append({
+                        "name": t.name,
+                        "description": t.description,
+                        "inputSchema": t.inputSchema
+                    })
+                    # Map tool name to server name
+                    self._tool_to_server[t.name] = name
+                
+                LOG.info(f"[MCP HUB] {name} initialized. Tools: {len(tool_schemas)} | Resources: {len(resources_list)}")
+                
                 return {
-                    "tools": [t.name for t in tools.tools],
+                    "tools": tool_schemas,
                     "resources": resources_list
                 }
 
-    async def call_tool(self, server_name: str, tool_name: str, arguments: Dict[str, Any]) -> Any:
-        """Call a tool on a specific MCP server."""
+    async def call_tool(self, server_name: Optional[str], tool_name: str, arguments: Dict[str, Any]) -> Any:
+        """Call a tool on a specific MCP server, or auto-resolve if server_name is None."""
+        if server_name is None:
+            server_name = self._tool_to_server.get(tool_name)
+            if not server_name:
+                raise ValueError(f"Tool {tool_name} not found in any registered server.")
+                
         if server_name not in self.servers:
             raise ValueError(f"Server {server_name} not registered.")
             
