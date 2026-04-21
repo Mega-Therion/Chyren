@@ -217,6 +217,7 @@ impl IdentitySynthesizer {
             }
         }
 
+        let addressed_count = addressed.len();
         let foundation = IdentityFoundation {
             synthesized_at: Utc::now().to_rfc3339(),
             core_principles: vec![
@@ -233,7 +234,7 @@ impl IdentitySynthesizer {
 
         self.persist(&foundation)?;
         tracing::info!("[DREAM] Dream cycle complete. Identity foundation persisted.");
-        omega_telemetry::info!("IdentitySynthesizer", "DREAM_COMPLETE", "Identity foundation synthesized with {} problems addressed", addressed.len());
+        omega_telemetry::info!("IdentitySynthesizer", "DREAM_COMPLETE", "Identity foundation synthesized with {} problems addressed", addressed_count);
         Ok(foundation)
     }
 

@@ -10,8 +10,9 @@
 
 use async_trait::async_trait;
 use omega_core::{
-    gen_id, now, AgentCapability, AgentResult, AgentTask, KnowledgeNode, ProofConstraint,
+    gen_id, now, AgentResult, AgentTask, KnowledgeNode, ProofConstraint,
 };
+use omega_core::mesh::AgentCapability;
 use omega_myelin::Service as MyelinService;
 use omega_neocortex::{cold_store::ColdStore, proof_index::ProofConstraintIndex, Neocortex};
 use std::sync::Arc;
@@ -220,8 +221,8 @@ impl PersistentAgent for IngestorAgent {
 
     fn capabilities(&self) -> Vec<AgentCapability> {
         vec![
-            AgentCapability::ContentIngestion,
-            AgentCapability::FormalVerification,
+            AgentCapability { category: "content_ingestion".to_string(), tools: vec![] },
+            AgentCapability { category: "formal_verification".to_string(), tools: vec![] },
         ]
     }
 

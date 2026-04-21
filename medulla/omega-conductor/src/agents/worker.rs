@@ -19,7 +19,7 @@ pub struct MeshWorker {
 impl MeshWorker {
     /// Create a new worker for the given agent and connect to the broker.
     pub async fn new(agent: Arc<dyn PersistentAgent>) -> Self {
-        let agent_id = agent.name();
+        let agent_id = agent.name().to_string();
         let mut mqttoptions = MqttOptions::new(format!("worker-{}", agent_id), "localhost", 1883);
         mqttoptions.set_keep_alive(Duration::from_secs(5));
 

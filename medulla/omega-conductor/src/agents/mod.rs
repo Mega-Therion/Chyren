@@ -4,7 +4,8 @@
 //! executes tasks, and returns scored results back through the EventBus.
 
 use async_trait::async_trait;
-use omega_core::{AgentCapability, AgentResult, AgentTask};
+use omega_core::{AgentResult, AgentTask};
+use omega_core::mesh::AgentCapability;
 
 /// A persistent agent that can be registered in the AgentRegistry and
 /// dispatched tasks via the EventBus.

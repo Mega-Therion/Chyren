@@ -5,7 +5,8 @@
 
 use super::PersistentAgent;
 use async_trait::async_trait;
-use omega_core::{now, AgentCapability, AgentResult, AgentTask, mesh::TaskContract};
+use omega_core::{now, AgentTask, AgentResult};
+use omega_core::mesh::{TaskContract, AgentCapability};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
@@ -28,8 +29,8 @@ impl PersistentAgent for MillenniumSolverAgent {
 
     fn capabilities(&self) -> Vec<AgentCapability> {
         vec![
-            AgentCapability::FormalVerification,
-            AgentCapability::Research,
+            AgentCapability { category: "formal_verification".to_string(), tools: vec![] },
+            AgentCapability { category: "research".to_string(), tools: vec![] },
         ]
     }
 

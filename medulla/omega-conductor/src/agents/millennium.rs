@@ -9,7 +9,8 @@
 //! import graphs without cloning the full 200k-file repository.
 
 use super::{ingestor::IngestionRequest, IngestorAgent};
-use omega_core::{now, AgentCapability, AgentResult, AgentTask};
+use omega_core::{now, AgentTask, AgentResult};
+use omega_core::mesh::AgentCapability;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashSet, VecDeque};
 
@@ -518,8 +519,8 @@ impl PersistentAgent for SearchAndExtendAgent {
 
     fn capabilities(&self) -> Vec<AgentCapability> {
         vec![
-            AgentCapability::ContentIngestion,
-            AgentCapability::FormalVerification,
+            AgentCapability { category: "content_ingestion".to_string(), tools: vec![] },
+            AgentCapability { category: "formal_verification".to_string(), tools: vec![] },
         ]
     }
 

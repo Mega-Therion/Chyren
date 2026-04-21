@@ -11,7 +11,8 @@
 
 use super::PersistentAgent;
 use async_trait::async_trait;
-use omega_core::{now, AgentCapability, AgentResult, AgentTask};
+use omega_core::{now, AgentResult, AgentTask};
+use omega_core::mesh::AgentCapability;
 use std::fs;
 use std::io::Write;
 use std::process::Command;
@@ -381,7 +382,7 @@ impl MathSpoke {
                         return Ok(format!("-- [PARTIAL: proof skeleton only]\n{salvaged}"));
                     }
                     omega_telemetry::warn!("MathSpoke", "SALVAGE_FAILURE", "Salvage failed — emitting trivial stub for {task_id}");
-                    return Ok(trivial);
+                    return Ok("-- salvaged stub\ntheorem salvaged : True := trivial\n".to_string());
                 }
         }
 
@@ -427,8 +428,8 @@ impl PersistentAgent for MathSpoke {
 
     fn capabilities(&self) -> Vec<AgentCapability> {
         vec![
-            AgentCapability::FormalVerification,
-            AgentCapability::ToolExecution,
+            AgentCapability { category: "formal_verification".to_string(), tools: vec![] },
+            AgentCapability { category: "tool_execution".to_string(), tools: vec![] },
         ]
     }
 

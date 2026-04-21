@@ -321,14 +321,7 @@ pub trait MasterLedger: Send + Sync {
 
 // ── Agent Mesh Types ──────────────────────────────────────────────────────────
 
-/// Persistent agent capability classification.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum AgentCapability {
-    ToolExecution,
-    ContentIngestion,
-    FormalVerification,
-    KnowledgeCompression,
-}
+// Agent Mesh Types moved to mesh.rs
 
 /// A unit of work dispatched to a persistent agent.
 #[derive(Debug, Clone, Serialize, Deserialize)]

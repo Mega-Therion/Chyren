@@ -1,67 +1,58 @@
-# Chyren — Alexa Skill Backend on Vercel
+# CHYREN — Sovereign Intelligence Hub
 
-This repo hosts the Alexa skill backend as a Vercel Serverless Function.
+Chyren is a high-fidelity, heterogeneous intelligence orchestrator designed for autonomous mathematical research, formal verification, and sovereign system management. 
 
-## Architecture
+It transcends legacy LLM wrappers by implementing a **recursive epistemic mesh** and a **multi-language agent architecture** (Rust, R, Zig, Lean 4).
 
-```
-User → Alexa → POST https://chyren.vercel.app/api/alexa → Vercel Function → Response
-```
+## 🌌 Sovereign Architecture
 
-## Alexa Console Setup
+- **Medulla (Rust)**: The high-velocity execution kernel. Governs task routing, memory locks, and agent orchestration.
+- **Neocortex (Rust/In-Memory)**: A recursive chiral graph for formal reasoning. Every thought is verified against a global axiom set.
+- **Sovereign Mesh (MQTT)**: A decentralized agent bus powered by `rumqttd`. Agents (Ingestor, MathSpoke, Solver) operate as independent workers.
+- **Math Spoke (Lean 4)**: Formal theorem proving and verification. Supports "Tiered Epistemic Escalation" (Ollama → Gemini → Formal Salvage).
+- **Heuristic Spoke (R)**: Bayesian statistical analysis of reasoning paths. Estimates proof convergence probability via telemetry logs.
+- **AEON (Autonomous Scheduler)**: Background feedback loop for identity synthesis and "Dream Cycle" learning.
 
-1. Open [Alexa Developer Console](https://developer.amazon.com/alexa/console/ask)
-2. Select your skill → **Build** tab → **Endpoint**
-3. Choose **HTTPS**
-4. Set endpoint URL to: `https://chyren.vercel.app/api/alexa`
-5. SSL certificate type: **"My development endpoint is a sub-domain of a domain that has a wildcard certificate from a certificate authority"**
-6. Click **Save Endpoints** → **Build Model**
+## 🛠 Tech Stack
 
-## GitHub → Vercel CI/CD Setup
+- **Core Engine**: Rust (Tokio, Actix, Serde)
+- **Analytics**: R (jsonlite, Bayesian inference)
+- **Proof Assistant**: Lean 4 (Formal Verification)
+- **Telemtry**: Prometheus + WebSocket (Real-time observability)
+- **Database**: Neon (Serverless Postgres) + Qdrant (Vector Store)
 
-Add these three secrets to your GitHub repo (`Settings → Secrets → Actions`):
+## 🚀 Getting Started
 
-| Secret | Where to find it |
-|---|---|
-| `VERCEL_TOKEN` | [vercel.com/account/tokens](https://vercel.com/account/tokens) |
-| `VERCEL_ORG_ID` | `.vercel/project.json` after first deploy (orgId) |
-| `VERCEL_PROJECT_ID` | `.vercel/project.json` after first deploy (projectId) |
+### Prerequisites
+- **Rust**: `1.75+`
+- **R**: `4.3+` (with `jsonlite`)
+- **Lean 4**: `elan` installed
 
-### First-time deploy (run locally once)
-
+### Installation
 ```bash
-npm install
-npx vercel login
-npx vercel --yes   # links project, creates .vercel/project.json
-npx vercel --prod  # production deploy
+git clone https://github.com/your-repo/Chyren.git
+cd Chyren/medulla
+cargo build --release
 ```
 
-After this, every `git push` to `main` auto-deploys to production.
-
-## Local Development
-
+### Running the Hub
 ```bash
-npm install
-npx vercel dev
-# Skill available at http://localhost:3000/api/alexa
+# Start the Conductor and Agent Mesh
+./target/release/chyren server
+
+# Solve a Millennium Prize Problem
+./target/release/chyren solve riemann --depth 5
 ```
 
-## Adding Intents
+## 📊 Observability
+Chyren exposes a high-fidelity metrics server on port `9090`.
+- **Prometheus**: `http://localhost:9090/metrics`
+- **WebSocket Telemetry**: `ws://localhost:9090/ws`
 
-Edit `api/alexa.js` — add a new handler object and register it in `SkillBuilders.custom().addRequestHandlers(...)`.
+The R-based Heuristic Validator monitors `telemetry.log` and outputs Bayesian convergence snapshots to `state/heuristic_snapshot.json`.
 
-```js
-const MyCustomIntentHandler = {
-  canHandle(input) {
-    return (
-      Alexa.getRequestType(input.requestEnvelope) === 'IntentRequest' &&
-      Alexa.getIntentName(input.requestEnvelope) === 'MyCustomIntent'
-    );
-  },
-  handle(input) {
-    return input.responseBuilder
-      .speak('You triggered my custom intent!')
-      .getResponse();
-  },
-};
-```
+## ⚖️ Sovereign Governance
+Chyren operates under the **Yettragrammaton Seal**. Truth is measurable, not rhetorical. Every claim must be verifiable.
+
+---
+**OmegA Collective — Silence over Compromise.**

@@ -8,6 +8,10 @@ use omega_core::{now, EvidencePacket, RunEnvelope, RunStatus};
 use omega_conductor::agents::{
     ingestor::IngestorAgent,
     millennium::{MillenniumProblem, SearchAndExtendAgent},
+    worker::MeshWorker,
+    millennium_solver::MillenniumSolverAgent,
+    math_spoke::MathSpoke,
+    PersistentAgent,
 };
 use omega_myelin::Service as MyelinService;
 use omega_neocortex::{cold_store::ColdStore, proof_index::ProofConstraintIndex, Neocortex};
@@ -202,7 +206,7 @@ async fn main() -> anyhow::Result<()> {
     let registry = Arc::new(Mutex::new(omega_core::mesh::AgentRegistry::new()));
     
     // Register MathSpoke
-    let math_spoke = Arc::new(omega_conductor::agents::math_spoke::MathSpoke);
+    let math_spoke = Arc::new(MathSpoke);
     {
         let mut reg = registry.lock().await;
         reg.register(omega_core::mesh::AgentRegistryEntry {
@@ -216,10 +220,10 @@ async fn main() -> anyhow::Result<()> {
         });
     }
     // Start MeshWorker for MathSpoke
-    let _math_worker = omega_conductor::agents::MeshWorker::new(math_spoke).await;
+    let _math_worker = MeshWorker::new(math_spoke).await;
 
     // Register Ingestor
-    let ingestor = Arc::new(omega_conductor::agents::IngestorAgent::new(
+    let ingestor = Arc::new(IngestorAgent::new(
         conductor.memory_service.clone(),
         Arc::new(Neocortex::new()),
         Arc::new(ColdStore::default_store().unwrap_or_else(|_| ColdStore::new("/tmp/chyren_cold").expect("cold store"))),
@@ -238,12 +242,12 @@ async fn main() -> anyhow::Result<()> {
         });
     }
     // Start MeshWorker for Ingestor
-    let _ingestor_worker = omega_conductor::agents::MeshWorker::new(ingestor).await;
+    let _ingestor_worker = MeshWorker::new(ingestor).await;
 
     let dispatcher = Arc::new(omega_conductor::dispatcher::Dispatcher::new(registry.clone()).await);
 
     // Register MillenniumSolver
-    let solver = Arc::new(omega_conductor::agents::MillenniumSolverAgent::new(dispatcher.clone()));
+    let solver = Arc::new(MillenniumSolverAgent::new(dispatcher.clone()));
     {
         let mut reg = registry.lock().await;
         reg.register(omega_core::mesh::AgentRegistryEntry {
@@ -256,7 +260,7 @@ async fn main() -> anyhow::Result<()> {
             last_heartbeat: now() as u64,
         });
     }
-    let _solver_worker = omega_conductor::agents::MeshWorker::new(solver).await;
+    let _solver_worker = MeshWorker::new(solver).await;
 
     conductor.set_dispatcher(dispatcher);
 
