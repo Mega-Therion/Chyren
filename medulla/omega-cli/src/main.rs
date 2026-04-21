@@ -11,18 +11,26 @@ use omega_conductor::agents::{
 };
 use omega_myelin::Service as MyelinService;
 use omega_neocortex::{cold_store::ColdStore, proof_index::ProofConstraintIndex, Neocortex};
+use rustyline::error::ReadlineError;
+use rustyline::DefaultEditor;
+use std::io::{stdout, Write};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tracing::{info, warn};
 
-fn init_tracing() {
-    // Respect `RUST_LOG` when set; otherwise default to info-level logs.
+fn init_tracing(verbose: bool) {
+    let level = if verbose { "debug" } else { "off" };
     let filter = tracing_subscriber::EnvFilter::try_from_default_env()
-        .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info"));
+        .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new(level));
+    
     // Always log to stderr so `--json` stdout remains machine-readable.
     tracing_subscriber::fmt()
         .with_env_filter(filter)
         .with_writer(std::io::stderr)
+        .with_target(verbose)
+        .with_thread_ids(verbose)
+        .with_file(verbose)
+        .with_line_number(verbose)
         .init();
 }
 
@@ -35,6 +43,10 @@ struct Cli {
     /// Emit machine-readable JSON output (single object per invocation).
     #[arg(long, global = true)]
     json: bool,
+
+    /// Increase logging verbosity.
+    #[arg(short, long, global = true)]
+    verbose: bool,
 
     /// Preferred provider/spoke (e.g. openai, anthropic, gemini, deepseek).
     #[arg(long, global = true)]
@@ -51,6 +63,11 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    /// Interactive or direct task query
+    Ask {
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String>
+    },
     /// Show system status
     Status,
     /// Reset the ledger
@@ -164,8 +181,9 @@ fn exit_code_for_error(e: &anyhow::Error) -> i32 {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    init_tracing();
+    // 1. Initial boot phase (silent by default)
     let cli = Cli::parse();
+    init_tracing(cli.verbose);
 
     if !cli.json {
         theme::print_banner();
@@ -203,7 +221,11 @@ async fn main() -> anyhow::Result<()> {
     // Phase 8: Boot reflection pass — metacognitive self-assessment
     let insights = conductor.reflect().await;
     if !insights.is_empty() {
-        eprintln!("[METACOG] {} epiphanies from boot reflection.", insights.len());
+        tracing::debug!("[METACOG] {} epiphanies from boot reflection.", insights.len());
+    }
+
+    if cli.command.is_none() && !cli.json {
+        return run_repl(conductor, cli.provider.clone(), cli.max_tokens, cli.temperature).await;
     }
 
     match &cli.command {
@@ -479,6 +501,7 @@ async fn main() -> anyhow::Result<()> {
 
     // 2. Determine task text from either reasoning commands or legacy positional arg
     let task_text = match &cli.command {
+        Some(Commands::Ask { args }) |
         Some(Commands::Thought { args }) |
         Some(Commands::Action { args }) |
         Some(Commands::Sense { args }) |
@@ -511,8 +534,9 @@ async fn main() -> anyhow::Result<()> {
 
         if !cli.json {
             println!(
-                "{} {}",
-                theme::info("[PLANNING]"),
+                "  {} {} {}",
+                theme::parallax_spacer(2),
+                theme::info("  ╭── SOVEREIGN INTENT"),
                 theme::value(&format!("\"{}\"", task_text)),
             );
         }
@@ -533,7 +557,7 @@ async fn main() -> anyhow::Result<()> {
                         error: Some("Rejected(adversarial)".to_string()),
                     });
                 } else {
-                    println!("{}", theme::warn("[AEGIS] Task deflected — adversarial pattern detected."));
+                    println!("{}", theme::warn("  ╰── [AEGIS] Task deflected — adversarial pattern detected."));
                     println!("{deflection_text}");
                 }
                 std::process::exit(10);
@@ -559,39 +583,51 @@ async fn main() -> anyhow::Result<()> {
         };
 
         if !cli.json {
-            println!("{}", theme::info("[EXECUTING] Routing through sovereign pipeline..."));
+            print!("  {}  {}", theme::parallax_spacer(2), theme::info("  ╰── [ROUTING] Pipeline Active..."));
+            std::io::stdout().flush().ok();
         }
 
-        // Apply generation overrides at the CLI boundary (keeps API defaults stable).
-        let result = match conductor
-            .execute_plan_with_overrides(
-                plan,
-                &mut envelope,
-                cli.provider.as_deref(),
-                cli.max_tokens,
-                cli.temperature,
-            )
-            .await
-        {
-            Ok(r) => r,
-            Err(e) => {
-                let err = anyhow::anyhow!(e.to_string());
-                if cli.json {
-                    print_json(JsonOut {
-                        ok: false,
-                        command: "task",
-                        status: None,
-                        run_id: Some(envelope.run_id.clone()),
-                        response_text: None,
-                        adccl_score: None,
-                        provider: cli.provider.clone(),
-                        error: Some(err.to_string()),
-                    });
-                } else {
-                    eprintln!("{err}");
+        // 3. Execution Phase with "Thinking" Animation
+        let mut animation = theme::ThinkingAnimation::default();
+        let provider_override = cli.provider.clone();
+        let max_tokens = cli.max_tokens;
+        let temp = cli.temperature;
+        
+        let run_id_captured = envelope.run_id.clone();
+        let exec_handle = tokio::spawn(async move {
+            conductor
+                .execute_plan_with_overrides(
+                    plan,
+                    &mut envelope,
+                    provider_override.as_deref(),
+                    max_tokens,
+                    temp,
+                )
+                .await
+        });
+
+        let result = if cli.json {
+            exec_handle.await??
+        } else {
+            // Spin while execution is in progress
+            let mut final_result = None;
+            let mut counter = 0;
+            while final_result.is_none() {
+                if exec_handle.is_finished() {
+                    final_result = Some(exec_handle.await??);
+                    break;
                 }
-                std::process::exit(exit_code_for_error(&err));
+                
+                let frame = animation.next_frame();
+                let msg = if counter < 20 { "Synthesizing..." } else if counter < 50 { "Aligning..." } else { "Finalizing..." };
+                print!("\r  {}  {} {} {}  ", theme::parallax_spacer(2), theme::gradient(&frame, counter), theme::info(msg), theme::parallax_spacer(4));
+                std::io::stdout().flush().ok();
+                
+                tokio::time::sleep(tokio::time::Duration::from_millis(80)).await;
+                counter += 1;
             }
+            println!("\r{}", " ".repeat(80)); // Clear line
+            final_result.unwrap()
         };
 
         if cli.json {
@@ -599,7 +635,7 @@ async fn main() -> anyhow::Result<()> {
                 ok: true,
                 command: "task",
                 status: Some(format!("{:?}", result.status)),
-                run_id: Some(envelope.run_id.clone()),
+                run_id: Some(run_id_captured),
                 response_text: Some(result.response_text.clone()),
                 adccl_score: result.verification.as_ref().map(|v| v.score as f64),
                 provider: cli
@@ -616,8 +652,10 @@ async fn main() -> anyhow::Result<()> {
                 .unwrap_or("unknown");
             let adccl_v = result.verification.as_ref().map(|v| v.score as f64).unwrap_or(0.0);
             let status_str = format!("{:?}", result.status);
+            
+            // Output layout
             theme::print_result_header(
-                &envelope.run_id,
+                &run_id_captured,
                 &status_str,
                 adccl_v,
                 provider_str,
@@ -640,6 +678,122 @@ async fn main() -> anyhow::Result<()> {
             std::process::exit(2);
         } else {
             println!("{}", theme::label("Run `chyren --help` for usage."));
+        }
+    }
+    Ok(())
+}
+
+async fn run_repl(
+    conductor: Arc<Conductor>,
+    provider: Option<String>,
+    max_tokens: usize,
+    temperature: f64,
+) -> anyhow::Result<()> {
+    let mut rl = DefaultEditor::new()?;
+    theme::print_banner();
+
+    loop {
+        let readline = rl.readline(&theme::prompt());
+        match readline {
+            Ok(line) => {
+                let task_text = line.trim();
+                if task_text.is_empty() { continue; }
+                if task_text == "exit" || task_text == "quit" { break; }
+                
+                let _ = rl.add_history_entry(task_text);
+
+                let mut envelope = RunEnvelope {
+                    task_id: format!("t-{}", uuid::Uuid::new_v4()),
+                    run_id: format!("r-{}", uuid::Uuid::new_v4()),
+                    task: task_text.to_string(),
+                    task_text: task_text.to_string(),
+                    created_at: now(),
+                    status: RunStatus::Pending,
+                    risk_score: 0.0,
+                    verified_payload: None,
+                    evidence_packet: EvidencePacket::new(),
+                };
+
+                let plan = match conductor.plan_task(task_text).await {
+                    Ok(p) => p,
+                    Err(ConductorError::Deflected(t)) => {
+                        println!("\n{}", theme::warn("  [AEGIS] Task deflected — adversarial pattern detected."));
+                        theme::print_markdown(&t);
+                        continue;
+                    }
+                    Err(e) => {
+                        println!("\n  {} {}", theme::fail("[ERROR]"), e);
+                        continue;
+                    }
+                };
+
+                let mut animation = theme::ThinkingAnimation::default();
+                let provider_override = provider.clone();
+                let conductor_clone = conductor.clone();
+                let run_id_captured = envelope.run_id.clone();
+                
+                let exec_handle = tokio::spawn(async move {
+                    conductor_clone.execute_plan_with_overrides(
+                        plan,
+                        &mut envelope,
+                        provider_override.as_deref(),
+                        max_tokens,
+                        temperature,
+                    ).await
+                });
+
+                let mut counter = 0;
+                let result = loop {
+                    if exec_handle.is_finished() {
+                        match exec_handle.await {
+                            Ok(res) => break res?,
+                            Err(e) => return Err(anyhow::anyhow!("Task execution failed: {}", e)),
+                        }
+                    }
+                    let msg = if counter < 15 { "Synthesizing" } else if counter < 40 { "Aligning" } else { "Finalizing" };
+                    let frame = animation.next_frame();
+                    print!("\r  {}  {} {} {}  ", theme::parallax_spacer(2), theme::gradient(&frame, counter), theme::info(msg), theme::parallax_spacer(4));
+                    if let Err(e) = stdout().flush() {
+                        eprintln!("\rFailed to flush stdout: {}", e);
+                    }
+                    tokio::time::sleep(tokio::time::Duration::from_millis(80)).await;
+                    counter += 1;
+                };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                
+                print!("\r{}\r", " ".repeat(60)); // Clear thinking line
+                
+                let provider_str = result.spoke_response.as_ref().map(|r| r.provider.as_str()).unwrap_or("unknown");
+                let score = result.verification.as_ref().map(|v| v.score as f64).unwrap_or(0.0);
+                let status_str = format!("{:?}", result.status);
+
+                theme::print_execution_metrics(&run_id_captured, &status_str, score, provider_str);
+                println!();
+                theme::print_markdown(&result.response_text);
+                println!();
+            },
+            Err(ReadlineError::Interrupted) | Err(ReadlineError::Eof) => break,
+            Err(err) => {
+                println!("Error: {:?}", err);
+                break;
+            }
         }
     }
     Ok(())

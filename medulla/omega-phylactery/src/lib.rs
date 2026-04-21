@@ -120,7 +120,7 @@ pub async fn bootstrap_kernel(memory: &MemoryService) -> Result<(), String> {
 
     let mut mem = memory.lock().await;
     let root_node = mem.write_node(identity_content, MemoryStratum::Canonical);
-    eprintln!("[PHYLACTERY] Identity anchored: {}", root_node.node_id);
+    tracing::debug!("[PHYLACTERY] Identity anchored: {}", root_node.node_id);
 
     // 2. Anchor Value System
     if let Some(values) = phylactery["anchors"]["values"].as_array() {
@@ -185,7 +185,7 @@ pub async fn bootstrap_kernel(memory: &MemoryService) -> Result<(), String> {
         1.0,
     );
 
-    eprintln!("[PHYLACTERY] System identity synthesized into L6 Canonical layer.");
+    tracing::debug!("[PHYLACTERY] System identity synthesized into L6 Canonical layer.");
     Ok(())
 }
 

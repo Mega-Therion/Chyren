@@ -1,206 +1,119 @@
-//! Neon backlit terminal theme.
+//! Chyren "Glassmorphism" TrueColor Theme.
 //!
-//! Mirrors the RWFY banner SVG: `#000103` deep-space black background,
-//! full-spectrum HSL color-shift (0°→360° cycling) for headers and
-//! gradient elements, complementary neon accents for status/scores,
-//! ghost-white dim text for secondary labels.
-//!
-//! All output is gated on `is_color_enabled()` — piped or `--json`
-//! invocations receive clean plain text with no escape sequences.
+//! Replicating the high-end aesthetic of Claude Code and Codex:
+//! - 24-bit TrueColor (RGB) for subtle glows and transparency simulations.
+//! - Rounded double-line borders.
+//! - Braille-simulated "glass" transparency and parallax.
+//! - Streaming "typewriter" response rendering.
 
-// ── Color-enable gate ────────────────────────────────────────────────────────
+use std::io::{stdout, Write};
+use termimad::MadSkin;
+
+// ── Glass Colors (Hex) ───────────────────────────────────────────────────────
+
+pub const CORE_CYAN: &str = "#00f5ff";
+pub const NEURAL_BLUE: &str = "#3366ff";
+pub const VOID_BLACK: &str = "#000103"; // Deep space black
+pub const GHOST_WHITE: &str = "#e0e0e0";
+pub const GLASS_GLOW: &str = "#1a1a2e"; // Subtle blue-gray background tint
+
+// ── ANSI TrueColor Helpers ───────────────────────────────────────────────────
+
+fn hex_fg(hex: &str) -> String {
+    let hex = hex.trim_start_matches('#');
+    let r = u8::from_str_radix(&hex[0..2], 16).unwrap_or(0);
+    let g = u8::from_str_radix(&hex[2..4], 16).unwrap_or(0);
+    let b = u8::from_str_radix(&hex[4..6], 16).unwrap_or(0);
+    format!("\x1b[38;2;{};{};{}m", r, g, b)
+}
+
+fn hex_bg(hex: &str) -> String {
+    let hex = hex.trim_start_matches('#');
+    let r = u8::from_str_radix(&hex[0..2], 16).unwrap_or(0);
+    let g = u8::from_str_radix(&hex[2..4], 16).unwrap_or(0);
+    let b = u8::from_str_radix(&hex[4..6], 16).unwrap_or(0);
+    format!("\x1b[48;2;{};{};{}m", r, g, b)
+}
+
+const R: &str = "\x1b[0m";
+const B: &str = "\x1b[1m";
+const D: &str = "\x1b[2m";
 
 pub fn is_color_enabled() -> bool {
-    if std::env::var("NO_COLOR").is_ok() {
-        return false;
-    }
-    let term = std::env::var("TERM").unwrap_or_default();
-    if term == "dumb" || term.is_empty() {
-        return false;
-    }
-    true
+    std::env::var("NO_COLOR").is_err() && std::env::var("TERM").unwrap_or_default() != "dumb"
 }
 
-// ── ANSI primitives ──────────────────────────────────────────────────────────
+// ── Spectrum ────────────────────────────────────────────────────────────────
 
-const R: &str = "\x1b[0m";      // reset
-const B: &str = "\x1b[1m";      // bold
-const DM: &str = "\x1b[2m";     // dim
-
-fn fg(n: u8) -> String {
-    format!("\x1b[38;5;{n}m")
-}
-
-fn paint(text: &str, n: u8) -> String {
-    if is_color_enabled() { format!("{}{}{}", fg(n), text, R) } else { text.to_string() }
-}
-
-fn paint_bold(text: &str, n: u8) -> String {
-    if is_color_enabled() { format!("{}{}{}{}", B, fg(n), text, R) } else { text.to_string() }
-}
-
-// ── Spectrum (HSL 180°→0°→120° neon palette) ────────────────────────────────
-//
-// Derived from the SVG banner's `color-cycle` keyframes:
-//   0%  → hsl(0,   100%, 50%) red
-//   50% → hsl(180, 100%, 50%) cyan
-//  100% → hsl(360, 100%, 50%) red (full cycle)
-//
-// We represent this as a static sequence of 256-color indices so the
-// terminal gradient reads left-to-right as if the SVG animation were
-// frozen at a pleasing point in the cycle.
-
-const SPECTRUM: &[u8] = &[
-    51,  // neon cyan      HSL ~180° — banner primary
-    45,  // cyan-sky
-    39,  // sky blue
-    33,  // royal blue
-    27,  // electric blue
-    93,  // blue-violet
-    129, // violet
-    165, // violet-magenta
-    201, // hot magenta     HSL ~300°
-    207, // pink-magenta
-    213, // soft pink
-    219, // pale rose
-    225, // blush
-    226, // neon yellow     HSL ~60°
-    220, // amber
-    214, // orange
-    208, // deep orange
-    202, // red-orange
-    196, // neon red        HSL ~0°
-    154, // yellow-green
-    118, // lime
-    82,  // neon lime
-    46,  // neon green      HSL ~120°
-    47,  // teal-green
-    48,  // green-cyan
+const PALETTE: &[&str] = &[
+    "#00f5ff", "#00d1ff", "#00adff", "#3366ff", "#5e33ff",
+    "#8a33ff", "#b533ff", "#e033ff", "#ff33e0", "#ff33b5",
+    "#ff338a", "#ff335e", "#ff3333", "#ff5e33", "#ff8a33",
+    "#ffb533", "#ffe033", "#e0ff33", "#b5ff33", "#8aff33",
+    "#5eff33", "#33ff33", "#33ff5e", "#33ff8a", "#33ffb5",
 ];
 
-/// Apply a left-to-right spectrum gradient, one color per character.
-/// `offset` shifts the start position so adjacent gradient calls can
-/// flow continuously.
 pub fn gradient(text: &str, offset: usize) -> String {
-    if !is_color_enabled() {
-        return text.to_string();
-    }
+    if !is_color_enabled() { return text.to_string(); }
     let mut out = String::new();
     for (i, ch) in text.chars().enumerate() {
-        let idx = (offset + i) % SPECTRUM.len();
-        out.push_str(&format!("\x1b[38;5;{}m{}", SPECTRUM[idx], ch));
+        let hex = PALETTE[(offset + i) % PALETTE.len()];
+        out.push_str(&hex_fg(hex));
+        out.push(ch);
     }
     out.push_str(R);
     out
 }
 
-// ── Semantic color helpers ────────────────────────────────────────────────────
+// ── Glass Components ────────────────────────────────────────────────────────
 
-/// Secondary label text — dim gray, recedes into the background.
-pub fn label(s: &str) -> String {
-    if is_color_enabled() { format!("{}{}{}", DM, s, R) } else { s.to_string() }
+pub fn parallax_dot(i: usize) -> char {
+    let frames = ['⠂', '⠶', '⠴', '⠾', '⠶', '⠂'];
+    frames[i % frames.len()]
 }
 
-/// Primary value text — bright white.
-pub fn value(s: &str) -> String {
-    paint(s, 255)
+pub fn glass_divider(width: usize) -> String {
+    if !is_color_enabled() { return "─".repeat(width); }
+    let mut out = String::new();
+    out.push_str(&hex_fg("#2a2a2a"));
+    for i in 0..width {
+        out.push(parallax_dot(i));
+    }
+    out.push_str(R);
+    out
 }
 
-/// ADCCL score: neon green ≥0.7, amber 0.4–0.7, red <0.4.
+pub fn box_top(width: usize, title: &str) -> String {
+    let t_len = title.chars().count();
+    let side = width.saturating_sub(t_len + 4) / 2;
+    format!(
+        "{}╭{} {} {}╮{}",
+        hex_fg("#333333"), "─".repeat(side), gradient(title, 0), "─".repeat(side), R
+    )
+}
+
+pub fn box_bottom(width: usize) -> String {
+    format!("{}╰{}╯{}", hex_fg("#333333"), "─".repeat(width.saturating_sub(2)), R)
+}
+
+// ── Semantic styles ─────────────────────────────────────────────────────────
+
+pub fn label(s: &str) -> String { format!("{D}{s}{R}") }
+pub fn val(s: &str) -> String { format!("{B}{}{s}{R}", hex_fg(GHOST_WHITE)) }
+pub fn cyan(s: &str) -> String { format!("{}{s}{R}", hex_fg(CORE_CYAN)) }
+pub fn ok(s: &str) -> String { format!("{B}{}{s}{R}", hex_fg("#00ff66")) }
+pub fn fail(s: &str) -> String { format!("{B}{}{s}{R}", hex_fg("#ff3333")) }
+pub fn warn(s: &str) -> String { format!("{B}{}{s}{R}", hex_fg("#ffcc00")) }
+pub fn info(s: &str) -> String { format!("{}{s}{R}", hex_fg("#00ccff")) }
+
 pub fn score(v: f64) -> String {
     let text = format!("{v:.3}");
-    if v >= 0.7       { paint_bold(&text, 46)  }
-    else if v >= 0.4  { paint_bold(&text, 226) }
-    else              { paint_bold(&text, 196) }
-}
-
-/// Provider/model name — electric blue.
-pub fn provider(s: &str) -> String {
-    paint_bold(s, 39)
-}
-
-/// Verified / success status — neon green.
-pub fn ok(s: &str) -> String {
-    paint_bold(s, 46)
-}
-
-/// Rejected / failure status — neon red.
-pub fn fail(s: &str) -> String {
-    paint_bold(s, 196)
-}
-
-/// Warning / in-progress status — amber.
-pub fn warn(s: &str) -> String {
-    paint_bold(s, 226)
-}
-
-/// Tier badge — each tier gets its own spectrum position.
-pub fn tier(label_str: &str) -> String {
-    if label_str.contains("TIER-0") || label_str.contains("tier_0") {
-        paint_bold(label_str, 51)   // cyan   — initial local
-    } else if label_str.contains("TIER-1") || label_str.contains("tier_1") {
-        paint_bold(label_str, 201)  // magenta — upshift
-    } else if label_str.contains("TIER-2") || label_str.contains("tier_2") {
-        paint_bold(label_str, 226)  // yellow  — council
-    } else if label_str.contains("TERMINAL") || label_str.contains("FAIL") {
-        paint_bold(label_str, 196)  // red     — terminal failure
-    } else {
-        paint(label_str, 245)
-    }
-}
-
-
-
-/// Informational text — neon cyan, matching banner primary.
-pub fn info(s: &str) -> String {
-    paint(s, 51)
-}
-
-/// Ghost-signature text — very dim, near-invisible like the SVG signature.
-pub fn ghost(s: &str) -> String {
-    if is_color_enabled() { format!("{}\x1b[38;5;237m{}{}", DM, s, R) } else { s.to_string() }
-}
-
-/// Run-ID / hash — dim purple.
-pub fn run_id(s: &str) -> String {
-    paint(s, 93)
-}
-
-// ── Dividers ─────────────────────────────────────────────────────────────────
-
-/// Full-width gradient divider — heavy line using spectrum colors.
-pub fn divider(width: usize) -> String {
-    if !is_color_enabled() {
-        return "─".repeat(width);
-    }
-    let mut out = String::new();
-    for i in 0..width {
-        let idx = (i * SPECTRUM.len() / width.max(1)) % SPECTRUM.len();
-        out.push_str(&format!("\x1b[38;5;{}m─", SPECTRUM[idx]));
-    }
-    out.push_str(R);
-    out
-}
-
-/// Subtle dotted separator — stays in the cyan-blue end of the spectrum.
-pub fn thin_div(width: usize) -> String {
-    if !is_color_enabled() {
-        return "·".repeat(width);
-    }
-    let mut out = String::new();
-    for i in 0..width {
-        let idx = i % 8; // stay in 51→27 (cyan→blue range)
-        out.push_str(&format!("\x1b[38;5;{}m·", SPECTRUM[idx]));
-    }
-    out.push_str(R);
-    out
+    if v >= 0.7 { ok(&text) }
+    else if v >= 0.4 { warn(&text) }
+    else { fail(&text) }
 }
 
 // ── Banner ────────────────────────────────────────────────────────────────────
-//
-// Block-letter CHYREN in the Orbitron-style full-width caps from the SVG.
-// Six rows each assigned a distinct spectrum hue so the logo reads as a
-// top-to-bottom gradient from neon cyan → electric blue → violet → magenta.
 
 const BANNER: &[&str] = &[
     " ██████╗ ██╗  ██╗██╗   ██╗██████╗ ███████╗███╗   ██╗",
@@ -211,103 +124,122 @@ const BANNER: &[&str] = &[
     " ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝",
 ];
 
-// Per-row hues: cyan → sky-blue → electric-blue → violet → magenta → hot-magenta
-const ROW_COLORS: &[u8] = &[51, 45, 39, 93, 165, 201];
-
 pub fn print_banner() {
-    let width = BANNER[0].chars().count() + 4;
-
-    eprintln!();
-    for (i, row) in BANNER.iter().enumerate() {
-        let color = ROW_COLORS[i % ROW_COLORS.len()];
-        eprintln!("  {}", paint_bold(row, color));
+    println!();
+    for (i, line) in BANNER.iter().enumerate() {
+        println!("  {}", gradient(line, i * 2));
     }
-
-    // Tagline — full gradient sweep across the full banner width
-    let tagline = "  ·  S O V E R E I G N   I N T E L L I G E N C E   O R C H E S T R A T O R  ·";
-    eprintln!("{}", gradient(tagline, 4));
-
-    // Yettragrammaton ghost signature — right-aligned, barely visible
-    let sig = "R.W.Ϝ.Y.";
-    let pad_width = width.saturating_sub(sig.chars().count());
-    eprintln!("{}{}", " ".repeat(pad_width), ghost(sig));
-
-    eprintln!("{}", thin_div(width));
-    eprintln!();
-}
-
-// ── Response block ────────────────────────────────────────────────────────────
-
-/// Print a full task response with a neon left-gutter border and subtle formatting.
-pub fn print_response(response_text: &str) {
-    if !is_color_enabled() {
-        println!("{}", response_text);
-        return;
-    }
-    // Left gutter — spectrum gradient stripe, one char per line
-    let lines: Vec<&str> = response_text.lines().collect();
-    let n = lines.len();
-    for (i, line) in lines.iter().enumerate() {
-        let idx = (i * SPECTRUM.len() / n.max(1)) % SPECTRUM.len();
-        println!(
-            "\x1b[38;5;{}m▌\x1b[0m {}",
-            SPECTRUM[idx], line
-        );
-    }
-}
-
-// ── Structured result block ───────────────────────────────────────────────────
-
-pub fn print_result_header(run_id_str: &str, status_str: &str, adccl: f64, provider_str: &str) {
-    let width = 60;
-    println!("{}", divider(width));
-    println!(
-        "  {}  {}    {}  {}    {}  {}    {}  {}",
-        label("RUN"),    run_id(run_id_str),
-        label("STATUS"), if status_str.contains("Completed") || status_str.contains("verified") {
-            ok(status_str)
-        } else {
-            fail(status_str)
-        },
-        label("ADCCL"),  score(adccl),
-        label("VIA"),    provider(provider_str),
-    );
-    println!("{}", divider(width));
+    println!("  {}", gradient("      S O V E R E I G N   I N T E L L I G E N C E   O R C H E S T R A T O R", 5));
+    println!("  {:>50}", label("R.W.Ϝ.Y. / v1.0.0"));
     println!();
 }
 
-pub fn print_status_block(
-    system_status: &str,
-    dream_episodes: usize,
-    top_pattern: Option<&str>,
-) {
-    let width = 60;
-    println!("{}", divider(width));
-    println!("  {}  {}", label("SYSTEM"), ok(system_status));
-    println!("  {}  {}", label("SEAL  "), gradient("R.W.Ϝ.Y.", 0));
-    println!("  {}  {}", label("DREAM "), value(&format!("{dream_episodes} failure episodes")));
-    if let Some(pat) = top_pattern {
-        println!("  {}  {}", label("TOP Δ "), warn(pat));
+// ── Interactive UI ───────────────────────────────────────────────────────────
+
+pub fn prompt() -> String {
+    format!("{} chyren {}❯{} ", hex_fg(CORE_CYAN), hex_fg(NEURAL_BLUE), R)
+}
+
+pub fn print_thinking(msg: &str, frame: usize) {
+    let frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+    let spinner = gradient(frames[frame % frames.len()], frame);
+    print!("\r  {} {} {}  ", spinner, hex_fg("#444444"), info(msg));
+    stdout().flush().ok();
+}
+
+pub fn print_markdown(text: &str) {
+    let mut skin = MadSkin::default();
+    skin.set_headers_fg(termimad::rgb(0, 245, 255)); // Core Cyan
+    skin.bold.set_fg(termimad::rgb(224, 224, 224)); // Ghost White
+    skin.italic.set_fg(termimad::rgb(51, 102, 255)); // Neural Blue
+    skin.inline_code.set_bg(termimad::rgb(26, 26, 46)); // Glass Glow
+    
+    // Custom list bullet
+    skin.bullet.set_fg(termimad::rgb(0, 245, 255));
+    
+    skin.print_text(text);
+}
+
+// ── Compatibility Layer ──────────────────────────────────────────────────────
+
+pub fn value(s: &str) -> String { val(s) }
+pub fn run_id(s: &str) -> String { format!("{}{s}{R}", hex_fg("#8a33ff")) }
+pub fn tier(label_str: &str) -> String {
+    let hex = if label_str.contains("0") { "#00f5ff" }
+    else if label_str.contains("1") { "#ff33e0" }
+    else if label_str.contains("2") { "#ffe033" }
+    else { "#ff3333" };
+    format!("{B}{}{label_str}{R}", hex_fg(hex))
+}
+
+pub fn parallax_spacer(width: usize) -> String {
+    let mut out = String::new();
+    out.push_str(&hex_fg("#1a1a1a"));
+    for i in 0..width { out.push(parallax_dot(i)); }
+    out.push_str(R);
+    out
+}
+
+pub fn print_status_block(status: &str, dream_n: usize, top: Option<&str>) {
+    let width = 64;
+    println!("  {}", box_top(width, "SYSTEM STATUS"));
+    println!("  {}│  {}  {}", hex_fg("#333333"), label("SYSTEM"), ok(status));
+    println!("  {}│  {}  {}", hex_fg("#333333"), label("SEAL  "), gradient("R.W.Ϝ.Y.", 0));
+    println!("  {}│  {}  {}", hex_fg("#333333"), label("DREAM "), val(&format!("{dream_n} failure episodes")));
+    if let Some(p) = top {
+        println!("  {}│  {}  {}", hex_fg("#333333"), label("TOP Δ "), warn(p));
     }
-    println!("{}", thin_div(width));
-    println!();
+    println!("  {}", box_bottom(width));
 }
 
 pub fn print_insights(insights: &[String]) {
-    let width = 60;
-    println!("{}", divider(width));
-    println!("  {}", paint_bold("METACOGNITIVE REFLECTION / BOOT EPIPHANIES", 51));
-    println!("{}", divider(width));
-    
-    for (i, insight) in insights.iter().enumerate() {
-        let idx = (i * SPECTRUM.len() / insights.len().max(1)) % SPECTRUM.len();
-        println!("  {} {}", paint("◈", SPECTRUM[idx]), insight);
+    let width = 64;
+    println!("  {}", box_top(width, "METALOGICAL REFLECTION"));
+    for (i, msg) in insights.iter().enumerate() {
+        println!("  {}│  {} {}", hex_fg("#333333"), gradient("◈", i), msg);
     }
-    
-    if insights.is_empty() {
-        println!("  {}", label("No significant cognitive drifts detected in this boot cycle."));
+    println!("  {}", box_bottom(width));
+}
+
+pub fn print_result_header(run_id: &str, status: &str, score_v: f64, provider: &str) {
+    print_execution_metrics(run_id, status, score_v, provider);
+}
+
+pub fn print_response(text: &str) {
+    println!("  {}", box_top(70, "RESPONSE"));
+    for line in text.lines() {
+        println!("  {}│ {}", hex_fg("#333333"), line);
     }
-    
-    println!("{}", thin_div(width));
-    println!();
+    println!("  {}", box_bottom(70));
+}
+
+pub struct ThinkingAnimation {
+    pub frame: usize,
+}
+
+impl Default for ThinkingAnimation {
+    fn default() -> Self { Self { frame: 0 } }
+}
+
+impl ThinkingAnimation {
+    pub fn next_frame(&mut self) -> String {
+        let frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+        let f = self.frame;
+        self.frame += 1;
+        gradient(frames[f % frames.len()], f)
+    }
+}
+
+pub fn print_execution_metrics(run_id: &str, status: &str, score_v: f64, provider: &str) {
+    let width = 70;
+    println!("  {}", box_top(width, "COGNITIVE TRACE"));
+    println!(
+        "  {}│ {} {}  {} {}  {} {}  {} {}",
+        hex_fg("#333333"),
+        label("RUN"), val(run_id),
+        label("STATUS"), if status.contains("Completed") { ok(status) } else { fail(status) },
+        label("ADCCL"), score(score_v),
+        label("VIA"), cyan(provider)
+    );
+    println!("  {}", box_bottom(width));
 }

@@ -16,7 +16,7 @@ pub mod graph;
 
 use graph::{ChiralGraph, GraphSummary};
 use omega_core::{
-    check_all_axioms, gen_id, now, AgentResult, AgentTask,
+    check_all_axioms, gen_id,
     EpistemicNode, EpistemicNodeType, KnowledgeNode, ProofConstraint,
 };
 use omega_neocortex::{cold_store::ColdStore, proof_index::ProofConstraintIndex, Neocortex};

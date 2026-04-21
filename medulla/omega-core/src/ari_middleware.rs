@@ -1,7 +1,8 @@
 //! ARI middleware – integrates C.A.S. and I.A.F. checks into the execution pipeline.
 
 use crate::cas::{evaluate_intent, iaf_check, IntentRisk, SovereignIntent, CasLedgerEntry};
-use crate::identity::YETTRAGRAMMATON; // existing constant
+use sha2::Digest;
+ // existing constant
 use std::time::SystemTime;
 
 /// Result of an ARI gate evaluation.
@@ -65,7 +66,7 @@ pub fn ari_gate(
     let ledger_entry = evaluate_intent(intent);
     AriGateResult {
         allowed: ledger_entry.admitted,
-        ledger_entry,
         reason: ledger_entry.rejection_reason.clone(),
+        ledger_entry,
     }
 }

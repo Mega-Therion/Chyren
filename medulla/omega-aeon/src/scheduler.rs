@@ -1,7 +1,6 @@
 use std::process::Command;
 use std::time::Duration;
-use tokio::time::sleep;
-use omega_telemetry::info;
+use tracing::info;
 
 /// Sovereign Scheduler for autonomous maintenance tasks
 pub struct SovereignScheduler {

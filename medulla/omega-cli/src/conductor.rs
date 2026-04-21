@@ -691,7 +691,7 @@ impl Conductor {
                         if let Ok(mut dream) = self.dream.try_lock() {
                             let report = Self::verification_report_from_adcccl(&envelope.run_id, &council_v);
                             let episode = dream.record_failure(&spoke_response.text, &report);
-                            eprintln!("[DREAM] Terminal failure recorded: {} lessons derived", episode.lessons.len());
+                            tracing::debug!("[DREAM] Terminal failure recorded: {} lessons derived", episode.lessons.len());
                         }
                         return Err(ConductorError::EpistemicFailure {
                             attempt_count: attempt_log.len(),
@@ -802,7 +802,7 @@ impl Conductor {
             // If ADCCL failed, record it in the dream engine for pattern learning
             if let Ok(mut dream) = self.dream.try_lock() {
                 let episode = dream.record_failure(&spoke_response.text, &report);
-                eprintln!("[DREAM] Failure recorded: {} lessons derived", episode.lessons.len());
+                tracing::debug!("[DREAM] Failure recorded: {} lessons derived", episode.lessons.len());
             }
         }
 
@@ -960,6 +960,7 @@ impl Conductor {
         Ok(VerificationResult {
             passed: consensus_passed,
             score: avg_score,
+            empathy_score: 1.0, // Default for consensus bypass or similar
             flags: all_flags.into_iter().collect(),
             status: if consensus_passed { "verified (consensus)".to_string() } else { "rejected (consensus)".to_string() },
         })

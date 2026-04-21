@@ -1,6 +1,5 @@
 use async_trait::async_trait;
 use crate::{Spoke, SpokeCapability, SpokeConfig, SpokeStatus, ToolDefinition, ToolInvocation, ToolResult};
-use serde_json::Value;
 
 /// The Vision Spoke: Implementation of Chyren's Ocular window.
 pub struct VisionSpoke {

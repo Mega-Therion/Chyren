@@ -409,6 +409,7 @@ impl KnowledgeNode {
     }
 }
 
+pub mod identity;
 pub mod mesh;
 pub mod axioms;
 pub mod cas;

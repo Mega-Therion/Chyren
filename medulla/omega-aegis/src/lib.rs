@@ -506,7 +506,7 @@ impl ThreatFabric {
             }
         }
         if quarantined > 0 {
-            eprintln!(
+            tracing::warn!(
                 "[THREAT FABRIC] {} entr{} failed signature check and were quarantined.",
                 quarantined,
                 if quarantined == 1 { "y" } else { "ies" }
