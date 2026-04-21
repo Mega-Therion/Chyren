@@ -104,7 +104,7 @@ pub struct Conductor {
     deflection_engine: DeflectionEngine,
     threat_fabric: ThreatFabric,
     adccl: ADCCL,
-    memory_service: Arc<omega_myelin::Service>,
+    pub memory_service: Arc<omega_myelin::Service>,
     spokes: Arc<SpokeRegistry>,
     store: Option<Arc<omega_myelin::db::MemoryStore>>,
     vector_store: Option<Arc<omega_myelin::VectorStore>>,

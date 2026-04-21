@@ -13,9 +13,9 @@ use termimad::MadSkin;
 
 pub const CORE_CYAN: &str = "#00f5ff";
 pub const NEURAL_BLUE: &str = "#3366ff";
-// pub const VOID_BLACK: &str = "#000103"; // Deep space black
+pub const VOID_BLACK: &str = "#000103"; // Deep space black
 pub const GHOST_WHITE: &str = "#e0e0e0";
-// pub const GLASS_GLOW: &str = "#1a1a2e"; // Subtle blue-gray background tint
+pub const GLASS_GLOW: &str = "#1a1a2e"; // Subtle blue-gray background tint
 
 // ── ANSI TrueColor Helpers ───────────────────────────────────────────────────
 
@@ -27,7 +27,6 @@ fn hex_fg(hex: &str) -> String {
     format!("\x1b[38;2;{};{};{}m", r, g, b)
 }
 
-/*
 fn hex_bg(hex: &str) -> String {
     let hex = hex.trim_start_matches('#');
     let r = u8::from_str_radix(&hex[0..2], 16).unwrap_or(0);
@@ -35,7 +34,6 @@ fn hex_bg(hex: &str) -> String {
     let b = u8::from_str_radix(&hex[4..6], 16).unwrap_or(0);
     format!("\x1b[48;2;{};{};{}m", r, g, b)
 }
-*/
 
 const R: &str = "\x1b[0m";
 const B: &str = "\x1b[1m";
@@ -169,14 +167,12 @@ pub fn prompt() -> String {
     format!("{} chyren {}❯{} ", hex_fg(CORE_CYAN), hex_fg(NEURAL_BLUE), R)
 }
 
-/*
 pub fn print_thinking(msg: &str, frame: usize) {
     let frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
     let spinner = gradient(frames[frame % frames.len()], frame);
     print!("\r  {} {} {}  ", spinner, hex_fg("#444444"), info(msg));
     stdout().flush().ok();
 }
-*/
 
 pub fn print_markdown(text: &str) {
     let mut skin = MadSkin::default();
@@ -184,11 +180,30 @@ pub fn print_markdown(text: &str) {
     skin.bold.set_fg(termimad::rgb(224, 224, 224)); // Ghost White
     skin.italic.set_fg(termimad::rgb(51, 102, 255)); // Neural Blue
     skin.inline_code.set_bg(termimad::rgb(26, 26, 46)); // Glass Glow
+    skin.code_block.set_bg(termimad::rgb(26, 26, 46)); // Glass Glow
+    skin.code_block.set_fg(termimad::rgb(224, 224, 224));
     
     // Custom list bullet
     skin.bullet.set_fg(termimad::rgb(0, 245, 255));
     
     skin.print_text(text);
+}
+
+pub fn print_response(text: &str) {
+    println!("  {}", box_top(70, "CHYREN RESPONSE"));
+    // We use a custom indentation approach for markdown
+    let mut skin = MadSkin::default();
+    skin.set_headers_fg(termimad::rgb(0, 245, 255));
+    skin.bold.set_fg(termimad::rgb(224, 224, 224));
+    skin.italic.set_fg(termimad::rgb(51, 102, 255));
+    skin.inline_code.set_bg(termimad::rgb(26, 26, 46));
+    skin.code_block.set_bg(termimad::rgb(26, 26, 46));
+    
+    // Print lines with the border
+    for line in text.lines() {
+        println!("  {}│ {}", hex_fg("#333333"), line);
+    }
+    println!("  {}", box_bottom(70));
 }
 
 // ── Compatibility Layer ──────────────────────────────────────────────────────
@@ -236,13 +251,7 @@ pub fn print_result_header(run_id: &str, status: &str, score_v: f64, provider: &
     print_execution_metrics(run_id, status, score_v, provider);
 }
 
-pub fn print_response(text: &str) {
-    println!("  {}", box_top(70, "RESPONSE"));
-    for line in text.lines() {
-        println!("  {}│ {}", hex_fg("#333333"), line);
-    }
-    println!("  {}", box_bottom(70));
-}
+// DEPRECATED: use the updated print_response above
 
 pub struct ThinkingAnimation {
     pub frame: usize,

@@ -2241,6 +2241,8 @@ name = "omega-aeon"
 version = "0.1.0"
 dependencies = [
  "omega-core",
+ "omega-dream",
+ "omega-myelin",
  "omega-telemetry",
  "serde",
  "serde_json",

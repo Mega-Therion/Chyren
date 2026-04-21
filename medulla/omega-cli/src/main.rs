@@ -256,7 +256,7 @@ async fn main() -> anyhow::Result<()> {
             }
             
             // Move 2: Start the AEON autonomous scheduler
-            let scheduler = Arc::new(omega_aeon::SovereignScheduler::new());
+            let scheduler = Arc::new(omega_aeon::SovereignScheduler::new(conductor.memory_service.clone()));
             tokio::spawn(async move {
                 scheduler.run().await;
             });
