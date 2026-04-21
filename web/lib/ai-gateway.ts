@@ -16,7 +16,7 @@ const PROJECT_ID = process.env.VERCEL_PROJECT_ID || 'chyren-web';
  * Wraps a provider with Vercel AI Gateway proxying.
  * Pattern: https://gateway.ai.vercel.com/v1/projects/<project>/gateways/<gateway>/<provider>
  */
-export function getGatewayHeaders() {
+export function getGatewayHeaders(): Record<string, string> {
   const key = process.env.VERCEL_AI_GATEWAY_KEY;
   return key ? { 'Authorization': `Bearer ${key}` } : {};
 }

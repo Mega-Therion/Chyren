@@ -8,7 +8,17 @@
  * R.W.Ϝ.Y. — Yettragrammaton sovereign seal
  */
 
-import { AriGateResult, IntentRisk } from './ari-gate';
+export type IntentRisk = 'Critical' | 'Elevated' | 'Benign';
+
+export interface AriGateResult {
+  allowed: boolean;
+  riskTier: IntentRisk;
+  adcclScore: number;
+  iafOk: boolean;
+  ledgerHash: string;
+  admittedAt: string;
+  rejectionReason?: string;
+}
 import enrichmentSchema from '../data/ari_enrichment_schema.json';
 
 // ─── ARI Enrichment ──────────────────────────────────────────────────────────

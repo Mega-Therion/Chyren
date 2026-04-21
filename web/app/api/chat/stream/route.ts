@@ -1,7 +1,5 @@
 import { type NextRequest } from 'next/server'
-import { streamText, type CoreMessage } from 'ai'
-import { experimental_wrapLanguageModel as wrapLanguageModel } from 'ai'
-import { fallback } from '@ai-sdk/provider'
+import { streamText, type ModelMessage as CoreMessage } from 'ai'
 import { CHYREN_SYSTEM_PROMPT } from '@/lib/phylactery'
 import { getRYContextAsync } from '@/lib/neon-context'
 import {
@@ -12,7 +10,7 @@ import { logger, logError } from '@/lib/logger'
 import { checkRateLimit, checkPromptInjection, clientIp } from '@/lib/hardening'
 import { semanticKnowledgeSearch } from '@/lib/librarian/knowledge-vector'
 import { ariGate, type AriGateResult } from '@/lib/ari-gate'
-import { anthropic, google, groq, openai } from '@/lib/ai-gateway'
+import { anthropic } from '@/lib/ai-gateway'
 import { getSovereignTools } from '@/lib/ai-sdk-tools'
 
 // Base system prompt is resolved per-request (async) so live-fetched Neon
@@ -289,24 +287,14 @@ export async function POST(req: NextRequest) {
     }))
 
     const result = await streamText({
-      model: fallback([
-        anthropic('claude-3-5-sonnet-20241022'),
-        google('gemini-2.0-flash'),
-        groq('llama-3.3-70b-versatile'),
-        openai('gpt-4o-mini')
-      ]),
+      model: anthropic('claude-3-5-sonnet-20241022'),
       system: systemPrompt,
       messages: sdkMessages,
       tools: sovereignTools,
-      maxSteps: 5,
       temperature: profile.temperature,
-      experimental_telemetry: {
-        isEnabled: true,
-        functionId: 'chyren-chat-v2'
-      }
     })
 
-    return result.toDataStreamResponse({
+    return result.toTextStreamResponse({
       headers: {
         'X-Chyren-Session': session,
         'X-Chyren-ARI': JSON.stringify({

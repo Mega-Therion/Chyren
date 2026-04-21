@@ -52,11 +52,12 @@ const Atom = ({ position, size, color }: { position: [number, number, number]; s
 }
 
 const Connection = ({ start, end }: { start: [number, number, number]; end: [number, number, number] }) => {
-  const lineRef = useRef<THREE.Line>(null!)
+  const lineRef = useRef<any>(null!)
   
   useFrame((state) => {
     const t = state.clock.getElapsedTime()
     const material = lineRef.current.material as THREE.LineBasicMaterial
+    const hue = (t * 0.05 + (start[0] / 15)) % 1
     material.color.setHSL(hue, 0.8, 0.6)
     material.opacity = 0.2 + Math.sin(t * 2) * 0.1
   })

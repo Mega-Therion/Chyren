@@ -20,7 +20,7 @@ export async function getSovereignTools() {
       description: t.description,
       // We use a flexible schema since MCP schemas are dynamic.
       // Ideally, we'd map t.inputSchema to Zod, but for now, we allow any object.
-      parameters: z.record(z.unknown()),
+      parameters: z.record(z.string(), z.unknown()),
       execute: async (args) => {
         const result = await dispatchTool(t.qualifiedName, args as Record<string, unknown>);
         if (result.isError) {
