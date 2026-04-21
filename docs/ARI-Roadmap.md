@@ -22,8 +22,8 @@ The following components are now mandatory for ARI certification:
 *   [x] Integration: Symbolic verifier integrated into `cortex/orchestrator.py` verification pipeline.
 
 ### Phase 1: Liquid-Fractal Core
-*   [ ] Implement `medulla/lfm_core.py` (Liquid SSM engine).
-*   [ ] Implement `medulla/cantor_block.py` (Menger Sponge geometry).
+*   [x] Implement `medulla/lfm_core.py` (Liquid SSM engine).
+*   [x] Implement `medulla/cantor_block.py` (Menger Sponge geometry).
 
 ### Phase 2: Deployment Readiness & Verification Metrics
 1. **Verification Latency:** Symbolic validation must add < 50ms.
