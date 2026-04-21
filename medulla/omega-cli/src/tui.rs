@@ -14,7 +14,7 @@ use std::io;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use std::time::{Duration, Instant};
-use crate::conductor::Conductor;
+use omega_cli::conductor::Conductor;
 use omega_core::mesh::{AgentRegistry, AgentStatus};
 
 pub struct TuiApp {
