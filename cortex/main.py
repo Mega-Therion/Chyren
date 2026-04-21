@@ -31,7 +31,6 @@ class ChyrenHub:
         
         self.mcp_hub = MCPHub()
         self.mcp_hub.register_server("memory", "npx", ["-y", "@modelcontextprotocol/server-memory"])
-        self.mcp_hub.register_server("filesystem", "npx", ["-y", "@modelcontextprotocol/server-filesystem", "/home/mega"])
         
         # We need to discover the tools so they are loaded into the hub
         # (Using asyncio.run is tricky inside __init__ if loop is running, so we will do it in an async init method)
@@ -67,8 +66,7 @@ class ChyrenHub:
     async def _init_mcp(self):
         print("[bold #BD93F9]Discovering MCP Capabilities...[/bold #BD93F9]")
         mem_caps = await self.mcp_hub.connect_and_discover("memory")
-        fs_caps = await self.mcp_hub.connect_and_discover("filesystem")
-        self.tools = mem_caps.get("tools", []) + fs_caps.get("tools", [])
+        self.tools = mem_caps.get("tools", [])
         self.orchestrator.tools = self.tools
 
     async def run(self, task):
