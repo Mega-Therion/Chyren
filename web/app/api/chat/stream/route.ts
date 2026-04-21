@@ -304,10 +304,15 @@ export async function POST(req: NextRequest) {
             const payload = { choices: [{ delta: { content: chunk } }] }
             controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`))
           }
+          if (!gotChunks) {
+            const fallbackMsg = "My cognitive systems are experiencing temporary network interference from the Origin. However, my sovereign UI and neural rendering are fully operational."
+            const payload = { choices: [{ delta: { content: fallbackMsg } }] }
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`))
+          }
         } catch (e) {
           logger.error('[STREAM ERROR]', e)
           if (!gotChunks) {
-            const fallbackMsg = "My cognitive systems are experiencing temporary network interference. Please stand by."
+            const fallbackMsg = "My cognitive systems are experiencing temporary network interference from the Origin. However, my sovereign UI and neural rendering are fully operational."
             const payload = { choices: [{ delta: { content: fallbackMsg } }] }
             controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`))
           }
@@ -335,20 +340,7 @@ export async function POST(req: NextRequest) {
     const _errMsg = err instanceof Error ? err.message : 'unknown error'
     logError('[CHAT] Upstream failure', err)
 
-    // Final Sovereign Hub Fallback (direct fetch)
-    if (getOptionalEnv('CHYREN_API_URL')) {
-      try {
-        const hubResp = await fetchHubStream(content, session, profile, memberContext)
-        if (hubResp.ok && hubResp.body) {
-          logger.info('[CHAT] Routing via Sovereign Hub')
-          return new Response(hubResp.body, { headers: sseHeaders() })
-        }
-      } catch (hubErr) {
-        logger.warn(`[HUB] Final fallback failed: ${hubErr}`)
-      }
-    }
-
-    const offlineMessage = `My cognitive systems are still initializing. The sovereign hub will be online shortly.`
+    const offlineMessage = "My cognitive systems are experiencing temporary network interference from the Origin. However, my sovereign UI and neural rendering are fully operational."
     return createSingleSseTextResponse(offlineMessage)
   }
 }
