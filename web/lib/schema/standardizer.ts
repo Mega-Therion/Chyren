@@ -1,4 +1,4 @@
-import { Entity } from './entity';
+import type { Entity } from './entity';
 export function standardize(raw: any): Entity {
   return {
     id: raw.id || raw.program_id,
