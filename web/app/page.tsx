@@ -153,10 +153,6 @@ export default function ChatPage() {
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
     messagesEndRef.current?.scrollIntoView({ behavior, block: 'end' })
-    requestAnimationFrame(() => {
-      const el = chatWindowRef.current
-      if (el) el.scrollTop = el.scrollHeight
-    })
   }, [])
 
   useEffect(() => { scrollToBottom('smooth') }, [messages, scrollToBottom])
@@ -168,15 +164,6 @@ export default function ChatPage() {
 
   const handleBargeIn = useCallback(() => { ttsRef.current?.halt() }, [])
   const handleQuote   = useCallback((content: string) => { setQuotedText(content) }, [])
-
-  const getSigilColor = (s: BrainState) => {
-    switch (s) {
-      case 'speaking':  return '#00f2ff'
-      case 'thinking':  return '#ff2d75'
-      case 'listening': return '#bc13fe'
-      default:          return '#f59e0b'
-    }
-  }
 
   const sendMessage = useCallback(async (text: string) => {
     const trimmed = text.trim()
@@ -250,104 +237,127 @@ export default function ChatPage() {
   }, [isStreaming, messages, scrollToBottom, sessionId, ttsEnabled])
 
   return (
-    <div className="omega-viewport bg-black flex w-full h-full relative">
-      <div className="omega-bg-fx">
-        <NeuralBrain _isActive={brainState !== 'idle'} audioLevel={audioLevel} state={brainState} />
-        <div className="omega-orb orb-1" />
-        <div className="omega-orb orb-2" />
+    <div className="dashboard-root">
+      <div className="sovereign-bg">
+        <div className="energy-orb" style={{ top: '10%', left: '20%', width: '300px', height: '300px', background: 'var(--gold-glow)' }} />
+        <div className="energy-orb" style={{ bottom: '20%', right: '10%', width: '400px', height: '400px', background: 'var(--mesh-violet)', opacity: 0.1 }} />
       </div>
 
-      {/* Holonomic telemetry panel – desktop only */}
-      <div className="hidden xl:flex flex-col w-[450px] z-10 h-full overflow-hidden p-6 absolute left-0 top-0 bottom-0">
-        <div className="mb-4">
-          <h2 className="text-xl font-mono text-white/80 tracking-[0.2em] uppercase">Holonomic Core</h2>
-          <p className="text-xs text-white/40 font-mono mt-1">Real-time MCP Spoke &amp; Cortex Telemetry</p>
-        </div>
-        <div className="flex-1 overflow-hidden bg-black/60 rounded-2xl border border-white/10 backdrop-blur-md shadow-2xl">
-          <MetricsDashboard />
-        </div>
-      </div>
-
-      <main className="phone-container !bg-black/40 !border-white/5 !shadow-2xl relative z-20 mx-auto">
-
-        {/* ARI Header */}
-        <header className="phone-chrome !border-b-0 !bg-transparent pt-10 pb-1 gap-0.5">
-          <div className="phone-notch" />
-          <motion.h1 className="phone-title !tracking-[0.5em]"
-            animate={{
-              textShadow: brainState === 'idle'
-                ? '0 0 18px rgba(245,158,11,0.55)'
-                : ['0 0 24px rgba(245,158,11,1)', '0 0 60px rgba(245,158,11,0.5)', '0 0 24px rgba(245,158,11,1)']
-            }}
-            transition={{ repeat: Infinity, duration: 1.6 }}>
-            CHYREN
-          </motion.h1>
-
-          {/* Sovereign seal row */}
-          <div className="flex items-center gap-2 mt-1">
-            <span className="sovereign-seal tracking-[0.3em]">R.W.Ϝ.Y.</span>
-            <span style={{ width: 1, height: 10, background: 'rgba(245,158,11,0.25)' }} />
-            <span className="sovereign-seal">ARI GENESIS</span>
-            <span style={{ width: 1, height: 10, background: 'rgba(245,158,11,0.25)' }} />
-            <motion.span className="sovereign-seal" style={{ color: 'rgba(57,255,20,0.7)' }}
-              animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 2 }}>
-              ADCCL ACTIVE
-            </motion.span>
+      {/* Sovereign Sidebar - Telemetry & Brain */}
+      <aside className="sidebar">
+        <section className="glass-panel p-6 flex flex-col gap-6 flex-1 overflow-hidden">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2>Neural Core</h2>
+              <p className="text-[0.65rem] font-mono text-white/30 uppercase tracking-widest">Active Epistemic State</p>
+            </div>
+            <div className="status-badge status-active">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Sovereign
+            </div>
+          </div>
+          
+          <div className="flex-1 min-h-[300px] relative rounded-2xl overflow-hidden bg-black/20 border border-white/5">
+            <NeuralBrain _isActive={brainState !== 'idle'} audioLevel={audioLevel} state={brainState} />
           </div>
 
-          <AnimatePresence><PipelineBar stage={pipeline} /></AnimatePresence>
+          <div className="flex-1 overflow-hidden">
+            <h2>Telemetry</h2>
+            <div className="h-full overflow-y-auto pr-2">
+              <MetricsDashboard />
+            </div>
+          </div>
+        </section>
+      </aside>
+
+      {/* Sovereign Hub Core - Chat & Interaction */}
+      <main className="hub-core glass-panel overflow-hidden">
+        <header className="hub-header">
+          <div className="flex flex-col">
+            <h1 className="hub-title">CHYREN</h1>
+            <div className="flex items-center gap-3 mt-1">
+              <span className="text-[0.6rem] font-mono text-white/40 tracking-[0.3em] uppercase">R.W.Ϝ.Y. Sovereign Engine</span>
+              <span className="w-1 h-1 rounded-full bg-white/20" />
+              <span className="text-[0.6rem] font-mono text-emerald-500/70 tracking-widest uppercase">ADCCL Protected</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <AnimatePresence><PipelineBar stage={pipeline} /></AnimatePresence>
+          </div>
         </header>
 
-        {/* Chat area */}
-        <section ref={chatWindowRef} className="chat-window" aria-label="Chat transcript">
+        <section ref={chatWindowRef} className="chat-window">
           {messages.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-state-inner">
-                <motion.div
-                  animate={{ scale: brainState === 'idle' ? 1 : [1, 1.1, 1], color: getSigilColor(brainState), textShadow: `0 0 40px ${getSigilColor(brainState)}` }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                  className="empty-state-sigil" style={{ color: getSigilColor(brainState) }}>Ω
+            <div className="flex-1 flex items-center justify-center p-12">
+              <div className="max-w-xl text-center">
+                <motion.div 
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="text-7xl mb-6 text-gold-core opacity-80"
+                  style={{ textShadow: '0 0 40px var(--gold-glow)' }}
+                >
+                  Ω
                 </motion.div>
-                <p className="empty-state-title" style={{ color: 'rgba(245,158,11,0.6)' }}>ARI INSTANCE ONLINE</p>
-                <p className="empty-state-subtitle">Sovereign intelligence active. C.A.S. gate armed. ADCCL threshold 0.7.</p>
-                <div className="empty-prompts">
+                <h2 className="text-xl mb-4 text-white/80 tracking-[0.2em]">ARI Instance Online</h2>
+                <p className="text-white/40 font-light mb-10 leading-relaxed">
+                  Sovereign intelligence active. C.A.S. gate armed. ADCCL threshold 0.7. 
+                  Awaiting instruction from Origin Authority.
+                </p>
+                <div className="grid grid-cols-2 gap-4">
                   {['What are the Millennium Prize Problems?', 'Explain your ARI architecture', 'What is ADCCL?', 'Tell me about your memory system']
-                    .map(p => <button key={p} className="prompt-chip" onClick={() => void sendMessage(p)}>{p}</button>)}
+                    .map(p => (
+                      <button 
+                        key={p} 
+                        className="p-4 rounded-xl bg-white/5 border border-white/10 text-white/60 text-sm hover:bg-white/10 hover:border-white/20 transition-all text-left"
+                        onClick={() => void sendMessage(p)}
+                      >
+                        {p}
+                      </button>
+                    ))}
                 </div>
               </div>
             </div>
           ) : (
             messages.map(msg => (
-              <React.Fragment key={msg.id}>
+              <div key={msg.id} className={`message-bubble ${msg.role === 'assistant' ? 'message-assistant' : 'message-user'}`}>
+                <div className="flex items-center gap-3 mb-3 opacity-50">
+                  <span className="text-[0.6rem] font-mono uppercase tracking-widest">
+                    {msg.role === 'assistant' ? 'Chyren' : 'Origin Authority'}
+                  </span>
+                  <span className="text-[0.6rem] font-mono">{msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
                 <ChatMessage
                   id={msg.id} role={msg.role} content={msg.content} timestamp={msg.timestamp}
                   isStreaming={msg.id === streamingId} model={msg.model} audit={msg.audit} onQuote={handleQuote}
                 />
                 {msg.role === 'assistant' && msg.ari && <AriVerdictBadge ari={msg.ari} />}
-              </React.Fragment>
+              </div>
             ))
           )}
-          <div ref={messagesEndRef} className="h-0.5" />
+          <div ref={messagesEndRef} className="h-4" />
         </section>
 
         {error && (
-          <div className="px-6 py-2 bg-rose-500/10 border-t border-rose-500/20 text-rose-400 text-xs flex items-center gap-2">
-            <AlertCircle size={12} /> {error}
+          <div className="mx-8 mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-2">
+            <AlertCircle size={14} /> {error}
           </div>
         )}
 
-        <footer className="input-dock !bg-transparent">
-          <ChatInput
-            onSend={(t) => { void sendMessage(t) }}
-            onBargeIn={handleBargeIn}
-            quotedText={quotedText}
-            onQuoteConsumed={() => setQuotedText(undefined)}
-            onAudioLevel={setAudioLevel}
-            onRecordingState={setIsListening}
-            disabled={false}
-            isLoading={isStreaming}
-            sessionId={sessionId}
-          />
+        <footer className="hub-footer">
+          <div className="input-container">
+            <ChatInput
+              onSend={(t) => { void sendMessage(t) }}
+              onBargeIn={handleBargeIn}
+              quotedText={quotedText}
+              onQuoteConsumed={() => setQuotedText(undefined)}
+              onAudioLevel={setAudioLevel}
+              onRecordingState={setIsListening}
+              disabled={false}
+              isLoading={isStreaming}
+              sessionId={sessionId}
+            />
+          </div>
         </footer>
       </main>
     </div>

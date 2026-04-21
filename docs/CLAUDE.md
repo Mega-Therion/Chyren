@@ -1,16 +1,5 @@
 # CLAUDE.md
 
-> **DEPRECATED — DO NOT USE FOR NEW WORK**
->
-> This file references pre-restructure paths (`omega_workspace/workspace/OmegA-Next/`, root-level `main.py`) that no longer reflect the current repository layout. It is retained as a historical reference only.
->
-> **Current authoritative references:**
-> - Architecture: [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)
-> - Developer tooling and build commands: root [`CLAUDE.md`](../CLAUDE.md)
-> - First-run setup: [`docs/QUICKSTART.md`](./QUICKSTART.md)
-
----
-
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview

@@ -243,9 +243,6 @@ export function ChatMessage({
   onQuote,
 }: ChatMessageProps) {
   const isUser = role === 'user'
-  const time = timestamp
-    ? timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
-    : ''
 
   const [showTray, setShowTray] = useState(false)
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -288,7 +285,7 @@ export function ChatMessage({
       )}
 
       <div
-        className={`fade-up px-5 py-3 ${isUser ? 'msg-user' : 'msg-assistant'}`}
+        className="w-full"
         onMouseDown={startLong}
         onMouseUp={cancelLong}
         onMouseLeave={cancelLong}
@@ -296,42 +293,34 @@ export function ChatMessage({
         onTouchEnd={onTouchEnd}
         onTouchCancel={cancelLong}
       >
-        {/* Header row */}
-        <div className="flex items-center gap-3 mb-1.5">
-          <span
-            className="font-mono text-xs font-medium tracking-wider"
-            style={{ color: isUser ? '#818cf8' : '#10b981' }}
-          >
-            {isUser ? '▸ USER' : 'Ω CHYREN'}
-          </span>
-          {time && (
-            <span className="font-mono text-xs text-slate-600">{time}</span>
-          )}
-          {isStreaming && (
-            <span className="badge badge-amber">STREAMING</span>
-          )}
-          {audit && (
+        {/* Audit row */}
+        {audit && (
+          <div className="mb-3">
             <AuditBadge audit={audit} />
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Content */}
         <div
-          className="msg-content text-sm leading-relaxed text-slate-200 pl-3"
+          className="text-[0.95rem] leading-relaxed text-white/90"
           style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
         >
           {role === 'assistant' ? (
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
-                // Syntax-highlighted code blocks with Copy button
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 code({ inline, className, children, ...props }: any) {
                   if (inline) {
-                    return <code className={className} {...props}>{children}</code>
+                    return <code className="bg-white/10 px-1.5 py-0.5 rounded text-mesh-cyan" {...props}>{children}</code>
                   }
                   return <CodeBlock className={className}>{children}</CodeBlock>
                 },
+                p({ children }) {
+                  return <p className="mb-4 last:mb-0">{children}</p>
+                },
+                ul({ children }) {
+                  return <ul className="list-disc pl-6 mb-4">{children}</ul>
+                }
               }}
             >
               {content}
@@ -340,9 +329,10 @@ export function ChatMessage({
             <span>{content}</span>
           )}
           {isStreaming && (
-            <span
-              className="cursor inline-block ml-0.5 w-1.5 h-3.5 align-middle"
-              style={{ background: '#10b981' }}
+            <motion.span
+              animate={{ opacity: [0, 1, 0] }}
+              transition={{ repeat: Infinity, duration: 0.8 }}
+              className="inline-block ml-1 w-2 h-4 align-middle bg-mesh-cyan shadow-[0_0_10px_rgba(0,242,255,0.5)]"
             />
           )}
         </div>

@@ -44,10 +44,21 @@ cargo build --release
 ./target/release/chyren solve riemann --depth 5
 ```
 
+## ✨ Spectacular Upgrades (Final Activation)
+
+The hub has undergone a four-phase final activation to achieve **Sovereign Strategic Autonomy**:
+
+1. **Metacognitive TUI Dashboard**: A high-fidelity `ratatui` dashboard for real-time terminal observability.
+2. **Autonomous Proof Search (MCTS)**: Strategic Monte Carlo Tree Search agent for navigating complex proof landscapes.
+3. **Neocortex Axiom Injection**: Dynamic loading of signed mathematical axiom programs (Zeta, Topology, Logic) at boot.
+4. **Sovereign Glassmorphic Web UI**: A stunning Next.js overhaul featuring ethereal glass textures, dynamic telemetry, and neural core visualization.
+
 ## 📊 Observability
-Chyren exposes a high-fidelity metrics server on port `9090`.
+Chyren exposes high-fidelity telemetry across multiple planes:
+- **TUI**: `chyren server` (Terminal Dashboard)
+- **Web**: Vercel-deployed Sovereign Hub (Glassmorphic Interface)
 - **Prometheus**: `http://localhost:9090/metrics`
-- **WebSocket Telemetry**: `ws://localhost:9090/ws`
+- **WebSocket**: `ws://localhost:9090/ws`
 
 The R-based Heuristic Validator monitors `telemetry.log` and outputs Bayesian convergence snapshots to `state/heuristic_snapshot.json`.
 
