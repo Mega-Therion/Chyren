@@ -56,8 +56,12 @@ const PALETTE: &[&str] = &[
 pub fn gradient(text: &str, offset: usize) -> String {
     if !is_color_enabled() { return text.to_string(); }
     let mut out = String::new();
+    let n = PALETTE.len();
+    
     for (i, ch) in text.chars().enumerate() {
-        let hex = PALETTE[(offset + i) % PALETTE.len()];
+        // Use a slower shift (offset / 4) and linear interpolation-like effect
+        let idx = ((offset / 4) + i) % n;
+        let hex = PALETTE[idx];
         out.push_str(&hex_fg(hex));
         out.push(ch);
     }
