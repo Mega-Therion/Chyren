@@ -209,9 +209,9 @@ impl SpokeRegistry {
         }
 
         reg.preference = vec![
+            "openai".into(),
             "groq".into(),
             "anthropic".into(),
-            "openai".into(),
             "gemini".into(),
             "deepseek".into(),
             "perplexity".into(),
