@@ -1,0 +1,165 @@
+/home/mega/Work/Chyren/medulla/omega-core/src/identity.rs:pub const IDENTITY_KERNEL: &[u8] = include_bytes!("../resources/identity.bin");
+/home/mega/Work/Chyren/medulla/omega-core/src/identity.rs:pub fn verify_integrity() -> bool {
+/home/mega/Work/Chyren/medulla/omega-core/src/identity.rs:pub fn load_identity() -> Result<serde_json::Value, serde_json::Error> {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:pub enum RunStatus {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:pub enum TaskStage {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:pub struct UserContext {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub name: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub family_members: Vec<String>,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub bio: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:pub enum MemoryStratum {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:pub struct MatrixProgram {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub domain: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub version: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub integrity_hash: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub payload: Vec<u8>,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:impl MatrixProgram {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    /// Construct a `MatrixProgram`, computing the SHA-256 integrity hash
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub fn new(domain: impl Into<String>, version: impl Into<String>, payload: Vec<u8>) -> Self {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:pub struct MemoryNode {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub node_id: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub content: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub retrieval_count: u64,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub decay_score: f64,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:pub struct MemoryEdge {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub from: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub to: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub from_id: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub to_id: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:pub struct RetrievalEpisode {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub episode_id: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub content: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub result_nodes: Vec<String>,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:pub struct EvidencePacket {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub source: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub payload: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:impl EvidencePacket {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub fn new() -> Self {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:impl Default for EvidencePacket {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    fn default() -> Self {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:pub struct VerificationReport {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub report_id: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub passed: bool,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub flags: Vec<String>,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub score: f64,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub evidence: Vec<EvidencePacket>,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub repairs: Vec<String>,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:pub struct ClaimBudget {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub max_claims: u32,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub claims_used: u32,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub allowed_claim_types: Vec<String>,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:pub struct PlanStep {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub action: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub verification: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub fallback: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:pub struct PlanSkeleton {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub steps: Vec<PlanStep>,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub estimated_tokens: usize,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub mitigations: Vec<String>,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:pub struct GoalContract {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub objective: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub success_criteria: Vec<String>,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub constraints: Vec<String>,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub claim_budget: ClaimBudget,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:pub struct TaskStateObject {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub task_id: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub run_id: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub task_text: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub stage: TaskStage,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub goal_contract: Option<GoalContract>,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub plan_skeleton: Option<PlanSkeleton>,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub state_context: HashMap<String, String>,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub self_tags: Vec<String>,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub created_at: f64,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub modified_at: f64,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:pub fn now() -> f64 {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:pub fn gen_id(prefix: &str) -> String {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:pub const YETTRAGRAMMATON: &str = "R.W.Ϝ.Y.";
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:pub struct RunEnvelope {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub task_id: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub run_id: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub task: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub task_text: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub created_at: f64,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub status: RunStatus,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub risk_score: f64,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub verified_payload: Option<String>,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub evidence_packet: EvidencePacket,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:pub struct Chronicle {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub episode_id: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub timestamp: f64,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub causal_links: Vec<String>,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub emotional_vector: Vec<f32>,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub content: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:pub struct TemporalAnchor {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub episode_id: String,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    pub timestamp: f64,
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:pub trait MasterLedger: Send + Sync {
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    fn commit_run(&self, envelope: RunEnvelope) -> Result<String, String>;
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    fn append_event(&self, event_type: &str, payload: &str) -> std::io::Result<()>;
+/home/mega/Work/Chyren/medulla/omega-core/src/lib.rs:    fn get_run(&self, run_id: &str) -> Option<RunEnvelope>;
+/home/mega/Work/Chyren/medulla/omega-myelin/src/phylactery.rs:pub fn bootstrap_phylactery_kernel(
+/home/mega/Work/Chyren/medulla/omega-myelin/src/vector.rs:pub struct SearchResult {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/vector.rs:    pub id: String,
+/home/mega/Work/Chyren/medulla/omega-myelin/src/vector.rs:    pub score: f32,
+/home/mega/Work/Chyren/medulla/omega-myelin/src/vector.rs:    pub payload: Value,
+/home/mega/Work/Chyren/medulla/omega-myelin/src/vector.rs:pub struct VectorStore {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/vector.rs:impl VectorStore {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/vector.rs:    /// Construct from explicit URL and collection name.
+/home/mega/Work/Chyren/medulla/omega-myelin/src/vector.rs:    pub fn new(url: &str, collection: &str) -> Self {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/vector.rs:    /// Construct from `QDRANT_URL` env var (default: `http://localhost:6333`),
+/home/mega/Work/Chyren/medulla/omega-myelin/src/vector.rs:    pub fn from_env() -> Self {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/vector.rs:    pub async fn health_check(&self) -> bool {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/vector.rs:    pub async fn upsert(
+/home/mega/Work/Chyren/medulla/omega-myelin/src/vector.rs:    pub async fn search(
+/home/mega/Work/Chyren/medulla/omega-myelin/src/vector.rs:        struct QdrantHit {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/vector.rs:        struct QdrantSearchResponse {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/vector.rs:    fn test_from_env_url_variants() {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/vector.rs:    async fn test_health_check_offline_returns_false() {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/vector.rs:    async fn test_search_offline_returns_empty() {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/vector.rs:    async fn test_upsert_offline_is_noop() {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/db.rs:pub struct MyelinError(pub String);
+/home/mega/Work/Chyren/medulla/omega-myelin/src/db.rs:impl fmt::Display for MyelinError {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/db.rs:    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/db.rs:impl Error for MyelinError {}
+/home/mega/Work/Chyren/medulla/omega-myelin/src/db.rs:pub struct MemoryStore {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/db.rs:impl MemoryStore {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/db.rs:    pub async fn connect(url: &str, _path: &str) -> Result<Self, Box<dyn Error + Send + Sync>> {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/db.rs:    pub async fn load_nodes(&self) -> Result<Vec<MemoryNode>, Box<dyn Error + Send + Sync>> {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/db.rs:    pub async fn upsert_node(&self, node: &MemoryNode) -> Result<(), Box<dyn Error + Send + Sync>> {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/db.rs:    pub async fn touch_node(&self, node_id: &str) -> Result<(), Box<dyn Error + Send + Sync>> {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/db.rs:    pub async fn sync_delta(&self) -> Result<Vec<MemoryNode>, Box<dyn Error + Send + Sync>> {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/db.rs:    pub async fn store_ledger_entry(
+/home/mega/Work/Chyren/medulla/omega-myelin/src/db.rs:    pub fn pool(&self) -> &sqlx::PgPool {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/db.rs:    pub async fn reset_all(&self) -> Result<(), Box<dyn Error + Send + Sync>> {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/db.rs:struct NodeRow {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:pub struct ThreatEntry {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:    pub pattern_id: String,
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:    pub severity: String,
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:    pub labels: Vec<String>,
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:pub struct MemoryGraph {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:    pub nodes: HashMap<String, MemoryNode>,
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:    pub edges: Vec<MemoryEdge>,
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:    pub threat_fabric: Vec<ThreatEntry>,
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:    pub episodes: Vec<RetrievalEpisode>,
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:    pub user_context: Option<omega_core::UserContext>,
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:    pub vector_store: Option<VectorStore>,
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:impl MemoryGraph {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:    pub fn new() -> Self {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:    pub fn add_node(&mut self, node: MemoryNode) {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:    pub fn write_node(
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:    pub fn create_edge(&mut self, from: String, to: String, _edge_type: String, _weight: f64) {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:pub struct Service {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:    pub graph: std::sync::Arc<tokio::sync::Mutex<MemoryGraph>>,
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:impl Service {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:    pub fn new() -> Self {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:    pub async fn name(&self) -> String {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:    pub async fn lock(&self) -> tokio::sync::MutexGuard<'_, MemoryGraph> {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:impl Default for Service {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:    fn default() -> Self {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:pub mod db;
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:pub mod vector;
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:pub use vector::{SearchResult, VectorStore};
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:impl MemoryGraph {
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:    pub async fn search_semantic(
+/home/mega/Work/Chyren/medulla/omega-myelin/src/lib.rs:    pub fn anchor_recall(
