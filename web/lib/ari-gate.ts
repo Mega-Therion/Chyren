@@ -9,10 +9,10 @@
  */
 
 import { AriGateResult, IntentRisk } from './ari-gate';
-import enrichmentSchema from '../../../state/ari_enrichment_schema.json';
+import enrichmentSchema from '../data/ari_enrichment_schema.json';
 
 // ─── ARI Enrichment ──────────────────────────────────────────────────────────
-// Schema: ../../../state/ari_enrichment_schema.json
+// Schema: ../data/ari_enrichment_schema.json
 function getCognitiveEnrichmentContext(intent: string): string[] {
   const context: string[] = [];
   // Alignment check

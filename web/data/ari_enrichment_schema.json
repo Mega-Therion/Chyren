@@ -1,0 +1,37 @@
+{
+  "enrichment_package_version": "1.0.0",
+  "metadata": {
+    "generated_at": "2026-04-20T12:00:00Z",
+    "description": "ARI-gate cognitive enrichment assets for high-integrity alignment and reasoning."
+  },
+  "assets": {
+    "alignment": [
+      {
+        "id": "Anthropic/hh-rlhf",
+        "type": "dataset",
+        "description": "Preference tuning for helpful/harmless alignment."
+      },
+      {
+        "id": "HuggingFaceH4/ultrafeedback_binarized",
+        "type": "dataset",
+        "description": "High-quality preference data for DPO."
+      }
+    ],
+    "reasoning": [
+      {
+        "id": "openai/gsm8k",
+        "type": "dataset",
+        "description": "Grade school math reasoning benchmarks."
+      },
+      {
+        "id": "HuggingFaceH4/MATH",
+        "type": "dataset",
+        "description": "Advanced mathematics reasoning."
+      }
+    ]
+  },
+  "ari_gate_injection_point": {
+    "path": "web/lib/ari-gate.ts",
+    "required_action": "Implement lookup table for asset scoring and intent context injection."
+  }
+}
