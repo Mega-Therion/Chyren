@@ -65,7 +65,26 @@ pub fn gradient(text: &str, offset: usize) -> String {
     out
 }
 
-// ── Glass Components ────────────────────────────────────────────────────────
+// ── Glass Container (Glassmorphism Effect) ──────────────────────────────────
+
+pub fn glass_border(color: &str) -> String {
+    format!("{}", hex_fg(color))
+}
+
+pub fn glass_container(width: usize, color: &str) -> String {
+    // 3px border, inside container with VOID_BLACK
+    format!("{}{}{} {} ", hex_fg(color), "█".repeat(width), R, hex_bg(VOID_BLACK))
+}
+
+pub fn render_glass(width: usize, color: &str, content: &str) -> String {
+    // Outer Border (Neon color)
+    let border = format!("{}{}", hex_fg(color), "█".repeat(width));
+    // Inner Container (Void Black + Transparency Simulation)
+    let inner_width = width.saturating_sub(4);
+    let inner = format!("{}{}{}", hex_bg(VOID_BLACK), " ".repeat(inner_width), R);
+    
+    format!("{}\n{}{}{}\n{}", border, hex_fg(color), "█", inner, hex_fg(color))
+}
 
 pub fn parallax_dot(i: usize) -> char {
     let frames = ['⠂', '⠶', '⠴', '⠾', '⠶', '⠂'];
@@ -88,12 +107,12 @@ pub fn box_top(width: usize, title: &str) -> String {
     let side = width.saturating_sub(t_len + 4) / 2;
     format!(
         "{}╭{} {} {}╮{}",
-        hex_fg("#333333"), "─".repeat(side), gradient(title, 0), "─".repeat(side), R
+        glass_border(CORE_CYAN), "─".repeat(side), gradient(title, 0), "─".repeat(side), R
     )
 }
 
 pub fn box_bottom(width: usize) -> String {
-    format!("{}╰{}╯{}", hex_fg("#333333"), "─".repeat(width.saturating_sub(2)), R)
+    format!("{}╰{}╯{}", glass_border(CORE_CYAN), "─".repeat(width.saturating_sub(2)), R)
 }
 
 // ── Semantic styles ─────────────────────────────────────────────────────────
