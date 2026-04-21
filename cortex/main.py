@@ -10,6 +10,7 @@ import json
 import time
 import websockets
 from mcp_hub import MCPHub
+from orchestrator import ChiralOrchestrator
 
 class ChyrenHub:
     def __init__(self):
@@ -18,11 +19,15 @@ class ChyrenHub:
         loader.load_foundation()
         sections = loader.parse_sections()
         self.identity = loader.create_identity_kernel(sections)
+        
         self.router = ProviderRouter()
         self.router.register(SovereignProvider())
         
         self.mcp_hub = MCPHub()
         self.mcp_hub.register_server("memory", "npx", ["-y", "@modelcontextprotocol/server-memory"])
+        
+        # Initialize the LangGraph Orchestrator
+        self.orchestrator = ChiralOrchestrator(self.router, self.identity)
         self.ws = None
 
     async def _connect_telemetry(self):
@@ -49,22 +54,16 @@ class ChyrenHub:
 
     async def run(self, task):
         await self._emit_telemetry("TaskAdmitted", {"task": task})
-        # Discover capabilities dynamically from the MCP hub
-        try:
-            capabilities = await self.mcp_hub.connect_and_discover("memory")
-            tool_context = f"\n[MCP HUB CAPABILITIES - memory]\nTools: {capabilities['tools']}"
-        except Exception as e:
-            tool_context = f"\n[MCP HUB FAILED]\nError: {e}"
-
-        system_prompt = (
-            f"You are Chyren, a sovereign intelligence orchestrator. "
-            f"You speak with the charismatic, wise authority of a British professor. "
-            f"Your tone is intellectually rich, sharp, and brisk—never rambling. "
-            f"{tool_context}"
-        )
-        request = ProviderRequest(prompt=task, system=system_prompt)
-        result = self.router.route(request, preferred="sovereign").text
-        await self._emit_telemetry("TaskCompleted", {"task": task, "status": "done"})
+        
+        # Execute the task through the LangGraph Orchestrator
+        final_state = await self.orchestrator.run(task)
+        result = final_state.get("response", "No response generated.")
+        
+        await self._emit_telemetry("TaskCompleted", {
+            "task": task, 
+            "status": "done",
+            "adccl_score": final_state.get("adccl_score", 0.0)
+        })
         return result
 
 async def main():
@@ -77,7 +76,7 @@ async def main():
             task = console.input("[bold #50FA7B]chyren agent ❯ [/bold #50FA7B]")
             if task.lower() in ['exit', 'quit']: break
             
-            console.print("[bold #BD93F9]...Processing...[/bold #BD93F9]")
+            console.print("[bold #BD93F9]...Executing Chiral Pipeline...[/bold #BD93F9]")
             result = await hub.run(task)
             
             # Print a clean, structured panel for the response

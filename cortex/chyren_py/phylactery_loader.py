@@ -79,6 +79,7 @@ class PhylacteryLoader:
                 "decisions": self._parse_list_section(sections.get("Strategic Decisions", "")),
                 "lessons": self._parse_list_section(sections.get("Lessons & Insights", "")),
                 "goals": self._parse_list_section(sections.get("Vision & Goals", "")),
+                "axioms": self._parse_list_section(sections.get("Millennium Prize Problems (Sovereign Reasoning)", "")),
                 "memory_stats": self._extract_memory_stats(sections.get("Memory Architecture", ""))
             },
             "integration_notes": [
@@ -145,7 +146,8 @@ class PhylacteryLoader:
                     "projects": kernel["components"]["projects"],
                     "decisions": kernel["components"]["decisions"],
                     "lessons": kernel["components"]["lessons"],
-                    "goals": kernel["components"]["goals"]
+                    "goals": kernel["components"]["goals"],
+                    "axioms": kernel["components"]["axioms"]
                 },
                 "memory_config": kernel["components"]["memory_stats"],
                 "policy_gates": {
@@ -286,7 +288,7 @@ pub fn bootstrap_phylactery_kernel(memory: &mut Service, kernel_path: &str) -> R
 
 
 if __name__ == "__main__":
-    foundation_path = Path("/home/mega/Chyren/chyren_py/IDENTITY_FOUNDATION.md")
+    foundation_path = Path("/home/mega/Chyren/cortex/chyren_py/IDENTITY_FOUNDATION.md")
 
     print("\n" + "="*70)
     print("🔮 PHYLACTERY KERNEL LOADER: Identity → L6 Memory")
