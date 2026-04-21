@@ -102,14 +102,17 @@ impl EpistemicMesh {
         let mut depth = 0;
         while !graph.is_converged() && depth < MAX_REFINEMENT_DEPTH {
             let entropy = graph.entropy();
-            eprintln!(
-                "[EpistemicMesh] depth={depth} entropy={:.2} violated={}",
-                entropy.value, entropy.violated_axiom_count
+            omega_telemetry::info!(
+                "EpistemicMesh", 
+                "MESH_ITERATION", 
+                "depth={depth} entropy={:.2} violated={}",
+                entropy.value, 
+                entropy.violated_axiom_count
             );
 
             // Trigger Sovereign Axiom Review if entropy is critical
             if entropy.requires_axiom_review() {
-                eprintln!("[EpistemicMesh] Entropy critical — triggering Sovereign Axiom Review");
+                omega_telemetry::warn!("EpistemicMesh", "ENTROPY_CRITICAL", "Entropy critical — triggering Sovereign Axiom Review");
                 sovereign_reviews_triggered += 1;
                 let phylactery_summary = self.get_phylactery_anchor().await;
                 graph.inject_axiom_anchor(&phylactery_summary);
@@ -182,8 +185,10 @@ impl EpistemicMesh {
                     .unwrap_or_else(|| "No answer produced.".to_string())
             });
 
-        eprintln!(
-            "[EpistemicMesh] Complete. nodes={} depth={} entropy={:.2} converged={}",
+        omega_telemetry::info!(
+            "EpistemicMesh",
+            "MESH_COMPLETE",
+            "nodes={} depth={} entropy={:.2} converged={}",
             summary.total_nodes, summary.depth, summary.entropy, summary.converged
         );
 
@@ -276,7 +281,7 @@ impl EpistemicMesh {
         if let Ok(hash) = self.cold_store.store(&node) {
             let mut idx = self.proof_index.lock().await;
             idx.insert(&hash, &node.constraints);
-            eprintln!("[EpistemicMesh] Logic-Cache entry written: {hash}");
+            omega_telemetry::info!("EpistemicMesh", "LOGIC_CACHE_WRITE", "Logic-Cache entry written: {hash}");
         }
     }
 

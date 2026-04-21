@@ -3,6 +3,8 @@
 
 #![warn(missing_docs)]
 
+use omega_core::now;
+
 use serde::{Deserialize, Serialize};
 use std::fs::OpenOptions;
 use std::io::Write;
@@ -296,6 +298,48 @@ impl TelemetryBus {
             sink.record_metric(name, value, labels.clone());
         }
     }
+}
+
+/// Log an informational event.
+#[macro_export]
+macro_rules! info {
+    ($component:expr, $event_type:expr, $($arg:tt)*) => {
+        $crate::TelemetryBus::broadcast($crate::SystemEvent {
+            component: $component.to_string(),
+            event_type: $event_type.to_string(),
+            level: $crate::EventLevel::Info,
+            payload: serde_json::json!(format!($($arg)*)),
+            timestamp: omega_core::now(),
+        });
+    };
+}
+
+/// Log a warning event.
+#[macro_export]
+macro_rules! warn {
+    ($component:expr, $event_type:expr, $($arg:tt)*) => {
+        $crate::TelemetryBus::broadcast($crate::SystemEvent {
+            component: $component.to_string(),
+            event_type: $event_type.to_string(),
+            level: $crate::EventLevel::Warn,
+            payload: serde_json::json!(format!($($arg)*)),
+            timestamp: omega_core::now(),
+        });
+    };
+}
+
+/// Log a critical/error event.
+#[macro_export]
+macro_rules! error {
+    ($component:expr, $event_type:expr, $($arg:tt)*) => {
+        $crate::TelemetryBus::broadcast($crate::SystemEvent {
+            component: $component.to_string(),
+            event_type: $event_type.to_string(),
+            level: $crate::EventLevel::Critical,
+            payload: serde_json::json!(format!($($arg)*)),
+            timestamp: omega_core::now(),
+        });
+    };
 }
 
 #[cfg(test)]

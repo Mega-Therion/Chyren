@@ -193,7 +193,11 @@ async fn main() -> anyhow::Result<()> {
     let _ = omega_telemetry::start_metrics_server(9090).await;
     omega_telemetry::CHYREN_TASK_ADMITTED_TOTAL.inc();
 
+    // Phase 5: Boot embedded MQTT broker for the agent mesh
+    omega_conductor::broker::start_embedded_broker();
+
     let mut conductor = Conductor::new();
+
 
     if let Ok(url) = std::env::var("OMEGA_DB_URL") {
         match omega_myelin::db::MemoryStore::connect(&url, "").await {

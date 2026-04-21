@@ -327,6 +327,8 @@ pub mod dispatcher;
 pub mod registry;
 /// Recursive Epistemic Mesh — Chiral Graph self-correcting reasoning system.
 pub mod epistemic;
+/// Embedded MQTT broker — starts rumqttd in a background thread.
+pub mod broker;
 
 #[cfg(test)]
 mod tests {

@@ -241,7 +241,7 @@ impl Conductor {
             // n removed;
             // n removed;
         } else {
-            eprintln!("[NEOCORTEX] Could not acquire memory lock during boot.");
+            omega_telemetry::error!("Conductor", "LOCK_FAILURE", "Could not acquire memory lock during boot.");
         }
     }
 
@@ -763,20 +763,24 @@ impl Conductor {
             ).await;
 
             if mesh_result.converged && mesh_result.final_answer != spoke_response.text {
-                eprintln!(
-                    "[EPISTEMIC] Mesh refined answer. violations={} logic_cache={} reviews={}",
+                omega_telemetry::info!(
+                    "Conductor",
+                    "MESH_REFINED",
+                    "Mesh refined answer. violations={} logic_cache={} reviews={}",
                     mesh_result.axiom_violations_encountered,
                     mesh_result.logic_cache_entries_written,
-                    mesh_result.sovereign_reviews_triggered,
+                    mesh_result.sovereign_reviews_triggered
                 );
                 spoke_response.text = mesh_result.final_answer;
             } else {
-                eprintln!(
-                    "[EPISTEMIC] nodes={} entropy={:.2} converged={} cache_writes={}",
+                omega_telemetry::info!(
+                    "Conductor",
+                    "MESH_STABLE",
+                    "nodes={} entropy={:.2} converged={} cache_writes={}",
                     mesh_result.graph_summary.total_nodes,
                     mesh_result.graph_summary.entropy,
                     mesh_result.converged,
-                    mesh_result.logic_cache_entries_written,
+                    mesh_result.logic_cache_entries_written
                 );
             }
         }
