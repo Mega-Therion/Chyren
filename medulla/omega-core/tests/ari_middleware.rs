@@ -1,5 +1,5 @@
 #![cfg(test)]
-use super::*;
+use omega_core::*;
 
 #[test]
 fn test_ari_gate_allows_benign() {

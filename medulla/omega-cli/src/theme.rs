@@ -13,9 +13,9 @@ use termimad::MadSkin;
 
 pub const CORE_CYAN: &str = "#00f5ff";
 pub const NEURAL_BLUE: &str = "#3366ff";
-pub const VOID_BLACK: &str = "#000103"; // Deep space black
+// pub const VOID_BLACK: &str = "#000103"; // Deep space black
 pub const GHOST_WHITE: &str = "#e0e0e0";
-pub const GLASS_GLOW: &str = "#1a1a2e"; // Subtle blue-gray background tint
+// pub const GLASS_GLOW: &str = "#1a1a2e"; // Subtle blue-gray background tint
 
 // ── ANSI TrueColor Helpers ───────────────────────────────────────────────────
 
@@ -27,6 +27,7 @@ fn hex_fg(hex: &str) -> String {
     format!("\x1b[38;2;{};{};{}m", r, g, b)
 }
 
+/*
 fn hex_bg(hex: &str) -> String {
     let hex = hex.trim_start_matches('#');
     let r = u8::from_str_radix(&hex[0..2], 16).unwrap_or(0);
@@ -34,6 +35,7 @@ fn hex_bg(hex: &str) -> String {
     let b = u8::from_str_radix(&hex[4..6], 16).unwrap_or(0);
     format!("\x1b[48;2;{};{};{}m", r, g, b)
 }
+*/
 
 const R: &str = "\x1b[0m";
 const B: &str = "\x1b[1m";
@@ -75,6 +77,7 @@ pub fn glass_border(color: &str) -> String {
     format!("{}", hex_fg(color))
 }
 
+/*
 pub fn glass_container(width: usize, color: &str) -> String {
     // 3px border, inside container with VOID_BLACK
     format!("{}{}{} {} ", hex_fg(color), "█".repeat(width), R, hex_bg(VOID_BLACK))
@@ -89,12 +92,14 @@ pub fn render_glass(width: usize, color: &str, content: &str) -> String {
     
     format!("{}\n{}{}{}\n{}", border, hex_fg(color), "█", inner, hex_fg(color))
 }
+*/
 
 pub fn parallax_dot(i: usize) -> char {
     let frames = ['⠂', '⠶', '⠴', '⠾', '⠶', '⠂'];
     frames[i % frames.len()]
 }
 
+/*
 pub fn glass_divider(width: usize) -> String {
     if !is_color_enabled() { return "─".repeat(width); }
     let mut out = String::new();
@@ -105,6 +110,7 @@ pub fn glass_divider(width: usize) -> String {
     out.push_str(R);
     out
 }
+*/
 
 pub fn box_top(width: usize, title: &str) -> String {
     let t_len = title.chars().count();
@@ -163,12 +169,14 @@ pub fn prompt() -> String {
     format!("{} chyren {}❯{} ", hex_fg(CORE_CYAN), hex_fg(NEURAL_BLUE), R)
 }
 
+/*
 pub fn print_thinking(msg: &str, frame: usize) {
     let frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
     let spinner = gradient(frames[frame % frames.len()], frame);
     print!("\r  {} {} {}  ", spinner, hex_fg("#444444"), info(msg));
     stdout().flush().ok();
 }
+*/
 
 pub fn print_markdown(text: &str) {
     let mut skin = MadSkin::default();

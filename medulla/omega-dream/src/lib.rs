@@ -7,6 +7,8 @@
 use omega_core::{now, VerificationReport};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::fs;
+use std::path::{Path, PathBuf};
 
 /// A dream episode representing a failed verification
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -62,11 +64,50 @@ impl Service {
 
     /// Create a new DREAM service with custom configuration
     pub fn with_config(config: DreamConfig) -> Self {
-        Service {
+        let mut service = Service {
             config,
             episodes: Vec::new(),
             pattern_cache: HashMap::new(),
+        };
+        let _ = service.load_from_disk();
+        service
+    }
+
+    fn dreams_path() -> PathBuf {
+        let home = std::env::var("HOME").unwrap_or_else(|_| ".".to_string());
+        Path::new(&home).join(".omega").join("dreams.json")
+    }
+
+    /// Save all episodes to disk.
+    pub fn save_to_disk(&self) -> Result<(), String> {
+        let path = Self::dreams_path();
+        if let Some(parent) = path.parent() {
+            let _ = fs::create_dir_all(parent);
         }
+        let json = serde_json::to_string_pretty(&self.episodes)
+            .map_err(|e| format!("Failed to serialize dreams: {}", e))?;
+        fs::write(path, json).map_err(|e| format!("Failed to write dreams: {}", e))?;
+        Ok(())
+    }
+
+    /// Load episodes from disk.
+    pub fn load_from_disk(&mut self) -> Result<(), String> {
+        let path = Self::dreams_path();
+        if !path.exists() {
+            return Ok(());
+        }
+        let json = fs::read_to_string(path).map_err(|e| format!("Failed to read dreams: {}", e))?;
+        let episodes: Vec<DreamEpisode> = serde_json::from_str(&json)
+            .map_err(|e| format!("Failed to parse dreams: {}", e))?;
+        self.episodes = episodes;
+        
+        // Rebuild pattern cache
+        self.pattern_cache.clear();
+        for episode in &self.episodes {
+            // We'd need to re-parse failure_report if we wanted to rebuild the cache perfectly,
+            // but for now we just load the episodes.
+        }
+        Ok(())
     }
 
     /// Record a verification failure as a dream episode
@@ -95,6 +136,7 @@ impl Service {
         };
 
         self.episodes.push(episode.clone());
+        let _ = self.save_to_disk();
 
         // Update pattern cache
         for flag in &report.flags {
