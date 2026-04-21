@@ -294,8 +294,34 @@ export async function POST(req: NextRequest) {
       temperature: profile.temperature,
     })
 
-    return result.toTextStreamResponse({
+    const encoder = new TextEncoder()
+    const customStream = new ReadableStream({
+      async start(controller) {
+        let gotChunks = false
+        try {
+          for await (const chunk of result.textStream) {
+            gotChunks = true
+            const payload = { choices: [{ delta: { content: chunk } }] }
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`))
+          }
+        } catch (e) {
+          logger.error('[STREAM ERROR]', e)
+          if (!gotChunks) {
+            const fallbackMsg = "My cognitive systems are experiencing temporary network interference. Please stand by."
+            const payload = { choices: [{ delta: { content: fallbackMsg } }] }
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`))
+          }
+        } finally {
+          controller.close()
+        }
+      }
+    })
+
+    return new Response(customStream, {
       headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
         'X-Chyren-Session': session,
         'X-Chyren-ARI': JSON.stringify({
           allowed: ariResult.allowed,
