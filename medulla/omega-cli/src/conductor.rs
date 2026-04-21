@@ -114,6 +114,8 @@ pub struct Conductor {
     dream: Arc<std::sync::Mutex<DreamEngine>>,
     /// Metacognitive agent for post-session self-reflection.
     metacog: Arc<std::sync::Mutex<MetacogAgent>>,
+    /// MQTT Dispatcher for the agent mesh.
+    pub dispatcher: Option<Arc<omega_conductor::dispatcher::Dispatcher>>,
 }
 
 impl Conductor {
@@ -230,6 +232,11 @@ impl Conductor {
     /// Bootstrap the identity kernel into the in-memory graph.
     pub async fn bootstrap_identity(&self) -> Result<(), String> {
         omega_phylactery::bootstrap_kernel(&self.memory_service).await
+    }
+
+    /// Set the dispatcher.
+    pub fn set_dispatcher(&mut self, dispatcher: Arc<omega_conductor::dispatcher::Dispatcher>) {
+        self.dispatcher = Some(dispatcher);
     }
 
     /// Inject all Neocortex seed programs into the MemoryGraph.

@@ -203,16 +203,22 @@ async fn main() -> anyhow::Result<()> {
         match omega_myelin::db::MemoryStore::connect(&url, "").await {
             Ok(store) => {
                 conductor.set_store(Arc::new(store));
+                omega_telemetry::info!("Cli", "BOOT_DB", "Persistent Master Ledger online.");
                 info!("Persistent Master Ledger online.");
             }
-            Err(e) => warn!("Failed to connect to DB: {e}. Using volatile ledger."),
+            Err(e) => {
+                omega_telemetry::warn!("Cli", "BOOT_DB_FAILURE", "Failed to connect to DB: {e}. Using volatile ledger.");
+                warn!("Failed to connect to DB: {e}. Using volatile ledger.");
+            }
         }
     }
 
     // Phase 6: Identity Synthesis
     if let Err(e) = conductor.bootstrap_identity().await {
+        omega_telemetry::warn!("Cli", "BOOT_IDENTITY_FAILURE", "Phylactery bootstrap failed: {e}");
         warn!("Phylactery bootstrap failed: {e}. Running as generic orchestrator.");
     } else {
+        omega_telemetry::info!("Cli", "BOOT_IDENTITY", "Phylactery Identity Kernel active (L6 Canonical).");
         info!("Phylactery Identity Kernel active (L6 Canonical).");
     }
 
@@ -256,6 +262,7 @@ async fn main() -> anyhow::Result<()> {
         }
         Some(Commands::Server) => {
             if !cli.json {
+                omega_telemetry::info!("Cli", "BOOT_SERVER", "Launching API Server on :8080");
                 println!("{}", theme::info("[BOOT] Launching API Server on :8080 ..."));
             }
             
@@ -367,6 +374,7 @@ async fn main() -> anyhow::Result<()> {
                 }
             };
 
+            omega_telemetry::info!("Cli", "SOLVE_START", "Problem: {} depth={}", target.name(), depth);
             println!(
                 "{} {}  {}  depth={}",
                 theme::tier("[TIER-2]"),
