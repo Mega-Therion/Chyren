@@ -90,6 +90,7 @@ class ChiralOrchestrator:
         
         # Route to the sovereign provider
         response = self.router.route(request, preferred="sovereign")
+        print(f"[DEBUG] Provider returned: {len(response.text)} chars")
         
         new_history = state['history'] + [{"role": "user", "content": state['task']}, {"role": "assistant", "content": response.text}]
         

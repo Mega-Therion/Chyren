@@ -9,6 +9,12 @@ import asyncio
 import json
 import time
 import websockets
+import os
+from dotenv import load_dotenv
+
+# Load the Sovereign Hub keys from the central registry
+load_dotenv("/home/mega/.omega/one-true.env")
+
 from mcp_hub import MCPHub
 from orchestrator import ChiralOrchestrator
 
