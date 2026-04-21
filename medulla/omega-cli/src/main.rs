@@ -11,6 +11,7 @@ use omega_conductor::agents::{
     millennium::{MillenniumProblem, SearchAndExtendAgent},
     worker::MeshWorker,
     millennium_solver::MillenniumSolverAgent,
+    mcts_solver::MctsSolverAgent,
     math_spoke::MathSpoke,
     PersistentAgent,
 };
@@ -273,6 +274,19 @@ async fn main() -> anyhow::Result<()> {
         });
     }
     let _solver_worker = MeshWorker::new(solver).await;
+ 
+    // Register MctsSolver
+    let mcts_solver = Arc::new(MctsSolverAgent::new(dispatcher.clone()));
+    {
+        let mut reg = registry.lock().await;
+        reg.register(omega_core::mesh::AgentRegistryEntry {
+            id: mcts_solver.name().to_string(),
+            capabilities: mcts_solver.capabilities(),
+            status: omega_core::mesh::AgentStatus::Idle,
+            last_heartbeat: now() as u64,
+        });
+    }
+    let _mcts_worker = MeshWorker::new(mcts_solver).await;
 
     conductor.set_dispatcher(dispatcher);
 
@@ -363,10 +377,12 @@ async fn main() -> anyhow::Result<()> {
                 scheduler.run().await;
             });
 
-            // Start API server in background
+            // Start API server in background thread
             let conductor_api = conductor.clone();
-            tokio::spawn(async move {
-                let _ = omega_cli::api::start_api_server(conductor_api).await;
+            std::thread::spawn(move || {
+                let _ = actix_web::rt::System::new().block_on(async move {
+                    let _ = omega_cli::api::start_api_server(conductor_api).await;
+                });
             });
 
             // Launch TUI Dashboard

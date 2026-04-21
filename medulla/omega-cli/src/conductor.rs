@@ -246,11 +246,27 @@ impl Conductor {
     /// This is Phase 7 of the boot sequence — runs after phylactery so Chyren
     /// has the full sovereign knowledge library loaded before processing any task.
     pub fn inject_neocortex(&self) {
-        if self.memory_service.graph.try_lock().is_ok() {
-            // n removed;
-            // n removed;
-        } else {
-            omega_telemetry::error!("Conductor", "LOCK_FAILURE", "Could not acquire memory lock during boot.");
+        let dir_path = "knowledge_injection";
+        if !std::path::Path::new(dir_path).exists() {
+            let _ = std::fs::create_dir_all(dir_path);
+            return;
+        }
+
+        if let Ok(entries) = std::fs::read_dir(dir_path) {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if path.extension().map_or(false, |e| e == "json") {
+                    if let Ok(content) = std::fs::read_to_string(&path) {
+                        if let Ok(program) = serde_json::from_str::<MatrixProgram>(&content) {
+                            let ms = self.memory_service.clone();
+                            tokio::spawn(async move {
+                                let mut graph = ms.lock().await;
+                                let _ = ingestion::IngestionEngine::ingest(program, &mut graph).await;
+                            });
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -878,8 +894,23 @@ impl Conductor {
             Ok(mc) => mc,
             Err(_) => return vec![],
         };
-        let epiphanies = mc.reflect(&graph);
-        epiphanies.iter().map(|e| e.insight.clone()).collect()
+        
+        let mut insights: Vec<String> = mc.reflect(&graph).iter().map(|e| e.insight.clone()).collect();
+
+        // Self-Healing Telemetry: Analyze Dream Engine for reasoning failures
+        if let Ok(dream) = self.dream.try_lock() {
+            let count = dream.episode_count();
+            if count > 5 {
+                insights.push(format!("HEURISTIC_ALERT: {} reasoning failures detected. Recommending Neocortex synchronization.", count));
+                
+                // Autonomous correction: if entropy is too high, recommend a flush
+                if count > 20 {
+                    insights.push("CRITICAL_RECOVERY: Reasoning entropy exceeded threshold. Initiating epistemic re-alignment.".into());
+                }
+            }
+        }
+
+        insights
     }
 
     /// The Council: Consensus-based LLM verification.
