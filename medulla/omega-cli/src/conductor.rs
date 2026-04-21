@@ -997,6 +997,27 @@ impl Conductor {
     }
 
     /// Return the count of recorded dream failure episodes.
+    /// Verify a response against a task using the ADCCL engine.
+    pub async fn verify_text(&self, task: &str, text: &str) -> VerificationResult {
+        self.adccl.verify(text, task)
+    }
+
+    /// Record a failed cognitive episode into the Dream Engine.
+    pub async fn record_dream(&self, task: &str, text: &str, score: f64, flags: &[String]) {
+        if let Ok(mut dream) = self.dream.try_lock() {
+            let report = VerificationReport {
+                report_id: format!("vr-ext-{}", now()),
+                passed: false,
+                flags: flags.to_vec(),
+                score,
+                evidence: vec![],
+                repairs: vec!["External failure reported".to_string()],
+            };
+            dream.record_failure(text, &report);
+        }
+    }
+
+    /// Return the total count of dream episodes recorded.
     pub fn dream_episode_count(&self) -> usize {
         self.dream
             .try_lock()

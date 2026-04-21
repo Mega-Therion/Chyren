@@ -21,6 +21,27 @@ struct ChatResponse {
     adccl_score: f64,
 }
 
+#[derive(Deserialize)]
+struct VerifyRequest {
+    task: String,
+    response: String,
+}
+
+#[derive(Serialize)]
+struct VerifyResponse {
+    score: f64,
+    passed: bool,
+    flags: Vec<String>,
+}
+
+#[derive(Deserialize)]
+struct DreamRecordRequest {
+    task: String,
+    response: String,
+    score: f64,
+    flags: Vec<String>,
+}
+
 #[post("/api/chat/stream")]
 async fn chat_stream_handler(
     conductor: web::Data<Arc<Conductor>>,
@@ -91,7 +112,6 @@ async fn chat_handler(
         verified_payload: None,
         evidence_packet: EvidencePacket::new(),
     };
-
     match conductor.plan_task(task_text).await {
         Ok(plan) => match conductor.execute_plan(plan, &mut envelope).await {
             Ok(result) => HttpResponse::Ok().json(ChatResponse {
@@ -104,6 +124,28 @@ async fn chat_handler(
         },
         Err(e) => HttpResponse::BadRequest().body(e.to_string()),
     }
+}
+
+#[post("/api/verify")]
+async fn verify_handler(
+    conductor: web::Data<Arc<Conductor>>,
+    req: web::Json<VerifyRequest>,
+) -> impl Responder {
+    let result = conductor.verify_text(&req.task, &req.response).await;
+    HttpResponse::Ok().json(VerifyResponse {
+        score: result.score as f64,
+        passed: result.passed,
+        flags: result.flags,
+    })
+}
+
+#[post("/api/dream/record")]
+async fn record_dream_handler(
+    conductor: web::Data<Arc<Conductor>>,
+    req: web::Json<DreamRecordRequest>,
+) -> impl Responder {
+    conductor.record_dream(&req.task, &req.response, req.score, &req.flags).await;
+    HttpResponse::Ok().body("Recorded")
 }
 
 pub async fn start_api_server(conductor: Arc<Conductor>) -> std::io::Result<()> {
@@ -124,6 +166,8 @@ pub async fn start_api_server(conductor: Arc<Conductor>) -> std::io::Result<()> 
             .app_data(data.clone())
             .service(chat_handler)
             .service(chat_stream_handler)
+            .service(verify_handler)
+            .service(record_dream_handler)
     })
     .bind((host, port))?
     .run()

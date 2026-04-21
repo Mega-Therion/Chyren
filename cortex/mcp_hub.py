@@ -59,6 +59,18 @@ class MCPHub:
                     "resources": resources_list
                 }
 
+    async def call_tool(self, server_name: str, tool_name: str, arguments: Dict[str, Any]) -> Any:
+        """Call a tool on a specific MCP server."""
+        if server_name not in self.servers:
+            raise ValueError(f"Server {server_name} not registered.")
+            
+        server_params = self.servers[server_name]
+        async with stdio_client(server_params) as (read, write):
+            async with ClientSession(read, write) as session:
+                await session.initialize()
+                result = await session.call_tool(tool_name, arguments)
+                return result.content
+
 async def _test():
     logging.basicConfig(level=logging.INFO)
     hub = MCPHub()

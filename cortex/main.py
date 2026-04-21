@@ -26,8 +26,8 @@ class ChyrenHub:
         self.mcp_hub = MCPHub()
         self.mcp_hub.register_server("memory", "npx", ["-y", "@modelcontextprotocol/server-memory"])
         
-        # Initialize the LangGraph Orchestrator
-        self.orchestrator = ChiralOrchestrator(self.router, self.identity)
+        # Initialize the LangGraph Orchestrator with the MCP Hub
+        self.orchestrator = ChiralOrchestrator(self.router, self.identity, self.mcp_hub)
         self.ws = None
 
     async def _connect_telemetry(self):
