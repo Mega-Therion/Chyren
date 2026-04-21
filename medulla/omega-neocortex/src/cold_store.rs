@@ -21,11 +21,15 @@ pub enum ColdStoreError {
     Serde(#[from] serde_json::Error),
     #[error("Node not found: {hash}")]
     NotFound { hash: String },
+    #[error("IPFS error: {0}")]
+    Ipfs(String),
 }
 
 /// Persistent, content-addressable store for cold-stratum knowledge nodes.
 pub struct ColdStore {
     base: PathBuf,
+    ipfs_url: Option<String>,
+    http: reqwest::Client,
 }
 
 impl ColdStore {
@@ -33,7 +37,12 @@ impl ColdStore {
     pub fn new(base_path: impl AsRef<Path>) -> Result<Self, ColdStoreError> {
         let base = base_path.as_ref().to_path_buf();
         fs::create_dir_all(&base)?;
-        Ok(Self { base })
+        let ipfs_url = std::env::var("IPFS_API_URL").ok();
+        Ok(Self {
+            base,
+            ipfs_url,
+            http: reqwest::Client::new(),
+        })
     }
 
     /// Default location: `~/.omega/cold/`
@@ -50,16 +59,40 @@ impl ColdStore {
 
     /// Persist a KnowledgeNode. Returns the content_hash (stable address).
     /// Idempotent: storing the same proof twice is a no-op (returns existing hash).
-    pub fn store(&self, node: &KnowledgeNode) -> Result<String, ColdStoreError> {
+    pub async fn store(&self, node: &KnowledgeNode) -> Result<String, ColdStoreError> {
         let path = self.node_path(&node.content_hash);
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent)?;
         }
         if !path.exists() {
             let bytes = serde_json::to_vec_pretty(node)?;
-            fs::write(&path, bytes)?;
+            fs::write(&path, &bytes)?;
+
+            // Sovereign Bridge: Pin to IPFS if available
+            if let Some(url) = &self.ipfs_url {
+                let _ = self.ipfs_pin(&node.content_hash, &bytes, url).await;
+            }
         }
         Ok(node.content_hash.clone())
+    }
+
+    async fn ipfs_pin(&self, hash: &str, data: &[u8], url: &str) -> Result<String, ColdStoreError> {
+        let form = reqwest::multipart::Form::new()
+            .part("file", reqwest::multipart::Part::bytes(data.to_vec()).file_name(format!("{}.json", hash)));
+
+        let resp = self.http.post(format!("{}/api/v0/add?pin=true", url))
+            .multipart(form)
+            .send()
+            .await
+            .map_err(|e| ColdStoreError::Ipfs(e.to_string()))?;
+
+        if resp.status().is_success() {
+            let json: serde_json::Value = resp.json().await.map_err(|e| ColdStoreError::Ipfs(e.to_string()))?;
+            if let Some(cid) = json["Hash"].as_str() {
+                return Ok(cid.to_string());
+            }
+        }
+        Err(ColdStoreError::Ipfs("Failed to pin to IPFS".into()))
     }
 
     /// Retrieve a KnowledgeNode by its content_hash. Returns None if not found.
@@ -137,42 +170,42 @@ mod tests {
         )
     }
 
-    #[test]
-    fn test_store_and_retrieve() {
+    #[tokio::test]
+    async fn test_store_and_retrieve() {
         let store = tmp_store();
         let node = make_node("theorem foo : True := trivial");
-        let hash = store.store(&node).unwrap();
+        let hash = store.store(&node).await.unwrap();
         let retrieved = store.retrieve(&hash).unwrap().unwrap();
         assert_eq!(retrieved.content_hash, hash);
         assert_eq!(retrieved.lean_proof, node.lean_proof);
     }
 
-    #[test]
-    fn test_idempotent_store() {
+    #[tokio::test]
+    async fn test_idempotent_store() {
         let store = tmp_store();
         let node = make_node("theorem bar : True := trivial");
-        let h1 = store.store(&node).unwrap();
-        let h2 = store.store(&node).unwrap();
+        let h1 = store.store(&node).await.unwrap();
+        let h2 = store.store(&node).await.unwrap();
         assert_eq!(h1, h2);
         assert_eq!(store.count().unwrap(), 1);
     }
 
-    #[test]
-    fn test_delete() {
+    #[tokio::test]
+    async fn test_delete() {
         let store = tmp_store();
         let node = make_node("theorem baz : True := trivial");
-        let hash = store.store(&node).unwrap();
+        let hash = store.store(&node).await.unwrap();
         store.delete(&hash).unwrap();
         assert!(store.retrieve(&hash).unwrap().is_none());
     }
 
-    #[test]
-    fn test_list_hashes() {
+    #[tokio::test]
+    async fn test_list_hashes() {
         let store = tmp_store();
         let n1 = make_node("theorem t1 : True := trivial");
         let n2 = make_node("theorem t2 : 1 = 1 := rfl");
-        store.store(&n1).unwrap();
-        store.store(&n2).unwrap();
+        store.store(&n1).await.unwrap();
+        store.store(&n2).await.unwrap();
         let hashes = store.list_hashes().unwrap();
         assert_eq!(hashes.len(), 2);
     }

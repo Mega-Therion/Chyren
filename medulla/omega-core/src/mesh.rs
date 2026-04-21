@@ -57,4 +57,18 @@ impl AgentRegistry {
             constraints.iter().all(|c| a.capabilities.iter().any(|cap| cap.category == *c))
         })
     }
+
+    pub fn claim_idle_agent_with(&mut self, constraints: Vec<String>) -> Option<String> {
+        let agent_id = self.agents.values()
+            .find(|a| {
+                a.status == AgentStatus::Idle && 
+                constraints.iter().all(|c| a.capabilities.iter().any(|cap| cap.category == *c))
+            })?
+            .id.clone();
+        
+        if let Some(agent) = self.agents.get_mut(&agent_id) {
+            agent.status = AgentStatus::Busy;
+        }
+        Some(agent_id)
+    }
 }

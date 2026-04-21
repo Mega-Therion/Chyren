@@ -35,6 +35,15 @@ impl VectorStore {
         }
     }
 
+    /// Derive a new shard from this vector store with a domain-specific collection.
+    pub fn shard(&self, domain: &str) -> Self {
+        Self {
+            client: self.client.clone(),
+            base_url: self.base_url.clone(),
+            collection: format!("{}_{}", self.collection, domain.to_lowercase().replace(' ', "_")),
+        }
+    }
+
     /// Construct from `QDRANT_URL` env var (default: `http://localhost:6333`),
     /// collection defaults to `"chyren_memory"`.
     pub fn from_env() -> Self {

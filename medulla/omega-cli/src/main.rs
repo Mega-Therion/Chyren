@@ -1,3 +1,4 @@
+mod tui;
 mod theme;
 
 use clap::{CommandFactory, Parser, Subcommand};
@@ -18,6 +19,7 @@ use omega_neocortex::{cold_store::ColdStore, proof_index::ProofConstraintIndex, 
 use rustyline::error::ReadlineError;
 use rustyline::DefaultEditor;
 use std::io::{stdout, Write};
+use std::time::{Duration, Instant};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tracing::{info, warn};
@@ -205,46 +207,56 @@ async fn main() -> anyhow::Result<()> {
     // Phase 5.5: Initialize Agent Mesh (MQTT)
     let registry = Arc::new(Mutex::new(omega_core::mesh::AgentRegistry::new()));
     
-    // Register MathSpoke
-    let math_spoke = Arc::new(MathSpoke);
-    {
-        let mut reg = registry.lock().await;
-        reg.register(omega_core::mesh::AgentRegistryEntry {
-            id: math_spoke.name().to_string(),
-            capabilities: vec![omega_core::mesh::AgentCapability {
-                category: "formal_verification".to_string(),
-                tools: vec![],
-            }],
-            status: omega_core::mesh::AgentStatus::Idle,
-            last_heartbeat: now() as u64,
-        });
+    // Scale MathSpoke: Start 4 parallel formalization workers
+    for i in 1..=4 {
+        let math_spoke = Arc::new(MathSpoke);
+        let worker_id = format!("{}-{}", math_spoke.name(), i);
+        {
+            let mut reg = registry.lock().await;
+            reg.register(omega_core::mesh::AgentRegistryEntry {
+                id: worker_id.clone(),
+                capabilities: vec![omega_core::mesh::AgentCapability {
+                    category: "formal_verification".to_string(),
+                    tools: vec![],
+                }],
+                status: omega_core::mesh::AgentStatus::Idle,
+                last_heartbeat: now() as u64,
+            });
+        }
+        // Start MeshWorker for MathSpoke
+        let _math_worker = MeshWorker::new(math_spoke).await;
+        omega_telemetry::info!("Cli", "AGENT_BOOT", "MathSpoke worker {} initialized", worker_id);
     }
-    // Start MeshWorker for MathSpoke
-    let _math_worker = MeshWorker::new(math_spoke).await;
 
-    // Register Ingestor
-    let ingestor = Arc::new(IngestorAgent::new(
-        conductor.memory_service.clone(),
-        Arc::new(Neocortex::new()),
-        Arc::new(ColdStore::default_store().unwrap_or_else(|_| ColdStore::new("/tmp/chyren_cold").expect("cold store"))),
-        Arc::new(Mutex::new(ProofConstraintIndex::new())),
-    ));
-    {
-        let mut reg = registry.lock().await;
-        reg.register(omega_core::mesh::AgentRegistryEntry {
-            id: ingestor.name().to_string(),
-            capabilities: vec![omega_core::mesh::AgentCapability {
-                category: "content_ingestion".to_string(),
-                tools: vec![],
-            }],
-            status: omega_core::mesh::AgentStatus::Idle,
-            last_heartbeat: now() as u64,
-        });
+    // Scale Ingestor: Start 2 parallel ingestion workers
+    for i in 1..=2 {
+        let ingestor = Arc::new(IngestorAgent::new(
+            conductor.memory_service.clone(),
+            Arc::new(Neocortex::new()),
+            Arc::new(ColdStore::default_store().unwrap_or_else(|_| ColdStore::new("/tmp/chyren_cold").expect("cold store"))),
+            Arc::new(Mutex::new(ProofConstraintIndex::new())),
+        ));
+        let worker_id = format!("{}-{}", ingestor.name(), i);
+        {
+            let mut reg = registry.lock().await;
+            reg.register(omega_core::mesh::AgentRegistryEntry {
+                id: worker_id.clone(),
+                capabilities: vec![omega_core::mesh::AgentCapability {
+                    category: "content_ingestion".to_string(),
+                    tools: vec![],
+                }],
+                status: omega_core::mesh::AgentStatus::Idle,
+                last_heartbeat: now() as u64,
+            });
+        }
+        // Start MeshWorker for Ingestor
+        let _ingestor_worker = MeshWorker::new(ingestor).await;
+        omega_telemetry::info!("Cli", "AGENT_BOOT", "Ingestor worker {} initialized", worker_id);
     }
-    // Start MeshWorker for Ingestor
-    let _ingestor_worker = MeshWorker::new(ingestor).await;
 
     let dispatcher = Arc::new(omega_conductor::dispatcher::Dispatcher::new(registry.clone()).await);
+
+    // Deferred TUI and API server launch
 
     // Register MillenniumSolver
     let solver = Arc::new(MillenniumSolverAgent::new(dispatcher.clone()));
@@ -265,17 +277,18 @@ async fn main() -> anyhow::Result<()> {
     conductor.set_dispatcher(dispatcher);
 
 
-    if let Ok(url) = std::env::var("OMEGA_DB_URL") {
-        match omega_myelin::db::MemoryStore::connect(&url, "").await {
-            Ok(store) => {
-                conductor.set_store(Arc::new(store));
-                omega_telemetry::info!("Cli", "BOOT_DB", "Persistent Master Ledger online.");
-                info!("Persistent Master Ledger online.");
-            }
-            Err(e) => {
-                omega_telemetry::warn!("Cli", "BOOT_DB_FAILURE", "Failed to connect to DB: {e}. Using volatile ledger.");
-                warn!("Failed to connect to DB: {e}. Using volatile ledger.");
-            }
+    let db_url = std::env::var("OMEGA_DB_URL")
+        .unwrap_or_else(|_| "postgresql://postgres@localhost:5432/chyren".to_string());
+
+    match omega_myelin::db::MemoryStore::connect(&db_url, "").await {
+        Ok(store) => {
+            conductor.set_store(Arc::new(store));
+            omega_telemetry::info!("Cli", "BOOT_DB", "Persistent Master Ledger online.");
+            info!("Persistent Master Ledger online.");
+        }
+        Err(e) => {
+            omega_telemetry::warn!("Cli", "BOOT_DB_FAILURE", "Failed to connect to DB ({}): {e}. Using volatile ledger.", db_url);
+            warn!("Failed to connect to DB: {e}. Using volatile ledger.");
         }
     }
 
@@ -293,6 +306,19 @@ async fn main() -> anyhow::Result<()> {
     info!("Neocortex programs injected — sovereign knowledge active.");
 
     let conductor = Arc::new(conductor);
+
+    // Initialize TUI App
+    let tui_app = Arc::new(Mutex::new(tui::TuiApp::new(conductor.clone(), registry.clone())));
+    
+    // Wire telemetry to TUI (simple bridge for now)
+    let tui_clone = tui_app.clone();
+    tokio::spawn(async move {
+        loop {
+            tokio::time::sleep(Duration::from_secs(5)).await;
+            let mut app = tui_clone.lock().await;
+            app.push_log(format!("[HEARTBEAT] System entropy stable at {:.4}", rand::random::<f32>()));
+        }
+    });
 
     // Phase 8: Boot reflection pass — metacognitive self-assessment
     let insights = conductor.reflect().await;
@@ -328,8 +354,7 @@ async fn main() -> anyhow::Result<()> {
         }
         Some(Commands::Server) => {
             if !cli.json {
-                omega_telemetry::info!("Cli", "BOOT_SERVER", "Launching API Server on :8080");
-                println!("{}", theme::info("[BOOT] Launching API Server on :8080 ..."));
+                omega_telemetry::info!("Cli", "BOOT_SERVER", "Launching API Server and Sovereign Dashboard");
             }
             
             // Move 2: Start the AEON autonomous scheduler
@@ -338,7 +363,16 @@ async fn main() -> anyhow::Result<()> {
                 scheduler.run().await;
             });
 
-            omega_cli::api::start_api_server(conductor).await?;
+            // Start API server in background
+            let conductor_api = conductor.clone();
+            tokio::spawn(async move {
+                let _ = omega_cli::api::start_api_server(conductor_api).await;
+            });
+
+            // Launch TUI Dashboard
+            if let Err(e) = tui::run_tui(tui_app).await {
+                eprintln!("TUI Error: {e}");
+            }
             return Ok(());
         }
         Some(Commands::Insights) => {

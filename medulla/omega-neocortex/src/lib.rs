@@ -373,13 +373,13 @@ impl Neocortex {
     /// Records the node in both the ColdStore (permanent content-addressed disk)
     /// and the ProofConstraintIndex (hot reasoning-first lookup). Returns the
     /// content_hash that can be used to retrieve the node later.
-    pub fn absorb_knowledge(
+    pub async fn absorb_knowledge(
         &self,
         node: &omega_core::KnowledgeNode,
         cold_store: &cold_store::ColdStore,
         proof_index: &mut proof_index::ProofConstraintIndex,
     ) -> Result<String, cold_store::ColdStoreError> {
-        let hash = cold_store.store(node)?;
+        let hash = cold_store.store(node).await?;
         proof_index.insert(&hash, &node.constraints);
         Ok(hash)
     }

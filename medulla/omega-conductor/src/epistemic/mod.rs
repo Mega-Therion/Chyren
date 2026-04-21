@@ -278,7 +278,7 @@ impl EpistemicMesh {
             None,
         );
 
-        if let Ok(hash) = self.cold_store.store(&node) {
+        if let Ok(hash) = self.cold_store.store(&node).await {
             let mut idx = self.proof_index.lock().await;
             idx.insert(&hash, &node.constraints);
             omega_telemetry::info!("EpistemicMesh", "LOGIC_CACHE_WRITE", "Logic-Cache entry written: {hash}");

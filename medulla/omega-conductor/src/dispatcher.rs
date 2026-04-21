@@ -61,13 +61,13 @@ impl Dispatcher {
     /// Returns an `Err` string if no eligible agent is found or if the MQTT
     /// publish call fails.
     pub async fn send_task(&self, task: TaskContract) -> Result<(), String> {
-        let registry = self.registry.lock().await;
-        
-        // Select an agent based on task constraints
-        let agent = registry.find_idle_agent_with(task.constraints.clone())
-            .ok_or_else(|| format!("No idle agent found matching constraints: {:?}", task.constraints))?;
+        let agent_id = {
+            let mut registry = self.registry.lock().await;
+            registry.claim_idle_agent_with(task.constraints.clone())
+                .ok_or_else(|| format!("No idle agent found matching constraints: {:?}", task.constraints))?
+        };
 
-        let topic = format!("agents/{}/tasks", agent.id);
+        let topic = format!("agents/{}/tasks", agent_id);
         let payload = serde_json::to_string(&task).map_err(|e| e.to_string())?;
 
         self.mqtt_client

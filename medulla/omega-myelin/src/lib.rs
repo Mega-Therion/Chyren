@@ -61,15 +61,29 @@ impl MemoryGraph {
         stratum: omega_core::MemoryStratum,
         embedding: Vec<f32>,
     ) -> MemoryNode {
+        self.write_node_sharded(content, stratum, embedding, "general").await
+    }
+
+    /// Write a node to the in-memory graph AND upsert its embedding to a specific Qdrant shard (domain).
+    pub async fn write_node_sharded(
+        &mut self,
+        content: String,
+        stratum: omega_core::MemoryStratum,
+        embedding: Vec<f32>,
+        domain: &str,
+    ) -> MemoryNode {
         let node = self.write_node(content.clone(), stratum);
 
         if let Some(vs) = &self.vector_store {
+            let shard = vs.shard(domain);
+            let _ = shard.ensure_collection().await;
             let payload = serde_json::json!({
                 "node_id": node.node_id,
                 "content": content,
+                "domain": domain,
             });
             // Fire-and-forget — errors already logged inside upsert()
-            let _ = vs.upsert(&node.node_id, embedding, payload).await;
+            let _ = shard.upsert(&node.node_id, embedding, payload).await;
         }
 
         node
@@ -82,8 +96,18 @@ impl MemoryGraph {
         query_embedding: Vec<f32>,
         top_k: usize,
     ) -> Vec<MemoryNode> {
+        self.search_semantic_sharded(query_embedding, top_k, "general").await
+    }
+
+    /// Search a specific Qdrant shard semantically and map hits back to in-memory MemoryNodes.
+    pub async fn search_semantic_sharded(
+        &self,
+        query_embedding: Vec<f32>,
+        top_k: usize,
+        domain: &str,
+    ) -> Vec<MemoryNode> {
         let vs = match &self.vector_store {
-            Some(vs) => vs,
+            Some(vs) => vs.shard(domain),
             None => return vec![],
         };
 
@@ -185,6 +209,29 @@ impl Service {
     ) -> MemoryNode {
         let mut graph = self.graph.lock().await;
         graph.write_node(content, stratum)
+    }
+
+    /// Sharded write — delegates to MemoryGraph::write_node_sharded.
+    pub async fn write_node_sharded(
+        &self,
+        content: String,
+        stratum: omega_core::MemoryStratum,
+        embedding: Vec<f32>,
+        domain: &str,
+    ) -> MemoryNode {
+        let mut graph = self.graph.lock().await;
+        graph.write_node_sharded(content, stratum, embedding, domain).await
+    }
+
+    /// Sharded search — delegates to MemoryGraph::search_semantic_sharded.
+    pub async fn search_semantic_sharded(
+        &self,
+        query_embedding: Vec<f32>,
+        top_k: usize,
+        domain: &str,
+    ) -> Vec<MemoryNode> {
+        let graph = self.graph.lock().await;
+        graph.search_semantic_sharded(query_embedding, top_k, domain).await
     }
 
     pub async fn create_edge(&self, from: String, to: String, edge_type: String, weight: f64) {

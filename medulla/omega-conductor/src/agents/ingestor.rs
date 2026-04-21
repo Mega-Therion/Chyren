@@ -170,6 +170,7 @@ impl IngestorAgent {
         let hash = self
             .cold_store
             .store(&node)
+            .await
             .map_err(|e| format!("cold store error: {e}"))?;
 
         // Update proof index
