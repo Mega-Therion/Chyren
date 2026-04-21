@@ -198,6 +198,68 @@ async fn main() -> anyhow::Result<()> {
 
     let mut conductor = Conductor::new();
 
+    // Phase 5.5: Initialize Agent Mesh (MQTT)
+    let registry = Arc::new(Mutex::new(omega_core::mesh::AgentRegistry::new()));
+    
+    // Register MathSpoke
+    let math_spoke = Arc::new(omega_conductor::agents::math_spoke::MathSpoke);
+    {
+        let mut reg = registry.lock().await;
+        reg.register(omega_core::mesh::AgentRegistryEntry {
+            id: math_spoke.name().to_string(),
+            capabilities: vec![omega_core::mesh::AgentCapability {
+                category: "formal_verification".to_string(),
+                tools: vec![],
+            }],
+            status: omega_core::mesh::AgentStatus::Idle,
+            last_heartbeat: now() as u64,
+        });
+    }
+    // Start MeshWorker for MathSpoke
+    let _math_worker = omega_conductor::agents::MeshWorker::new(math_spoke).await;
+
+    // Register Ingestor
+    let ingestor = Arc::new(omega_conductor::agents::IngestorAgent::new(
+        conductor.memory_service.clone(),
+        Arc::new(Neocortex::new()),
+        Arc::new(ColdStore::default_store().unwrap_or_else(|_| ColdStore::new("/tmp/chyren_cold").expect("cold store"))),
+        Arc::new(Mutex::new(ProofConstraintIndex::new())),
+    ));
+    {
+        let mut reg = registry.lock().await;
+        reg.register(omega_core::mesh::AgentRegistryEntry {
+            id: ingestor.name().to_string(),
+            capabilities: vec![omega_core::mesh::AgentCapability {
+                category: "content_ingestion".to_string(),
+                tools: vec![],
+            }],
+            status: omega_core::mesh::AgentStatus::Idle,
+            last_heartbeat: now() as u64,
+        });
+    }
+    // Start MeshWorker for Ingestor
+    let _ingestor_worker = omega_conductor::agents::MeshWorker::new(ingestor).await;
+
+    let dispatcher = Arc::new(omega_conductor::dispatcher::Dispatcher::new(registry.clone()).await);
+
+    // Register MillenniumSolver
+    let solver = Arc::new(omega_conductor::agents::MillenniumSolverAgent::new(dispatcher.clone()));
+    {
+        let mut reg = registry.lock().await;
+        reg.register(omega_core::mesh::AgentRegistryEntry {
+            id: solver.name().to_string(),
+            capabilities: vec![omega_core::mesh::AgentCapability {
+                category: "research".to_string(),
+                tools: vec![],
+            }],
+            status: omega_core::mesh::AgentStatus::Idle,
+            last_heartbeat: now() as u64,
+        });
+    }
+    let _solver_worker = omega_conductor::agents::MeshWorker::new(solver).await;
+
+    conductor.set_dispatcher(dispatcher);
+
 
     if let Ok(url) = std::env::var("OMEGA_DB_URL") {
         match omega_myelin::db::MemoryStore::connect(&url, "").await {

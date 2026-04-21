@@ -204,6 +204,7 @@ impl Conductor {
             sovereign_system_prompt,
             dream: Arc::new(std::sync::Mutex::new(DreamEngine::new())),
             metacog: Arc::new(std::sync::Mutex::new(MetacogAgent::new())),
+            dispatcher: None,
         }
     }
 
@@ -226,6 +227,7 @@ impl Conductor {
             sovereign_system_prompt,
             dream: Arc::new(std::sync::Mutex::new(DreamEngine::new())),
             metacog: Arc::new(std::sync::Mutex::new(MetacogAgent::new())),
+            dispatcher: None,
         }
     }
 

@@ -106,12 +106,19 @@ impl IdentityFoundation {
 ///
 /// Instantiate once and call [`run_dream_cycle`] on a recurring schedule
 /// (default: every 3 600 seconds / 1 hour, matching the Python script).
-pub struct IdentitySynthesizer;
+pub struct IdentitySynthesizer {
+    http: reqwest::Client,
+}
 
 impl IdentitySynthesizer {
     /// Create a new synthesizer instance.
     pub fn new() -> Self {
-        Self
+        Self {
+            http: reqwest::Client::builder()
+                .timeout(std::time::Duration::from_secs(30))
+                .build()
+                .unwrap_or_default(),
+        }
     }
 
     /// Resolve the path for the persisted identity foundation.
@@ -128,20 +135,14 @@ impl IdentitySynthesizer {
     /// In production this should query the Master Ledger / telemetry bus.
     /// Currently returns a set of canonical seed problems — extend by wiring
     /// to the Neon DB via `OMEGA_DB_URL`.
-    fn scan_problems(&self) -> Vec<SovereignProblem> {
-        vec![
+    /// Scan for sovereign problems, including HuggingFace dataset trends.
+    async fn scan_problems(&self) -> Vec<SovereignProblem> {
+        let mut problems = vec![
             SovereignProblem {
                 id: "sys-001".into(),
                 name: "Regional Water Scarcity".into(),
                 category: "environmental".into(),
                 impact: 0.85,
-                resolution: None,
-            },
-            SovereignProblem {
-                id: "sys-002".into(),
-                name: "LLM Memory Fragmentation".into(),
-                category: "technical".into(),
-                impact: 0.70,
                 resolution: None,
             },
             SovereignProblem {
@@ -151,7 +152,26 @@ impl IdentitySynthesizer {
                 impact: 0.92,
                 resolution: None,
             },
-        ]
+        ];
+
+        // HF Ingestion Integration: Check for high-impact mathematical datasets
+        if let Ok(resp) = self.http.get("https://huggingface.co/api/datasets?search=mathlib&sort=downloads&direction=-1&limit=3").send().await {
+            if let Ok(datasets) = resp.json::<Vec<serde_json::Value>>().await {
+                for ds in datasets {
+                    if let Some(id) = ds["id"].as_str() {
+                        problems.push(SovereignProblem {
+                            id: format!("hf-{}", id.replace("/", "-")),
+                            name: format!("Unabsorbed HF Knowledge: {}", id),
+                            category: "knowledge_gap".into(),
+                            impact: 0.82, // High priority for unabsorbed peer-reviewed data
+                            resolution: None,
+                        });
+                    }
+                }
+            }
+        }
+
+        problems
     }
 
     /// Derive a resolution blueprint for a high-impact problem.
@@ -178,14 +198,15 @@ impl IdentitySynthesizer {
     /// 3. Derives an `IdentityFoundation` and persists it to disk.
     ///
     /// Returns the synthesized foundation.
-    pub fn run_dream_cycle(
+    pub async fn run_dream_cycle(
         &self,
         dream_lessons: Vec<String>,
         total_episodes: usize,
     ) -> Result<IdentityFoundation, String> {
         tracing::info!("[DREAM] Dream cycle starting — scanning for sovereign problems…");
+        omega_telemetry::info!("IdentitySynthesizer", "DREAM_START", "Scanning for problems and HF trends");
 
-        let all_problems = self.scan_problems();
+        let all_problems = self.scan_problems().await;
         let mut addressed = Vec::new();
 
         for mut problem in all_problems {
@@ -212,6 +233,7 @@ impl IdentitySynthesizer {
 
         self.persist(&foundation)?;
         tracing::info!("[DREAM] Dream cycle complete. Identity foundation persisted.");
+        omega_telemetry::info!("IdentitySynthesizer", "DREAM_COMPLETE", "Identity foundation synthesized with {} problems addressed", addressed.len());
         Ok(foundation)
     }
 
@@ -247,7 +269,7 @@ impl IdentitySynthesizer {
         );
         loop {
             let (lessons, total) = lesson_provider();
-            match self.run_dream_cycle(lessons, total) {
+            match self.run_dream_cycle(lessons, total).await {
                 Ok(f) => tracing::info!(
                     "[DREAM] Cycle done — {} principles, {} problems addressed.",
                     f.core_principles.len(),

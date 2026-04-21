@@ -19,9 +19,11 @@ pub trait PersistentAgent: Send + Sync {
 pub mod ingestor;
 pub mod math_spoke;
 pub mod millennium;
+pub mod millennium_solver;
 pub mod worker;
 
 pub use ingestor::IngestorAgent;
 pub use math_spoke::MathSpoke;
 pub use millennium::{MillenniumProblem, SearchAndExtendAgent};
+pub use millennium_solver::MillenniumSolverAgent;
 pub use worker::MeshWorker;

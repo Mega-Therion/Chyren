@@ -87,7 +87,7 @@ impl TelemetrySink for FileSink {
 use actix_web::{get, App, HttpResponse, HttpServer, Responder};
 use lazy_static::lazy_static;
 use prometheus::{opts, register_counter, register_gauge, Counter, Encoder, Gauge, TextEncoder};
-use tracing::{info, warn};
+use tracing::{info as t_info, warn as t_warn};
 
 lazy_static! {
     /// Total number of tasks admitted to the system
@@ -119,7 +119,7 @@ use futures_util::StreamExt as _;
 /// Start the Prometheus and WebSocket metrics server on the specified port.
 /// This runs in a background thread and does not block.
 pub async fn start_metrics_server(port: u16) -> std::io::Result<()> {
-    info!("[THE EYE] Starting metrics server on 0.0.0.0:{}", port);
+    info!("Telemetry", "BOOT_METRICS", "Starting metrics server on 0.0.0.0:{}", port);
     
     // Spawn the server as a background task
     tokio::spawn(async move {
