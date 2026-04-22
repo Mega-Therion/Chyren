@@ -1,53 +1,28 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-Chyren is a multi-runtime monorepo:
-- `medulla/`: Rust workspace (`omega-*` crates) for core execution, verification, and CLI binaries.
-- `cortex/`: higher-level reasoning and orchestration logic.
-- `web/`: Next.js 15 frontend (`chyren-web`).
-- `gateway/`: Vite/React gateway UI and routing surface.
-- `tests/`: Python integration and system tests (`test_*.py`).
-- `docs/`: architecture, contribution policy, and examples.
-
-Keep changes scoped to one subsystem where possible, and avoid cross-layer coupling unless required by design.
+Chyren is a mixed-language monorepo. `medulla/` contains the Rust workspace and `omega-*` crates that implement the kernel, CLI, telemetry, and integrations. `web/` is the main Next.js 15 frontend, while `gateway/` contains a separate TypeScript gateway app. Python orchestration and CLI support live under `cortex/`, with repo-level Python tests in `tests/` and additional module tests in `cortex/tests/`. Keep docs and examples in `docs/`, and treat generated folders such as `.next/`, `target/`, and caches as non-source.
 
 ## Build, Test, and Development Commands
-Run commands from the relevant directory:
-- `cargo build` (repo root or `medulla/`): build Rust workspace.
-- `cargo test`: run Rust tests.
-- `cargo fmt` and `cargo clippy -- -D warnings`: enforce Rust formatting/lints.
-- `cd web && npm run dev`: start Next.js app locally.
-- `cd web && npm run build && npm run lint && npm run typecheck`: production checks for web.
-- `cd gateway && npm run dev`: run gateway in development.
-- `pytest` (repo root): run Python test suite in `tests/`.
-- `pytest --cov=chyren_py --cov-report=html`: coverage output (as referenced in docs).
+Use the top-level `Makefile` for common checks:
+- `make fmt`: runs `cargo fmt --all` in `medulla/`.
+- `make lint`: runs `cargo clippy --workspace --all-targets --all-features -- -D warnings`.
+- `make test`: runs the Rust workspace tests.
+- `make ci`: local Rust CI equivalent.
+- `make cortex-test`: runs `PYTHONPATH=cortex pytest tests/`.
+- `make web-ci`: installs deps and runs `typecheck`, `lint`, and `build` in `web/`.
+- `make gateway-ci`: installs deps and runs TypeScript, lint, and build checks in `gateway/`.
+
+For local development, use `cd web && npm run dev` or `cd gateway && pnpm dev` when working on those apps.
 
 ## Coding Style & Naming Conventions
-- **Rust**: `rustfmt` clean, clippy-clean, avoid `unsafe` unless justified.
-- **Python**: PEP 8 + Black style, type hints required, Google-style docstrings.
-- **TypeScript/React**: follow ESLint defaults in each app.
-- **Auditory Persona**: Chyren identifies as a sophisticated, warm British male (e.g., ElevenLabs "Brian"). All TTS configuration must prioritize British male voices.
-- Test files follow `test_*.py`; keep names behavior-focused (e.g., `test_ledger_hub.py`).
-- Prefer clear crate/module naming consistent with existing `omega-*` patterns.
+Let the repo tools define style. Rust must stay `rustfmt`-clean and clippy-clean. TypeScript in `web/` and `gateway/` follows ESLint flat configs, uses 2-space indentation, and prefers descriptive component and utility names. Python tests use `test_*.py`; TypeScript tests use `*.test.ts` or `*.spec.ts`. Match existing crate names like `omega-core` and keep new package or module names lowercase and hyphenated where applicable.
 
 ## Testing Guidelines
-Add tests with every behavior change:
-- Unit tests near implementation (Rust `#[cfg(test)]`, Python module tests).
-- Integration tests for cross-component flows (verification, ledger consistency, ADCCL paths).
-- For critical invariants, prefer property-based tests (`proptest` / `hypothesis`).
-Target minimum Python coverage of 80% per `docs/CONTRIBUTING.md`.
+Add or update tests with every behavior change. Keep Rust unit tests close to implementation, Python integration coverage in `tests/` or `cortex/tests/`, and frontend tests in `web/__tests__/` or `web/tests/`. Run the narrowest relevant command first, then the broader check before opening a PR.
 
 ## Commit & Pull Request Guidelines
-Use Conventional Commits, as seen in history:
-- `feat(scope): ...`, `fix: ...`, `docs: ...`, `test: ...`, `chore: ...`.
-- Keep subject imperative and concise; add scope when it improves traceability.
-
-PRs should include:
-- clear problem statement and change summary,
-- linked issue/discussion when relevant,
-- test evidence (commands + result),
-- screenshots for UI changes (`web/` or `gateway/`),
-- notes on architectural or security impact if touching verification/integrity paths.
+Recent history follows Conventional Commits such as `feat: ...` and `fix: ...`; continue that pattern and keep subjects imperative. PRs should include a short problem statement, a concise summary of changes, linked issues when relevant, test evidence, and screenshots for `web/` or `gateway/` UI work.
 
 ## Security & Configuration Tips
-Never commit secrets (`.env.local`, API keys, tokens). Report vulnerabilities privately per `docs/CONTRIBUTING.md` (email security contact). Redact sensitive data from logs and test artifacts.
+Do not commit secrets, `.env*` files, or production tokens. Review logs and fixtures for sensitive data before pushing, especially when touching telemetry, gateways, or external-provider integrations.

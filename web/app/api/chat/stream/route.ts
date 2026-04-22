@@ -286,15 +286,6 @@ export async function POST(req: NextRequest) {
       content: m.content
     }))
 
-  try {
-    const sovereignTools = await getSovereignTools()
-    
-    // Convert history to AI SDK CoreMessage format
-    const sdkMessages: CoreMessage[] = history.map(m => ({
-      role: m.role,
-      content: m.content
-    }))
-
     // Tier 1: Anthropic (Cloud)
     try {
       const result = await streamText({
