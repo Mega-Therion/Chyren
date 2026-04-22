@@ -356,7 +356,6 @@ export async function POST(req: NextRequest) {
         })
       }
     }
-
   } catch (err: unknown) {
     logError('[CHAT] All cognitive tiers failed', err)
     const offlineMessage = "My cognitive systems are experiencing total origin interference. However, my sovereign UI is active."
