@@ -1,0 +1,40 @@
+{
+  "timestamp": "20260422T062647Z",
+  "version": "v1",
+  "manifold": "Stiefel V_m(R^N)",
+  "metric": "SVD Entropy (log2)",
+  "results": [
+    {
+      "event": "initial",
+      "entropy": 2.321928094887362,
+      "basis_shape": [
+        100,
+        5
+      ]
+    },
+    {
+      "event": "novel_info",
+      "entropy": 2.584962500721156,
+      "basis_shape": [
+        100,
+        6
+      ]
+    },
+    {
+      "event": "redundant_info",
+      "entropy": 2.5216406363433186,
+      "basis_shape": [
+        100,
+        7
+      ]
+    },
+    {
+      "event": "partially_novel_info",
+      "entropy": 2.526614082215958,
+      "basis_shape": [
+        100,
+        8
+      ]
+    }
+  ]
+}

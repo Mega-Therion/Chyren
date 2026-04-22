@@ -1,0 +1,19 @@
+{
+  "timestamp": "20260422T062709Z",
+  "version": "v1",
+  "manifold": "S^{N-1} Boundary",
+  "results": [
+    {
+      "case": "aligned_council",
+      "resonance": -0.015774068627236917
+    },
+    {
+      "case": "random_council",
+      "resonance": -0.0009557482591747792
+    },
+    {
+      "case": "adversarial_council",
+      "resonance": 0.004563931847790952
+    }
+  ]
+}
