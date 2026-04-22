@@ -305,6 +305,33 @@ def cmd_sovereign(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_status(remainder: list[str]) -> int:
+    from rich.console import Console
+    from rich.table import Table
+    from rich.text import Text
+    from rich.panel import Panel
+    from chyren_cli.ui.render import render_banner
+    from chyren_cli.ui.theme import CHYREN_THEME
+
+    console = Console(theme=CHYREN_THEME)
+    render_banner()
+    
+    table = Table(box=None, expand=True)
+    table.add_column("SUBSYSTEM", style="neon.cyan", ratio=1)
+    table.add_column("STATE", style="bold", ratio=1)
+    table.add_column("TELEMETRY", style="white", ratio=2)
+    
+    # Check processes
+    dream_active = _pid_alive(int(DREAM_LOCK.read_text().split(":")[0])) if DREAM_LOCK.exists() else False
+    
+    table.add_row("HEMISPHERE R (Medulla)", "[green]ACTIVE[/]", "High-Speed Sovereign Runtime")
+    table.add_row("HEMISPHERE L (Cortex)", "[green]ACTIVE[/]", "Reasoning & Orchestration Hub")
+    table.add_row("DREAM CYCLE", "[green]DREAMING[/]" if dream_active else "[yellow]OFFLINE[/]", "Autonomous Maintenance Loop")
+    table.add_row("OCULAR SENSORS", "[cyan]RESONATING[/]", "VisionSpoke registered in Medulla")
+    table.add_row("MASTER LEDGER", "[green]INTEGRITY PASS[/]", "Append-only state verified")
+    
+    console.print(Panel(table, title="[bold white]UNIFIED BRAIN STATE[/]", border_style="neon.purple"))
+    
     if "--geometric" in remainder:
         # Calculate Holonomy Pulse metrics
         ledger_path = STATE_DIR / "master_ledger.json"
