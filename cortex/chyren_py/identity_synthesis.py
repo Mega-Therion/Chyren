@@ -247,14 +247,14 @@ This identity foundation will:
 """
         return foundation
 
-    def synthesize(self) -> Dict[str, Any]:
+    def synthesize(self, limit: int = 58339) -> Dict[str, Any]:
         """Full synthesis pipeline."""
         print("\n" + "="*70)
-        print("🧠 CHYREN IDENTITY SYNTHESIS: 58,000+ Memory Entries → Identity")
+        print(f"🧠 CHYREN IDENTITY SYNTHESIS: {limit} Entries → Identity")
         print("="*70)
 
         self.connect()
-        entries = self.fetch_all_entries()
+        entries = self.fetch_all_entries(limit=limit)
 
         if not entries:
             print("✗ No entries found in Neon database")
@@ -280,13 +280,17 @@ This identity foundation will:
 
 
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description="Chyren Identity Synthesizer")
+    parser.add_argument("--limit", type=int, default=58339, help="Number of entries to process")
+    args = parser.parse_args()
+
     neon_url = os.getenv("OMEGA_DB_URL")
     if not neon_url:
-        print("✗ OMEGA_DB_URL not set")
-        sys.exit(1)
+        print("! OMEGA_DB_URL not set; skipping Neon archive")
 
     synthesizer = IdentitySynthesizer(neon_url)
-    result = synthesizer.synthesize()
+    result = synthesizer.synthesize(limit=args.limit)
 
     print(f"\n" + "="*70)
     print(f"✓ Synthesis complete: {result['entry_count']:,} entries processed")

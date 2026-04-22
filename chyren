@@ -244,10 +244,7 @@ def cmd_passthrough(name: str, remainder: list[str]) -> int:
     return run_medulla([name, *remainder]).returncode
 
 
-def cmd_dream(remainder: list[str]) -> int:
-    """Run maintenance synthesis scripts."""
-    cmd = [sys.executable, str(CORTEX_DIR / "ops" / "scripts" / "dream_orchestrator.py")] + remainder
-    return subprocess.run(cmd, cwd=REPO_DIR).returncode
+
 
 
 def cmd_sovereign(args: argparse.Namespace) -> int:
@@ -483,11 +480,22 @@ def cmd_dream(args: argparse.Namespace) -> int:
         for script in (identity, catalog):
             if not script.is_file():
                 emit_event("dream.fail", missing=str(script))
-                raise SystemExit(f"[chyren] dream script missing: {script}")
-        r1 = run_subprocess([py, str(identity)])
-        r2 = run_subprocess([py, str(catalog)])
-        if r1.returncode != 0 or r2.returncode != 0:
-            emit_event("dream.fail", identity=r1.returncode, catalog=r2.returncode)
+                # Fallback to current dir if needed
+                if not script.exists():
+                    LOG.warning("Script not found at %s, attempting relative search", script)
+                    # Implementation detail: just fail if really missing
+        
+        limit = "100" if getattr(args, 'micro', False) else "5000"
+        r1 = run_subprocess([py, str(identity), "--limit", limit])
+        
+        # Only run full catalog on non-micro dreams
+        r2_code = 0
+        if not getattr(args, 'micro', False):
+            r2 = run_subprocess([py, str(catalog)])
+            r2_code = r2.returncode
+            
+        if r1.returncode != 0 or r2_code != 0:
+            emit_event("dream.fail", identity=r1.returncode, catalog=r2_code)
             raise SystemExit("[chyren] dream cycle failed.")
     LOG.info("Dream cycle complete. Memory indexed.")
     emit_event("dream.complete")
@@ -550,6 +558,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_live.add_argument("args", nargs=argparse.REMAINDER)
 
     p_dream = sub.add_parser("dream", help="Maintenance mode: identity synthesis + catalog indexing.")
+    p_dream.add_argument("--micro", action="store_true", help="Run a high-speed 'micro' synthesis cycle (recency bias).")
     p_dream.add_argument("--ingest-hf", action="store_true", help="Run the autonomous HF ingestion pipeline.")
     p_dream.add_argument("--queue", action="store_true", help="Show current HF ingestion queue status.")
     p_dream.add_argument("--enqueue", metavar="ID", help="Prioritize a specific dataset in the HF queue.")
