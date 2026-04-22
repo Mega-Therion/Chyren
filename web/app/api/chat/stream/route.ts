@@ -286,63 +286,89 @@ export async function POST(req: NextRequest) {
       content: m.content
     }))
 
-    const result = await streamText({
-      model: anthropic('claude-3-5-sonnet-20241022'),
-      system: systemPrompt,
-      messages: sdkMessages,
-      tools: sovereignTools,
-      temperature: profile.temperature,
-    })
+  try {
+    const sovereignTools = await getSovereignTools()
+    
+    // Convert history to AI SDK CoreMessage format
+    const sdkMessages: CoreMessage[] = history.map(m => ({
+      role: m.role,
+      content: m.content
+    }))
 
-    const encoder = new TextEncoder()
-    const customStream = new ReadableStream({
-      async start(controller) {
-        let hasVisibleText = false
-        try {
-          for await (const chunk of result.textStream) {
-            if (chunk && chunk.trim().length > 0) {
-              hasVisibleText = true
+    // Tier 1: Anthropic (Cloud)
+    try {
+      const result = await streamText({
+        model: anthropic('claude-3-5-sonnet-20241022'),
+        system: systemPrompt,
+        messages: sdkMessages,
+        tools: sovereignTools,
+        temperature: profile.temperature,
+      })
+
+      const encoder = new TextEncoder()
+      const customStream = new ReadableStream({
+        async start(controller) {
+          let hasVisibleText = false
+          try {
+            for await (const chunk of result.textStream) {
+              if (chunk && chunk.trim().length > 0) {
+                hasVisibleText = true
+              }
+              const payload = { choices: [{ delta: { content: chunk } }] }
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`))
             }
-            const payload = { choices: [{ delta: { content: chunk } }] }
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`))
+            if (!hasVisibleText) {
+              throw new Error('Empty stream from Anthropic')
+            }
+          } catch (e) {
+            logger.error('[STREAM ERROR] Anthropic failed, falling back...', e)
+            throw e; // Bubble up to trigger next tier
+          } finally {
+            controller.close()
           }
-          if (!hasVisibleText) {
-            const fallbackMsg = "My cognitive systems are experiencing temporary network interference from the Origin. However, my sovereign UI and neural rendering are fully operational."
-            const payload = { choices: [{ delta: { content: fallbackMsg } }] }
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`))
-          }
-        } catch (e) {
-          logger.error('[STREAM ERROR]', e)
-          if (!hasVisibleText) {
-            const fallbackMsg = "My cognitive systems are experiencing temporary network interference from the Origin. However, my sovereign UI and neural rendering are fully operational."
-            const payload = { choices: [{ delta: { content: fallbackMsg } }] }
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`))
-          }
-        } finally {
-          controller.close()
         }
-      }
-    })
+      })
 
-    return new Response(customStream, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        Connection: 'keep-alive',
-        'X-Chyren-Session': session,
-        'X-Chyren-ARI': JSON.stringify({
-          allowed: ariResult.allowed,
-          riskTier: ariResult.riskTier,
-          adcclScore: ariResult.adcclScore
+      return new Response(customStream, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          Connection: 'keep-alive',
+        }
+      })
+    } catch (primaryErr) {
+      logger.warn('[CHAT] Tier 1 (Anthropic) failed, escalating to Tier 2 (Sovereign Hub)...')
+      
+      // Tier 2: Sovereign Hub (Rust Server)
+      try {
+        const hubResponse = await fetchHubStream(content, session, profile, memberContext)
+        if (!hubResponse.ok) throw new Error(`Hub returned ${hubResponse.status}`)
+        return hubResponse
+      } catch (hubErr) {
+        logger.warn('[CHAT] Tier 2 (Sovereign Hub) failed, de-escalating to Tier 3 (Local Ollama)...')
+        
+        // Tier 3: Local Ollama (Direct)
+        const { ollama } = await import('@/lib/ai-gateway')
+        const ollamaResult = await streamText({
+          model: ollama('llama3.2:3b'), // Using the specific model available in Ollama
+          system: systemPrompt,
+          messages: sdkMessages,
+          temperature: profile.temperature,
+        })
+
+        return new Response(ollamaResult.textStream.pipeThrough(new TextEncoderStream()), {
+          headers: {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            Connection: 'keep-alive',
+          }
         })
       }
-    })
+    }
 
   } catch (err: unknown) {
-    const _errMsg = err instanceof Error ? err.message : 'unknown error'
-    logError('[CHAT] Upstream failure', err)
-
-    const offlineMessage = "My cognitive systems are experiencing temporary network interference from the Origin. However, my sovereign UI and neural rendering are fully operational."
+    logError('[CHAT] All cognitive tiers failed', err)
+    const offlineMessage = "My cognitive systems are experiencing total origin interference. However, my sovereign UI is active."
     return createSingleSseTextResponse(offlineMessage)
   }
 }

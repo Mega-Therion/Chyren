@@ -55,3 +55,8 @@ export const openrouter = createOpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
   headers: getGatewayHeaders(),
 });
+
+export const ollama = createOpenAI({
+  baseURL: process.env.OLLAMA_BASE_URL || 'http://localhost:11434/v1',
+  apiKey: 'ollama',
+});

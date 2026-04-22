@@ -215,6 +215,7 @@ impl SpokeRegistry {
             "gemini".into(),
             "deepseek".into(),
             "perplexity".into(),
+            "ollama".into(),
         ];
 
         reg
@@ -301,83 +302,101 @@ impl SpokeRegistry {
     /// Spokes that support a `"model"` field in their `chat_completion` input (e.g.
     /// OpenRouterSpoke, OllamaSpoke) will use `model_hint` instead of their default.
     /// Spokes that ignore it continue working normally.
+    /// 
+    /// Now with automatic failover: if the preferred/first spoke fails, it tries
+    /// the others in the preference list.
     pub async fn route_with_model(
         &self,
         request: &SpokeRequest,
         preferred: Option<&str>,
         model_hint: Option<&str>,
     ) -> anyhow::Result<SpokeResponse> {
-        let name = preferred
-            .map(|n| n.to_string())
-            .unwrap_or_else(|| self.preference.first().cloned().unwrap_or_default());
-
-        let spoke = self
-            .spokes
-            .get(&name)
-            .ok_or_else(|| anyhow::anyhow!("Spoke {} not found", name))?;
-
-        let mut input = serde_json::json!({
-            "prompt": request.prompt,
-            "system": request.system,
-            "max_tokens": request.max_tokens,
-            "temperature": request.temperature,
-        });
-        if let Some(model) = model_hint {
-            input["model"] = serde_json::Value::String(model.to_string());
+        let mut candidates = Vec::new();
+        if let Some(p) = preferred {
+            candidates.push(p.to_string());
+        }
+        for p in &self.preference {
+            if !candidates.contains(p) {
+                candidates.push(p.clone());
+            }
         }
 
-        // Translate SpokeRequest to a ToolInvocation of "chat_completion".
-        let start = std::time::Instant::now();
-        let result = spoke
-            .invoke_tool(ToolInvocation {
+        let mut last_error = anyhow::anyhow!("No spokes available");
+
+        for name in candidates {
+            let spoke = match self.spokes.get(&name) {
+                Some(s) => s,
+                None => continue,
+            };
+
+            let mut input = serde_json::json!({
+                "prompt": request.prompt,
+                "system": request.system,
+                "max_tokens": request.max_tokens,
+                "temperature": request.temperature,
+            });
+            if let Some(model) = model_hint {
+                input["model"] = serde_json::Value::String(model.to_string());
+            }
+
+            // Translate SpokeRequest to a ToolInvocation of "chat_completion".
+            let start = std::time::Instant::now();
+            match spoke.invoke_tool(ToolInvocation {
                 tool: "chat_completion".to_string(),
                 input,
-            })
-            .await
-            .map_err(|e| anyhow::anyhow!("Spoke invocation error: {}", e))?;
+            }).await {
+                Ok(result) if result.success => {
+                    let text = result
+                        .output
+                        .get("choices")
+                        .and_then(|c| c.get(0))
+                        .and_then(|o| o.get("message"))
+                        .and_then(|m| m.get("content"))
+                        .and_then(|ct| ct.as_str())
+                        .map(|s| s.to_string())
+                        .or_else(|| {
+                            result
+                                .output
+                                .get("content")
+                                .and_then(|c| c.get(0))
+                                .and_then(|o| o.get("text"))
+                                .and_then(|t| t.as_str())
+                                .map(|s| s.to_string())
+                        })
+                        .or_else(|| {
+                            result
+                                .output
+                                .get("candidates")
+                                .and_then(|c| c.get(0))
+                                .and_then(|o| o.get("content"))
+                                .and_then(|ct| ct.get("parts"))
+                                .and_then(|p| p.get(0))
+                                .and_then(|pr| pr.get("text"))
+                                .and_then(|txt| txt.as_str())
+                                .map(|s| s.to_string())
+                        })
+                        .unwrap_or_default();
 
-        if !result.success {
-            anyhow::bail!("Spoke execution failed: {:?}", result.error);
+                    return Ok(SpokeResponse {
+                        text,
+                        provider: name,
+                        model: model_hint.unwrap_or("auto").to_string(),
+                        token_count: 0,
+                        latency_ms: start.elapsed().as_millis() as f64,
+                    });
+                }
+                Ok(result) => {
+                    last_error = anyhow::anyhow!("Spoke {} execution failed: {:?}", name, result.error);
+                }
+                Err(e) => {
+                    last_error = anyhow::anyhow!("Spoke {} invocation error: {}", name, e);
+                }
+            }
+            
+            tracing::warn!("[SPOKE_REGISTRY] Spoke {} failed, trying next candidate. Error: {}", name, last_error);
         }
 
-        let text = result
-            .output
-            .get("choices")
-            .and_then(|c| c.get(0))
-            .and_then(|o| o.get("message"))
-            .and_then(|m| m.get("content"))
-            .and_then(|ct| ct.as_str())
-            .map(|s| s.to_string())
-            .or_else(|| {
-                result
-                    .output
-                    .get("content")
-                    .and_then(|c| c.get(0))
-                    .and_then(|o| o.get("text"))
-                    .and_then(|t| t.as_str())
-                    .map(|s| s.to_string())
-            })
-            .or_else(|| {
-                result
-                    .output
-                    .get("candidates")
-                    .and_then(|c| c.get(0))
-                    .and_then(|o| o.get("content"))
-                    .and_then(|ct| ct.get("parts"))
-                    .and_then(|p| p.get(0))
-                    .and_then(|pr| pr.get("text"))
-                    .and_then(|txt| txt.as_str())
-                    .map(|s| s.to_string())
-            })
-            .unwrap_or_default();
-
-        Ok(SpokeResponse {
-            text,
-            provider: name,
-            model: "auto".to_string(),
-            token_count: 0,
-            latency_ms: start.elapsed().as_millis() as f64,
-        })
+        Err(last_error)
     }
 }
 

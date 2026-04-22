@@ -22,15 +22,18 @@ interface Spark {
 }
 
 export type BrainState = 'idle' | 'listening' | 'thinking' | 'speaking';
+export type RiskTier = 'Benign' | 'Elevated' | 'Critical';
 
 export function NeuralBrain({
   _isActive = false,
   audioLevel = 0,
   state = 'idle',
+  riskTier = 'Benign',
 }: {
   _isActive?: boolean;
   audioLevel?: number;
   state?: BrainState;
+  riskTier?: RiskTier;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef<number>(0);
@@ -85,22 +88,30 @@ export function NeuralBrain({
     stateRef.current.nodes = nodes;
     stateRef.current.sparks = [];
 
-    // Dynamic colors based on user request:
-    // Blue for speaking (responding)
-    // Pink for thinking (processing)
-    // Purple for listening
-    const getBaseColor = (s: BrainState, a: number) => {
-      switch (s) {
-        case 'speaking': return `rgba(0, 242, 255, ${a})`; // Cyan/Blue
-        case 'thinking': return `rgba(255, 45, 117, ${a})`; // Rose/Pink
-        case 'listening': return `rgba(188, 19, 254, ${a})`; // Violet/Purple
-        default: return `rgba(245, 158, 11, ${a})`; // Amber/Idle
-      }
-    };
-
-    // Bridge: read audioLevel from dataset each frame to avoid closure staleness
+    // Bridge: read data from dataset each frame to avoid closure staleness
     const readAudioLevel = () => parseFloat(canvas.dataset.audioLevel ?? '0') || 0;
     const readState = () => (canvas.dataset.brainState as BrainState) || 'idle';
+    const readRiskTier = () => (canvas.dataset.riskTier as RiskTier) || 'Benign';
+
+    // Dynamic colors based on user request:
+    // Blue/Cyan for Benign (Standard reasoning)
+    // Yellow/Amber for Elevated (C.A.S. triggered)
+    // Pink/Red for Critical (Neural alert)
+    const getBaseColor = (s: BrainState, a: number, r: RiskTier) => {
+      if (s === 'idle') return `rgba(245, 158, 11, ${a})`; // Amber
+      if (s === 'listening') return `rgba(188, 19, 254, ${a})`; // Violet
+
+      // Speaking/Thinking colors mapped to Reasoning Logic (Risk Tier)
+      switch (r) {
+        case 'Critical': return `rgba(255, 45, 117, ${a})`; // Rose/Red
+        case 'Elevated': return `rgba(255, 223, 0, ${a})`; // Gold/Yellow
+        case 'Benign':
+        default:
+          return s === 'speaking' 
+            ? `rgba(0, 242, 255, ${a})` // Cyan
+            : `rgba(99, 102, 241, ${a})`; // Indigo (Thinking)
+      }
+    };
 
     const spawnSpark = () => {
       const { nodes, sparks } = stateRef.current;
@@ -123,6 +134,8 @@ export function NeuralBrain({
       const al = readAudioLevel();
       const s = readState();
 
+      const r = readRiskTier();
+
       ctx.clearRect(0, 0, W, H);
 
       const boost = 1 + al * 1.4;
@@ -144,7 +157,7 @@ export function NeuralBrain({
           const dy = b.y - a.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           const alpha = Math.max(0, (1 - dist / 220) * edgeBoost);
-          ctx.strokeStyle = getBaseColor(s, alpha);
+          ctx.strokeStyle = getBaseColor(s, alpha, r);
           ctx.lineWidth = 0.8 + al * 0.6;
           ctx.beginPath();
           ctx.moveTo(a.x, a.y);
@@ -155,20 +168,20 @@ export function NeuralBrain({
 
       nodes.forEach(n => {
         const pulse = Math.sin(n.pulsePhase) * 0.5 + 0.5;
-        const r = n.radius + pulse * 1.5;
+        const radius = n.radius + pulse * 1.5;
         const alpha = 0.4 + pulse * 0.4;
 
-        const grd = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, r * 3);
-        grd.addColorStop(0, getBaseColor(s, alpha * 0.6));
-        grd.addColorStop(1, getBaseColor(s, 0));
+        const grd = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, radius * 3);
+        grd.addColorStop(0, getBaseColor(s, alpha * 0.6, r));
+        grd.addColorStop(1, getBaseColor(s, 0, r));
         ctx.fillStyle = grd;
         ctx.beginPath();
-        ctx.arc(n.x, n.y, r * 3, 0, Math.PI * 2);
+        ctx.arc(n.x, n.y, radius * 3, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = getBaseColor(s, alpha);
+        ctx.fillStyle = getBaseColor(s, alpha, r);
         ctx.beginPath();
-        ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+        ctx.arc(n.x, n.y, radius, 0, Math.PI * 2);
         ctx.fill();
       });
 
@@ -195,15 +208,15 @@ export function NeuralBrain({
         const sy = from.y + (to.y - from.y) * p;
 
         const sgrd = ctx.createRadialGradient(sx, sy, 0, sx, sy, sparkR * 4);
-        sgrd.addColorStop(0, getBaseColor(s, opacity * 0.8));
-        sgrd.addColorStop(0.5, getBaseColor(s, opacity * 0.3));
-        sgrd.addColorStop(1, getBaseColor(s, 0));
+        sgrd.addColorStop(0, getBaseColor(s, opacity * 0.8, r));
+        sgrd.addColorStop(0.5, getBaseColor(s, opacity * 0.3, r));
+        sgrd.addColorStop(1, getBaseColor(s, 0, r));
         ctx.fillStyle = sgrd;
         ctx.beginPath();
         ctx.arc(sx, sy, sparkR * 4, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = getBaseColor(s, opacity);
+        ctx.fillStyle = getBaseColor(s, opacity, r);
         ctx.beginPath();
         ctx.arc(sx, sy, sparkR, 0, Math.PI * 2);
         ctx.fill();
@@ -225,7 +238,8 @@ export function NeuralBrain({
     if (!canvas) return;
     canvas.dataset.audioLevel = String(audioLevel);
     canvas.dataset.brainState = state;
-  }, [audioLevel, state]);
+    canvas.dataset.riskTier = riskTier;
+  }, [audioLevel, state, riskTier]);
 
 
   return (

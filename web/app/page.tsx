@@ -142,9 +142,11 @@ export default function ChatPage() {
   const chatWindowRef  = useRef<HTMLDivElement>(null)
   const ttsRef         = useRef<TtsEngine | null>(null)
 
+  const latestAri = messages.findLast(m => m.role === 'assistant' && m.ari)?.ari
   const brainState: BrainState = isStreaming
     ? (streamingId ? 'speaking' : 'thinking')
     : (isListening ? 'listening' : 'idle')
+  const riskTier = latestAri?.riskTier ?? 'Benign'
 
   useEffect(() => {
     ttsRef.current = createTtsEngine()
@@ -244,7 +246,7 @@ export default function ChatPage() {
       </div>
 
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <NeuralBrain _isActive={brainState !== 'idle'} audioLevel={audioLevel} state={brainState} />
+        <NeuralBrain _isActive={brainState !== 'idle'} audioLevel={audioLevel} state={brainState} riskTier={riskTier} />
       </div>
 
       {/* Sovereign Hub Core - Chat & Interaction */}
