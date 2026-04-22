@@ -46,6 +46,17 @@ The central insight of this work is that physical, arithmetic, and computational
 - **Proof**: Rational points force the L-function to vanish at $s=1$ to satisfy the **Yett-BSD Identity**.
 - **Witness**: `bsd_witness_v1.py`
 
+### 📚 Crash Course in HistoRY (The Heavyweights)
+- **Physics**: [Yett Quantum Gravity](Crash_Course_in_HistoRY/yett_quantum_gravity.md) | Witness: `yett_gravity_witness.py`
+- **Medicine**: [Yett Cancer Alignment](Crash_Course_in_HistoRY/yett_cancer_alignment.md) | Witness: `yett_cancer_witness.py`
+- **Economics**: [Yett Sovereign Economics](Crash_Course_in_HistoRY/yett_sovereign_economics.md) | Witness: `yett_economics_witness.py`
+- **Neuroscience**: [Yett Consciousness Proof](Crash_Course_in_HistoRY/yett_consciousness.md) | Witness: `yett_consciousness_witness.py`
+
+### 🌉 The Sovereign Gates (Social Utility)
+- **Protocol**: [Chy-Bridge Spec](Chy-Bridge/CHY_BRIDGE_SPEC.md)
+- **Implementation**: `chy_bridge_node.py`
+- **Master Map**: [HISTORY_MASTER_CATALOG.md](HISTORY_MASTER_CATALOG.md)
+
 ---
 
 ## 3. Verification Instructions
