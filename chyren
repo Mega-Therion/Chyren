@@ -305,34 +305,42 @@ def cmd_sovereign(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_status(remainder: list[str]) -> int:
-    from rich.console import Console
-    from rich.table import Table
-    from rich.text import Text
-    from rich.panel import Panel
-    from chyren_cli.ui.render import render_banner
-    from chyren_cli.ui.theme import CHYREN_THEME
+    if "--geometric" in remainder:
+        # Calculate Holonomy Pulse metrics
+        ledger_path = STATE_DIR / "master_ledger.json"
+        chi_avg = 1.0
+        omega_score = 0.0
+        if ledger_path.exists():
+            try:
+                with open(ledger_path, "r") as f:
+                    data = json.load(f)
+                    entries = data.get("entries", [])
+                    if entries:
+                        # Last 10 entries for moving average
+                        window = entries[-10:]
+                        chi_avg = sum(e.get("chiral_invariant", 1.0) for e in window) / len(window)
+                        # Omega is approximated as (Delta H / Delta T) + Resonance
+                        # Here we use the alignment growth as a proxy
+                        omega_score = (chi_avg * len(entries)) / 100.0 # Normalized score
+                
+                # Render Geometric Pulse
+                pulse_table = Table(box=None, expand=True)
+                pulse_table.add_column("METRIC", style="neon.cyan")
+                pulse_table.add_column("VALUE", style="bold")
+                
+                status_color = "green" if chi_avg >= 0.7 else "red"
+                status_text = "L-TYPE" if chi_avg >= 0.7 else "D-TYPE"
+                
+                pulse_table.add_row("CHIRAL INVARIANT (χ)", f"[{status_color}]{chi_avg:.4f}[/]")
+                pulse_table.add_row("SOVEREIGNTY SCORE (Ω)", f"[white]{omega_score:.4f}[/]")
+                pulse_table.add_row("GEOMETRIC PHASE", "[cyan]RESONATING[/]")
+                pulse_table.add_row("HOLONOMY CLASS", f"[{status_color}]{status_text}[/]")
+                
+                console.print(Panel(pulse_table, title="[bold white]HOLONOMY PULSE (Ω·χ)[/]", border_style="neon.cyan"))
+            except Exception as e:
+                console.print(f"[red]Error reading geometric pulse: {e}[/]")
 
-    console = Console(theme=CHYREN_THEME)
-    render_banner()
-    
-    table = Table(box=None, expand=True)
-    table.add_column("SUBSYSTEM", style="neon.cyan", ratio=1)
-    table.add_column("STATE", style="bold", ratio=1)
-    table.add_column("TELEMETRY", style="white", ratio=2)
-    
-    # Check processes
-    dream_active = _pid_alive(int(DREAM_LOCK.read_text().split(":")[0])) if DREAM_LOCK.exists() else False
-    
-    table.add_row("HEMISPHERE R (Medulla)", "[green]ACTIVE[/]", "High-Speed Sovereign Runtime")
-    table.add_row("HEMISPHERE L (Cortex)", "[green]ACTIVE[/]", "Reasoning & Orchestration Hub")
-    table.add_row("DREAM CYCLE", "[green]DREAMING[/]" if dream_active else "[yellow]OFFLINE[/]", "Autonomous Maintenance Loop")
-    table.add_row("OCULAR SENSORS", "[cyan]RESONATING[/]", "VisionSpoke registered in Medulla")
-    table.add_row("MASTER LEDGER", "[green]INTEGRITY PASS[/]", "Append-only state verified")
-    
-    console.print(Panel(table, title="[bold white]UNIFIED BRAIN STATE[/]", border_style="neon.purple"))
-    
-    emit_event("status.requested")
+    emit_event("status.requested", geometric="--geometric" in remainder)
     return run_medulla(["status", *remainder]).returncode
 
 
@@ -501,6 +509,7 @@ def build_parser() -> argparse.ArgumentParser:
         _add_passthrough(n, f"Execution pipeline: {n}")
 
     p_status = sub.add_parser("status", help="Print unified brain status.")
+    p_status.add_argument("--geometric", action="store_true", help="Include Holonomy Pulse metrics (Ω·χ).")
     p_status.add_argument("args", nargs=argparse.REMAINDER)
 
     p_reset = sub.add_parser("reset", help="Reset the Medulla ledger (destructive).")
