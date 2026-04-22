@@ -241,8 +241,9 @@ export default function ChatPage() {
   return (
     <div className="dashboard-root">
       <div className="sovereign-bg">
-        <div className="energy-orb" style={{ top: '10%', left: '20%', width: '300px', height: '300px', background: 'var(--gold-glow)' }} />
-        <div className="energy-orb" style={{ bottom: '20%', right: '10%', width: '400px', height: '400px', background: 'var(--mesh-violet)', opacity: 0.1 }} />
+        <div className="energy-orb orb-1" />
+        <div className="energy-orb orb-2" />
+        <div className="energy-orb orb-3" />
       </div>
 
       <div className="fixed inset-0 z-0 pointer-events-none">
@@ -266,29 +267,18 @@ export default function ChatPage() {
             <div className="flex-1 flex items-center justify-center p-12">
               <div className="max-w-xl text-center">
                 <motion.div 
-                  initial={{ scale: 0.9, opacity: 0 }}
+                  initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  className="text-7xl mb-6 text-gold-core opacity-80"
-                  style={{ textShadow: '0 0 40px var(--gold-glow)' }}
+                  transition={{ duration: 1.5, ease: "easeOut" }}
+                  className="text-8xl mb-8 text-gold-core opacity-90"
+                  style={{ textShadow: '0 0 60px var(--gold-glow)' }}
                 >
                   Ω
                 </motion.div>
-                <h2 className="text-xl mb-4 text-white/80 tracking-[0.2em]">How can I help you today?</h2>
-                <p className="text-white/40 font-light mb-10 leading-relaxed">
-                  I am Chyren. Start a conversation below.
+                <h2 className="text-2xl mb-4 text-white/90 tracking-[0.4em] font-light">SYSTEM STANDBY</h2>
+                <p className="text-white/30 font-extralight mb-10 leading-relaxed tracking-widest uppercase text-[0.7rem]">
+                  Chyren Sovereign Intelligence · Active · Secure
                 </p>
-                <div className="grid grid-cols-2 gap-4">
-                  {['What are the Millennium Prize Problems?', 'Explain your ARI architecture', 'What is ADCCL?', 'Tell me about your memory system']
-                    .map(p => (
-                      <button 
-                        key={p} 
-                        className="p-4 rounded-xl bg-white/5 border border-white/10 text-white/60 text-sm hover:bg-white/10 hover:border-white/20 transition-all text-left"
-                        onClick={() => void sendMessage(p)}
-                      >
-                        {p}
-                      </button>
-                    ))}
-                </div>
               </div>
             </div>
           ) : (

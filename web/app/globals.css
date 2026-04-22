@@ -52,8 +52,30 @@ body {
   position: fixed;
   inset: 0;
   z-index: -1;
-  background: radial-gradient(circle at 50% -20%, #1a1a2e 0%, var(--bg-void) 70%);
+  background: radial-gradient(circle at 50% -20%, #0a0a1a 0%, var(--bg-void) 80%);
   overflow: hidden;
+}
+
+/* Starfield Overlay */
+.sovereign-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(1px 1px at 20px 30px, #fff, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 40px 70px, #fff, rgba(0,0,0,0)),
+    radial-gradient(1.5px 1.5px at 50px 160px, var(--mesh-cyan), rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 90px 40px, #fff, rgba(0,0,0,0)),
+    radial-gradient(1.5px 1.5px at 130px 80px, var(--gold-core), rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 160px 120px, #fff, rgba(0,0,0,0));
+  background-size: 250px 250px;
+  opacity: 0.15;
+  animation: twinkle 8s infinite linear;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.1; }
+  50% { opacity: 0.2; }
 }
 
 .sovereign-bg::after {
@@ -61,23 +83,52 @@ body {
   position: absolute;
   inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  opacity: 0.03;
+  opacity: 0.02;
   mix-blend-mode: overlay;
 }
 
-/* Floating Energy Orbs */
+/* Floating Energy Orbs - Nebula Style */
 .energy-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.15;
+  filter: blur(120px);
+  opacity: 0.12;
   pointer-events: none;
-  animation: orbit 20s infinite linear;
 }
 
-@keyframes orbit {
-  from { transform: rotate(0deg) translateX(100px) rotate(0deg); }
-  to { transform: rotate(360deg) translateX(100px) rotate(-360deg); }
+.orb-1 {
+  width: 600px;
+  height: 600px;
+  background: var(--gold-glow);
+  top: -10%;
+  left: -10%;
+  animation: drift 25s infinite alternate ease-in-out;
+}
+
+.orb-2 {
+  width: 800px;
+  height: 800px;
+  background: var(--mesh-violet);
+  bottom: -20%;
+  right: -10%;
+  animation: drift 35s infinite alternate-reverse ease-in-out;
+  opacity: 0.08;
+}
+
+.orb-3 {
+  width: 500px;
+  height: 500px;
+  background: var(--mesh-cyan);
+  top: 40%;
+  left: 30%;
+  animation: drift 30s infinite alternate ease-in-out;
+  opacity: 0.05;
+}
+
+@keyframes drift {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(100px, 50px) scale(1.1); }
+  100% { transform: translate(-50px, 100px) scale(0.9); }
 }
 
 /* Main Dashboard Structure */
