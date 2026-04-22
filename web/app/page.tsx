@@ -320,3 +320,4 @@ export default function ChatPage() {
     </div>
   )
 }
+// smoke test
