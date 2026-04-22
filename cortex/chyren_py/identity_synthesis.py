@@ -24,36 +24,66 @@ class IdentitySynthesizer:
         self.conn = None
 
     def connect(self):
-        """Connect to Neon database."""
+        """Connect to Neon database (optional)."""
+        if not self.db_url:
+            print("! OMEGA_DB_URL not set; skipping Neon archive")
+            return None
         try:
             self.conn = psycopg2.connect(self.db_url)
             print("✓ Connected to Neon database")
             return self.conn
         except Exception as e:
-            print(f"✗ Connection failed: {e}")
-            sys.exit(1)
+            print(f"! Neon connection failed: {e}; proceeding with local ledger only")
+            return None
 
     def fetch_all_entries(self, limit: int = 58339) -> List[Dict[str, Any]]:
-        """Fetch all neocortex_library from Neon, prioritizing importance."""
-        cursor = self.conn.cursor(cursor_factory=RealDictCursor)
-        try:
-            # We fetch priority entries first (importance >= 0.9 or canonical namespace)
-            # then fill up with regular recent entries
-            cursor.execute(f"""
-                (SELECT
-                    id, task as content, source, adccl_score as importance, created_at
-                FROM public.omega_memory_entries
-                ORDER BY adccl_score DESC, created_at DESC)
-                LIMIT {limit}
-            """)
-            entries = cursor.fetchall()
-            print(f"✓ Fetched {len(entries)} memory entries from Neon (prioritized)")
-            return entries
-        except Exception as e:
-            print(f"✗ Query failed: {e}")
-            return []
-        finally:
-            cursor.close()
+        """Fetch memory entries from both Neon and local Master Ledger."""
+        entries = []
+        
+        # 1. Fetch from local Master Ledger (Sovereign Truth)
+        ledger_path = Path("/home/mega/Chyren/cortex/state/master_ledger.json")
+        if ledger_path.exists():
+            try:
+                with open(ledger_path, "r") as f:
+                    data = json.load(f)
+                    local_entries = data.get("entries", [])
+                    for e in local_entries:
+                        entries.append({
+                            "id": e.get("run_id"),
+                            "content": e.get("response_text"),
+                            "source": "local_ledger",
+                            "importance": e.get("adccl_score", 0.0),
+                            "chiral_invariant": e.get("chiral_invariant", 1.0),
+                            "created_at": datetime.fromtimestamp(e.get("timestamp_utc", 0)).isoformat()
+                        })
+                print(f"✓ Loaded {len(local_entries)} entries from local Master Ledger")
+            except Exception as e:
+                print(f"✗ Failed to load local ledger: {e}")
+
+        # 2. Fetch from Neon (Historical Archive)
+        if self.conn:
+            cursor = self.conn.cursor(cursor_factory=RealDictCursor)
+            try:
+                cursor.execute(f"""
+                    (SELECT
+                        id, task as content, source, adccl_score as importance, created_at
+                    FROM public.omega_memory_entries
+                    ORDER BY adccl_score DESC, created_at DESC)
+                    LIMIT {limit}
+                """)
+                db_entries = cursor.fetchall()
+                for e in db_entries:
+                    e["chiral_invariant"] = 1.0 # Default for legacy entries
+                    entries.append(e)
+                print(f"✓ Fetched {len(db_entries)} memory entries from Neon")
+            except Exception as e:
+                print(f"✗ Query failed: {e}")
+            finally:
+                cursor.close()
+
+        # Sort combined entries by importance and geometric alignment
+        entries.sort(key=lambda x: (x.get("importance", 0) * x.get("chiral_invariant", 1.0)), reverse=True)
+        return entries[:limit]
 
     def extract_identity_patterns(self, entries: List[Dict]) -> Dict[str, Any]:
         """Extract identity anchors from raw entries using content analysis."""

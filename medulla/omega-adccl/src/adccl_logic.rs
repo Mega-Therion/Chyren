@@ -6,6 +6,7 @@ pub struct VerificationResult {
     pub passed: bool,
     pub score: f32,
     pub empathy_score: f32,
+    pub chiral_invariant: f32, // Q5 Bridge: Holonomy-based alignment
     pub flags: Vec<String>,
     pub status: String,
 }
@@ -177,6 +178,21 @@ impl ADCCL {
         }
 
         score = score.clamp(0.0, 1.0);
+        
+        // ── Q5 CHIRAL INVARIANT BRIDGE ───────────────────────────────────────
+        // Conjectural mapping from drift markers to holonomy-based alignment.
+        // In a future version, this will be computed from the response embedding
+        // trajectory through constitutional space.
+        let mut chiral_invariant = score; 
+        if flags.contains(&"CAPABILITY_REFUSAL".to_string()) {
+            // Orientation-reversing holonomy detected via refusal pattern.
+            chiral_invariant *= 0.5; 
+        }
+        if flags.contains(&"STUB_MARKERS_DETECTED".to_string()) {
+            // Large drift out of manifold.
+            chiral_invariant *= 0.1;
+        }
+
         let min_score = self.get_calibrated_min_score();
         let passed = score >= min_score && !flags.contains(&"STUB_MARKERS_DETECTED".to_string());
 
@@ -184,6 +200,7 @@ impl ADCCL {
             passed,
             score,
             empathy_score,
+            chiral_invariant,
             flags,
             status: if passed {
                 "verified".to_string()

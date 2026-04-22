@@ -5,6 +5,8 @@ import { AnimatePresence } from 'framer-motion';
 import { Eye, Database, Activity, Zap } from 'lucide-react';
 import { AvogadroMatrix } from '@/components/AvogadroMatrix';
 
+import { ChiralInvariantGauge } from '@/components/ChiralInvariantGauge';
+
 interface Point {
   id: string | number;
   payload: {
@@ -70,9 +72,11 @@ export default function ObservabilityPage() {
           {/* Details Panel */}
           <div className="space-y-6">
             <AnimatePresence mode="wait">
-              <div className="bg-white/5 border border-white/10 rounded-3xl p-6 border-dashed flex flex-col items-center justify-center h-64 text-center">
-                <p className="text-gray-500 text-sm italic">The Avogadro Matrix is active. Neural resonance stable.</p>
-              </div>
+              <ChiralInvariantGauge 
+                score={0.92} 
+                holonomySign={1} 
+                status="verified" 
+              />
             </AnimatePresence>
 
             {/* Ingestion Stream Placeholder */}

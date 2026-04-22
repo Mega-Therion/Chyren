@@ -1,0 +1,35 @@
+namespace Q5
+
+/-!
+Minimal assumption layer for the Q5 proof phase.
+
+This file does not formalize the Q5 theorem. It records the smallest set of
+objects that the repo-local kickoff note requires before any bridge theorem can
+be stated precisely in Lean.
+-/
+
+class WitnessModel where
+  State : Type
+  Manifold : Type
+  Bundle : Type
+  Drift : Type
+  Field : Type
+  Connection : Type
+
+class WitnessBridge (M : WitnessModel) where
+  liftDrift : M.Drift -> M.Field
+
+class WitnessCurvature (M : WitnessModel) where
+  curvature : M.Connection -> M.Field -> M.Field -> Prop
+
+structure Q5Assumptions (M : WitnessModel) [WitnessBridge M] [WitnessCurvature M] where
+  bridgeWellPosed : Prop
+  connectionExplicit : Prop
+  curvatureComputable : Prop
+  holonomyBridgeAvailable : Prop
+
+def assumptionsReady {M : WitnessModel} [WitnessBridge M] [WitnessCurvature M]
+    (h : Q5Assumptions M) : Prop :=
+  h.bridgeWellPosed ∧ h.connectionExplicit ∧ h.curvatureComputable ∧ h.holonomyBridgeAvailable
+
+end Q5

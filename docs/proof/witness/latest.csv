@@ -1,0 +1,4 @@
+case_id,dimension,bridge_enabled,n_steps,path_id,transport_rule_id,commutator_norm,deviation_from_identity,trace_re,trace_im,trace_phase
+commuting,2,True,512,"theta_loop_[0,2pi]",left_product_euler_transport_v1,0.0,0.09494235508740999,1.8842821565931769,0.0,0.0
+noncommuting,2,True,512,"theta_loop_[0,2pi]",left_product_euler_transport_v1,2.8284271247461903,257.33419600429517,-222.11150329024653,0.0,3.141592653589793
+control,2,False,512,"theta_loop_[0,2pi]",left_product_euler_transport_v1,2.8284271247461903,0.0,2.0,0.0,0.0

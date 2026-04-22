@@ -32,6 +32,7 @@ class LedgerEntry:
     latency_ms: float
     token_count: int
     adccl_score: float              # 0.0–1.0 from ADCCL verification
+    chiral_invariant: float         # Q5 Unified Metric: holonomy-based alignment
     adccl_flags: list[str]          # issues raised by ADCCL, empty on clean pass
     state_snapshot: dict[str, Any]  # injected state at the time of the call
     previous_state_hash: str = ""   # SHA-256 of the previous entry's signature

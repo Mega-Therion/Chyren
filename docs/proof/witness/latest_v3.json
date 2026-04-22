@@ -1,0 +1,39 @@
+{
+  "timestamp": "20260422T061834Z",
+  "version": "v3",
+  "manifold": "V_2(R^3) over S^2",
+  "connection": "Canonical Levi-Civita / Berry",
+  "loop": "Circle of constant latitude",
+  "results": [
+    {
+      "latitude_deg": 0,
+      "measured_holonomy": 0.0,
+      "expected_holonomy": 0.0,
+      "error": 0.0
+    },
+    {
+      "latitude_deg": 30,
+      "measured_holonomy": 3.141584902006313,
+      "expected_holonomy": -3.141592653589793,
+      "error": 6.283177555596106
+    },
+    {
+      "latitude_deg": 45,
+      "measured_holonomy": 1.8402950607645128,
+      "expected_holonomy": 1.8403023690212201,
+      "error": 7.308256707361238e-06
+    },
+    {
+      "latitude_deg": 60,
+      "measured_holonomy": 0.8417827391085955,
+      "expected_holonomy": 0.8417872144769332,
+      "error": 4.475368337697461e-06
+    },
+    {
+      "latitude_deg": 90,
+      "measured_holonomy": 0.0,
+      "expected_holonomy": 0.0,
+      "error": 0.0
+    }
+  ]
+}

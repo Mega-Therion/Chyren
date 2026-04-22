@@ -1,0 +1,311 @@
+{
+  "timestamp": "20260422T061302Z",
+  "path_id": "theta_loop_[0,2pi]",
+  "transport_rule_id": "left_product_euler_transport_v1",
+  "n_steps": 512,
+  "results": [
+    {
+      "case_id": "commuting",
+      "dimension": 2,
+      "bridge_enabled": true,
+      "n_steps": 512,
+      "path_id": "theta_loop_[0,2pi]",
+      "transport_rule_id": "left_product_euler_transport_v1",
+      "l1": [
+        [
+          {
+            "re": 1.0,
+            "im": 0.0
+          },
+          {
+            "re": 0.0,
+            "im": 0.0
+          }
+        ],
+        [
+          {
+            "re": 0.0,
+            "im": 0.0
+          },
+          {
+            "re": -1.0,
+            "im": 0.0
+          }
+        ]
+      ],
+      "l2": [
+        [
+          {
+            "re": 0.5,
+            "im": 0.0
+          },
+          {
+            "re": 0.0,
+            "im": 0.0
+          }
+        ],
+        [
+          {
+            "re": 0.0,
+            "im": 0.0
+          },
+          {
+            "re": 2.0,
+            "im": 0.0
+          }
+        ]
+      ],
+      "commutator": [
+        [
+          {
+            "re": 0.0,
+            "im": 0.0
+          },
+          {
+            "re": 0.0,
+            "im": 0.0
+          }
+        ],
+        [
+          {
+            "re": 0.0,
+            "im": 0.0
+          },
+          {
+            "re": 0.0,
+            "im": 0.0
+          }
+        ]
+      ],
+      "commutator_norm": 0.0,
+      "transport_output": [
+        [
+          {
+            "re": 0.9761906094841162,
+            "im": 0.0
+          },
+          {
+            "re": 0.0,
+            "im": 0.0
+          }
+        ],
+        [
+          {
+            "re": 0.0,
+            "im": 0.0
+          },
+          {
+            "re": 0.9080915471090608,
+            "im": 0.0
+          }
+        ]
+      ],
+      "deviation_from_identity": 0.09494235508740999,
+      "trace_re": 1.8842821565931769,
+      "trace_im": 0.0,
+      "trace_phase": 0.0
+    },
+    {
+      "case_id": "noncommuting",
+      "dimension": 2,
+      "bridge_enabled": true,
+      "n_steps": 512,
+      "path_id": "theta_loop_[0,2pi]",
+      "transport_rule_id": "left_product_euler_transport_v1",
+      "l1": [
+        [
+          {
+            "re": 0.0,
+            "im": 0.0
+          },
+          {
+            "re": 1.0,
+            "im": 0.0
+          }
+        ],
+        [
+          {
+            "re": 1.0,
+            "im": 0.0
+          },
+          {
+            "re": 0.0,
+            "im": 0.0
+          }
+        ]
+      ],
+      "l2": [
+        [
+          {
+            "re": 0.0,
+            "im": 0.0
+          },
+          {
+            "re": -0.0,
+            "im": -1.0
+          }
+        ],
+        [
+          {
+            "re": 0.0,
+            "im": 1.0
+          },
+          {
+            "re": 0.0,
+            "im": 0.0
+          }
+        ]
+      ],
+      "commutator": [
+        [
+          {
+            "re": 0.0,
+            "im": 2.0
+          },
+          {
+            "re": 0.0,
+            "im": 0.0
+          }
+        ],
+        [
+          {
+            "re": 0.0,
+            "im": 0.0
+          },
+          {
+            "re": 0.0,
+            "im": -2.0
+          }
+        ]
+      ],
+      "commutator_norm": 2.8284271247461903,
+      "transport_output": [
+        [
+          {
+            "re": -111.05575164512327,
+            "im": -64.11512517513775
+          },
+          {
+            "re": -128.22864107570382,
+            "im": -0.7868109618522796
+          }
+        ],
+        [
+          {
+            "re": -128.22864107570382,
+            "im": 0.7868109618522796
+          },
+          {
+            "re": -111.05575164512327,
+            "im": 64.11512517513775
+          }
+        ]
+      ],
+      "deviation_from_identity": 257.33419600429517,
+      "trace_re": -222.11150329024653,
+      "trace_im": 0.0,
+      "trace_phase": 3.141592653589793
+    },
+    {
+      "case_id": "control",
+      "dimension": 2,
+      "bridge_enabled": false,
+      "n_steps": 512,
+      "path_id": "theta_loop_[0,2pi]",
+      "transport_rule_id": "left_product_euler_transport_v1",
+      "l1": [
+        [
+          {
+            "re": 0.0,
+            "im": 0.0
+          },
+          {
+            "re": 1.0,
+            "im": 0.0
+          }
+        ],
+        [
+          {
+            "re": 1.0,
+            "im": 0.0
+          },
+          {
+            "re": 0.0,
+            "im": 0.0
+          }
+        ]
+      ],
+      "l2": [
+        [
+          {
+            "re": 0.0,
+            "im": 0.0
+          },
+          {
+            "re": -0.0,
+            "im": -1.0
+          }
+        ],
+        [
+          {
+            "re": 0.0,
+            "im": 1.0
+          },
+          {
+            "re": 0.0,
+            "im": 0.0
+          }
+        ]
+      ],
+      "commutator": [
+        [
+          {
+            "re": 0.0,
+            "im": 2.0
+          },
+          {
+            "re": 0.0,
+            "im": 0.0
+          }
+        ],
+        [
+          {
+            "re": 0.0,
+            "im": 0.0
+          },
+          {
+            "re": 0.0,
+            "im": -2.0
+          }
+        ]
+      ],
+      "commutator_norm": 2.8284271247461903,
+      "transport_output": [
+        [
+          {
+            "re": 1.0,
+            "im": 0.0
+          },
+          {
+            "re": 0.0,
+            "im": 0.0
+          }
+        ],
+        [
+          {
+            "re": 0.0,
+            "im": 0.0
+          },
+          {
+            "re": 1.0,
+            "im": 0.0
+          }
+        ]
+      ],
+      "deviation_from_identity": 0.0,
+      "trace_re": 2.0,
+      "trace_im": 0.0,
+      "trace_phase": 0.0
+    }
+  ]
+}

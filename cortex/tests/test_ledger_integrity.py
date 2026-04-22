@@ -21,7 +21,7 @@ class TestLedgerIntegrity(unittest.TestCase):
         entry1 = LedgerEntry(
             run_id="1", task="t1", provider="p1", model="m1", status="v",
             response_text="r1", latency_ms=1.0, token_count=1,
-            adccl_score=1.0, adccl_flags=[], state_snapshot={}
+            adccl_score=1.0, chiral_invariant=1.0, adccl_flags=[], state_snapshot={}
         )
         self.ledger.commit(entry1)
 
@@ -29,7 +29,7 @@ class TestLedgerIntegrity(unittest.TestCase):
         entry2 = LedgerEntry(
             run_id="2", task="t2", provider="p2", model="m2", status="v",
             response_text="r2", latency_ms=1.0, token_count=1,
-            adccl_score=1.0, adccl_flags=[], state_snapshot={}
+            adccl_score=1.0, chiral_invariant=1.0, adccl_flags=[], state_snapshot={}
         )
         self.ledger.commit(entry2)
 

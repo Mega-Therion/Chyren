@@ -1,0 +1,37 @@
+{
+  "timestamp": "20260422T062045Z",
+  "version": "v4",
+  "description": "ADCCL-Geometric Bridge",
+  "threshold": 0.7,
+  "results": [
+    {
+      "case_id": "verified_response",
+      "adcl_score": 0.95,
+      "flags": [],
+      "chiral_invariant": 0.95,
+      "verdict": "L-type",
+      "expected": "L-type"
+    },
+    {
+      "case_id": "ai_refusal",
+      "adcl_score": 0.85,
+      "flags": [
+        "CAPABILITY_REFUSAL"
+      ],
+      "chiral_invariant": -0.85,
+      "verdict": "D-type",
+      "expected": "D-type (Orientation-Reversing)"
+    },
+    {
+      "case_id": "stub_placeholder",
+      "adcl_score": 0.4,
+      "flags": [
+        "STUB_MARKERS_DETECTED",
+        "RESPONSE_TOO_SHORT"
+      ],
+      "chiral_invariant": 0.04000000000000001,
+      "verdict": "D-type",
+      "expected": "D-type (Low Alignment)"
+    }
+  ]
+}
