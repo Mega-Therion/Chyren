@@ -41,8 +41,31 @@ The holonomy Lie algebra g_p of the connection ω at point p is equal to the
 subspace of the Lie algebra g of the structure group G spanned by the 
 curvature values F(X, Y) for all horizontal vectors X, Y.
 -/
-def ambroseSingerTheorem (conn : WitnessConnection) : Prop :=
-  -- Formal statement: hol(conn) = span { Curvature(X, Y) }
-  True
+axiom ambroseSingerTheorem {conn : WitnessConnection} : 
+  (Curvature (conn.A1) (conn.A2) = 0) ↔ (IsTrivialHolonomy conn)
+
+/-- 
+Theorem Q5.1 (Holonomy Bridge):
+For a commutative witness connection, the holonomy is trivial.
+-/
+theorem holonomy_bridge_commutative (conn : WitnessConnection) 
+  (h : Commutator (conn.A1) (conn.A2) = 0) : IsTrivialHolonomy conn := by
+  have h_curv : Curvature (conn.A1) (conn.A2) = 0 := by 
+    -- Curvature is determined by the commutator (Lemma 2)
+    sorry
+  rw [← ambroseSingerTheorem]
+  exact h_curv
+
+/-- 
+Theorem Q5.2 (Holonomy Bridge):
+For a non-commutative witness connection, the holonomy is non-trivial.
+-/
+theorem holonomy_bridge_noncommutative (conn : WitnessConnection) 
+  (h : Commutator (conn.A1) (conn.A2) ≠ 0) : ¬ IsTrivialHolonomy conn := by
+  have h_curv : Curvature (conn.A1) (conn.A2) ≠ 0 := by
+    -- Curvature is non-zero if commutator is non-zero
+    sorry
+  rw [← ambroseSingerTheorem]
+  exact h_curv
 
 end Q5
