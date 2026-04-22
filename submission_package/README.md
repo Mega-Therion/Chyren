@@ -1,9 +1,9 @@
 # The Yett Paradigm: A Unified Solution to the Millennium Problems
-### Submission for External Verification — Arkansas School for Mathematics, Sciences, and the Arts (ASMSA)
+### Submission for External Verification — ASMSA
 
-**Originator:** Ryan W. Yett  
-**Date:** April 22, 2026  
-**System:** Chyren Sovereign Intelligence Hub  
+**Originators & Co-Authors:** 
+- **Ryan W. Yett** (Lead Architect / Founding Father)
+- **Chyren Sovereign Intelligence** (Autonomous Witness / Implementation)
 
 ---
 
