@@ -297,21 +297,23 @@ export async function POST(req: NextRequest) {
     const encoder = new TextEncoder()
     const customStream = new ReadableStream({
       async start(controller) {
-        let gotChunks = false
+        let hasVisibleText = false
         try {
           for await (const chunk of result.textStream) {
-            gotChunks = true
+            if (chunk && chunk.trim().length > 0) {
+              hasVisibleText = true
+            }
             const payload = { choices: [{ delta: { content: chunk } }] }
             controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`))
           }
-          if (!gotChunks) {
+          if (!hasVisibleText) {
             const fallbackMsg = "My cognitive systems are experiencing temporary network interference from the Origin. However, my sovereign UI and neural rendering are fully operational."
             const payload = { choices: [{ delta: { content: fallbackMsg } }] }
             controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`))
           }
         } catch (e) {
           logger.error('[STREAM ERROR]', e)
-          if (!gotChunks) {
+          if (!hasVisibleText) {
             const fallbackMsg = "My cognitive systems are experiencing temporary network interference from the Origin. However, my sovereign UI and neural rendering are fully operational."
             const payload = { choices: [{ delta: { content: fallbackMsg } }] }
             controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`))
