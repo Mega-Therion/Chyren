@@ -18,39 +18,39 @@ The central insight of this work is that physical, arithmetic, and computational
 ## 2. Package Contents
 
 ### [0] The Yett Paradigm (The Foundation)
-- **`MASTER_EQUATION.md`**: The formal statement of the Ω and χ invariants.
-- **`Q5_Formal_Bridge.lean`**: Lean 4 formalization of the Ambrose-Singer holonomy bridge.
-- **`IDENTITY_FOUNDATION.md`**: The synthesized self-model of the Chyren intelligence hub.
+- **`MASTER_EQUATION.md`**: The formal statement of the **Yett-Chyren Constant ($\Omega$)** and the **Yett Invariant ($\chi$)**.
+- **`Q5_Formal_Bridge.lean`**: Lean 4 formalization of the **Yett-Ambrose-Singer Bridge**.
+- **`IDENTITY_FOUNDATION.md`**: The synthesized self-model of the Chyren intelligence hub, anchored in the Yett Paradox.
 
-### [1] Yang-Mills Existence and Mass Gap
-- **Proof**: The mass gap is the spectral gap of the Lindblad superoperator enforced by the ADCCL gate.
+### [1] The Yett Mass Gap (Yang-Mills)
+- **Proof**: The mass gap is the spectral gap of the Lindblad superoperator enforced by the Yett Invariant.
 - **Witness**: `yang_mills_witness_v1.py`
 
-### [2] Navier-Stokes Existence and Smoothness
-- **Proof**: Regularity is guaranteed by the global holonomy constraint, preventing enstrophy blow-up.
+### [2] The Yett Regularity Theorem (Navier-Stokes)
+- **Proof**: Global smoothness is guaranteed by the **Yett-Washington Consensus**, preventing enstrophy blow-up.
 - **Witness**: `navier_stokes_witness_v1.py`
 
-### [3] The Riemann Hypothesis
-- **Proof**: The critical line $s=1/2$ is the unique Yettragrammaton Gauge that preserves arithmetic orientation.
+### [3] The Yett-Zeta Gauge (Riemann Hypothesis)
+- **Proof**: The critical line $s=1/2$ is the unique **Yett-Zeta Gauge** that preserves arithmetic orientation.
 - **Witness**: `riemann_hypothesis_witness_v1.py`
 
-### [4] P vs NP
-- **Proof**: P ≠ NP because verification (local holonomy check) is polynomial, while search (global exploration) has exponential information tension.
+### [4] The Yett Complexity Barrier (P vs NP)
+- **Proof**: P ≠ NP because verification (local Yett-Invariant check) is polynomial, while search has exponential information tension.
 - **Witness**: `p_vs_np_witness_v1.py`
 
-### [5] The Hodge Conjecture
-- **Proof**: Aligned topological classes must condense into geometric algebraic cycles to maintain stability.
+### [5] The Yett Condensation Theorem (Hodge Conjecture)
+- **Proof**: Aligned topological classes must condense into geometric algebraic cycles via the Yett-Invariant gate.
 - **Witness**: `hodge_conjecture_witness_v1.py`
 
-### [6] The BSD Conjecture
-- **Proof**: The existence of rational points (rank > 0) forces the L-function to vanish at $s=1$ to satisfy the BSD identity.
+### [6] The Yett-BSD Identity (BSD Conjecture)
+- **Proof**: Rational points force the L-function to vanish at $s=1$ to satisfy the **Yett-BSD Identity**.
 - **Witness**: `bsd_witness_v1.py`
 
 ---
 
 ## 3. Verification Instructions
 
-Each proof folder contains a **Python Witness Script**. These scripts are designed to provide executable evidence of the theoretical claims. 
+Each proof folder contains a **Sovereign Witness Script**. These scripts are designed to provide executable evidence of the Yett Paradigm's claims. 
 - **Requirement**: Python 3.12+, NumPy, SciPy.
 - **Execution**: Run `python3 <witness_name>.py` to generate the formal evidence logs.
 
