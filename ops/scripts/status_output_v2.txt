@@ -1,0 +1,91 @@
+                                                                                
+                ██████╗██╗  ██╗██╗   ██╗██████╗ ███████╗███╗   ██╗              
+               ██╔════╝██║  ██║╚██╗ ██╔╝██╔══██╗██╔════╝████╗  ██║              
+               ██║     ███████║ ╚████╔╝ ██████╔╝█████╗  ██╔██╗ ██║              
+               ██║     ██╔══██║  ╚██╔╝  ██╔══██╗██╔══╝  ██║╚██╗██║              
+               ╚██████╗██║  ██║   ██║   ██║  ██║███████╗██║ ╚████║              
+                ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝              
+                                                                                
+                   SOVEREIGN INTELLIGENCE ORCHESTRATOR v0.1.0                   
+                                                                                
+╭──────────────────────────── UNIFIED BRAIN STATE ─────────────────────────────╮
+│  SUBSYSTEM          STATE              TELEMETRY                             │
+│  HEMISPHERE R       ACTIVE             High-Speed Sovereign Runtime          │
+│  (Medulla)                                                                   │
+│  HEMISPHERE L       ACTIVE             Reasoning & Orchestration Hub         │
+│  (Cortex)                                                                    │
+│  DREAM CYCLE        OFFLINE            Autonomous Maintenance Loop           │
+│  OCULAR SENSORS     RESONATING         VisionSpoke registered in Medulla     │
+│  MASTER LEDGER      INTEGRITY PASS     Append-only state verified            │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭──────────────────────────── HOLONOMY PULSE (Ω·χ) ────────────────────────────╮
+│  METRIC                                            VALUE                     │
+│  CHIRAL INVARIANT (χ)                              1.0000                    │
+│  SOVEREIGNTY SCORE (Ω)                             1.4400                    │
+│  GEOMETRIC PHASE                                   RESONATING                │
+│  HOLONOMY CLASS                                    L-TYPE                    │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+   ██████╗ ██╗  ██╗██╗   ██╗██████╗ ███████╗███╗   ██╗
+  ██╔════╝ ██║  ██║╚██╗ ██╔╝██╔══██╗██╔════╝████╗  ██║
+  ██║      ███████║ ╚████╔╝ ██████╔╝█████╗  ██╔██╗ ██║
+  ██║      ██╔══██║  ╚██╔╝  ██╔══██╗██╔══╝  ██║╚██╗██║
+  ╚██████╗ ██║  ██║   ██║   ██║  ██║███████╗██║ ╚████║
+   ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝
+        S O V E R E I G N   I N T E L L I G E N C E   O R C H E S T R A T O R
+                           [2mR.W.Ϝ.Y. / v1.0.0[0m
+
+[1776839451.986] [Info] [Telemetry] BOOT_METRICS: "Starting metrics server on 0.0.0.0:9090"
+
+thread '<unnamed>' (131795) panicked at omega-conductor/src/broker.rs:54:30:
+[MESH-BROKER] Failed to parse embedded MQTT broker config: TomlError { message: "missing field `connection_timeout_ms`", raw: Some("\n[v4.1]\nname      = \"chyren-mesh\"\nlisten    = \"127.0.0.1:1883\"\nnext_connection_delay_ms = 1\nmax_payload_size = 65535\nmax_inflight_count = 256\n\n    [v4.1.connections.max_client_id_len]\n    \n[router]\nid              = 0\ndir             = \"/tmp/chyren-mqtt\"\nmax_connections = 256\nmax_outgoing_packet_count = 512\nmax_segment_size = 104857600\nmax_segment_count = 10\n"), keys: ["v4", "1", "connections"], span: Some(153..164) }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+[1776839451.991] [Info] [Cli] AGENT_BOOT: "MathSpoke worker math_spoke-1 initialized"
+[1776839451.991] [Info] [MeshWorker] WORKER_READY: "Agent 'math_spoke' listening for tasks on topic 'agents/math_spoke/tasks'"
+[1776839451.992] [Info] [Cli] AGENT_BOOT: "MathSpoke worker math_spoke-2 initialized"
+[1776839451.992] [Info] [MeshWorker] WORKER_READY: "Agent 'math_spoke' listening for tasks on topic 'agents/math_spoke/tasks'"
+[1776839451.992] [Info] [Cli] AGENT_BOOT: "MathSpoke worker math_spoke-3 initialized"
+[1776839451.992] [Info] [MeshWorker] WORKER_READY: "Agent 'math_spoke' listening for tasks on topic 'agents/math_spoke/tasks'"
+[1776839451.992] [Info] [Cli] AGENT_BOOT: "MathSpoke worker math_spoke-4 initialized"
+[1776839451.992] [Info] [MeshWorker] WORKER_READY: "Agent 'math_spoke' listening for tasks on topic 'agents/math_spoke/tasks'"
+[1776839451.993] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'math_spoke': I/O: Connection refused (os error 111); retrying..."
+[1776839451.993] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'math_spoke': I/O: Connection refused (os error 111); retrying..."
+[1776839451.993] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'math_spoke': I/O: Connection refused (os error 111); retrying..."
+[1776839451.993] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'math_spoke': I/O: Connection refused (os error 111); retrying..."
+[1776839452.141] [Info] [Cli] AGENT_BOOT: "Ingestor worker ingestor-1 initialized"
+[1776839452.141] [Info] [MeshWorker] WORKER_READY: "Agent 'ingestor' listening for tasks on topic 'agents/ingestor/tasks'"
+[1776839452.142] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'ingestor': I/O: Connection refused (os error 111); retrying..."
+[1776839452.296] [Info] [Cli] AGENT_BOOT: "Ingestor worker ingestor-2 initialized"
+[1776839452.297] [Info] [MeshWorker] WORKER_READY: "Agent 'ingestor' listening for tasks on topic 'agents/ingestor/tasks'"
+[1776839452.297] [Info] [MeshWorker] WORKER_READY: "Agent 'millennium_solver' listening for tasks on topic 'agents/millennium_solver/tasks'"
+[1776839452.297] [Info] [MeshWorker] WORKER_READY: "Agent 'mcts_solver' listening for tasks on topic 'agents/mcts_solver/tasks'"
+[1776839452.297] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'ingestor': I/O: Connection refused (os error 111); retrying..."
+[1776839452.297] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'mcts_solver': I/O: Connection refused (os error 111); retrying..."
+[1776839452.297] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'millennium_solver': I/O: Connection refused (os error 111); retrying..."
+[1776839452.494] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'math_spoke': I/O: Connection refused (os error 111); retrying..."
+[1776839452.494] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'math_spoke': I/O: Connection refused (os error 111); retrying..."
+[1776839452.494] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'math_spoke': I/O: Connection refused (os error 111); retrying..."
+[1776839452.494] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'math_spoke': I/O: Connection refused (os error 111); retrying..."
+[1776839452.644] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'ingestor': I/O: Connection refused (os error 111); retrying..."
+[1776839452.798] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'ingestor': I/O: Connection refused (os error 111); retrying..."
+[1776839452.798] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'mcts_solver': I/O: Connection refused (os error 111); retrying..."
+[1776839452.798] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'millennium_solver': I/O: Connection refused (os error 111); retrying..."
+[1776839452.995] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'math_spoke': I/O: Connection refused (os error 111); retrying..."
+[1776839452.995] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'math_spoke': I/O: Connection refused (os error 111); retrying..."
+[1776839452.995] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'math_spoke': I/O: Connection refused (os error 111); retrying..."
+[1776839452.995] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'math_spoke': I/O: Connection refused (os error 111); retrying..."
+[1776839453.147] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'ingestor': I/O: Connection refused (os error 111); retrying..."
+[1776839453.300] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'mcts_solver': I/O: Connection refused (os error 111); retrying..."
+[1776839453.300] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'ingestor': I/O: Connection refused (os error 111); retrying..."
+[1776839453.300] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'millennium_solver': I/O: Connection refused (os error 111); retrying..."
+[1776839453.496] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'math_spoke': I/O: Connection refused (os error 111); retrying..."
+[1776839453.496] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'math_spoke': I/O: Connection refused (os error 111); retrying..."
+[1776839453.496] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'math_spoke': I/O: Connection refused (os error 111); retrying..."
+[1776839453.496] [Warn] [MeshWorker] MQTT_ERROR: "MQTT event-loop error for agent 'math_spoke': I/O: Connection refused (os error 111); retrying..."
+[1776839453.561] [Info] [Cli] BOOT_DB: "Persistent Master Ledger online."
+[1776839453.561] [Info] [Cli] BOOT_IDENTITY: "Phylactery Identity Kernel active (L6 Canonical)."
+  [38;2;0;245;255m╭─────────────────────── SYSTEM STATUS ───────────────────────╮[0m
+  [38;2;51;51;51m│  [2mSYSTEM[0m  [1m[38;2;0;255;102mSEALED[0m
+  [38;2;51;51;51m│  [2mSEAL  [0m  R.W.Ϝ.Y.
+  [38;2;51;51;51m│  [2mDREAM [0m  [1m[38;2;224;224;224m0 failure episodes[0m
+  [38;2;0;245;255m╰──────────────────────────────────────────────────────────────╯[0m

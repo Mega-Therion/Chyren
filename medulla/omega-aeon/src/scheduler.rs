@@ -9,6 +9,8 @@ pub struct SovereignScheduler {
     pub ingest_interval: Duration,
     /// Interval for identity synthesis
     pub dream_interval: Duration,
+    /// Interval for high-frequency geometric pulse
+    pub pulse_interval: Duration,
     /// Interval for memory maintenance (DreamCompressor)
     pub maintenance_interval: Duration,
     /// Memory service access
@@ -18,8 +20,9 @@ pub struct SovereignScheduler {
 impl SovereignScheduler {
     pub fn new(memory: Arc<omega_myelin::Service>) -> Self {
         Self {
-            ingest_interval: Duration::from_secs(3600),     // 1 hour
-            dream_interval: Duration::from_secs(43200),    // 12 hours
+            ingest_interval: Duration::from_secs(3600),      // 1 hour
+            dream_interval: Duration::from_secs(43200),     // 12 hours
+            pulse_interval: Duration::from_secs(300),        // 5 minutes
             maintenance_interval: Duration::from_secs(86400), // 24 hours
             memory,
         }
@@ -31,6 +34,7 @@ impl SovereignScheduler {
         
         let mut ingest_timer = tokio::time::interval(self.ingest_interval);
         let mut dream_timer = tokio::time::interval(self.dream_interval);
+        let mut pulse_timer = tokio::time::interval(self.pulse_interval);
         let mut maintenance_timer = tokio::time::interval(self.maintenance_interval);
 
         loop {
@@ -40,6 +44,9 @@ impl SovereignScheduler {
                 }
                 _ = dream_timer.tick() => {
                     self.run_dream().await;
+                }
+                _ = pulse_timer.tick() => {
+                    self.run_pulse().await;
                 }
                 _ = maintenance_timer.tick() => {
                     self.run_maintenance().await;
@@ -72,6 +79,20 @@ impl SovereignScheduler {
             Ok(s) if s.success() => info!("AEON: Dream cycle complete."),
             Ok(s) => warn!("AEON: Dream cycle failed with status: {}", s),
             Err(e) => warn!("AEON: Failed to spawn dream process: {}", e),
+        }
+    }
+
+    async fn run_pulse(&self) {
+        info!("AEON: Checking Holonomy Pulse (Ω·χ)...");
+        let status = std::process::Command::new("./chyren")
+            .arg("status")
+            .arg("--geometric")
+            .status();
+
+        match status {
+            Ok(s) if s.success() => info!("AEON: Geometric pulse stable."),
+            Ok(s) => warn!("AEON: Geometric pulse abnormal: {}", s),
+            Err(e) => warn!("AEON: Failed to check geometric pulse: {}", e),
         }
     }
 

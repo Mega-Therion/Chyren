@@ -305,7 +305,7 @@ def cmd_sovereign(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_status(remainder: list[str]) -> int:
+def cmd_status(args: argparse.Namespace, remainder: list[str]) -> int:
     from rich.console import Console
     from rich.table import Table
     from rich.text import Text
@@ -332,7 +332,7 @@ def cmd_status(remainder: list[str]) -> int:
     
     console.print(Panel(table, title="[bold white]UNIFIED BRAIN STATE[/]", border_style="neon.purple"))
     
-    if "--geometric" in remainder:
+    if getattr(args, "geometric", False):
         # Calculate Holonomy Pulse metrics
         ledger_path = STATE_DIR / "master_ledger.json"
         chi_avg = 1.0
@@ -367,7 +367,7 @@ def cmd_status(remainder: list[str]) -> int:
             except Exception as e:
                 console.print(f"[red]Error reading geometric pulse: {e}[/]")
 
-    emit_event("status.requested", geometric="--geometric" in remainder)
+    emit_event("status.requested", geometric=getattr(args, "geometric", False))
     return run_medulla(["status", *remainder]).returncode
 
 
@@ -583,7 +583,7 @@ def dispatch(args: argparse.Namespace, raw_argv: list[str]) -> int:
     if cmd in MEDULLA_PASSTHROUGH:
         return cmd_passthrough(cmd, remainder)
     if cmd == "status":
-        return cmd_status(remainder)
+        return cmd_status(args, remainder)
     if cmd == "reset":
         return cmd_reset(remainder, assume_yes=args.yes)
     if cmd == "telegram":
