@@ -10,7 +10,6 @@
 | **Riemann Hypothesis** | [riemann_hypothesis.md](docs/millennium/riemann_hypothesis.md) | [riemann_hypothesis_witness_v1.py](ops/scripts/riemann_hypothesis_witness_v1.py) | Scaffolding |
 | **P vs NP** | [p_vs_np.md](docs/millennium/p_vs_np.md) | [p_vs_np_witness_v1.py](ops/scripts/p_vs_np_witness_v1.py) | Scaffolding |
 | **Hodge Conjecture** | [hodge_conjecture.md](docs/millennium/hodge_conjecture.md) | [hodge_conjecture_witness_v1.py](ops/scripts/hodge_conjecture_witness_v1.py) | Scaffolding |
-| **BSD Conjecture** | [bsd_conjecture.md](docs/millennium/bsd_conjecture.md) | [bsd_witness_v1.py](ops/scripts/bsd_witness_v1.py) | Scaffolding |
 
 ### 📚 Crash Course in HistoRY (The Heavyweights)
 | Field | Proof (Markdown) | Witness (Python) | Breakthrough |
