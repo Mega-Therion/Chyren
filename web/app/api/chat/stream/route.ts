@@ -341,13 +341,29 @@ export async function POST(req: NextRequest) {
         // Tier 3: Local Ollama (Direct)
         const { ollama } = await import('@/lib/ai-gateway')
         const ollamaResult = await streamText({
-          model: ollama('llama3.2:3b'), // Using the specific model available in Ollama
+          model: ollama('llama3.2:3b'),
           system: systemPrompt,
           messages: sdkMessages,
           temperature: profile.temperature,
         })
 
-        return new Response(ollamaResult.textStream.pipeThrough(new TextEncoderStream()), {
+        const encoder = new TextEncoder()
+        const ollamaStream = new ReadableStream({
+          async start(controller) {
+            try {
+              for await (const chunk of ollamaResult.textStream) {
+                const payload = { choices: [{ delta: { content: chunk } }] }
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`))
+              }
+            } catch (e) {
+              logger.error('[STREAM ERROR] Ollama failed', e)
+            } finally {
+              controller.close()
+            }
+          }
+        })
+
+        return new Response(ollamaStream, {
           headers: {
             'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-cache',
