@@ -52,6 +52,7 @@ const Atom = ({ position, size, color }: { position: [number, number, number]; s
 }
 
 const Connection = ({ start, end }: { start: [number, number, number]; end: [number, number, number] }) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const lineRef = useRef<any>(null!)
   
   useFrame((state) => {

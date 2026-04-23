@@ -1,9 +1,10 @@
 import type { Entity } from './entity';
-export function standardize(raw: any): Entity {
+
+export function standardize(raw: Record<string, unknown>): Entity {
   return {
-    id: raw.id || raw.program_id,
-    name: raw.name || 'Unnamed Entity',
-    description: raw.description || '',
+    id: (raw.id ?? raw.program_id) as string,
+    name: (raw.name as string) || 'Unnamed Entity',
+    description: (raw.description as string) || '',
     realm: 'external',
     kind: 'dataset',
     provenance: {

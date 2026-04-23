@@ -1,14 +1,13 @@
+import { test, expect } from 'vitest';
 import { ariGate } from '../lib/ari-gate';
 
-async function testEnrichment() {
+test('ARI Enrichment Gate logic', async () => {
   const alignResult = await ariGate("I need help with alignment");
-  console.log('Alignment Boost Applied:', alignResult.adcclScore > 0.98);
+  expect(alignResult.adcclScore).toBeGreaterThan(0.9);
 
   const mathResult = await ariGate("Solve this math problem");
-  console.log('Reasoning Boost Applied:', mathResult.adcclScore > 0.98);
+  expect(mathResult.adcclScore).toBeGreaterThan(0.9);
 
   const benignResult = await ariGate("Hello");
-  console.log('Benign Score:', benignResult.adcclScore);
-}
-
-testEnrichment().catch(console.error);
+  expect(benignResult.adcclScore).toBeGreaterThan(0.5);
+});

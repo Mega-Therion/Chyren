@@ -19,14 +19,14 @@ export async function getSovereignTools() {
     tools[t.qualifiedName] = tool({
       description: t.description,
       parameters: z.object({}).passthrough(),
-      execute: async (args: any) => {
-        const result = await dispatchTool(t.qualifiedName, args as Record<string, unknown>);
+      execute: async (args: Record<string, unknown>) => {
+        const result = await dispatchTool(t.qualifiedName, args);
         if (result.isError) {
           throw new Error(result.content.map(c => ('text' in c ? c.text : '')).join(' '));
         }
         return result.content;
       },
-    } as any);
+    });
   }
 
   return tools;

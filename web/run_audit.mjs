@@ -67,7 +67,7 @@ async function runAudit() {
                  answer += data.choices[0].delta.content;
                }
                // the '0:' is another common format for nextjs streaming
-             } catch (e) {
+             } catch (_e) {
                  // Next.js ai/sdk stream format
                  if (line.startsWith('data: 0:')) {
                     const text = JSON.parse(line.substring(8));
@@ -78,7 +78,7 @@ async function runAudit() {
              try {
                 const text = JSON.parse(line.substring(2));
                 if (typeof text === 'string') answer += text;
-             } catch(e) {}
+             } catch(_e) {}
           }
         }
       }
