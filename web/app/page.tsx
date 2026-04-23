@@ -75,6 +75,7 @@ function consumeSseBuffer(buffer: string): {
 
 // ─── ARI verdict badge ────────────────────────────────────────────────────────
 function AriVerdictBadge({ ari }: { ari: AriMeta }) {
+  const tierStyle = {
     Benign:   'bg-green-500/10 border-green-500/30 text-green-400',
     Elevated: 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400',
     Critical: 'bg-rose-500/10 border-rose-500/30 text-rose-400',
