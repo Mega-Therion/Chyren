@@ -143,6 +143,7 @@ function StreamItem({ label, status, progress }: { label: string, status: string
         <span className={status === 'Active' ? 'text-blue-400' : 'text-gray-500'}>{status}</span>
       </div>
       <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+        {/* eslint-disable-next-line react/forbid-dom-props */}
         <div className="h-full bg-blue-500" style={{ width: `${progress}%` }} />
       </div>
     </div>

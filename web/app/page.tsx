@@ -75,25 +75,21 @@ function consumeSseBuffer(buffer: string): {
 
 // ─── ARI verdict badge ────────────────────────────────────────────────────────
 function AriVerdictBadge({ ari }: { ari: AriMeta }) {
-  const tierStyle = {
-    Benign:   { bg: 'rgba(57,255,20,0.08)',   border: 'rgba(57,255,20,0.3)',  color: '#39ff14' },
-    Elevated: { bg: 'rgba(255,223,0,0.08)',   border: 'rgba(255,223,0,0.3)', color: '#ffdf00' },
-    Critical: { bg: 'rgba(255,45,117,0.08)', border: 'rgba(255,45,117,0.3)', color: '#ff2d75' },
+    Benign:   'bg-green-500/10 border-green-500/30 text-green-400',
+    Elevated: 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400',
+    Critical: 'bg-rose-500/10 border-rose-500/30 text-rose-400',
   }[ari.riskTier]
   const Icon = ari.allowed ? ShieldCheck : ShieldX
   return (
     <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
       className="flex items-center gap-2 mt-2 flex-wrap pl-3">
-      <span style={{ background: tierStyle.bg, border: `1px solid ${tierStyle.border}`, color: tierStyle.color }}
-        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6rem] font-mono tracking-widest uppercase">
+      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6rem] font-mono tracking-widest uppercase border ${tierStyle}`}>
         <Icon size={9} /> C.A.S. · {ari.riskTier}
       </span>
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6rem] font-mono tracking-widest uppercase"
-        style={{ background: 'rgba(0,242,255,0.06)', border: '1px solid rgba(0,242,255,0.2)', color: 'rgba(0,242,255,0.85)' }}>
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6rem] font-mono tracking-widest uppercase bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
         ADCCL {(ari.adcclScore * 100).toFixed(0)}%
       </span>
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6rem] font-mono tracking-widest uppercase"
-        style={{ background: 'rgba(188,19,254,0.06)', border: '1px solid rgba(188,19,254,0.2)', color: 'rgba(188,19,254,0.75)' }}>
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.6rem] font-mono tracking-widest uppercase bg-purple-500/10 border border-purple-500/20 text-purple-400">
         R.W.Ϝ.Y. · {ari.ledgerHash.slice(0, 8)}…
       </span>
     </motion.div>

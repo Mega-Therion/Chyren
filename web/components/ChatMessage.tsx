@@ -125,7 +125,7 @@ function ProvenanceTrace({ messageId, model }: ProvenanceProps) {
         type="button"
         className="provenance-toggle"
         onClick={() => { setOpen(o => !o); haptic('receive') }}
-        aria-expanded={open}
+        aria-expanded={open ? 'true' : 'false'}
         aria-label="View provenance trace"
       >
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -138,7 +138,7 @@ function ProvenanceTrace({ messageId, model }: ProvenanceProps) {
           fill="none"
           stroke="currentColor"
           strokeWidth="2.5"
-          style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}
+          className={`transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
         >
           <polyline points="6 9 12 15 18 9"/>
         </svg>
@@ -302,10 +302,7 @@ export function ChatMessage({
         )}
 
         {/* Content */}
-        <div
-          className="text-[0.95rem] leading-relaxed text-white/90"
-          style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
-        >
+        <div className="text-[0.95rem] leading-relaxed text-white/90 whitespace-pre-wrap break-words">
           {role === 'assistant' ? (
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
