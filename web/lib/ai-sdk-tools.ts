@@ -18,9 +18,9 @@ export async function getSovereignTools() {
   for (const t of registered) {
     tools[t.qualifiedName] = tool({
       description: t.description,
-      parameters: z.object({}).passthrough(),
-      execute: async (args: Record<string, unknown>) => {
-        const result = await dispatchTool(t.qualifiedName, args);
+      parameters: z.record(z.any()),
+      execute: async (args) => {
+        const result = await dispatchTool(t.qualifiedName, args as Record<string, unknown>);
         if (result.isError) {
           throw new Error(result.content.map(c => ('text' in c ? c.text : '')).join(' '));
         }
