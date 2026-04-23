@@ -76,13 +76,16 @@ function AuditBadge({ audit }: { audit: { passed: boolean; score: number; flags:
   const scoreBorder =
     score >= 0.7 ? 'rgba(57,255,20,0.22)' : score >= 0.5 ? 'rgba(255,215,0,0.2)' : 'rgba(255,68,68,0.22)'
 
+  const pillClass = score >= 0.7
+    ? 'text-green-400 bg-green-500/10 border-green-500/20'
+    : score >= 0.5
+      ? 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20'
+      : 'text-red-400 bg-red-500/10 border-red-500/20'
+
   return (
     <span className="inline-flex items-center gap-1.5 flex-wrap">
       {/* Score pill */}
-      <span
-        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-mono text-[10px] tracking-wider border"
-        style={{ color: scoreColor, background: scoreBg, borderColor: scoreBorder }}
-      >
+      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-mono text-[10px] tracking-wider border ${pillClass}`}>
         {audit.passed ? '✓' : '✗'}
         <span>{(score * 100).toFixed(0)}%</span>
       </span>
@@ -90,8 +93,7 @@ function AuditBadge({ audit }: { audit: { passed: boolean; score: number; flags:
       {audit.flags.map(flag => (
         <span
           key={flag}
-          className="inline-flex items-center px-1.5 py-0.5 rounded font-mono text-[9px] tracking-wide"
-          style={{ color: 'rgba(255,255,255,0.35)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+          className="inline-flex items-center px-1.5 py-0.5 rounded font-mono text-[9px] tracking-wide text-white/35 bg-white/5 border border-white/10"
         >
           {flag.replace(/ \(.*\)$/, '')}
         </span>
@@ -125,7 +127,7 @@ function ProvenanceTrace({ messageId, model }: ProvenanceProps) {
         type="button"
         className="provenance-toggle"
         onClick={() => { setOpen(o => !o); haptic('receive') }}
-        aria-expanded={open ? 'true' : 'false'}
+        aria-expanded={open}
         aria-label="View provenance trace"
       >
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

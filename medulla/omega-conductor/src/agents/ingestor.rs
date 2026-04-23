@@ -23,6 +23,7 @@ use super::{MathSpoke, PersistentAgent};
 /// A pending ingestion request.
 #[derive(Debug, Clone)]
 pub struct IngestionRequest {
+    /// Source URL to ingest.
     pub url: String,
     /// Hint about the mathematical domain (e.g. "number_theory")
     pub domain_hint: String,
@@ -34,6 +35,7 @@ pub struct IngestionRequest {
 /// absorbs verified KnowledgeNodes into the Neocortex.
 pub struct IngestorAgent {
     myelin: Arc<MyelinService>,
+    #[allow(dead_code)]
     neocortex: Arc<Neocortex>,
     cold_store: Arc<ColdStore>,
     proof_index: Arc<Mutex<ProofConstraintIndex>>,
@@ -42,6 +44,8 @@ pub struct IngestorAgent {
 }
 
 impl IngestorAgent {
+    /// Create a new IngestorAgent with access to Myelin, Neocortex, ColdStore,
+    /// and ProofConstraintIndex subsystems.
     pub fn new(
         myelin: Arc<MyelinService>,
         neocortex: Arc<Neocortex>,

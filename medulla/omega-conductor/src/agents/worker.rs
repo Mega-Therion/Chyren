@@ -11,6 +11,7 @@ use omega_core::AgentTask;
 use serde_json;
 
 /// A worker that executes tasks for a specific agent via MQTT.
+#[allow(dead_code)]
 pub struct MeshWorker {
     agent: Arc<dyn PersistentAgent>,
     mqtt_client: AsyncClient,

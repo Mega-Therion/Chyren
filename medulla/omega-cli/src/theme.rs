@@ -13,8 +13,10 @@ use termimad::MadSkin;
 
 pub const CORE_CYAN: &str = "#00f5ff";
 pub const NEURAL_BLUE: &str = "#3366ff";
+#[allow(dead_code)]
 pub const VOID_BLACK: &str = "#000103"; // Deep space black
 pub const GHOST_WHITE: &str = "#e0e0e0";
+#[allow(dead_code)]
 pub const GLASS_GLOW: &str = "#1a1a2e"; // Subtle blue-gray background tint
 
 // ── ANSI TrueColor Helpers ───────────────────────────────────────────────────
@@ -27,6 +29,7 @@ fn hex_fg(hex: &str) -> String {
     format!("\x1b[38;2;{};{};{}m", r, g, b)
 }
 
+#[allow(dead_code)]
 fn hex_bg(hex: &str) -> String {
     let hex = hex.trim_start_matches('#');
     let r = u8::from_str_radix(&hex[0..2], 16).unwrap_or(0);
@@ -167,6 +170,7 @@ pub fn prompt() -> String {
     format!("{} chyren {}❯{} ", hex_fg(CORE_CYAN), hex_fg(NEURAL_BLUE), R)
 }
 
+#[allow(dead_code)]
 pub fn print_thinking(msg: &str, frame: usize) {
     let frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
     let spinner = gradient(frames[frame % frames.len()], frame);

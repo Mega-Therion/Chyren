@@ -24,20 +24,28 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 
 const MAX_REFINEMENT_DEPTH: usize = 5;
+#[allow(dead_code)]
 const ENTROPY_ANCHOR_THRESHOLD: f32 = 0.5;
 
 /// Result of a full Epistemic Mesh run.
 pub struct MeshResult {
+    /// The final converged answer.
     pub final_answer: String,
+    /// Summary of the chiral graph state.
     pub graph_summary: GraphSummary,
+    /// Total axiom violations encountered during reasoning.
     pub axiom_violations_encountered: usize,
+    /// Number of logic-cache entries written.
     pub logic_cache_entries_written: usize,
+    /// Number of sovereign axiom reviews triggered.
     pub sovereign_reviews_triggered: usize,
+    /// Whether the mesh converged.
     pub converged: bool,
 }
 
 /// The Epistemic Mesh orchestrator.
 pub struct EpistemicMesh {
+    #[allow(dead_code)]
     neocortex: Arc<Neocortex>,
     cold_store: Arc<ColdStore>,
     proof_index: Arc<Mutex<ProofConstraintIndex>>,
@@ -45,6 +53,8 @@ pub struct EpistemicMesh {
 }
 
 impl EpistemicMesh {
+    /// Create a new EpistemicMesh with access to the Neocortex, ColdStore,
+    /// and ProofConstraintIndex subsystems.
     pub fn new(
         neocortex: Arc<Neocortex>,
         cold_store: Arc<ColdStore>,
@@ -314,6 +324,7 @@ impl EpistemicMesh {
         "[EpistemicMesh: no LLM provider available]".to_string()
     }
 
+    #[allow(dead_code)]
     async fn call_openllm(&self, prompt: &str) -> Result<String, String> {
         let base = std::env::var("OPENLLM_BASE_URL")
             .unwrap_or_else(|_| "http://localhost:3000/v1".to_string());

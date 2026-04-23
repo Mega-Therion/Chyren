@@ -17,6 +17,7 @@ use std::time::{Duration, Instant};
 use omega_cli::conductor::Conductor;
 use omega_core::mesh::{AgentRegistry, AgentStatus};
 
+#[allow(dead_code)]
 pub struct TuiApp {
     pub conductor: Arc<Conductor>,
     pub registry: Arc<Mutex<AgentRegistry>>,
