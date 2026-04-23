@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * AI SDK Tool Adapters
  * 
@@ -16,7 +17,6 @@ export async function getSovereignTools() {
   const tools: Record<string, Tool> = {};
 
   for (const t of registered) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (tools as any)[t.qualifiedName] = tool({
       description: t.description,
       parameters: z.record(z.string(), z.any()),
@@ -27,7 +27,7 @@ export async function getSovereignTools() {
         }
         return result.content;
       },
-    });
+    } as any);
   }
 
   return tools;
