@@ -321,14 +321,11 @@ mod tests {
             10,
         ).await;
         // May fail if ~/.omega is not writable; ignore IO error in CI
-        match result {
-            Ok(f) => {
-                assert!(!f.core_principles.is_empty());
-                assert!(!f.addressed_problems.is_empty());
-                let md = f.to_markdown();
-                assert!(md.contains("IDENTITY FOUNDATION"));
-            }
-            Err(_) => {} // acceptable in restricted environments
+        if let Ok(f) = result {
+            assert!(!f.core_principles.is_empty());
+            assert!(!f.addressed_problems.is_empty());
+            let md = f.to_markdown();
+            assert!(md.contains("IDENTITY FOUNDATION"));
         }
     }
 }

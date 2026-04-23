@@ -6,9 +6,12 @@
 use rumqttc::{AsyncClient, MqttOptions, QoS, Event, Packet};
 use std::time::Duration;
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU64, Ordering};
 use crate::agents::PersistentAgent;
 use omega_core::AgentTask;
 use serde_json;
+
+static WORKER_COUNTER: AtomicU64 = AtomicU64::new(0);
 
 /// A worker that executes tasks for a specific agent via MQTT.
 #[allow(dead_code)]
@@ -21,7 +24,9 @@ impl MeshWorker {
     /// Create a new worker for the given agent and connect to the broker.
     pub async fn new(agent: Arc<dyn PersistentAgent>) -> Self {
         let agent_id = agent.name().to_string();
-        let mut mqttoptions = MqttOptions::new(format!("worker-{}", agent_id), "localhost", 1883);
+        let worker_seq = WORKER_COUNTER.fetch_add(1, Ordering::Relaxed);
+        let client_id = format!("worker-{}-{}", agent_id, worker_seq);
+        let mut mqttoptions = MqttOptions::new(client_id, "localhost", 1883);
         mqttoptions.set_keep_alive(Duration::from_secs(5));
 
         let (mqtt_client, mut eventloop) = AsyncClient::new(mqttoptions, 10);

@@ -35,16 +35,15 @@ pub struct AgentRegistryEntry {
     pub last_heartbeat: u64,
 }
 
-/// The central truth source for agent availability.
+#[derive(Default)]
 pub struct AgentRegistry {
     pub agents: HashMap<String, AgentRegistryEntry>,
 }
 
 impl AgentRegistry {
+    /// Create a new empty agent registry.
     pub fn new() -> Self {
-        Self {
-            agents: HashMap::new(),
-        }
+        Self::default()
     }
 
     pub fn register(&mut self, entry: AgentRegistryEntry) {

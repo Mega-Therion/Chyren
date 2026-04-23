@@ -59,7 +59,7 @@ impl PersistentAgent for MctsSolverAgent {
                     run_id: task.run_id,
                     agent_id: task.agent_id,
                     success: true,
-                    output: format!("MCTS selection complete. Dispatched branch beta-7 for evaluation."),
+                    output: "MCTS selection complete. Dispatched branch beta-7 for evaluation.".to_string(),
                     adccl_score: Some(0.95),
                     error: None,
                     completed_at: now(),

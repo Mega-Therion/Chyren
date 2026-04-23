@@ -131,7 +131,7 @@ impl ColdStore {
             let path = entry.path();
             if path.is_dir() {
                 self.walk_hashes(&path, out)?;
-            } else if path.extension().map_or(false, |e| e == "json") {
+            } else if path.extension().is_some_and(|e| e == "json") {
                 if let Some(stem) = path.file_stem().and_then(|s| s.to_str()) {
                     out.push(stem.to_string());
                 }

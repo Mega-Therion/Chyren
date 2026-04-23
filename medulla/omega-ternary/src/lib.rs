@@ -26,7 +26,7 @@ impl Ternary {
     }
 }
 
-use std::ops::{Add, Sub, Mul};
+use std::ops::{Add, Sub, Mul, Neg};
 
 impl Add for Ternary {
     type Output = Ternary;
@@ -43,8 +43,9 @@ impl Add for Ternary {
 
 impl Sub for Ternary {
     type Output = Ternary;
+    #[allow(clippy::suspicious_arithmetic_impl)]
     fn sub(self, rhs: Ternary) -> Ternary {
-        self + rhs.neg()
+        self + (-rhs)
     }
 }
 
@@ -60,8 +61,9 @@ impl Mul for Ternary {
     }
 }
 
-impl Ternary {
-    pub fn neg(self) -> Ternary {
+impl Neg for Ternary {
+    type Output = Ternary;
+    fn neg(self) -> Ternary {
         match self {
             Ternary::Neg => Ternary::Pos,
             Ternary::Zero => Ternary::Zero,

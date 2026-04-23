@@ -99,7 +99,7 @@ impl ProofConstraintIndex {
             fs::create_dir_all(parent)?;
         }
         let bytes = serde_json::to_vec_pretty(self)
-            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
+            .map_err(std::io::Error::other)?;
         fs::write(path, bytes)
     }
 

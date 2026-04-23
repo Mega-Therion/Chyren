@@ -169,9 +169,9 @@ impl ADCCL {
             ].iter().copied().collect();
             let words: Vec<&str> = text.split_whitespace().collect();
             let stop_count = words.iter()
-                .filter(|w| stopwords.contains(&w.to_lowercase().trim_matches(|c: char| !c.is_alphabetic()) as &str))
+                .filter(|w| stopwords.contains(w.to_lowercase().trim_matches(|c: char| !c.is_alphabetic())))
                 .count();
-            if words.len() > 0 && stop_count as f32 / words.len() as f32 > 0.65 {
+            if !words.is_empty() && stop_count as f32 / words.len() as f32 > 0.65 {
                 flags.push("LOW_INFORMATION_DENSITY".to_string());
                 score -= 0.15;
             }

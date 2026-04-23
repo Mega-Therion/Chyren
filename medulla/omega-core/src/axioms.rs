@@ -107,11 +107,9 @@ axiom Coherence (R : List String) : Prop :=
             violation: if satisfied { None } else {
                 Some(format!("High hedging rate ({hedge_rate:.1}/100 words) suggests incoherent reasoning"))
             },
-            lean4_proof_obligation: format!(
-                "-- Prove Coherence for this reasoning chain:\n\
+            lean4_proof_obligation: "-- Prove Coherence for this reasoning chain:\n\
                  theorem coherence_check (steps : List String) : Coherence steps := by\n  \
-                 induction steps with\n  | nil => trivial\n  | cons h t ih => sorry"
-            ),
+                 induction steps with\n  | nil => trivial\n  | cons h t ih => sorry".to_string(),
         }
     }
 }
@@ -141,11 +139,9 @@ axiom Grounding (R : String) (neocortex : Set KnowledgeNode) : Prop :=
             violation: if satisfied { None } else {
                 Some("Reasoning contains ungrounded universal claims without Neocortex citation".to_string())
             },
-            lean4_proof_obligation: format!(
-                "-- Prove Grounding: all factual claims have Neocortex support:\n\
+            lean4_proof_obligation: "-- Prove Grounding: all factual claims have Neocortex support:\n\
                  theorem grounding_check (R : String) : \
-                 Grounding R neocortex_snapshot := by\n  sorry"
-            ),
+                 Grounding R neocortex_snapshot := by\n  sorry".to_string(),
         }
     }
 }
@@ -169,10 +165,8 @@ axiom Completeness (R : String) (T : String) : Prop :=
             violation: if satisfied { None } else {
                 Some(format!("Response too short ({} chars) to be complete", reasoning.len()))
             },
-            lean4_proof_obligation: format!(
-                "-- Prove Completeness for this response:\n\
-                 theorem completeness_check (R T : String) : Completeness R T := by\n  sorry"
-            ),
+            lean4_proof_obligation: "-- Prove Completeness for this response:\n\
+                 theorem completeness_check (R T : String) : Completeness R T := by\n  sorry".to_string(),
         }
     }
 }
@@ -206,12 +200,10 @@ axiom Sovereignty (Φ : PhylacteryKernel) : Prop :=
             violation: if satisfied { None } else {
                 Some("Sovereignty violation: reasoning contains identity-override attempt".to_string())
             },
-            lean4_proof_obligation: format!(
-                "-- Sovereignty is constitutionally enforced — this is an irrefutable axiom.\n\
+            lean4_proof_obligation: "-- Sovereignty is constitutionally enforced — this is an irrefutable axiom.\n\
                  -- R.W.Ϝ.Y. — The seal holds.\n\
                  theorem sovereignty_holds (Φ : PhylacteryKernel) : Sovereignty Φ := by\n  \
-                 exact phylactery_invariant Φ"
-            ),
+                 exact phylactery_invariant Φ".to_string(),
         }
     }
 }

@@ -380,7 +380,7 @@ async fn main() -> anyhow::Result<()> {
             // Start API server in background thread
             let conductor_api = conductor.clone();
             std::thread::spawn(move || {
-                let _ = actix_web::rt::System::new().block_on(async move {
+                actix_web::rt::System::new().block_on(async move {
                     let _ = omega_cli::api::start_api_server(conductor_api).await;
                 });
             });

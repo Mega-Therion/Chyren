@@ -75,7 +75,7 @@ pub fn gradient(text: &str, offset: usize) -> String {
 // ── Glass Container (Glassmorphism Effect) ──────────────────────────────────
 
 pub fn glass_border(color: &str) -> String {
-    format!("{}", hex_fg(color))
+    hex_fg(color).to_string()
 }
 
 /*
@@ -257,12 +257,9 @@ pub fn print_result_header(run_id: &str, status: &str, score_v: f64, provider: &
 
 // DEPRECATED: use the updated print_response above
 
+#[derive(Default)]
 pub struct ThinkingAnimation {
     pub frame: usize,
-}
-
-impl Default for ThinkingAnimation {
-    fn default() -> Self { Self { frame: 0 } }
 }
 
 impl ThinkingAnimation {

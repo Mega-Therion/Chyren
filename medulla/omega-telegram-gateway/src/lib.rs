@@ -251,15 +251,17 @@ pub async fn run_bridge(token: String) -> Result<(), Box<dyn std::error::Error +
                     "/status" => {
                         // Best-effort status: conductor health info.
                         let status = conductor.health_status().await;
+                        let conductor_status = if status.conductor_ok { "operational" } else { "degraded" };
+                        let qdrant_status = if status.qdrant_ok { "connected" } else { "unavailable" };
                         format!(
                             "System Status\n\nConductor: {}\nProviders: {}\nLedger: {}\nQdrant: {}",
-                            status.conductor_ok.then_some("operational").unwrap_or("degraded"),
+                            conductor_status,
                             status.active_providers.join(", "),
                             status
                                 .ledger_entry_count
                                 .map(|n| format!("{n} entries"))
                                 .unwrap_or_else(|| "unavailable".to_string()),
-                            status.qdrant_ok.then_some("connected").unwrap_or("unavailable"),
+                            qdrant_status,
                         )
                     }
                     _ => format!(

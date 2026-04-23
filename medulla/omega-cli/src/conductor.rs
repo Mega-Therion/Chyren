@@ -255,7 +255,7 @@ impl Conductor {
         if let Ok(entries) = std::fs::read_dir(dir_path) {
             for entry in entries.flatten() {
                 let path = entry.path();
-                if path.extension().map_or(false, |e| e == "json") {
+                if path.extension().is_some_and(|e| e == "json") {
                     if let Ok(content) = std::fs::read_to_string(&path) {
                         if let Ok(program) = serde_json::from_str::<MatrixProgram>(&content) {
                             let ms = self.memory_service.clone();
@@ -980,9 +980,7 @@ impl Conductor {
         let pass_count = votes.iter().filter(|(_, _, passed, _)| *passed).count();
         let total_votes = votes.len();
         
-        let consensus_passed = if total_votes >= 3 {
-            pass_count >= 2
-        } else if total_votes == 2 {
+        let consensus_passed = if total_votes >= 2 {
             pass_count >= 2
         } else {
             pass_count == 1

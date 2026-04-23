@@ -330,9 +330,8 @@ pub struct MathlibCrawler {
     queue: Vec<IngestionRequest>,
 }
 
-impl MathlibCrawler {
-    /// Create a new MathlibCrawler with a pre-configured HTTP client.
-    pub fn new() -> Self {
+impl Default for MathlibCrawler {
+    fn default() -> Self {
         Self {
             http: reqwest::Client::builder()
                 .timeout(std::time::Duration::from_secs(20))
@@ -342,6 +341,13 @@ impl MathlibCrawler {
             visited: HashSet::new(),
             queue: Vec::new(),
         }
+    }
+}
+
+impl MathlibCrawler {
+    /// Create a new MathlibCrawler with a pre-configured HTTP client.
+    pub fn new() -> Self {
+        Self::default()
     }
 
     /// Fetch the raw .lean source for a module path.
