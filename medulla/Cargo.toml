@@ -38,7 +38,7 @@ rumqttd = "0.19"
 rumqttc = "0.24"
 chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1.0", features = ["v4", "serde"] }
-reqwest = { version = "0.12", features = ["json"] }
+reqwest = { version = "0.12", features = ["json", "multipart"] }
 futures = "0.3"
 
 [workspace.package]

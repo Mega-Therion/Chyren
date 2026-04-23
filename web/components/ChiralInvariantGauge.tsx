@@ -13,7 +13,7 @@ interface ChiralInvariantGaugeProps {
 export const ChiralInvariantGauge: React.FC<ChiralInvariantGaugeProps> = ({ 
   score = 0.85, 
   holonomySign = 1, 
-  _status = "verified" 
+  status: _status = "verified" 
 }) => {
   const isLType = score >= 0.7 && holonomySign === 1;
   const color = isLType ? "text-cyan-400" : "text-magenta-400";
