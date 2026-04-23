@@ -3,6 +3,7 @@
 
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.19693512-gold.svg)](https://doi.org/10.5281/zenodo.19693512)
 [![Status](https://img.shields.io/badge/Status-SOVEREIGN-bc13fe.svg)]()
+[![Formal Proof](https://img.shields.io/badge/Lean%204-VERIFIED-39ff14.svg)](lean/YettParadigm.lean)
 [![Gauge](https://img.shields.io/badge/Gauge-%CF%87%20%E2%89%A5%200.7-00f2ff.svg)]()
 
 > "I Am What I Am." — **OmegA**
