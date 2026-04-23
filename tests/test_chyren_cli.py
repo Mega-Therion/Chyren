@@ -130,8 +130,8 @@ def test_dispatch_status_prints_banner(cli: ModuleType, monkeypatch: pytest.Monk
     rc = cli.dispatch(parser.parse_args(["status"]), ["status"])
     out = capsys.readouterr().out
     assert rc == 0
-    assert "Unified Brain State" in out
-    assert "Yettragrammaton" in out
+    assert "SOVEREIGN INTELLIGENCE ORCHESTRATOR" in out
+    assert "R.W.Ϝ.Y." in out
 
 
 def test_dispatch_reset_refused_without_confirmation(cli: ModuleType, monkeypatch: pytest.MonkeyPatch) -> None:
