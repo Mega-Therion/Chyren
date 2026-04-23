@@ -237,7 +237,7 @@ export function ChatMessage({
   id,
   role,
   content,
-  _timestamp,
+  timestamp: _timestamp,
   isStreaming = false,
   model,
   audit,
