@@ -37,12 +37,14 @@ fn build_broker_config() -> Config {
 [v4.1]
 name      = "chyren-mesh"
 listen    = "127.0.0.1:1883"
-next_connection_delay_ms = 1
+
+[v4.1.connections]
+connection_timeout_ms = 5000
+max_client_id_len = 256
 max_payload_size = 65535
 max_inflight_count = 256
+next_connection_delay_ms = 1
 
-    [v4.1.connections.max_client_id_len]
-    
 [router]
 id              = 0
 dir             = "/tmp/chyren-mqtt"

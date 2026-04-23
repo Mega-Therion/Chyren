@@ -1004,7 +1004,8 @@ impl Conductor {
         Ok(VerificationResult {
             passed: consensus_passed,
             score: avg_score,
-            empathy_score: 1.0, // Default for consensus bypass or similar
+            empathy_score: 1.0, 
+            chiral_invariant: avg_score, 
             flags: all_flags.into_iter().collect(),
             status: if consensus_passed { "verified (consensus)".to_string() } else { "rejected (consensus)".to_string() },
         })
