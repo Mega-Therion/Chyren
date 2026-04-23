@@ -16,11 +16,12 @@ export async function getSovereignTools() {
   const tools: Record<string, Tool> = {};
 
   for (const t of registered) {
-    tools[t.qualifiedName] = tool({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (tools as any)[t.qualifiedName] = tool({
       description: t.description,
       parameters: z.record(z.string(), z.any()),
-      execute: async (args: Record<string, any>) => {
-        const result = await dispatchTool(t.qualifiedName, args as Record<string, unknown>);
+      execute: async (args: any) => {
+        const result = await dispatchTool(t.qualifiedName, args);
         if (result.isError) {
           throw new Error(result.content.map(c => ('text' in c ? c.text : '')).join(' '));
         }
