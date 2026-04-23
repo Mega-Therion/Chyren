@@ -26,11 +26,13 @@ pub struct DerivationRule {
     pub derived_from: Vec<String>,
     /// Human-readable derivation description.
     pub description: String,
+    /// Timestamp when this derivation rule was created.
     pub created_at: f64,
 }
 
 // ── Compression Report ────────────────────────────────────────────────────────
 
+/// Report summarizing compression decisions for a graph snapshot.
 #[derive(Debug, Default)]
 pub struct CompressionReport {
     /// Nodes that were compressed into derivation rules.
@@ -52,6 +54,7 @@ pub struct CompressionReport {
 pub struct DreamCompressor;
 
 impl DreamCompressor {
+    /// Create a new DreamCompressor.
     pub fn new() -> Self {
         Self
     }
@@ -162,10 +165,13 @@ impl Default for DreamCompressor {
 
 // ── Legacy synthesis entry point ──────────────────────────────────────────────
 
+/// Legacy identity kernel used for timestamp-anchored synthesis.
 pub struct PhylacteryKernel {
+    /// ISO-8601 timestamp of the last synthesis.
     pub timestamp: String,
 }
 
+/// Legacy entry point for identity synthesis updates.
 pub fn synthesize_and_update() -> Result<(), String> {
     let now = SystemTime::now()
         .duration_since(UNIX_EPOCH)

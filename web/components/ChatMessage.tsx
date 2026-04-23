@@ -69,13 +69,6 @@ function CodeBlock({ children, className }: { children?: React.ReactNode; classN
 
 function AuditBadge({ audit }: { audit: { passed: boolean; score: number; flags: string[] } }) {
   const score = audit.score
-  const scoreColor =
-    score >= 0.7 ? '#39ff14' : score >= 0.5 ? '#ffd700' : '#ff4444'
-  const scoreBg =
-    score >= 0.7 ? 'rgba(57,255,20,0.08)' : score >= 0.5 ? 'rgba(255,215,0,0.08)' : 'rgba(255,68,68,0.08)'
-  const scoreBorder =
-    score >= 0.7 ? 'rgba(57,255,20,0.22)' : score >= 0.5 ? 'rgba(255,215,0,0.2)' : 'rgba(255,68,68,0.22)'
-
   const pillClass = score >= 0.7
     ? 'text-green-400 bg-green-500/10 border-green-500/20'
     : score >= 0.5

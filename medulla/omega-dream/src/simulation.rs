@@ -7,12 +7,14 @@ use tokio::time::{sleep, Duration};
 use omega_neocortex::Neocortex;
 use crate::Service as DreamService;
 
+/// Background worker that projects potential task outcomes from historical failure patterns.
 pub struct DreamSimulationWorker {
     dream_service: Arc<tokio::sync::Mutex<DreamService>>,
     neocortex: Arc<Neocortex>,
 }
 
 impl DreamSimulationWorker {
+    /// Create a new simulation worker with the given dream service and neocortex.
     pub fn new(dream_service: Arc<tokio::sync::Mutex<DreamService>>, neocortex: Arc<Neocortex>) -> Self {
         Self {
             dream_service,
@@ -20,6 +22,7 @@ impl DreamSimulationWorker {
         }
     }
 
+    /// Run the continuous simulation loop, projecting outcomes every 5 minutes.
     pub async fn run(&self) {
         loop {
             // Background simulation logic
