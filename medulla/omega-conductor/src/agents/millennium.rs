@@ -16,31 +16,53 @@ use std::collections::{HashSet, VecDeque};
 
 // ── Sovereign Disciplines ─────────────────────────────────────────────────────
 
+/// All mathematical and philosophical disciplines tracked by the Sovereign system.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum SovereignDiscipline {
+    /// Pure arithmetic and number operations.
     Arithmetic,
+    /// Advanced number theory (primes, zeta, etc.).
     NumberTheory,
+    /// Quantum mechanics and Hilbert spaces.
     QuantumTheory,
+    /// Theoretical physics and manifolds.
     TheoreticalPhysics,
+    /// Algebraic geometry and scheme theory.
     AlgebraicGeometry,
+    /// Complex analysis and holomorphic functions.
     ComplexAnalysis,
+    /// Euclidean and analytic geometry.
     EuclideanGeometry,
+    /// Non-Euclidean and geodesic geometry.
     NonEuclideanGeometry,
+    /// Linear and non-linear differential equations.
     DifferentialEquations,
+    /// Linear algebra and vector spaces.
     LinearAlgebra,
+    /// Abstract algebra and group theory.
     AbstractAlgebra,
+    /// General and algebraic topology.
     Topology,
+    /// Differential and integral calculus.
     Calculus,
+    /// Trigonometry and periodic functions.
     Trigonometry,
+    /// Classical kinematics and dynamics.
     Kinematics,
+    /// Geometric and wave optics.
     Optics,
+    /// Cryptography and information theory.
     Cryptography,
+    /// Probability and statistics.
     Statistics,
+    /// Formal logic and rhetorical argumentation.
     LogicAndRhetoric,
+    /// Socratic and Aristotelian philosophy.
     ClassicalPhilosophy,
 }
 
 impl SovereignDiscipline {
+    /// Returns the human-readable name of this discipline.
     pub fn name(&self) -> &'static str {
         match self {
             Self::Arithmetic => "Pure Arithmetic",
@@ -66,6 +88,7 @@ impl SovereignDiscipline {
         }
     }
 
+    /// Returns the Mathlib4 domain key for this discipline.
     pub fn domain(&self) -> &'static str {
         match self {
             Self::Arithmetic => "arithmetic",
@@ -91,6 +114,7 @@ impl SovereignDiscipline {
         }
     }
 
+    /// Returns the Mathlib4 entry module paths for this discipline.
     pub fn mathlib4_entry_modules(&self) -> &'static [&'static str] {
         match self {
             Self::Arithmetic => &[
@@ -173,17 +197,25 @@ impl SovereignDiscipline {
 
 // ── Millennium Prize Problems ─────────────────────────────────────────────────
 
+/// The six unsolved Clay Mathematics Institute Millennium Prize Problems.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum MillenniumProblem {
+    /// The Riemann Hypothesis — zeros of ζ(s) on the critical line.
     RiemannHypothesis,
+    /// P vs NP — computational complexity separation.
     PVsNP,
+    /// Navier-Stokes existence and smoothness.
     NavierStokes,
+    /// Yang-Mills existence and mass gap.
     YangMills,
+    /// The Hodge Conjecture — algebraic cycles on projective manifolds.
     HodgeConjecture,
+    /// Birch and Swinnerton-Dyer Conjecture — L-function rank.
     BirchSwinnertonDyer,
 }
 
 impl MillenniumProblem {
+    /// Returns the human-readable name of this problem.
     pub fn name(&self) -> &'static str {
         match self {
             Self::RiemannHypothesis => "Riemann Hypothesis",
@@ -195,6 +227,7 @@ impl MillenniumProblem {
         }
     }
 
+    /// Returns the Mathlib4 domain key for this problem.
     pub fn domain(&self) -> &'static str {
         match self {
             Self::RiemannHypothesis => "number_theory",
@@ -298,6 +331,7 @@ pub struct MathlibCrawler {
 }
 
 impl MathlibCrawler {
+    /// Create a new MathlibCrawler with a pre-configured HTTP client.
     pub fn new() -> Self {
         Self {
             http: reqwest::Client::builder()
@@ -394,6 +428,7 @@ impl MathlibCrawler {
         }
     }
 
+    /// Consume the crawler and return the accumulated ingestion queue.
     pub fn into_queue(self) -> Vec<IngestionRequest> {
         self.queue
     }
@@ -413,10 +448,12 @@ pub struct SearchAndExtendAgent {
 }
 
 impl SearchAndExtendAgent {
+    /// Create a new SearchAndExtendAgent wrapping the given IngestorAgent.
     pub fn new(ingestor: IngestorAgent) -> Self {
         Self { ingestor }
     }
 
+    /// Run targeted Mathlib4 ingestion for a specific Millennium Prize Problem.
     pub async fn run(&self, problem: MillenniumProblem, max_depth: usize) -> SearchExtendReport {
         let mut report = SearchExtendReport {
             problem: problem.name().to_string(),
@@ -457,6 +494,7 @@ impl SearchAndExtendAgent {
         report
     }
 
+    /// Run targeted Mathlib4 ingestion for a Sovereign Discipline.
     pub async fn run_discipline(&self, discipline: SovereignDiscipline, max_depth: usize) -> SearchExtendReport {
         let mut report = SearchExtendReport {
             problem: discipline.name().to_string(),
@@ -498,11 +536,16 @@ impl SearchAndExtendAgent {
     }
 }
 
+/// Report from a SearchAndExtend agent run.
 #[derive(Debug, Serialize)]
 pub struct SearchExtendReport {
+    /// Name of the target problem or discipline.
     pub problem: String,
+    /// Number of Mathlib4 modules crawled.
     pub modules_crawled: usize,
+    /// Content hashes of successfully absorbed knowledge nodes.
     pub absorbed_hashes: Vec<String>,
+    /// Errors encountered during ingestion.
     pub errors: Vec<String>,
 }
 

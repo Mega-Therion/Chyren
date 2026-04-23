@@ -21,17 +21,23 @@ use std::collections::HashMap;
 /// 0.0 = full consensus, 1.0 = maximum divergence.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EpistemicEntropy {
+    /// Normalized entropy value (0.0 = consensus, 1.0 = max divergence).
     pub value: f32,
+    /// Number of primary reasoning nodes.
     pub primary_node_count: usize,
+    /// Total axiom violations across all nodes.
     pub violated_axiom_count: usize,
+    /// Highest axiom violation level encountered.
     pub max_violation_level: u8,
 }
 
 impl EpistemicEntropy {
+    /// Returns true if entropy indicates critical divergence.
     pub fn is_critical(&self) -> bool {
         self.value > 0.7 || self.max_violation_level == 0
     }
 
+    /// Returns true if entropy exceeds threshold for axiom re-anchor.
     pub fn requires_axiom_review(&self) -> bool {
         self.value > 0.5 || self.violated_axiom_count > 2
     }
@@ -39,18 +45,24 @@ impl EpistemicEntropy {
 
 // ── Chiral Graph ──────────────────────────────────────────────────────────────
 
+/// The runtime chiral reasoning graph.
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct ChiralGraph {
+    /// All epistemic nodes keyed by ID.
     pub nodes: HashMap<String, EpistemicNode>,
+    /// All directed edges between nodes.
     pub edges: Vec<ChiralEdge>,
+    /// Current refinement depth.
     pub depth: usize,
 }
 
 impl ChiralGraph {
+    /// Create an empty chiral graph.
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// Insert a node, computing its entropy weight, and return its ID.
     pub fn add_node(&mut self, mut node: EpistemicNode) -> String {
         node.entropy_weight = self.compute_node_entropy_weight(&node);
         let id = node.id.clone();
@@ -58,6 +70,7 @@ impl ChiralGraph {
         id
     }
 
+    /// Append a directed edge to the graph.
     pub fn add_edge(&mut self, edge: ChiralEdge) {
         self.edges.push(edge);
     }
@@ -246,15 +259,25 @@ impl ChiralGraph {
     }
 }
 
+/// Snapshot summary of the chiral graph state for logging and ledger.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct GraphSummary {
+    /// Total number of nodes in the graph.
     pub total_nodes: usize,
+    /// Number of primary reasoning nodes.
     pub primary_count: usize,
+    /// Number of adversarial critique nodes.
     pub critique_count: usize,
+    /// Number of refinement nodes.
     pub refinement_count: usize,
+    /// Number of axiom re-anchor nodes.
     pub axiom_anchor_count: usize,
+    /// Total number of directed edges.
     pub total_edges: usize,
+    /// Current refinement depth.
     pub depth: usize,
+    /// Current entropy value.
     pub entropy: f32,
+    /// Whether the graph has converged.
     pub converged: bool,
 }

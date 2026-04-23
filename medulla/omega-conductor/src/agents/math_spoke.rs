@@ -44,6 +44,7 @@ fn lean_binary() -> String {
         .unwrap_or_else(|_| "/home/mega/.elan/bin/lean".to_string())
 }
 
+/// Lean 4 formalization spoke — converts mathematical content into compiler-verified proofs.
 pub struct MathSpoke;
 
 impl MathSpoke {

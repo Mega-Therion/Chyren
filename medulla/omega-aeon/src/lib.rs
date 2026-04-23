@@ -8,6 +8,7 @@
 use omega_core::{
     gen_id, now, GoalContract, RunEnvelope, TaskStage, TaskStateObject, YETTRAGRAMMATON,
 };
+/// Sovereign task scheduling subsystem.
 pub mod scheduler;
 pub use scheduler::SovereignScheduler;
 use std::collections::HashMap;

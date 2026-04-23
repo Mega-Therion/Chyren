@@ -11,9 +11,13 @@ use omega_core::mesh::AgentCapability;
 /// dispatched tasks via the EventBus.
 #[async_trait]
 pub trait PersistentAgent: Send + Sync {
+    /// Returns the unique name of this agent.
     fn name(&self) -> &str;
+    /// Returns the capabilities this agent offers.
     fn capabilities(&self) -> Vec<AgentCapability>;
+    /// Returns the system prompt used when this agent reasons.
     fn system_prompt(&self) -> &str;
+    /// Execute a task and return a scored result.
     async fn execute(&self, task: AgentTask) -> AgentResult;
 }
 
@@ -21,6 +25,7 @@ pub mod ingestor;
 pub mod math_spoke;
 pub mod millennium;
 pub mod millennium_solver;
+/// Monte-Carlo Tree Search solver agent.
 pub mod mcts_solver;
 pub mod worker;
 

@@ -18,6 +18,7 @@ pub struct SovereignScheduler {
 }
 
 impl SovereignScheduler {
+    /// Create a new scheduler with default intervals and the given memory service.
     pub fn new(memory: Arc<omega_myelin::Service>) -> Self {
         Self {
             ingest_interval: Duration::from_secs(3600),      // 1 hour

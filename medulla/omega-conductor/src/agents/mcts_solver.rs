@@ -11,6 +11,7 @@ pub struct MctsSolverAgent {
 }
 
 impl MctsSolverAgent {
+    /// Create a new MCTS solver with the given task dispatcher.
     pub fn new(dispatcher: Arc<crate::dispatcher::Dispatcher>) -> Self {
         Self { dispatcher }
     }

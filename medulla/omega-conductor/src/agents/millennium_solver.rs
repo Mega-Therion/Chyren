@@ -9,12 +9,14 @@ use omega_core::{now, AgentTask, AgentResult};
 use omega_core::mesh::{TaskContract, AgentCapability};
 use std::sync::Arc;
 
+/// High-level strategist agent for coordinating Millennium Prize Problem solutions.
 pub struct MillenniumSolverAgent {
     // This agent will use the Dispatcher to call MathSpoke
     dispatcher: Arc<crate::dispatcher::Dispatcher>,
 }
 
 impl MillenniumSolverAgent {
+    /// Create a new solver agent backed by the given task dispatcher.
     pub fn new(dispatcher: Arc<crate::dispatcher::Dispatcher>) -> Self {
         Self { dispatcher }
     }
