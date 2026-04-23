@@ -113,6 +113,9 @@ docker-compose up    # Starts chyren-api (8080), chyren-web (3000), postgres, qd
 | `omega-integration` | Cross-crate routing |
 | `omega-eval` | Evaluation framework |
 | `omega-telegram-gateway` | Telegram bot integration |
+| `omega-cim` | Compositional identity mapping |
+| `omega-ternary` | Ternary logic / trivalent reasoning layer |
+| `omega-vision` | Multimodal / visual input processing |
 
 ### Data Layer
 - **Master Ledger**: PostgreSQL (Neon) — append-only, cryptographically signed; `OMEGA_DB_URL` env var
@@ -160,6 +163,18 @@ Always source this file before running Cortex or Medulla directly. Missing keys 
 - **New Python provider**: implement `ProviderBase` in `cortex/providers/`, register in `cortex/main.py`
 - **New Rust crate**: add to `medulla/Cargo.toml` workspace members, expose from `src/lib.rs`, wire into `omega-integration` or `omega-cli`
 - **Rust → Python migration**: use `legacy_bridge.rs` pattern; tests must pass in both layers before cutover
+
+## Other Root-Level Directories
+
+- `chyren-os/` — Experimental OS-layer abstraction (`boot/`, `kernel/`, `supervisor/`, `interface/`, `state/`)
+- `hub/` — Swarm attestation utilities (`swarm_attestation.py`)
+- `api/` — Alexa integration (`alexa.js`, `interaction_model.json`)
+- `ops/` — Legacy bootstrap and proxy scripts (not part of active runtime)
+- `analytics/` — Standalone analytics tooling
+- `knowledge_injection/` — Data ingest pipelines fed into Qdrant/Neon
+- Root-level Python scripts (`ingest_neon.py`, `telemetry_bus.py`, `ari_verify.py`, `cantor_block.py`) — one-off tooling; not part of the main runtime
+
+See `AGENTS.md` at the repo root for commit message conventions, PR format, and test location guidelines.
 
 ## Notes on `docs/CLAUDE.md`
 The file at `docs/CLAUDE.md` is outdated — it references pre-restructure paths (`omega_workspace/workspace/OmegA-Next/`, root-level `main.py`). Use this root `CLAUDE.md` as the authoritative reference.

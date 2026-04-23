@@ -7,7 +7,6 @@ use super::PersistentAgent;
 use async_trait::async_trait;
 use omega_core::{now, AgentTask, AgentResult};
 use omega_core::mesh::{TaskContract, AgentCapability};
-use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
 pub struct MillenniumSolverAgent {

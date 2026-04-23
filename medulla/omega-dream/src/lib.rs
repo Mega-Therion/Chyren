@@ -103,7 +103,7 @@ impl Service {
         
         // Rebuild pattern cache
         self.pattern_cache.clear();
-        for episode in &self.episodes {
+        for _episode in &self.episodes {
             // We'd need to re-parse failure_report if we wanted to rebuild the cache perfectly,
             // but for now we just load the episodes.
         }

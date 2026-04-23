@@ -1048,7 +1048,7 @@ impl Conductor {
     }
 
     /// Record a failed cognitive episode into the Dream Engine.
-    pub async fn record_dream(&self, task: &str, text: &str, score: f64, flags: &[String]) {
+    pub async fn record_dream(&self, _task: &str, text: &str, score: f64, flags: &[String]) {
         if let Ok(mut dream) = self.dream.try_lock() {
             let report = VerificationReport {
                 report_id: format!("vr-ext-{}", now()),

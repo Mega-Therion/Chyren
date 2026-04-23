@@ -7,7 +7,7 @@ use rumqttc::{AsyncClient, MqttOptions, QoS, Event, Packet};
 use std::time::Duration;
 use std::sync::Arc;
 use crate::agents::PersistentAgent;
-use omega_core::{AgentTask, AgentResult};
+use omega_core::AgentTask;
 use serde_json;
 
 /// A worker that executes tasks for a specific agent via MQTT.

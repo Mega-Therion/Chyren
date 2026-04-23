@@ -3,7 +3,6 @@
 
 #![warn(missing_docs)]
 
-use omega_core::now;
 
 use serde::{Deserialize, Serialize};
 use std::fs::OpenOptions;
@@ -87,7 +86,6 @@ impl TelemetrySink for FileSink {
 use actix_web::{get, App, HttpResponse, HttpServer, Responder};
 use lazy_static::lazy_static;
 use prometheus::{opts, register_counter, register_gauge, Counter, Encoder, Gauge, TextEncoder};
-use tracing::{info as t_info, warn as t_warn};
 
 lazy_static! {
     /// Total number of tasks admitted to the system

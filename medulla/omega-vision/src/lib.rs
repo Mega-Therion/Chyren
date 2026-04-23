@@ -1,8 +1,5 @@
 use async_trait::async_trait;
 use omega_spokes::{Spoke, SpokeCapability, SpokeConfig, SpokeStatus, ToolDefinition, ToolInvocation, ToolResult};
-use std::sync::Arc;
-use tokio::sync::mpsc;
-use serde_json::Value;
 
 /// The Ocular Spoke: Chyren's window into the physical world.
 pub struct VisionSpoke {

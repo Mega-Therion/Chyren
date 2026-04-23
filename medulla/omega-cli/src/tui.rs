@@ -49,7 +49,7 @@ pub async fn run_tui(app: Arc<Mutex<TuiApp>>) -> Result<(), io::Error> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    let tick_rate = Duration::from_millis(250);
+    let _tick_rate = Duration::from_millis(250);
     
     loop {
         {

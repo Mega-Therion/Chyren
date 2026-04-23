@@ -313,13 +313,13 @@ mod tests {
         assert!(!p_low.exceeds_impact_gate());
     }
 
-    #[test]
-    fn test_dream_cycle_produces_foundation() {
+    #[tokio::test]
+    async fn test_dream_cycle_produces_foundation() {
         let synth = IdentitySynthesizer::new();
         let result = synth.run_dream_cycle(
             vec!["Always cite sources".into()],
             10,
-        );
+        ).await;
         // May fail if ~/.omega is not writable; ignore IO error in CI
         match result {
             Ok(f) => {

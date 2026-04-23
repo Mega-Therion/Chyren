@@ -233,7 +233,7 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  const { message, messages } = await req.json().catch(() => ({}))
+  const { message, messages, reasoningDepth } = await req.json().catch(() => ({}))
   const session = req.nextUrl.searchParams.get('session') ?? 'global'
 
   const content = messages?.length
@@ -275,8 +275,14 @@ export async function POST(req: NextRequest) {
   const history = toChatHistory(messages, content)
   const { prompt: baseSystemPrompt, profile } = await buildSystemPrompt(session, memberContext)
   const knowledgeContext = await buildKnowledgeContext(content)
-  const systemPrompt = knowledgeContext ? baseSystemPrompt + knowledgeContext : baseSystemPrompt
+  let systemPrompt = knowledgeContext ? baseSystemPrompt + knowledgeContext : baseSystemPrompt
   
+  if (reasoningDepth === 'high') {
+    systemPrompt += '\n\nREASONING DEPTH: HIGH. Think deeply step-by-step. Analyze all theoretical constraints and topological invariants before answering. Do not rush to a conclusion.'
+  } else if (reasoningDepth === 'low') {
+    systemPrompt += '\n\nREASONING DEPTH: LOW. Provide a rapid, intuitive, and highly concise answer.'
+  }
+
   try {
     const sovereignTools = await getSovereignTools()
     

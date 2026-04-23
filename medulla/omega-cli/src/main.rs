@@ -20,7 +20,7 @@ use omega_neocortex::{cold_store::ColdStore, proof_index::ProofConstraintIndex, 
 use rustyline::error::ReadlineError;
 use rustyline::DefaultEditor;
 use std::io::{stdout, Write};
-use std::time::{Duration, Instant};
+use std::time::Duration;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tracing::{info, warn};

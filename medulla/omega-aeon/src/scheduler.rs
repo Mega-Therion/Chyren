@@ -98,7 +98,7 @@ impl SovereignScheduler {
 
     async fn run_maintenance(&self) {
         info!("AEON: Running autonomous memory maintenance...");
-        let compressor = DreamCompressor::new();
+        let _compressor = DreamCompressor::new();
         
         // 1. Get nodes from memory service
         // Note: For now we only analyze in-memory KnowledgeNodes if they exist.
