@@ -333,7 +333,7 @@ export async function POST(req: NextRequest) {
           Connection: 'keep-alive',
         }
       })
-    } catch (primaryErr) {
+    } catch {
       logger.warn('[CHAT] Tier 1 (Anthropic) failed, escalating to Tier 2 (Sovereign Hub)...')
       
       // Tier 2: Sovereign Hub (Rust Server)
@@ -341,7 +341,7 @@ export async function POST(req: NextRequest) {
         const hubResponse = await fetchHubStream(content, session, profile, memberContext)
         if (!hubResponse.ok) throw new Error(`Hub returned ${hubResponse.status}`)
         return hubResponse
-      } catch (hubErr) {
+      } catch {
         logger.warn('[CHAT] Tier 2 (Sovereign Hub) failed, de-escalating to Tier 3 (Local Ollama)...')
         
         // Tier 3: Local Ollama (Direct)

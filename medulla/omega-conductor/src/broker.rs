@@ -34,24 +34,23 @@ fn build_broker_config() -> Config {
     // builder.  We use the raw TOML route because the builder API changes
     // frequently across patch versions.
     let toml_str = r#"
-[v4.1]
-name      = "chyren-mesh"
-listen    = "127.0.0.1:1883"
-
-[v4.1.connections]
-connection_timeout_ms = 5000
-max_client_id_len = 256
-max_payload_size = 65535
-max_inflight_count = 256
-next_connection_delay_ms = 1
+id = 0
 
 [router]
-id              = 0
-dir             = "/tmp/chyren-mqtt"
-max_connections = 256
+max_connections           = 256
 max_outgoing_packet_count = 512
-max_segment_size = 104857600
-max_segment_count = 10
+max_segment_size          = 104857600
+max_segment_count         = 10
+
+[v4.chyren]
+name                     = "chyren-mesh"
+listen                   = "127.0.0.1:1883"
+next_connection_delay_ms = 1
+
+[v4.chyren.connections]
+connection_timeout_ms = 5000
+max_payload_size      = 65535
+max_inflight_count    = 256
 "#;
     toml::from_str(toml_str).expect("[MESH-BROKER] Failed to parse embedded MQTT broker config")
 }

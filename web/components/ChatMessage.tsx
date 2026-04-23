@@ -237,13 +237,13 @@ export function ChatMessage({
   id,
   role,
   content,
-  timestamp,
+  _timestamp,
   isStreaming = false,
   model,
   audit,
   onQuote,
 }: ChatMessageProps) {
-  const isUser = role === 'user'
+  const _isUser = role === 'user'
 
   const [showTray, setShowTray] = useState(false)
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -310,6 +310,7 @@ export function ChatMessage({
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 code({ inline, className, children, ...props }: any) {
                   if (inline) {
                     return <code className="bg-white/10 px-1.5 py-0.5 rounded text-mesh-cyan" {...props}>{children}</code>

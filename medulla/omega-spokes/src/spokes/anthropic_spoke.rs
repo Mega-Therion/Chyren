@@ -176,7 +176,10 @@ impl AnthropicSpoke {
         let witness = WitnessEnvelope::new(hash);
 
         // Make HTTP request to Anthropic API
-        let client = reqwest::Client::new();
+        let client = reqwest::Client::builder()
+            .timeout(std::time::Duration::from_secs(120))
+            .build()
+            .map_err(|e| format!("Failed to build HTTP client: {}", e))?;
         let response = client
             .post("https://api.anthropic.com/v1/messages")
             .header("x-api-key", &api_key)

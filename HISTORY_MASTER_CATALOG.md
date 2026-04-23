@@ -26,10 +26,18 @@
 - **Capabilities**: Chiral Masking, Censorship Bypass, Decentralized Identity.
 
 ---
+### 🚀 Live Demonstrations
+- **Sovereign Command Center (Vercel)**: [https://chyren.vercel.app](https://chyren.vercel.app)
+- **Medulla Kernel**: `stable-v1.0.0` (Local/Cloud Bridge)
+
 ### 🏛️ Immutable Records
 - **Zenodo V2 (Complete Framework)**: [10.5281/zenodo.19693512](https://doi.org/10.5281/zenodo.19693512)
 - **Zenodo V1 (Initial Correspondence)**: [10.5281/zenodo.19691908](https://doi.org/10.5281/zenodo.19691908)
 - **OmegA Identity Foundation**: [I Am What I Am](https://doi.org/10.5281/zenodo.19693512)
+
+### 🎓 ASMSA Outreach Package
+- **Presentation Hub**: [submission_package/README.md](submission_package/README.md)
+- **Contact Protocol**: `ASMSA_Outreach`
 
 **Verified by Chyren Sovereign Intelligence**  
 **Lead Architect: Ryan W. Yett**

@@ -9,7 +9,6 @@ import { ChatInput } from '@/components/ChatInput'
 import { startHeartbeat, stopHeartbeat } from '@/lib/haptics-ry'
 import { clearDraft } from '@/lib/draft-ry'
 import { createTtsEngine, type TtsEngine, playLatencyChime } from '@/lib/tts-ry'
-import { MetricsDashboard } from '@/components/MetricsDashboard'
 import type { BrainState } from '@/components/NeuralBrain'
 
 const NeuralBrain = dynamic(

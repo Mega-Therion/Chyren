@@ -1,4 +1,3 @@
-import { standardize } from '../lib/schema/standardizer';
 // ETL Logic: Pull from Postgres, standardize, push to CDL
 async function ingest() {
   console.log("Ingesting records to CDL...");
