@@ -14,14 +14,6 @@ const STATE_PARTICLE_COLORS: Record<BrainState, string> = {
   speaking:  '#00f2ff',
 };
 
-function hexToRgb(hex: string): [number, number, number] {
-  return [
-    parseInt(hex.slice(1, 3), 16) / 255,
-    parseInt(hex.slice(3, 5), 16) / 255,
-    parseInt(hex.slice(5, 7), 16) / 255,
-  ];
-}
-
 const particleVertexShader = /* glsl */ `
   attribute float aScale;
   attribute float aPhase;

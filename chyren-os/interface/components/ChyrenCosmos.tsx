@@ -5,7 +5,6 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { EffectComposer, Bloom, Vignette, ChromaticAberration } from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
 import * as THREE from 'three';
-import { Vector2 } from 'three';
 import { SovereignSphere } from './SovereignSphere';
 import { ParticleCosmos } from './ParticleCosmos';
 import type { BrainState } from './NeuralBrain';
@@ -99,7 +98,7 @@ function SovereignRing2({ state }: { state: BrainState }) {
 // Post-processing effect set — state-reactive bloom intensity
 function PostFX({ state, audioLevel }: { state: BrainState; audioLevel: number }) {
   const bloomRef = useRef<{ intensity: number }>(null);
-  const caRef = useRef<{ offset: Vector2 }>(null);
+  const caRef = useRef<{ offset: THREE.Vector2 }>(null);
 
   const BLOOM_MAP: Record<BrainState, number> = {
     idle: 0.6, listening: 1.4, thinking: 1.6, speaking: 2.0,
@@ -127,7 +126,7 @@ function PostFX({ state, audioLevel }: { state: BrainState; audioLevel: number }
       />
       <ChromaticAberration
         ref={caRef}
-        offset={new Vector2(0.0004, 0.0004)}
+        offset={new THREE.Vector2(0.0004, 0.0004)}
         blendFunction={BlendFunction.NORMAL}
         radialModulation={false}
         modulationOffset={0}

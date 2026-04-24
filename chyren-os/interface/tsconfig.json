@@ -39,6 +39,10 @@
   "exclude": [
     "node_modules",
     ".next",
-    ".vercel"
+    ".vercel",
+    "src",
+    "vite.config.ts",
+    "tsconfig.app.json",
+    "tsconfig.node.json"
   ]
 }
