@@ -1,11 +1,8 @@
-//! Ollama spoke — OpenAI-compatible local inference (Gemma4:e2b default).
+/! Ollama spoke — OpenAI-compatible local inference.
 //!
 //! Environment variables:
 //!   OLLAMA_BASE_URL  — base URL for the Ollama server (default: http://localhost:11434/v1)
-//!   OLLAMA_MODEL     — model to use (default: gemma4:e2b)
-//!
-//! Gemma4 via Ollama does not support the `system` role. System content is
-//! prepended inline to the first user message instead.
+//!   OLLAMA_MODEL     — model to use (default: llama3.2:3b)
 
 use crate::{
     Spoke, SpokeCapability, SpokeConfig, SpokeStatus, ToolDefinition, ToolInvocation, ToolResult,
@@ -16,7 +13,7 @@ use std::env;
 use tokio::sync::mpsc;
 
 const DEFAULT_BASE_URL: &str = "http://localhost:11434/v1";
-const DEFAULT_MODEL: &str = "gemma4:e2b";
+const DEFAULT_MODEL: &str = "llama3.2:3b";
 
 pub struct OllamaSpoke {
     config: SpokeConfig,
@@ -43,7 +40,10 @@ impl OllamaSpoke {
     }
 
     async fn chat_completion(&self, input: &Value) -> Result<Value, String> {
-        let client = reqwest::Client::new();
+        let client = reqwest::Client::builder()
+            .timeout(std::time::Duration::from_secs(120))
+            .build()
+            .map_err(|e| format!("Failed to build HTTP client: {}", e))?;
         let base = self.base_url();
         let model = input
             .get("model")
@@ -271,10 +271,8 @@ mod tests {
     }
 
     #[test]
-    fn default_model_is_gemma4() {
+    fn default_model_is_set() {
         let spoke = ollama_spoke();
-        // Without env var set, should fall back to gemma4:e2b.
-        // (If OLLAMA_MODEL is set in the test environment we just check it's non-empty.)
         assert!(!spoke.model().is_empty());
     }
 
