@@ -1,8 +1,8 @@
-/! Ollama spoke — OpenAI-compatible local inference.
+//! Ollama spoke -- OpenAI-compatible local inference.
 //!
 //! Environment variables:
-//!   OLLAMA_BASE_URL  — base URL for the Ollama server (default: http://localhost:11434/v1)
-//!   OLLAMA_MODEL     — model to use (default: llama3.2:3b)
+//!   OLLAMA_BASE_URL  -- base URL for the Ollama server (default: http://localhost:11434/v1)
+//!   OLLAMA_MODEL     -- model to use (default: llama3.2:3b)
 
 use crate::{
     Spoke, SpokeCapability, SpokeConfig, SpokeStatus, ToolDefinition, ToolInvocation, ToolResult,

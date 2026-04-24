@@ -19,7 +19,7 @@ impl PerplexitySpoke {
     async fn chat_completion(&self, input: &Value) -> Result<Value, String> {
         let api_key =
             env::var("PERPLEXITY_API_KEY").map_err(|_| "PERPLEXITY_API_KEY not set".to_string())?;
-        let client = reqwest::Client::new();
+        let client = reqwest::Client::builder().timeout(std::time::Duration::from_secs(120)).build().unwrap_or_default();
         let prompt = input.get("prompt").and_then(|p| p.as_str()).unwrap_or("");
         let system = input
             .get("system")
@@ -65,7 +65,7 @@ impl PerplexitySpoke {
     ) -> Result<(), String> {
         let api_key =
             env::var("PERPLEXITY_API_KEY").map_err(|_| "PERPLEXITY_API_KEY not set".to_string())?;
-        let client = reqwest::Client::new();
+        let client = reqwest::Client::builder().timeout(std::time::Duration::from_secs(120)).build().unwrap_or_default();
         let prompt = input.get("prompt").and_then(|p| p.as_str()).unwrap_or("");
         let system = input
             .get("system")

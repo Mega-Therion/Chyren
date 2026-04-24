@@ -121,15 +121,22 @@ pub async fn start_metrics_server(port: u16) -> std::io::Result<()> {
     
     // Spawn the server as a background task
     tokio::spawn(async move {
-        let server = HttpServer::new(|| {
+        let server = match HttpServer::new(|| {
             App::new()
                 .service(metrics_endpoint)
                 .service(web::resource("/ws").route(web::get().to(websocket_handler)))
         })
         .bind(("0.0.0.0", port))
-        .expect("Failed to bind metrics server")
-        .run();
-
+        {
+            Ok(b) => b.run(),
+            Err(e) => {
+                eprintln!(
+                    "[THE EYE] Metrics server not started on port {}: {} (continuing without it)",
+                    port, e
+                );
+                return;
+            }
+        };
         if let Err(e) = server.await {
             eprintln!("[THE EYE] Metrics server error: {}", e);
         }

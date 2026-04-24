@@ -22,7 +22,7 @@ impl DeepSeekSpoke {
         let api_key = env::var("DEEPSEEK_API_KEY")
             .map_err(|_| "DEEPSEEK_API_KEY not set".to_string())?;
 
-        let client = reqwest::Client::new();
+        let client = reqwest::Client::builder().timeout(std::time::Duration::from_secs(120)).build().unwrap_or_default();
         let prompt = input.get("prompt").and_then(|p| p.as_str()).unwrap_or("");
         let system = input.get("system").and_then(|s| s.as_str()).unwrap_or("");
         let model = input
