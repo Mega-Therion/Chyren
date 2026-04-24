@@ -4,6 +4,7 @@ import { useRef, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { EffectComposer, Bloom, Vignette, ChromaticAberration } from '@react-three/postprocessing';
 import { BlendFunction } from 'postprocessing';
+import * as THREE from 'three';
 import { Vector2 } from 'three';
 import { SovereignSphere } from './SovereignSphere';
 import { ParticleCosmos } from './ParticleCosmos';
@@ -48,7 +49,7 @@ function CameraController({ state }: { state: BrainState }) {
 
 // Outer ring pulse ring (wireframe torus)
 function SovereignRing({ state }: { state: BrainState }) {
-  const meshRef = useRef<THREE.Mesh>(null);
+  const meshRef = useRef<THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>>(null);
   const COLOR_MAP: Record<BrainState, string> = {
     idle: '#f59e0b', listening: '#bc13fe', thinking: '#ff2d75', speaking: '#00f2ff',
   };
@@ -60,11 +61,11 @@ function SovereignRing({ state }: { state: BrainState }) {
     meshRef.current.rotation.z = t * 0.07;
     const scale = 1 + Math.sin(t * 1.5) * 0.02;
     meshRef.current.scale.setScalar(scale);
-    (meshRef.current.material as THREE.MeshBasicMaterial).color.set(COLOR_MAP[state]);
+    meshRef.current.material.color.set(COLOR_MAP[state]);
   });
 
   return (
-    <mesh ref={meshRef as React.RefObject<THREE.Mesh>}>
+    <mesh ref={meshRef}>
       <torusGeometry args={[2.1, 0.005, 4, 128]} />
       <meshBasicMaterial color="#f59e0b" transparent opacity={0.35} />
     </mesh>
@@ -72,7 +73,7 @@ function SovereignRing({ state }: { state: BrainState }) {
 }
 
 function SovereignRing2({ state }: { state: BrainState }) {
-  const meshRef = useRef<THREE.Mesh>(null);
+  const meshRef = useRef<THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>>(null);
   const COLOR_MAP: Record<BrainState, string> = {
     idle: '#b45309', listening: '#6d28d9', thinking: '#9f1239', speaking: '#0891b2',
   };
@@ -84,11 +85,11 @@ function SovereignRing2({ state }: { state: BrainState }) {
     meshRef.current.rotation.y = t * 0.11;
     const scale = 1 + Math.sin(t * 1.1 + 1.0) * 0.025;
     meshRef.current.scale.setScalar(scale);
-    (meshRef.current.material as THREE.MeshBasicMaterial).color.set(COLOR_MAP[state]);
+    meshRef.current.material.color.set(COLOR_MAP[state]);
   });
 
   return (
-    <mesh ref={meshRef as React.RefObject<THREE.Mesh>}>
+    <mesh ref={meshRef}>
       <torusGeometry args={[2.4, 0.003, 4, 96]} />
       <meshBasicMaterial color="#b45309" transparent opacity={0.22} />
     </mesh>
