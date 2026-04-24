@@ -93,7 +93,11 @@ impl OllamaSpoke {
                 .text()
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(format!("Ollama HTTP {} — {}", status, &err_body[..err_body.len().min(300)]));
+            return Err(format!(
+                "Ollama HTTP {} — {}",
+                status,
+                &err_body[..err_body.len().min(300)]
+            ));
         }
 
         resp.json::<Value>()
@@ -110,11 +114,7 @@ impl OllamaSpoke {
         let base = self.base_url();
         let model = self.model();
 
-        match client
-            .get(format!("{}/models", base))
-            .send()
-            .await
-        {
+        match client.get(format!("{}/models", base)).send().await {
             Ok(resp) if resp.status().is_success() => {
                 if let Ok(data) = resp.json::<Value>().await {
                     data["data"]

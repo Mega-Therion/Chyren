@@ -149,17 +149,21 @@ impl SpokeRegistry {
         let mut reg = Self::new();
 
         let providers = vec![
-            ("groq", 5),
-            ("anthropic", 10),
-            ("openai", 20),
-            ("gemini", 30),
+            // Free tier — lowest priority numbers = preferred
+            ("groq", 5),         // Free: 500K tokens/day
+            ("openrouter", 10),  // Free: 30+ free models
+            ("gemini", 15),      // Free tier: 2.5 Flash
+            ("ollama", 20),      // Local: free if models installed
+            // Paid — higher numbers = used as fallback only
             ("deepseek", 40),
             ("perplexity", 45),
-            ("ollama", 50),
+            ("anthropic", 50),
+            ("openai", 60),
+            // Infrastructure — not inference providers
             ("search", 90),
             ("neon", 100),
             ("sovereign", 0),
-            // Explicit MCP bridges
+            // MCP bridges
             ("github", 200),
             ("vercel", 201),
             ("supabase", 202),
@@ -167,7 +171,6 @@ impl SpokeRegistry {
             ("zapier", 204),
             ("manus", 205),
             ("filesystem", 206),
-            ("openrouter", 15),
             ("vision", 150),
         ];
 
@@ -208,18 +211,20 @@ impl SpokeRegistry {
             }
         }
 
-        // Fallback order: cheapest/most-reliable first, premium providers last.
+        // Fallback order: free/local providers first, paid providers last.
+        // Tier 1 (free): groq → openrouter free models → gemini free tier
+        // Tier 2 (paid): deepseek (cheapest) → anthropic → openai → perplexity
         // route_with_model prepends the explicitly-requested provider; this list is the
         // cascade when that one fails.
         reg.preference = vec![
-            "openrouter".into(),
-            "ollama".into(),
-            "deepseek".into(),
-            "gemini".into(),
-            "groq".into(),
-            "anthropic".into(),
-            "openai".into(),
-            "perplexity".into(),
+            "groq".into(),       // Free: 500K tokens/day, fastest inference
+            "openrouter".into(), // Free: 30+ free models via OPENROUTER_DEFAULT_MODEL
+            "gemini".into(),     // Free tier: Gemini 2.5 Flash, 1M context
+            "ollama".into(),     // Local: free if models installed
+            "deepseek".into(),   // Paid but cheapest cloud option
+            "anthropic".into(),  // Paid premium
+            "openai".into(),     // Paid premium
+            "perplexity".into(), // Paid
         ];
 
         reg
