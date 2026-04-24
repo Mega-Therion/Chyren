@@ -30,6 +30,22 @@ class ChyrenHub:
         self.router = ProviderRouter()
         self.router.register(SovereignProvider())
         self.security = SecurityService(self)
+        
+        # Initialize MCP Hub and register specialized servers
+        self.mcp_hub = MCPHub()
+        # Primary semantic memory (RAG)
+        self.mcp_hub.register_server("memory", "npx", ["-y", "@modelcontextprotocol/server-memory"])
+        # Hugging Face Datasets integration
+        self.mcp_hub.register_server(
+            "datasets", 
+            sys.executable, 
+            [os.path.join(os.path.dirname(__file__), "core", "hf_datasets_server.py")]
+        )
+        
+        # Initialize the high-level orchestrator
+        self.orchestrator = ChiralOrchestrator(self.router, self.identity, self.mcp_hub)
+        self.tools = []
+        self.ws = None
 
     async def _connect_telemetry(self):
         try:
@@ -55,8 +71,17 @@ class ChyrenHub:
 
     async def _init_mcp(self):
         print("[bold #BD93F9]Discovering MCP Capabilities...[/bold #BD93F9]")
-        mem_caps = await self.mcp_hub.connect_and_discover("memory")
-        self.tools = mem_caps.get("tools", [])
+        
+        # Connect to all registered servers
+        all_tools = []
+        for server_name in self.mcp_hub.servers.keys():
+            try:
+                caps = await self.mcp_hub.connect_and_discover(server_name)
+                all_tools.extend(caps.get("tools", []))
+            except Exception as e:
+                print(f"[bold #FF5555][MCP ERROR] Failed to connect to {server_name}: {e}[/bold #FF5555]")
+        
+        self.tools = all_tools
         self.orchestrator.tools = self.tools
 
     async def run(self, task):

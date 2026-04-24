@@ -68,14 +68,37 @@ def prioritize(dataset_id):
     conn.close()
     print(f"Prioritized: {dataset_id}")
 
+def enqueue(repo, subset=None):
+    dataset_id = repo.replace("/", "-")
+    if subset:
+        dataset_id = f"{dataset_id}-{subset}"
+    
+    conn = get_db_conn()
+    cur = conn.cursor()
+    source_hash = compute_hash(repo, subset or "")
+    
+    cur.execute("""
+        INSERT INTO dataset_queue (id, hf_repo, hf_subset, hf_split, priority, row_limit, source_hash)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        ON CONFLICT (id) DO UPDATE SET priority = 1
+    """, (dataset_id, repo, subset or "", "train", 1, 500, source_hash))
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+    print(f"Enqueued and prioritized: {dataset_id}")
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--replenish", action="store_true")
     parser.add_argument("--status", action="store_true")
     parser.add_argument("--prioritize", type=str)
+    parser.add_argument("--enqueue", type=str)
+    parser.add_argument("--subset", type=str)
     args = parser.parse_args()
 
     if args.replenish: replenish()
     elif args.status: status()
     elif args.prioritize: prioritize(args.prioritize)
+    elif args.enqueue: enqueue(args.enqueue, args.subset)
     else: parser.print_help()
