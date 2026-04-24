@@ -172,6 +172,8 @@ impl SpokeRegistry {
             ("manus", 205),
             ("filesystem", 206),
             ("vision", 150),
+            // Claude Code CLI bridge — tool delegation, not inference fallback
+            ("claude-code", 210),
         ];
 
         for (p, priority) in providers {
@@ -235,6 +237,7 @@ impl SpokeRegistry {
                 ))),
                 "openrouter" => Some(Arc::new(spokes::OpenRouterSpoke::new(config))),
                 "vision" => Some(Arc::new(spokes::VisionSpoke::new(config))),
+                "claude-code" => Some(Arc::new(spokes::ClaudeCodeSpoke::new(config))),
                 _ => None,
             };
 
