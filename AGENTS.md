@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-Chyren is a mixed-language monorepo. `medulla/` contains the Rust workspace and `omega-*` crates that implement the kernel, CLI, telemetry, and integrations. `web/` is the main Next.js 15 frontend, while `gateway/` contains a separate TypeScript gateway app. Python orchestration and CLI support live under `cortex/`, with repo-level Python tests in `tests/` and additional module tests in `cortex/tests/`. Keep docs and examples in `docs/`, and treat generated folders such as `.next/`, `target/`, and caches as non-source.
+Chyren is a mixed-language monorepo. `medulla/` contains the Rust workspace and `omega-*` crates that implement the kernel, CLI, telemetry, and integrations. `chyren-os/interface/` is the main Next.js 15 frontend, while `gateway/` contains a separate TypeScript gateway app. Python orchestration and CLI support live under `cortex/`, with repo-level Python tests in `tests/` and additional module tests in `cortex/tests/`. Keep docs and examples in `docs/`, and treat generated folders such as `.next/`, `target/`, and caches as non-source.
 
 ## Build, Test, and Development Commands
 Use the top-level `Makefile` for common checks:

@@ -29,7 +29,7 @@ cortex-test:
 	PYTHONPATH=cortex pytest tests/
 
 web-ci:
-	cd web && npm ci && npm run typecheck && npm run lint && npm run build
+	cd chyren-os/interface && npm ci && npm run typecheck && npm run lint && npm run build
 
 gateway-ci:
 	cd gateway && pnpm install && npx tsc --noEmit && pnpm lint && pnpm build
