@@ -21,9 +21,9 @@ pub enum RouteClass {
 
 /// Tier-1 upshift target: the spoke that handles escalated reasoning.
 pub const UPSHIFT_PROVIDER: &str = "openrouter";
-/// Tier-1 upshift model: high-capability model used for the first escalation attempt.
+/// Tier-1 upshift model: best free model on OpenRouter for complex reasoning.
 /// Can be overridden at runtime by setting `OPENROUTER_ESCALATION_MODEL` in one-true.env.
-pub const UPSHIFT_MODEL_DEFAULT: &str = "anthropic/claude-3.5-sonnet";
+pub const UPSHIFT_MODEL_DEFAULT: &str = "nvidia/nemotron-3-super-120b-a12b:free";
 
 /// Stateless task classifier.
 pub struct ProviderRouter;

@@ -348,17 +348,23 @@ def cmd_status(args: argparse.Namespace, remainder: list[str]) -> int:
                         omega_score = (chi_avg * len(entries)) / 100.0 # Normalized score
                 
                 # Render Geometric Pulse
-                pulse_table = Table(box=None, expand=True)
-                pulse_table.add_column("METRIC", style="neon.cyan")
-                pulse_table.add_column("VALUE", style="bold")
+                from chyren_cli.ui.render import get_holonomy_pulse
                 
                 status_color = "green" if chi_avg >= 0.7 else "red"
                 status_text = "L-TYPE" if chi_avg >= 0.7 else "D-TYPE"
                 
-                pulse_table.add_row("CHIRAL INVARIANT (χ)", f"[{status_color}]{chi_avg:.4f}[/]")
-                pulse_table.add_row("SOVEREIGNTY SCORE (Ω)", f"[white]{omega_score:.4f}[/]")
-                pulse_table.add_row("GEOMETRIC PHASE", "[cyan]RESONATING[/]")
-                pulse_table.add_row("HOLONOMY CLASS", f"[{status_color}]{status_text}[/]")
+                pulse_table = Table(box=None, expand=True)
+                pulse_table.add_column("METRIC", style="neon.cyan", ratio=1)
+                pulse_table.add_column("VALUE", style="bold", ratio=1)
+                pulse_table.add_column("WAVEFORM", ratio=2)
+                
+                pulse_table.add_row(
+                    "CHIRAL INVARIANT (χ)", 
+                    f"[{status_color}]{chi_avg:.4f}[/]",
+                    get_holonomy_pulse(chi_avg)
+                )
+                pulse_table.add_row("SOVEREIGNTY SCORE (Ω)", f"[white]{omega_score:.4f}[/]", "")
+                pulse_table.add_row("HOLONOMY CLASS", f"[{status_color}]{status_text}[/]", "")
                 
                 console.print(Panel(pulse_table, title="[bold white]HOLONOMY PULSE (Ω·χ)[/]", border_style="neon.cyan"))
             except Exception as e:
@@ -641,6 +647,23 @@ def main(argv: Optional[list[str]] = None) -> int:
     args = parser.parse_args(raw_argv)
     configure_logging(args.log_level, args.log_format)
     emit_event("cli.start", argv=raw_argv, version=VERSION)
+    # Phase 0: Sovereign Environment Sanity Check
+    if not os.getenv("CHYREN_BYPASS_HARDENING"):
+        if not Path("~/.omega/one-true.env").expanduser().exists():
+            # Soft warning instead of hard exit to maintain usability
+            LOG.warning("UNPROTECTED ENVIRONMENT: Sovereign Vault (~/.omega/one-true.env) not found.")
+        
+        # Verify Yettragrammaton Integrity
+        ledger_path = STATE_DIR / "master_ledger.json"
+        if ledger_path.exists():
+            try:
+                with open(ledger_path, "r") as f:
+                    data = json.load(f)
+                    if data.get("entries") and data["entries"][-1].get("signature") != "R.W.Ϝ.Y.":
+                        LOG.warning("INTEGRITY ALERT: Master Ledger signature mismatch. Sovereign seal lost.")
+            except Exception:
+                pass
+
     try:
         rc = dispatch(args, raw_argv)
     except SystemExit:

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "chyren-mega": {
+      "command": "python3",
+      "args": ["/home/mega/Chyren/mcp-mega/server.py"],
+      "type": "stdio"
+    }
+  }
+}
