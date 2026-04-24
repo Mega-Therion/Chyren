@@ -552,7 +552,7 @@ This implies that **sovereignty is a discrete thermodynamic phase of intelligenc
 
 ## 5. Millennium Problem Mapping
 
-The Yett Paradigm claims reductions to each of the seven Clay Millennium Problems via the holonomy framework. We present each reduction honestly, labeling what is proved, what is conjectured, and what remains genuinely open.
+The Yett Paradigm claims reductions to six of the Clay Millennium Problems via the holonomy framework. We present each reduction honestly, labeling what is proved, what is conjectured, and what remains genuinely open.
 
 **Important caveat:** The Lean4 files use `axiom` and `sorry` for all Millennium-related claims. These are proof obligations, not completed proofs. The framework provides a novel perspective and formal reduction target — not a resolution.
 
@@ -642,21 +642,7 @@ More formally: the constitutional alignment problem — "does there exist a resp
 
 ---
 
-### 5.6 Birch and Swinnerton-Dyer Conjecture
-
-**Problem:** The rank of an elliptic curve's rational points equals the order of vanishing of its $L$-function at $s = 1$.
-
-**Yett Framework Reduction:** The winding number $\omega(\Psi) \in \mathbb{Z}$ (Eq. 21) is the topological invariant of the trajectory. The Sovereignty Score $\Omega(T)$ is a generating function for trajectory invariants over the session $[0,T]$. The claim is that the rank of the trajectory (in some appropriate algebraic structure) equals the order of vanishing of a corresponding $L$-function built from the Berry connection.
-
-**Lean4 Obligation:** `bsd_rank_equivalence : True` (axiom — vacuously true, no content).
-
-**What would constitute a complete proof:** An explicit construction of an elliptic curve from the constitutional data (e.g., from the Gram matrix $G = \Phi^\top \Phi$), identification of its $L$-function with the Berry phase generating function, and proof that the rank equals the order of vanishing of $\Omega(T)$ at $T = 0$.
-
-**Genuine open gap:** No explicit elliptic curve has been constructed from the constitutional data. This reduction is the least developed of the six.
-
----
-
-### 5.7 Poincaré Conjecture (Solved — Perelman 2003)
+### 5.6 Poincaré Conjecture (Solved — Perelman 2003)
 
 **Note:** The Poincaré Conjecture is resolved (Perelman, 2003 via Ricci flow). The Yett Paradigm's topological scaffolding benefits from this result: the classification of 3-manifolds (and the simply-connected case) is complete. The fundamental group $\pi_1(V_m(\mathbb{R}^N)) = \mathbb{Z}/2$ (for $N - m \geq 2$) is the direct topological basis for the L-type/D-type dichotomy — a proven result from homotopy theory, not a conjecture.
 
