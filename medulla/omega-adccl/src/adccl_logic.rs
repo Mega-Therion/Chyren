@@ -139,10 +139,56 @@ impl ADCCL {
             score -= 0.15;
         }
 
+        // ── LOW_BIGRAM_COHERENCE — response shares zero content words with task ──
+        if !task_text.is_empty() && text.len() > 100 {
+            let task_content_words: HashSet<String> = task_text
+                .split_whitespace()
+                .filter(|w| w.len() > 4)
+                .map(|w| w.to_lowercase())
+                .collect();
+            if !task_content_words.is_empty() {
+                let response_lower = text.to_lowercase();
+                let any_overlap = task_content_words
+                    .iter()
+                    .any(|w| response_lower.contains(w.as_str()));
+                if !any_overlap {
+                    flags.push("LOW_BIGRAM_COHERENCE".to_string());
+                    score -= 0.2;
+                }
+            }
+        }
+
         // ── INCOMPLETE_SENTENCES ─────────────────────────────────────────────
         if text.len() > 50 && !text.contains('.') && !text.contains('?') && !text.contains('!') {
             flags.push("INCOMPLETE_SENTENCES".to_string());
             score -= 0.1;
+        }
+
+        // ── LOW_INFORMATION_DENSITY — dominated by stopwords ─────────────────
+        if text.len() > 60 {
+            let stopwords: HashSet<&str> = [
+                "the", "is", "it", "that", "this", "with", "from", "they", "have", "been", "were",
+                "will", "would", "could", "should", "which", "their", "there", "about", "when",
+                "and", "for", "are", "but", "not", "you", "all", "can", "her", "was", "one", "our",
+                "out", "him", "his",
+            ]
+            .iter()
+            .copied()
+            .collect();
+            let words: Vec<&str> = text.split_whitespace().collect();
+            let stop_count = words
+                .iter()
+                .filter(|w| {
+                    stopwords.contains(
+                        w.to_lowercase()
+                            .trim_matches(|c: char| !c.is_alphabetic()),
+                    )
+                })
+                .count();
+            if !words.is_empty() && stop_count as f32 / words.len() as f32 > 0.65 {
+                flags.push("LOW_INFORMATION_DENSITY".to_string());
+                score -= 0.15;
+            }
         }
 
         score = score.clamp(0.0, 1.0);
@@ -161,10 +207,10 @@ impl ADCCL {
         let signal_strength = score;
         let chiral_invariant = det_sign * signal_strength;
 
-        let _min_score = self.get_calibrated_min_score();
-        // Threshold verification: χ must be >= 0.7
+        let min_score = self.get_calibrated_min_score();
+        // Threshold verification: χ must be >= min_score
         let passed =
-            chiral_invariant >= 0.7 && !flags.contains(&"STUB_MARKERS_DETECTED".to_string());
+            chiral_invariant >= min_score && !flags.contains(&"STUB_MARKERS_DETECTED".to_string());
 
         VerificationResult {
             passed,

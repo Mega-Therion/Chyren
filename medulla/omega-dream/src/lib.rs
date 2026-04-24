@@ -265,6 +265,7 @@ mod tests {
     #[test]
     fn test_dream_episode_recording() {
         let mut service = Service::new();
+        service.episodes.clear(); // Ensure fresh state for test
         let report = VerificationReport {
             report_id: "test".to_string(),
             passed: false,
@@ -282,6 +283,7 @@ mod tests {
     #[test]
     fn test_retrieve_dreams() {
         let mut service = Service::new();
+        service.episodes.clear(); // Ensure fresh state for test
         let report = VerificationReport {
             report_id: "test".to_string(),
             passed: false,
@@ -299,6 +301,7 @@ mod tests {
     #[test]
     fn test_failure_patterns() {
         let mut service = Service::new();
+        service.episodes.clear(); // Ensure fresh state for test
         let report1 = VerificationReport {
             report_id: "test1".to_string(),
             passed: false,
@@ -328,6 +331,7 @@ mod tests {
     #[test]
     fn test_dream_statistics() {
         let mut service = Service::new();
+        service.episodes.clear(); // Ensure fresh state for test
         let report = VerificationReport {
             report_id: "test".to_string(),
             passed: false,

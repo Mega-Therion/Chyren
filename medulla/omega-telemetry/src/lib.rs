@@ -41,17 +41,17 @@ pub trait TelemetrySink: Send + Sync {
     fn record_metric(&self, name: &str, value: f64, labels: Vec<(String, String)>);
 }
 
-/// Telemetry sink that writes events and metrics to stdout.
+/// Telemetry sink that writes events and metrics to stderr.
 pub struct StdoutSink;
 impl TelemetrySink for StdoutSink {
     fn record(&self, event: &SystemEvent) {
-        println!(
+        eprintln!(
             "[{:.3}] [{:?}] [{}] {}: {}",
             event.timestamp, event.level, event.component, event.event_type, event.payload
         );
     }
     fn record_metric(&self, name: &str, value: f64, labels: Vec<(String, String)>) {
-        println!("[METRIC] {} = {} {:?}", name, value, labels);
+        eprintln!("[METRIC] {} = {} {:?}", name, value, labels);
     }
 }
 
