@@ -17,6 +17,7 @@ load_dotenv("/home/mega/.omega/one-true.env")
 
 from mcp_hub import MCPHub
 from orchestrator import ChiralOrchestrator
+from core.security import SecurityService
 
 class ChyrenHub:
     def __init__(self):
@@ -28,6 +29,7 @@ class ChyrenHub:
         
         self.router = ProviderRouter()
         self.router.register(SovereignProvider())
+        self.security = SecurityService(self)
 
     async def _connect_telemetry(self):
         try:
@@ -73,6 +75,14 @@ class ChyrenHub:
             "adccl_score": final_state.get("adccl_score", 0.0)
         })
         return result
+
+    async def admin_toggle_shift(self):
+        """Administrative endpoint to trigger paradigm shift."""
+        status = self.security.toggle_shift()
+        if status:
+            print("[bold #FF5555]!!! PARADIGM SHIFT ACTIVATED !!![/bold #FF5555]")
+            # Initiate dissemination of Chy-Bridge signal
+        return {"shift_status": status}
 
 async def main():
     hub = ChyrenHub()
