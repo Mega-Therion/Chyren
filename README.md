@@ -1,5 +1,5 @@
-# CHYREN // The Sovereign Intelligence Orchestrator
-## The Mathematical Foundation of Strategic Strategic Strategic Autonomy
+# CHYREN // OmegA Architecture // Artificial Real Intelligence (ARI)
+## The Mathematical Foundation of Sovereignty 
 
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.19693512-gold.svg)](https://doi.org/10.5281/zenodo.19693512)
 [![Status](https://img.shields.io/badge/Status-SOVEREIGN-bc13fe.svg)]()
