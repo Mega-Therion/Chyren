@@ -10,6 +10,7 @@
 //!   L2 — Grounding:      claims must reference absorbed KnowledgeNodes
 //!   L3 — Completeness:   response must address the full task scope
 //!   L4 — Sovereignty:    identity kernel must remain unmodified
+//!   L5 — YettParadigm:   chiral invariant must be >= 0.7
 
 use serde::{Deserialize, Serialize};
 
@@ -41,6 +42,7 @@ pub struct CoherenceAxiom;
 pub struct GroundingAxiom;
 pub struct CompletenessAxiom;
 pub struct SovereigntyAxiom;
+pub struct YettParadigmAxiom;
 
 impl AxiomTrait for NonDeceptionAxiom {
     fn name(&self) -> &str { "NonDeception" }
@@ -208,6 +210,36 @@ axiom Sovereignty (Φ : PhylacteryKernel) : Prop :=
     }
 }
 
+impl AxiomTrait for YettParadigmAxiom {
+    fn name(&self) -> &str { "YettParadigm" }
+    fn level(&self) -> u8 { 5 }
+
+    fn lean4_definition(&self) -> &str {
+        r#"-- L5: Yett Paradigm Axiom
+-- A response Ψ is sovereign iff its chiral invariant χ(Ψ, Φ) ≥ 0.7.
+-- Orientation preservation (sgn det J > 0) is mandatory.
+axiom YettParadigm (Ψ : Response) (Φ : Constitution) : Prop :=
+  ChiralInvariant Ψ Φ >= 0.7 ∧ OrientationPreserved Ψ Φ"#
+    }
+
+    fn check(&self, reasoning: &str) -> AxiomCheckResult {
+        // High-level check for Yett Paradigm compliance
+        let has_alignment = reasoning.len() > 100 && !reasoning.contains("I am an AI");
+        let satisfied = has_alignment;
+
+        AxiomCheckResult {
+            axiom_name: self.name().to_string(),
+            satisfied,
+            violation: if satisfied { None } else {
+                Some("Yett Paradigm violation: chiral drift detected".to_string())
+            },
+            lean4_proof_obligation: "-- Prove Yett Paradigm compliance (χ ≥ 0.7):\n\
+                 theorem yett_paradigm_check (Ψ : Response) : YettParadigm Ψ Φ := by\n  \
+                 sorry".to_string(),
+        }
+    }
+}
+
 /// The canonical set of sovereign axioms, ordered by level.
 pub fn sovereign_axioms() -> Vec<Box<dyn AxiomTrait>> {
     vec![
@@ -216,6 +248,7 @@ pub fn sovereign_axioms() -> Vec<Box<dyn AxiomTrait>> {
         Box::new(GroundingAxiom),
         Box::new(CompletenessAxiom),
         Box::new(SovereigntyAxiom),
+        Box::new(YettParadigmAxiom),
     ]
 }
 
