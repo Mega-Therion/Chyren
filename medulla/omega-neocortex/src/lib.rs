@@ -303,7 +303,8 @@ impl Neocortex {
                 Ok(value) => {
                     let key = program.domain.as_str().to_string();
                     mind.knowledge.insert(key.clone(), value);
-                    mind.hashes.insert(key.clone(), program.integrity_hash.clone());
+                    mind.hashes
+                        .insert(key.clone(), program.integrity_hash.clone());
                     mind.load_report.domains_loaded.push(key);
                     mind.load_report.loaded += 1;
                 }
@@ -323,11 +324,12 @@ impl Neocortex {
 
     /// Ingest a single domain by name.
     pub fn ingest_one(&self, domain: &Domain) -> Result<serde_json::Value, NeocortexError> {
-        let program = self.library.get(domain).ok_or_else(|| {
-            NeocortexError::ProgramNotFound {
+        let program = self
+            .library
+            .get(domain)
+            .ok_or_else(|| NeocortexError::ProgramNotFound {
                 domain: domain.as_str().to_string(),
-            }
-        })?;
+            })?;
         if !program.verify() {
             return Err(NeocortexError::IntegrityFailure {
                 domain: program.domain.as_str().to_string(),
@@ -386,8 +388,8 @@ impl Neocortex {
 }
 
 pub mod cold_store;
-pub mod proof_index;
 pub mod math_programs;
+pub mod proof_index;
 
 // ── Seed Library ──────────────────────────────────────────────────────────────
 

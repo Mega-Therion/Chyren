@@ -134,10 +134,7 @@ impl ProviderRouter {
             if available.contains(p) {
                 return Some(RoutingContext {
                     provider: p.clone(),
-                    reasoning: format!(
-                        "Fallback: '{}' is first available in priority order",
-                        p
-                    ),
+                    reasoning: format!("Fallback: '{}' is first available in priority order", p),
                 });
             }
         }
@@ -157,8 +154,11 @@ impl ProviderRouter {
     /// Delegates to `route` on a filtered `available` list.
     /// Returns `None` if no other providers remain.
     pub fn failover(&self, failed: &str, available: &[String]) -> Option<RoutingContext> {
-        let remaining: Vec<String> =
-            available.iter().filter(|p| p.as_str() != failed).cloned().collect();
+        let remaining: Vec<String> = available
+            .iter()
+            .filter(|p| p.as_str() != failed)
+            .cloned()
+            .collect();
 
         if remaining.is_empty() {
             return None;
@@ -201,7 +201,10 @@ mod tests {
     #[test]
     fn routes_code_task_to_anthropic() {
         let ctx = router()
-            .route("Please implement a Rust function to parse JSON", &all_providers())
+            .route(
+                "Please implement a Rust function to parse JSON",
+                &all_providers(),
+            )
             .expect("should route");
         assert_eq!(ctx.provider, "anthropic");
     }
@@ -243,7 +246,10 @@ mod tests {
         let ctx = router()
             .route("What time is it?", &all_providers())
             .expect("should route");
-        assert_eq!(ctx.provider, "anthropic", "fallback should be highest-priority");
+        assert_eq!(
+            ctx.provider, "anthropic",
+            "fallback should be highest-priority"
+        );
     }
 
     #[test]

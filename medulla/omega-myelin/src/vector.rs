@@ -40,7 +40,11 @@ impl VectorStore {
         Self {
             client: self.client.clone(),
             base_url: self.base_url.clone(),
-            collection: format!("{}_{}", self.collection, domain.to_lowercase().replace(' ', "_")),
+            collection: format!(
+                "{}_{}",
+                self.collection,
+                domain.to_lowercase().replace(' ', "_")
+            ),
         }
     }
 
@@ -98,10 +102,7 @@ impl VectorStore {
         vector: Vec<f32>,
         payload: Value,
     ) -> Result<(), anyhow::Error> {
-        let url = format!(
-            "{}/collections/{}/points",
-            self.base_url, self.collection
-        );
+        let url = format!("{}/collections/{}/points", self.base_url, self.collection);
         let body = json!({
             "points": [{
                 "id": id,

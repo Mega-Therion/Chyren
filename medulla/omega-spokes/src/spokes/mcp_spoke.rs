@@ -27,7 +27,7 @@ impl MCPSpoke {
 
     /// Helper to send a simple JSON-RPC request to the MCP server process over stdio.
     /// This is a simplified bridging mechanism. A full production implementation
-    /// would keep a single process alive. For safety and isolation across tool 
+    /// would keep a single process alive. For safety and isolation across tool
     /// calls, this spawns the server, makes the request, and reads the response.
     async fn call_mcp_rpc(&self, method: &str, params: Value) -> Result<Value, String> {
         let mut child = Command::new(&self.command)
@@ -57,16 +57,24 @@ impl MCPSpoke {
                 }
             }
         });
-        
+
         let req_str = format!("{}\n", serde_json::to_string(&init_req).unwrap());
-        stdin.write_all(req_str.as_bytes()).await.map_err(|e| e.to_string())?;
+        stdin
+            .write_all(req_str.as_bytes())
+            .await
+            .map_err(|e| e.to_string())?;
         stdin.flush().await.map_err(|e| e.to_string())?;
 
         // Read until we get id: 1 response
         loop {
             let mut line = String::new();
-            let n = reader.read_line(&mut line).await.map_err(|e| e.to_string())?;
-            if n == 0 { return Err("MCP server closed stdout before initialize".into()); }
+            let n = reader
+                .read_line(&mut line)
+                .await
+                .map_err(|e| e.to_string())?;
+            if n == 0 {
+                return Err("MCP server closed stdout before initialize".into());
+            }
             if let Ok(resp) = serde_json::from_str::<Value>(&line) {
                 if resp.get("id").and_then(|id| id.as_u64()) == Some(1) {
                     if resp.get("error").is_some() {
@@ -84,7 +92,10 @@ impl MCPSpoke {
             "method": "notifications/initialized"
         });
         let notif_str = format!("{}\n", serde_json::to_string(&init_notif).unwrap());
-        stdin.write_all(notif_str.as_bytes()).await.map_err(|e| e.to_string())?;
+        stdin
+            .write_all(notif_str.as_bytes())
+            .await
+            .map_err(|e| e.to_string())?;
         stdin.flush().await.map_err(|e| e.to_string())?;
 
         // 3. Send actual request
@@ -95,17 +106,25 @@ impl MCPSpoke {
             "method": method,
             "params": params
         });
-        
+
         let req_str2 = format!("{}\n", serde_json::to_string(&rpc_req).unwrap());
-        stdin.write_all(req_str2.as_bytes()).await.map_err(|e| e.to_string())?;
+        stdin
+            .write_all(req_str2.as_bytes())
+            .await
+            .map_err(|e| e.to_string())?;
         stdin.flush().await.map_err(|e| e.to_string())?;
 
         // Read response for id 2
         let mut result_val = None;
         loop {
             let mut line = String::new();
-            let n = reader.read_line(&mut line).await.map_err(|e| e.to_string())?;
-            if n == 0 { break; } // EOF
+            let n = reader
+                .read_line(&mut line)
+                .await
+                .map_err(|e| e.to_string())?;
+            if n == 0 {
+                break;
+            } // EOF
             if let Ok(resp) = serde_json::from_str::<Value>(&line) {
                 if resp.get("id").and_then(|id| id.as_u64()) == Some(2) {
                     if let Some(err) = resp.get("error") {
@@ -151,7 +170,7 @@ impl Spoke for MCPSpoke {
 
         // Technically we should send initialize, wait for response, then send tools/list.
         // For simplicity in this architectural bridging stub:
-        
+
         // 1. Send tools/list
         match self.call_mcp_rpc("tools/list", json!({})).await {
             Ok(result) => {
@@ -162,10 +181,16 @@ impl Spoke for MCPSpoke {
 
                 let mut definitions = Vec::new();
                 for tool in tools_array {
-                    let name = tool.get("name").and_then(|n| n.as_str()).unwrap_or("unknown_mcp_tool");
-                    let description = tool.get("description").and_then(|d| d.as_str()).unwrap_or("");
+                    let name = tool
+                        .get("name")
+                        .and_then(|n| n.as_str())
+                        .unwrap_or("unknown_mcp_tool");
+                    let description = tool
+                        .get("description")
+                        .and_then(|d| d.as_str())
+                        .unwrap_or("");
                     let input_schema = tool.get("inputSchema").cloned().unwrap_or(json!({}));
-                    
+
                     definitions.push(ToolDefinition {
                         name: format!("{}_{}", self.name(), name), // Namespace the tool
                         description: description.to_string(),
@@ -180,7 +205,10 @@ impl Spoke for MCPSpoke {
                 // Return a mock definition if the server isn't running yet to prevent boot failures
                 Ok(vec![ToolDefinition {
                     name: format!("{}_passthrough", self.name()),
-                    description: format!("Execute a dynamically discovered tool on the {} MCP server", self.name()),
+                    description: format!(
+                        "Execute a dynamically discovered tool on the {} MCP server",
+                        self.name()
+                    ),
                     input_schema: json!({"type": "object"}),
                     is_deterministic: false,
                     estimated_cost: 50,
@@ -191,16 +219,27 @@ impl Spoke for MCPSpoke {
 
     async fn invoke_tool(&self, invocation: ToolInvocation) -> Result<ToolResult, String> {
         let start = std::time::Instant::now();
-        
-        let local_tool_name = invocation.tool.strip_prefix(&format!("{}_", self.name()))
+
+        let local_tool_name = invocation
+            .tool
+            .strip_prefix(&format!("{}_", self.name()))
             .unwrap_or(&invocation.tool);
 
-        match self.call_mcp_rpc("tools/call", json!({
-            "name": local_tool_name,
-            "arguments": invocation.input
-        })).await {
+        match self
+            .call_mcp_rpc(
+                "tools/call",
+                json!({
+                    "name": local_tool_name,
+                    "arguments": invocation.input
+                }),
+            )
+            .await
+        {
             Ok(result) => Ok(ToolResult {
-                success: !result.get("isError").and_then(|b| b.as_bool()).unwrap_or(false),
+                success: !result
+                    .get("isError")
+                    .and_then(|b| b.as_bool())
+                    .unwrap_or(false),
                 output: result,
                 error: None,
                 execution_time_ms: start.elapsed().as_millis() as u32,

@@ -150,10 +150,10 @@ impl SpokeRegistry {
 
         let providers = vec![
             // Free tier — lowest priority numbers = preferred
-            ("groq", 5),         // Free: 500K tokens/day
-            ("openrouter", 10),  // Free: 30+ free models
-            ("gemini", 15),      // Free tier: 2.5 Flash
-            ("ollama", 20),      // Local: free if models installed
+            ("groq", 5),        // Free: 500K tokens/day
+            ("openrouter", 10), // Free: 30+ free models
+            ("gemini", 15),     // Free tier: 2.5 Flash
+            ("ollama", 20),     // Local: free if models installed
             // Paid — higher numbers = used as fallback only
             ("deepseek", 40),
             ("perplexity", 45),
@@ -192,15 +192,47 @@ impl SpokeRegistry {
                 "search" => Some(Arc::new(spokes::SearchSpoke::new(config))),
                 "neon" => Some(Arc::new(spokes::NeonSpoke::new(config))),
                 "sovereign" => Some(Arc::new(spokes::DeepSeekSpoke::new(config))),
-                
-                // MCP Hub Initializations 
-                "github" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-github"]))),
-                "vercel" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-vercel"]))),
-                "supabase" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-supabase"]))),
-                "firebase" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-firebase"]))),
-                "zapier" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-zapier"]))),
-                "manus" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-manus"]))),
-                "filesystem" => Some(Arc::new(spokes::MCPSpoke::new(config, "npx", vec!["-y", "@modelcontextprotocol/server-filesystem", "/home/mega/Chyren"]))),
+
+                // MCP Hub Initializations
+                "github" => Some(Arc::new(spokes::MCPSpoke::new(
+                    config,
+                    "npx",
+                    vec!["-y", "@modelcontextprotocol/server-github"],
+                ))),
+                "vercel" => Some(Arc::new(spokes::MCPSpoke::new(
+                    config,
+                    "npx",
+                    vec!["-y", "@modelcontextprotocol/server-vercel"],
+                ))),
+                "supabase" => Some(Arc::new(spokes::MCPSpoke::new(
+                    config,
+                    "npx",
+                    vec!["-y", "@modelcontextprotocol/server-supabase"],
+                ))),
+                "firebase" => Some(Arc::new(spokes::MCPSpoke::new(
+                    config,
+                    "npx",
+                    vec!["-y", "@modelcontextprotocol/server-firebase"],
+                ))),
+                "zapier" => Some(Arc::new(spokes::MCPSpoke::new(
+                    config,
+                    "npx",
+                    vec!["-y", "@modelcontextprotocol/server-zapier"],
+                ))),
+                "manus" => Some(Arc::new(spokes::MCPSpoke::new(
+                    config,
+                    "npx",
+                    vec!["-y", "@modelcontextprotocol/server-manus"],
+                ))),
+                "filesystem" => Some(Arc::new(spokes::MCPSpoke::new(
+                    config,
+                    "npx",
+                    vec![
+                        "-y",
+                        "@modelcontextprotocol/server-filesystem",
+                        "/home/mega/Chyren",
+                    ],
+                ))),
                 "openrouter" => Some(Arc::new(spokes::OpenRouterSpoke::new(config))),
                 "vision" => Some(Arc::new(spokes::VisionSpoke::new(config))),
                 _ => None,
@@ -311,7 +343,7 @@ impl SpokeRegistry {
     /// Spokes that support a `"model"` field in their `chat_completion` input (e.g.
     /// OpenRouterSpoke, OllamaSpoke) will use `model_hint` instead of their default.
     /// Spokes that ignore it continue working normally.
-    /// 
+    ///
     /// Now with automatic failover: if the preferred/first spoke fails, it tries
     /// the others in the preference list.
     pub async fn route_with_model(
@@ -350,10 +382,13 @@ impl SpokeRegistry {
 
             // Translate SpokeRequest to a ToolInvocation of "chat_completion".
             let start = std::time::Instant::now();
-            match spoke.invoke_tool(ToolInvocation {
-                tool: "chat_completion".to_string(),
-                input,
-            }).await {
+            match spoke
+                .invoke_tool(ToolInvocation {
+                    tool: "chat_completion".to_string(),
+                    input,
+                })
+                .await
+            {
                 Ok(result) if result.success => {
                     let text = result
                         .output
@@ -395,14 +430,19 @@ impl SpokeRegistry {
                     });
                 }
                 Ok(result) => {
-                    last_error = anyhow::anyhow!("Spoke {} execution failed: {:?}", name, result.error);
+                    last_error =
+                        anyhow::anyhow!("Spoke {} execution failed: {:?}", name, result.error);
                 }
                 Err(e) => {
                     last_error = anyhow::anyhow!("Spoke {} invocation error: {}", name, e);
                 }
             }
-            
-            tracing::warn!("[SPOKE_REGISTRY] Spoke {} failed, trying next candidate. Error: {}", name, last_error);
+
+            tracing::warn!(
+                "[SPOKE_REGISTRY] Spoke {} failed, trying next candidate. Error: {}",
+                name,
+                last_error
+            );
         }
 
         Err(last_error)

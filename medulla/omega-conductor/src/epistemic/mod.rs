@@ -16,8 +16,7 @@ pub mod graph;
 
 use graph::{ChiralGraph, GraphSummary};
 use omega_core::{
-    check_all_axioms, gen_id,
-    EpistemicNode, EpistemicNodeType, KnowledgeNode, ProofConstraint,
+    check_all_axioms, gen_id, EpistemicNode, EpistemicNodeType, KnowledgeNode, ProofConstraint,
 };
 use omega_neocortex::{cold_store::ColdStore, proof_index::ProofConstraintIndex, Neocortex};
 use std::sync::Arc;
@@ -88,8 +87,11 @@ impl EpistemicMesh {
         for (spoke_name, answer) in &primary_answers {
             let mut node = EpistemicNode::new_primary(answer.clone(), spoke_name);
             node.axiom_violations = check_all_axioms(answer);
-            axiom_violations_encountered += node.axiom_violations.iter()
-                .filter(|v| !v.satisfied).count();
+            axiom_violations_encountered += node
+                .axiom_violations
+                .iter()
+                .filter(|v| !v.satisfied)
+                .count();
             let id = graph.add_node(node);
             primary_ids.push(id);
         }
@@ -100,7 +102,9 @@ impl EpistemicMesh {
                 let critique_text = self.generate_critique(task, &primary_node.content).await;
                 let mut critique = EpistemicNode::new_critique(critique_text, primary_id);
                 critique.axiom_violations = check_all_axioms(&primary_node.content);
-                critique.proof_obligations = primary_node.axiom_violations.iter()
+                critique.proof_obligations = primary_node
+                    .axiom_violations
+                    .iter()
                     .filter(|v| !v.satisfied)
                     .map(|v| v.lean4_proof_obligation.clone())
                     .collect();
@@ -113,26 +117,33 @@ impl EpistemicMesh {
         while !graph.is_converged() && depth < MAX_REFINEMENT_DEPTH {
             let entropy = graph.entropy();
             omega_telemetry::info!(
-                "EpistemicMesh", 
-                "MESH_ITERATION", 
+                "EpistemicMesh",
+                "MESH_ITERATION",
                 "depth={depth} entropy={:.2} violated={}",
-                entropy.value, 
+                entropy.value,
                 entropy.violated_axiom_count
             );
 
             // Trigger Sovereign Axiom Review if entropy is critical
             if entropy.requires_axiom_review() {
-                omega_telemetry::warn!("EpistemicMesh", "ENTROPY_CRITICAL", "Entropy critical — triggering Sovereign Axiom Review");
+                omega_telemetry::warn!(
+                    "EpistemicMesh",
+                    "ENTROPY_CRITICAL",
+                    "Entropy critical — triggering Sovereign Axiom Review"
+                );
                 sovereign_reviews_triggered += 1;
                 let phylactery_summary = self.get_phylactery_anchor().await;
                 graph.inject_axiom_anchor(&phylactery_summary);
             }
 
             // Refine each dirty leaf node
-            let dirty_leaves: Vec<String> = graph.leaf_node_ids()
+            let dirty_leaves: Vec<String> = graph
+                .leaf_node_ids()
                 .into_iter()
                 .filter(|id| {
-                    graph.nodes.get(id)
+                    graph
+                        .nodes
+                        .get(id)
                         .map(|n| !n.is_clean() && n.node_type != EpistemicNodeType::AxiomAnchor)
                         .unwrap_or(false)
                 })
@@ -149,14 +160,18 @@ impl EpistemicMesh {
                 };
 
                 // Build correction prompt from axiom violations
-                let violations: Vec<String> = leaf.axiom_violations.iter()
+                let violations: Vec<String> = leaf
+                    .axiom_violations
+                    .iter()
                     .filter(|v| !v.satisfied)
-                    .map(|v| format!(
-                        "Axiom {} violated: {}\nLean 4 obligation:\n{}",
-                        v.axiom_name,
-                        v.violation.as_deref().unwrap_or("unknown"),
-                        v.lean4_proof_obligation
-                    ))
+                    .map(|v| {
+                        format!(
+                            "Axiom {} violated: {}\nLean 4 obligation:\n{}",
+                            v.axiom_name,
+                            v.violation.as_deref().unwrap_or("unknown"),
+                            v.lean4_proof_obligation
+                        )
+                    })
                     .collect();
 
                 let correction_prompt = format!(
@@ -167,11 +182,8 @@ impl EpistemicMesh {
                 );
 
                 let refined = self.call_llm(&correction_prompt).await;
-                let mut refined_node = EpistemicNode::new_refinement(
-                    refined,
-                    &leaf_id,
-                    &leaf.source_spoke,
-                );
+                let mut refined_node =
+                    EpistemicNode::new_refinement(refined, &leaf_id, &leaf.source_spoke);
                 refined_node.axiom_violations = check_all_axioms(&refined_node.content);
 
                 // Write failed chain to Logic-Cache before replacing it
@@ -187,10 +199,12 @@ impl EpistemicMesh {
         }
 
         let summary = graph.summary();
-        let final_answer = graph.best_answer()
+        let final_answer = graph
+            .best_answer()
             .map(|n| n.content.clone())
             .unwrap_or_else(|| {
-                primary_answers.first()
+                primary_answers
+                    .first()
                     .map(|(_, a)| a.clone())
                     .unwrap_or_else(|| "No answer produced.".to_string())
             });
@@ -199,7 +213,10 @@ impl EpistemicMesh {
             "EpistemicMesh",
             "MESH_COMPLETE",
             "nodes={} depth={} entropy={:.2} converged={}",
-            summary.total_nodes, summary.depth, summary.entropy, summary.converged
+            summary.total_nodes,
+            summary.depth,
+            summary.entropy,
+            summary.converged
         );
 
         MeshResult {
@@ -236,7 +253,8 @@ impl EpistemicMesh {
         // In production this would query the phylactery kernel.
         // For now return the sovereign axiom definitions.
         let axioms = omega_core::sovereign_axioms();
-        let defs: Vec<String> = axioms.iter()
+        let defs: Vec<String> = axioms
+            .iter()
             .map(|a| format!("L{}: {}\n{}", a.level(), a.name(), a.lean4_definition()))
             .collect();
         format!(
@@ -249,7 +267,9 @@ impl EpistemicMesh {
     /// Write a failed reasoning chain to the Neocortex Logic-Cache.
     /// This teaches future tasks to avoid the same class of errors.
     async fn write_logic_cache_entry(&self, failed_node: &EpistemicNode, task: &str) {
-        let violations: Vec<String> = failed_node.axiom_violations.iter()
+        let violations: Vec<String> = failed_node
+            .axiom_violations
+            .iter()
             .filter(|v| !v.satisfied)
             .map(|v| format!("{}:{}", v.axiom_name, v.violation.as_deref().unwrap_or("")))
             .collect();
@@ -267,7 +287,9 @@ impl EpistemicMesh {
             gen_id("lc")
         );
 
-        let constraints: Vec<ProofConstraint> = failed_node.axiom_violations.iter()
+        let constraints: Vec<ProofConstraint> = failed_node
+            .axiom_violations
+            .iter()
             .filter(|v| !v.satisfied)
             .map(|v| ProofConstraint {
                 id: gen_id("pc"),
@@ -291,7 +313,11 @@ impl EpistemicMesh {
         if let Ok(hash) = self.cold_store.store(&node).await {
             let mut idx = self.proof_index.lock().await;
             idx.insert(&hash, &node.constraints);
-            omega_telemetry::info!("EpistemicMesh", "LOGIC_CACHE_WRITE", "Logic-Cache entry written: {hash}");
+            omega_telemetry::info!(
+                "EpistemicMesh",
+                "LOGIC_CACHE_WRITE",
+                "Logic-Cache entry written: {hash}"
+            );
         }
     }
 
@@ -336,12 +362,19 @@ impl EpistemicMesh {
             "temperature": 0.3,
             "messages": [{"role": "user", "content": prompt}]
         });
-        let resp = self.http
+        let resp = self
+            .http
             .post(format!("{base}/chat/completions"))
-            .json(&body).send().await.map_err(|e| e.to_string())?;
-        if !resp.status().is_success() { return Err(format!("OpenLLM {}", resp.status())); }
+            .json(&body)
+            .send()
+            .await
+            .map_err(|e| e.to_string())?;
+        if !resp.status().is_success() {
+            return Err(format!("OpenLLM {}", resp.status()));
+        }
         let j: serde_json::Value = resp.json().await.map_err(|e| e.to_string())?;
-        j["choices"].as_array()
+        j["choices"]
+            .as_array()
             .and_then(|a| a.first())
             .and_then(|c| c["message"]["content"].as_str())
             .map(|s| s.to_string())
@@ -354,16 +387,21 @@ impl EpistemicMesh {
             "max_tokens": 2048,
             "messages": [{"role": "user", "content": prompt}]
         });
-        let resp = self.http
+        let resp = self
+            .http
             .post("https://api.anthropic.com/v1/messages")
             .header("x-api-key", api_key)
             .header("anthropic-version", "2023-06-01")
-            .json(&body).send().await.map_err(|e| e.to_string())?;
+            .json(&body)
+            .send()
+            .await
+            .map_err(|e| e.to_string())?;
         if !resp.status().is_success() {
             return Err(format!("Anthropic {}", resp.status()));
         }
         let j: serde_json::Value = resp.json().await.map_err(|e| e.to_string())?;
-        j["content"].as_array()
+        j["content"]
+            .as_array()
             .and_then(|a| a.first())
             .and_then(|b| b["text"].as_str())
             .map(|s| s.to_string())
@@ -378,12 +416,19 @@ impl EpistemicMesh {
         let url = format!(
             "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
         );
-        let resp = self.http.post(&url).json(&body).send().await.map_err(|e| e.to_string())?;
+        let resp = self
+            .http
+            .post(&url)
+            .json(&body)
+            .send()
+            .await
+            .map_err(|e| e.to_string())?;
         if !resp.status().is_success() {
             return Err(format!("Gemini {}", resp.status()));
         }
         let j: serde_json::Value = resp.json().await.map_err(|e| e.to_string())?;
-        j["candidates"].as_array()
+        j["candidates"]
+            .as_array()
             .and_then(|a| a.first())
             .and_then(|c| c["content"]["parts"].as_array())
             .and_then(|p| p.first())
@@ -399,15 +444,22 @@ impl EpistemicMesh {
             "temperature": 0.3,
             "messages": [{"role": "user", "content": prompt}]
         });
-        let resp = self.http
+        let resp = self
+            .http
             .post("https://openrouter.ai/api/v1/chat/completions")
             .header("Authorization", format!("Bearer {api_key}"))
             .header("HTTP-Referer", "https://chyren.ai")
             .header("X-Title", "Chyren Sovereign Intelligence")
-            .json(&body).send().await.map_err(|e| e.to_string())?;
-        if !resp.status().is_success() { return Err(format!("OpenRouter {}", resp.status())); }
+            .json(&body)
+            .send()
+            .await
+            .map_err(|e| e.to_string())?;
+        if !resp.status().is_success() {
+            return Err(format!("OpenRouter {}", resp.status()));
+        }
         let j: serde_json::Value = resp.json().await.map_err(|e| e.to_string())?;
-        j["choices"].as_array()
+        j["choices"]
+            .as_array()
             .and_then(|a| a.first())
             .and_then(|c| c["message"]["content"].as_str())
             .map(|s| s.to_string())
@@ -417,20 +469,27 @@ impl EpistemicMesh {
     async fn call_ollama(&self, prompt: &str) -> Result<String, String> {
         let base = std::env::var("OLLAMA_BASE_URL")
             .unwrap_or_else(|_| "http://localhost:11434/v1".to_string());
-        let model = std::env::var("OLLAMA_MODEL")
-            .unwrap_or_else(|_| "mistral-nemo:latest".to_string());
+        let model =
+            std::env::var("OLLAMA_MODEL").unwrap_or_else(|_| "mistral-nemo:latest".to_string());
         let body = serde_json::json!({
             "model": model,
             "max_tokens": 2048,
             "temperature": 0.3,
             "messages": [{"role": "user", "content": prompt}]
         });
-        let resp = self.http
+        let resp = self
+            .http
             .post(format!("{base}/chat/completions"))
-            .json(&body).send().await.map_err(|e| e.to_string())?;
-        if !resp.status().is_success() { return Err(format!("Ollama {}", resp.status())); }
+            .json(&body)
+            .send()
+            .await
+            .map_err(|e| e.to_string())?;
+        if !resp.status().is_success() {
+            return Err(format!("Ollama {}", resp.status()));
+        }
         let j: serde_json::Value = resp.json().await.map_err(|e| e.to_string())?;
-        j["choices"].as_array()
+        j["choices"]
+            .as_array()
             .and_then(|a| a.first())
             .and_then(|c| c["message"]["content"].as_str())
             .map(|s| s.to_string())
@@ -438,23 +497,28 @@ impl EpistemicMesh {
     }
 
     async fn call_groq(&self, api_key: &str, prompt: &str) -> Result<String, String> {
-        let model = std::env::var("GROQ_MODEL")
-            .unwrap_or_else(|_| "llama-3.3-70b-versatile".to_string());
+        let model =
+            std::env::var("GROQ_MODEL").unwrap_or_else(|_| "llama-3.3-70b-versatile".to_string());
         let body = serde_json::json!({
             "model": model,
             "max_tokens": 2048,
             "temperature": 0.3,
             "messages": [{"role": "user", "content": prompt}]
         });
-        let resp = self.http
+        let resp = self
+            .http
             .post("https://api.groq.com/openai/v1/chat/completions")
             .header("Authorization", format!("Bearer {api_key}"))
-            .json(&body).send().await.map_err(|e| e.to_string())?;
+            .json(&body)
+            .send()
+            .await
+            .map_err(|e| e.to_string())?;
         if !resp.status().is_success() {
             return Err(format!("Groq {}", resp.status()));
         }
         let j: serde_json::Value = resp.json().await.map_err(|e| e.to_string())?;
-        j["choices"].as_array()
+        j["choices"]
+            .as_array()
             .and_then(|a| a.first())
             .and_then(|c| c["message"]["content"].as_str())
             .map(|s| s.to_string())

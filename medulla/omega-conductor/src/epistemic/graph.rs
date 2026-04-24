@@ -81,7 +81,9 @@ impl ChiralGraph {
             from_id: critique.id.clone(),
             to_id: primary_id.to_string(),
             polarity: EdgePolarity::Critiques,
-            axiom_name: critique.axiom_violations.first()
+            axiom_name: critique
+                .axiom_violations
+                .first()
                 .map(|v| v.axiom_name.clone()),
         };
         critique.parent_id = Some(primary_id.to_string());
@@ -97,11 +99,7 @@ impl ChiralGraph {
         parent_critique_id: &str,
         source_spoke: &str,
     ) -> String {
-        let refinement = EpistemicNode::new_refinement(
-            content,
-            parent_critique_id,
-            source_spoke,
-        );
+        let refinement = EpistemicNode::new_refinement(content, parent_critique_id, source_spoke);
         let edge = ChiralEdge {
             from_id: refinement.id.clone(),
             to_id: parent_critique_id.to_string(),
@@ -151,27 +149,33 @@ impl ChiralGraph {
 
     /// Compute the current epistemic entropy of the graph.
     pub fn entropy(&self) -> EpistemicEntropy {
-        let primaries: Vec<&EpistemicNode> = self.nodes.values()
+        let primaries: Vec<&EpistemicNode> = self
+            .nodes
+            .values()
             .filter(|n| n.node_type == EpistemicNodeType::Primary)
             .collect();
 
-        let total_violations: Vec<&AxiomCheckResult> = self.nodes.values()
+        let total_violations: Vec<&AxiomCheckResult> = self
+            .nodes
+            .values()
             .flat_map(|n| n.axiom_violations.iter())
             .filter(|v| !v.satisfied)
             .collect();
 
-        let max_level = total_violations.iter()
+        let max_level = total_violations
+            .iter()
             .filter_map(|v| {
                 let axioms = omega_core::sovereign_axioms();
-                axioms.iter().find(|a| a.name() == v.axiom_name).map(|a| a.level())
+                axioms
+                    .iter()
+                    .find(|a| a.name() == v.axiom_name)
+                    .map(|a| a.level())
             })
             .max()
             .unwrap_or(0);
 
         // Entropy = proportion of nodes with violations, weighted by level
-        let weight_sum: f32 = self.nodes.values()
-            .map(|n| n.entropy_weight)
-            .sum();
+        let weight_sum: f32 = self.nodes.values().map(|n| n.entropy_weight).sum();
         let total = self.nodes.len().max(1) as f32;
         let raw_entropy = (weight_sum / total).min(1.0);
 
@@ -186,21 +190,22 @@ impl ChiralGraph {
     /// True when all leaf nodes are axiom-clean (no violations).
     pub fn is_converged(&self) -> bool {
         let leaves = self.leaf_node_ids();
-        leaves.iter().all(|id| {
-            self.nodes.get(id)
-                .map(|n| n.is_clean())
-                .unwrap_or(true)
-        })
+        leaves
+            .iter()
+            .all(|id| self.nodes.get(id).map(|n| n.is_clean()).unwrap_or(true))
     }
 
     /// IDs of nodes with no outgoing Refines or Supports edges (the frontier).
     pub fn leaf_node_ids(&self) -> Vec<String> {
-        let has_outgoing: std::collections::HashSet<&str> = self.edges.iter()
+        let has_outgoing: std::collections::HashSet<&str> = self
+            .edges
+            .iter()
             .filter(|e| matches!(e.polarity, EdgePolarity::Refines | EdgePolarity::Supports))
             .map(|e| e.from_id.as_str())
             .collect();
 
-        self.nodes.keys()
+        self.nodes
+            .keys()
             .filter(|id| !has_outgoing.contains(id.as_str()))
             .cloned()
             .collect()
@@ -209,16 +214,20 @@ impl ChiralGraph {
     /// The best current answer: the cleanest leaf Primary or Refinement node.
     pub fn best_answer(&self) -> Option<&EpistemicNode> {
         let leaves = self.leaf_node_ids();
-        let candidates: Vec<&EpistemicNode> = leaves.iter()
+        let candidates: Vec<&EpistemicNode> = leaves
+            .iter()
             .filter_map(|id| self.nodes.get(id))
-            .filter(|n| matches!(
-                n.node_type,
-                EpistemicNodeType::Primary | EpistemicNodeType::Refinement
-            ))
+            .filter(|n| {
+                matches!(
+                    n.node_type,
+                    EpistemicNodeType::Primary | EpistemicNodeType::Refinement
+                )
+            })
             .collect();
 
         // Prefer nodes with zero violations, then fewest violations
-        candidates.into_iter()
+        candidates
+            .into_iter()
             .min_by_key(|n| n.axiom_violations.iter().filter(|v| !v.satisfied).count())
     }
 
@@ -227,14 +236,26 @@ impl ChiralGraph {
         let entropy = self.entropy();
         GraphSummary {
             total_nodes: self.nodes.len(),
-            primary_count: self.nodes.values()
-                .filter(|n| n.node_type == EpistemicNodeType::Primary).count(),
-            critique_count: self.nodes.values()
-                .filter(|n| n.node_type == EpistemicNodeType::Critique).count(),
-            refinement_count: self.nodes.values()
-                .filter(|n| n.node_type == EpistemicNodeType::Refinement).count(),
-            axiom_anchor_count: self.nodes.values()
-                .filter(|n| n.node_type == EpistemicNodeType::AxiomAnchor).count(),
+            primary_count: self
+                .nodes
+                .values()
+                .filter(|n| n.node_type == EpistemicNodeType::Primary)
+                .count(),
+            critique_count: self
+                .nodes
+                .values()
+                .filter(|n| n.node_type == EpistemicNodeType::Critique)
+                .count(),
+            refinement_count: self
+                .nodes
+                .values()
+                .filter(|n| n.node_type == EpistemicNodeType::Refinement)
+                .count(),
+            axiom_anchor_count: self
+                .nodes
+                .values()
+                .filter(|n| n.node_type == EpistemicNodeType::AxiomAnchor)
+                .count(),
             total_edges: self.edges.len(),
             depth: self.depth,
             entropy: entropy.value,
@@ -247,7 +268,9 @@ impl ChiralGraph {
             EpistemicNodeType::Primary => 0.5,
             EpistemicNodeType::Critique => {
                 // Higher weight for lower-level axiom violations (L0 is worst)
-                let max_level = node.axiom_violations.iter()
+                let max_level = node
+                    .axiom_violations
+                    .iter()
                     .filter(|v| !v.satisfied)
                     .count();
                 (max_level as f32 * 0.25).min(1.0)

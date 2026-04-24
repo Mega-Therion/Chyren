@@ -150,7 +150,11 @@ pub fn extract_command(text: &str) -> Option<String> {
     if !trimmed.starts_with('/') {
         return None;
     }
-    let cmd = trimmed.split_whitespace().next().unwrap_or("").to_lowercase();
+    let cmd = trimmed
+        .split_whitespace()
+        .next()
+        .unwrap_or("")
+        .to_lowercase();
     if cmd.is_empty() {
         None
     } else {
@@ -251,8 +255,16 @@ pub async fn run_bridge(token: String) -> Result<(), Box<dyn std::error::Error +
                     "/status" => {
                         // Best-effort status: conductor health info.
                         let status = conductor.health_status().await;
-                        let conductor_status = if status.conductor_ok { "operational" } else { "degraded" };
-                        let qdrant_status = if status.qdrant_ok { "connected" } else { "unavailable" };
+                        let conductor_status = if status.conductor_ok {
+                            "operational"
+                        } else {
+                            "degraded"
+                        };
+                        let qdrant_status = if status.qdrant_ok {
+                            "connected"
+                        } else {
+                            "unavailable"
+                        };
                         format!(
                             "System Status\n\nConductor: {}\nProviders: {}\nLedger: {}\nQdrant: {}",
                             conductor_status,

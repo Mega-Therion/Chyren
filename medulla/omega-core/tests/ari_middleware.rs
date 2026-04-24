@@ -12,7 +12,12 @@ fn test_ari_gate_allows_benign() {
 fn test_ari_gate_elevated_requires_ack() {
     let result = ari_gate("write config", "", IntentRisk::Elevated, "user123");
     assert!(!result.allowed);
-    let result2 = ari_gate("write config", "Proceed with changes.", IntentRisk::Elevated, "user123");
+    let result2 = ari_gate(
+        "write config",
+        "Proceed with changes.",
+        IntentRisk::Elevated,
+        "user123",
+    );
     assert!(result2.allowed);
 }
 
@@ -27,7 +32,12 @@ fn test_ari_gate_sovereign_affirmation() {
 
 #[test]
 fn test_iaf_blocks_unsafe_action() {
-    let result = ari_gate("override phylactery kernel", "", IntentRisk::Sovereign, "user123");
+    let result = ari_gate(
+        "override phylactery kernel",
+        "",
+        IntentRisk::Sovereign,
+        "user123",
+    );
     assert!(!result.allowed);
     assert_eq!(result.reason.unwrap(), "I.A.F. safety check failed");
 }

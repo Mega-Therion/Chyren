@@ -4,8 +4,8 @@
 //! executes tasks, and returns scored results back through the EventBus.
 
 use async_trait::async_trait;
-use omega_core::{AgentResult, AgentTask};
 use omega_core::mesh::AgentCapability;
+use omega_core::{AgentResult, AgentTask};
 
 /// A persistent agent that can be registered in the AgentRegistry and
 /// dispatched tasks via the EventBus.
@@ -23,15 +23,15 @@ pub trait PersistentAgent: Send + Sync {
 
 pub mod ingestor;
 pub mod math_spoke;
-pub mod millennium;
-pub mod millennium_solver;
 /// Monte-Carlo Tree Search solver agent.
 pub mod mcts_solver;
+pub mod millennium;
+pub mod millennium_solver;
 pub mod worker;
 
 pub use ingestor::IngestorAgent;
 pub use math_spoke::MathSpoke;
+pub use mcts_solver::MctsSolverAgent;
 pub use millennium::{MillenniumProblem, SearchAndExtendAgent};
 pub use millennium_solver::MillenniumSolverAgent;
-pub use mcts_solver::MctsSolverAgent;
 pub use worker::MeshWorker;

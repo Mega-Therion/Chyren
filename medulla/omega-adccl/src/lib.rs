@@ -48,7 +48,11 @@ mod tests {
             result.flags, result.score
         );
         assert_eq!(result.status, "verified");
-        assert!(result.score >= 0.7, "Score {} should be >= 0.7", result.score);
+        assert!(
+            result.score >= 0.7,
+            "Score {} should be >= 0.7",
+            result.score
+        );
         assert!(
             result.flags.is_empty(),
             "Expected no flags for good response, got {:?}",
@@ -93,7 +97,8 @@ mod tests {
         let adccl = ADCCL::new(0.7, None);
 
         // Task is long enough that a 5-character response is clearly wrong.
-        let task = "Describe in detail the provider fallback mechanism and how it interacts with ADCCL";
+        let task =
+            "Describe in detail the provider fallback mechanism and how it interacts with ADCCL";
         let short_response = "Yes.";
 
         let result = adccl.verify(short_response, task);
@@ -190,7 +195,8 @@ mod tests {
 
         let task = "Describe the ledger architecture";
         // Five hedge phrases in ~30 words → rate >> 3 per 200 words.
-        let response = "I think perhaps I believe it seems like it might be the case that could be \
+        let response =
+            "I think perhaps I believe it seems like it might be the case that could be \
             true but I'm not sure and I cannot be certain about the ledger design here.";
 
         let result = adccl.verify(response, task);
@@ -234,7 +240,9 @@ mod tests {
         let result = adccl.verify(response, task);
 
         assert!(
-            result.flags.contains(&"LOW_INFORMATION_DENSITY".to_string()),
+            result
+                .flags
+                .contains(&"LOW_INFORMATION_DENSITY".to_string()),
             "Expected LOW_INFORMATION_DENSITY flag, got {:?}",
             result.flags
         );

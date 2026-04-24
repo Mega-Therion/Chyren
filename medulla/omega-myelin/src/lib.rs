@@ -61,7 +61,8 @@ impl MemoryGraph {
         stratum: omega_core::MemoryStratum,
         embedding: Vec<f32>,
     ) -> MemoryNode {
-        self.write_node_sharded(content, stratum, embedding, "general").await
+        self.write_node_sharded(content, stratum, embedding, "general")
+            .await
     }
 
     /// Write a node to the in-memory graph AND upsert its embedding to a specific Qdrant shard (domain).
@@ -96,7 +97,8 @@ impl MemoryGraph {
         query_embedding: Vec<f32>,
         top_k: usize,
     ) -> Vec<MemoryNode> {
-        self.search_semantic_sharded(query_embedding, top_k, "general").await
+        self.search_semantic_sharded(query_embedding, top_k, "general")
+            .await
     }
 
     /// Search a specific Qdrant shard semantically and map hits back to in-memory MemoryNodes.
@@ -112,7 +114,10 @@ impl MemoryGraph {
         };
 
         // Fetch more candidates from Qdrant so we have room to mathematically re-rank them
-        let hits = vs.search(query_embedding, top_k * 3).await.unwrap_or_default();
+        let hits = vs
+            .search(query_embedding, top_k * 3)
+            .await
+            .unwrap_or_default();
 
         let mut resonant_nodes: Vec<(MemoryNode, f32)> = hits
             .into_iter()
@@ -120,17 +125,17 @@ impl MemoryGraph {
                 self.nodes.get(&hit.id).cloned().map(|node| {
                     // --- THE RESONANCE CALCULATION ---
                     // 1. Frequency (Base phase alignment from Qdrant: 0.0 to 1.0)
-                    let frequency = hit.score; 
-                    
+                    let frequency = hit.score;
+
                     // 2. Energy (The decaying wave from eviction.rs: 0.1 to 1.0)
                     let energy = node.decay_score as f32;
-                    
+
                     // 3. Amplitude (Historical weight/salience. logarithmic so it doesn't blow up)
                     let amplitude = 1.0 + (node.retrieval_count as f32).ln_1p() * 0.15;
-                    
+
                     // Final Resonance = Frequency * Energy * Amplitude
                     let resonance = frequency * energy * amplitude;
-                    
+
                     (node, resonance)
                 })
             })
@@ -140,7 +145,11 @@ impl MemoryGraph {
         resonant_nodes.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
 
         // Return the most resonant `top_k` nodes
-        resonant_nodes.into_iter().take(top_k).map(|(n, _)| n).collect()
+        resonant_nodes
+            .into_iter()
+            .take(top_k)
+            .map(|(n, _)| n)
+            .collect()
     }
 
     pub fn create_edge(&mut self, from: String, to: String, _edge_type: String, _weight: f64) {
@@ -220,7 +229,9 @@ impl Service {
         domain: &str,
     ) -> MemoryNode {
         let mut graph = self.graph.lock().await;
-        graph.write_node_sharded(content, stratum, embedding, domain).await
+        graph
+            .write_node_sharded(content, stratum, embedding, domain)
+            .await
     }
 
     /// Sharded search — delegates to MemoryGraph::search_semantic_sharded.
@@ -231,7 +242,9 @@ impl Service {
         domain: &str,
     ) -> Vec<MemoryNode> {
         let graph = self.graph.lock().await;
-        graph.search_semantic_sharded(query_embedding, top_k, domain).await
+        graph
+            .search_semantic_sharded(query_embedding, top_k, domain)
+            .await
     }
 
     pub async fn create_edge(&self, from: String, to: String, edge_type: String, weight: f64) {
@@ -247,11 +260,11 @@ impl Default for Service {
 }
 
 pub mod db;
-pub mod vector;
 pub mod eviction;
+pub mod vector;
 
-pub use vector::{SearchResult, VectorStore};
 pub use eviction::StratumEvictionWorker;
+pub use vector::{SearchResult, VectorStore};
 
 #[cfg(test)]
 mod tests {
@@ -261,9 +274,7 @@ mod tests {
     #[tokio::test]
     async fn test_search_semantic_no_vector_store_returns_empty() {
         let graph = MemoryGraph::new();
-        let results = graph
-            .search_semantic(vec![0.1f32, 0.2, 0.3], 5)
-            .await;
+        let results = graph.search_semantic(vec![0.1f32, 0.2, 0.3], 5).await;
         assert!(
             results.is_empty(),
             "search_semantic should return empty vec when no vector_store is set"
@@ -299,9 +310,7 @@ mod tests {
         let vs = VectorStore::new("http://127.0.0.1:19999", "test_col");
         graph.set_vector_store(vs);
 
-        let results = graph
-            .search_semantic(vec![0.1f32, 0.2, 0.3], 5)
-            .await;
+        let results = graph.search_semantic(vec![0.1f32, 0.2, 0.3], 5).await;
         assert!(
             results.is_empty(),
             "search_semantic should return empty vec when Qdrant is offline"

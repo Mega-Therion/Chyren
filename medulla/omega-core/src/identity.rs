@@ -1,4 +1,3 @@
-
 pub const IDENTITY_KERNEL: &[u8] = include_bytes!("../resources/identity.bin");
 
 pub const YETTRAGRAMMATON: &str = "R.W.Ϝ.Y.";

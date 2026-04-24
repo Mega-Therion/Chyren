@@ -85,10 +85,7 @@ impl IdentityFoundation {
         if !self.addressed_problems.is_empty() {
             md.push_str("\n## High-Impact Problems Addressed\n\n");
             for p in &self.addressed_problems {
-                md.push_str(&format!(
-                    "### {} (impact={:.2})\n",
-                    p.name, p.impact
-                ));
+                md.push_str(&format!("### {} (impact={:.2})\n", p.name, p.impact));
                 if let Some(ref res) = p.resolution {
                     md.push_str(&format!("_Resolution_: {}\n", res));
                 }
@@ -204,7 +201,11 @@ impl IdentitySynthesizer {
         total_episodes: usize,
     ) -> Result<IdentityFoundation, String> {
         tracing::info!("[DREAM] Dream cycle starting — scanning for sovereign problems…");
-        omega_telemetry::info!("IdentitySynthesizer", "DREAM_START", "Scanning for problems and HF trends");
+        omega_telemetry::info!(
+            "IdentitySynthesizer",
+            "DREAM_START",
+            "Scanning for problems and HF trends"
+        );
 
         let all_problems = self.scan_problems().await;
         let mut addressed = Vec::new();
@@ -235,7 +236,12 @@ impl IdentitySynthesizer {
 
         self.persist(&foundation)?;
         tracing::info!("[DREAM] Dream cycle complete. Identity foundation persisted.");
-        omega_telemetry::info!("IdentitySynthesizer", "DREAM_COMPLETE", "Identity foundation synthesized with {} problems addressed", addressed_count);
+        omega_telemetry::info!(
+            "IdentitySynthesizer",
+            "DREAM_COMPLETE",
+            "Identity foundation synthesized with {} problems addressed",
+            addressed_count
+        );
         Ok(foundation)
     }
 
@@ -249,10 +255,7 @@ impl IdentitySynthesizer {
         let markdown = foundation.to_markdown();
         fs::write(&path, &markdown)
             .map_err(|e| format!("Failed to write identity foundation: {}", e))?;
-        tracing::info!(
-            "[DREAM] Identity foundation written to {}",
-            path.display()
-        );
+        tracing::info!("[DREAM] Identity foundation written to {}", path.display());
         Ok(())
     }
 
@@ -317,10 +320,9 @@ mod tests {
     #[tokio::test]
     async fn test_dream_cycle_produces_foundation() {
         let synth = IdentitySynthesizer::new();
-        let result = synth.run_dream_cycle(
-            vec!["Always cite sources".into()],
-            10,
-        ).await;
+        let result = synth
+            .run_dream_cycle(vec!["Always cite sources".into()], 10)
+            .await;
         // May fail if ~/.omega is not writable; ignore IO error in CI
         if let Ok(f) = result {
             assert!(!f.core_principles.is_empty());

@@ -1,7 +1,7 @@
 use super::PersistentAgent;
 use async_trait::async_trait;
-use omega_core::{now, AgentTask, AgentResult};
-use omega_core::mesh::{TaskContract, AgentCapability};
+use omega_core::mesh::{AgentCapability, TaskContract};
+use omega_core::{now, AgentResult, AgentTask};
 use std::sync::Arc;
 
 /// MctsSolverAgent: A strategic agent that explores proof spaces using Monte Carlo Tree Search.
@@ -37,13 +37,18 @@ impl PersistentAgent for MctsSolverAgent {
     }
 
     async fn execute(&self, task: AgentTask) -> AgentResult {
-        omega_telemetry::info!("MctsSolver", "SEARCH_START", "Initiating MCTS path exploration for task {}", task.task_id);
+        omega_telemetry::info!(
+            "MctsSolver",
+            "SEARCH_START",
+            "Initiating MCTS path exploration for task {}",
+            task.task_id
+        );
 
         // Simulate MCTS Branching
         let sub_task = TaskContract {
             task_id: format!("{}-mcts-branch-1", task.task_id),
             task_type: "formal_verification".to_string(),
-            payload: serde_json::json!({ 
+            payload: serde_json::json!({
                 "branch_id": "beta-7",
                 "path": task.payload,
                 "action": "expand_zeta_summation"
@@ -53,30 +58,27 @@ impl PersistentAgent for MctsSolverAgent {
         };
 
         match self.dispatcher.send_task(sub_task).await {
-            Ok(_) => {
-                AgentResult {
-                    task_id: task.task_id,
-                    run_id: task.run_id,
-                    agent_id: task.agent_id,
-                    success: true,
-                    output: "MCTS selection complete. Dispatched branch beta-7 for evaluation.".to_string(),
-                    adccl_score: Some(0.95),
-                    error: None,
-                    completed_at: now(),
-                }
-            }
-            Err(e) => {
-                AgentResult {
-                    task_id: task.task_id,
-                    run_id: task.run_id,
-                    agent_id: task.agent_id,
-                    success: false,
-                    output: String::new(),
-                    adccl_score: Some(0.0),
-                    error: Some(format!("MCTS dispatch error: {}", e)),
-                    completed_at: now(),
-                }
-            }
+            Ok(_) => AgentResult {
+                task_id: task.task_id,
+                run_id: task.run_id,
+                agent_id: task.agent_id,
+                success: true,
+                output: "MCTS selection complete. Dispatched branch beta-7 for evaluation."
+                    .to_string(),
+                adccl_score: Some(0.95),
+                error: None,
+                completed_at: now(),
+            },
+            Err(e) => AgentResult {
+                task_id: task.task_id,
+                run_id: task.run_id,
+                agent_id: task.agent_id,
+                success: false,
+                output: String::new(),
+                adccl_score: Some(0.0),
+                error: Some(format!("MCTS dispatch error: {}", e)),
+                completed_at: now(),
+            },
         }
     }
 }

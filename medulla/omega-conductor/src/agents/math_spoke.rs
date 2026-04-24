@@ -11,8 +11,8 @@
 
 use super::PersistentAgent;
 use async_trait::async_trait;
-use omega_core::{now, AgentResult, AgentTask};
 use omega_core::mesh::AgentCapability;
+use omega_core::{now, AgentResult, AgentTask};
 use std::fs;
 use std::io::Write;
 use std::process::Command;
@@ -40,8 +40,7 @@ const MATH_SYSTEM_PROMPT: &str = "You are a sovereign mathematician inside the C
 
 /// Path to the elan-managed lean binary (isolated from system Python entirely).
 fn lean_binary() -> String {
-    std::env::var("LEAN_BIN")
-        .unwrap_or_else(|_| "/home/mega/.elan/bin/lean".to_string())
+    std::env::var("LEAN_BIN").unwrap_or_else(|_| "/home/mega/.elan/bin/lean".to_string())
 }
 
 /// Lean 4 formalization spoke — converts mathematical content into compiler-verified proofs.
@@ -61,28 +60,50 @@ impl MathSpoke {
 
         // Tier 0: Ollama — local, no keys, 512 token limit for theorem skeleton only
         match self.call_ollama(&user_prompt).await {
-            Ok(r) => { 
-                omega_telemetry::info!("MathSpoke", "LLM_SUCCESS", "provider=ollama verified theorem skeleton");
-                return Ok(r); 
+            Ok(r) => {
+                omega_telemetry::info!(
+                    "MathSpoke",
+                    "LLM_SUCCESS",
+                    "provider=ollama verified theorem skeleton"
+                );
+                return Ok(r);
             }
             Err(e) if e.contains("500") || e.contains("memory") || e.contains("OOM") => {
-                omega_telemetry::warn!("MathSpoke", "LLM_OOM", "Ollama OOM — escalating to cloud: {e}");
+                omega_telemetry::warn!(
+                    "MathSpoke",
+                    "LLM_OOM",
+                    "Ollama OOM — escalating to cloud: {e}"
+                );
             }
-            Err(e) => omega_telemetry::warn!("MathSpoke", "LLM_FAILURE", "Ollama failed ({e}) → Tier 1"),
+            Err(e) => {
+                omega_telemetry::warn!("MathSpoke", "LLM_FAILURE", "Ollama failed ({e}) → Tier 1")
+            }
         }
 
         // Tier 1a: Groq free tier
         if let Ok(key) = std::env::var("GROQ_API_KEY") {
             if !key.contains("stale") && !key.is_empty() {
                 match self.call_groq(&key, &user_prompt).await {
-                    Ok(r) => { 
-                        omega_telemetry::info!("MathSpoke", "LLM_SUCCESS", "provider=groq verified theorem skeleton");
-                        return Ok(r); 
+                    Ok(r) => {
+                        omega_telemetry::info!(
+                            "MathSpoke",
+                            "LLM_SUCCESS",
+                            "provider=groq verified theorem skeleton"
+                        );
+                        return Ok(r);
                     }
                     Err(e) if e.contains("401") => {
-                        omega_telemetry::error!("MathSpoke", "AUTH_FAILURE", "Groq 401 — key rotation required at ~/.omega/groq-rotate.sh");
+                        omega_telemetry::error!(
+                            "MathSpoke",
+                            "AUTH_FAILURE",
+                            "Groq 401 — key rotation required at ~/.omega/groq-rotate.sh"
+                        );
                     }
-                    Err(e) => omega_telemetry::warn!("MathSpoke", "LLM_FAILURE", "Groq failed ({e}) → OpenRouter"),
+                    Err(e) => omega_telemetry::warn!(
+                        "MathSpoke",
+                        "LLM_FAILURE",
+                        "Groq failed ({e}) → OpenRouter"
+                    ),
                 }
             }
         }
@@ -91,11 +112,19 @@ impl MathSpoke {
         if let Ok(key) = std::env::var("OPENROUTER_API_KEY") {
             if !key.is_empty() {
                 match self.call_openrouter(&key, &user_prompt).await {
-                    Ok(r) => { 
-                        omega_telemetry::info!("MathSpoke", "LLM_SUCCESS", "provider=openrouter verified theorem skeleton");
-                        return Ok(r); 
+                    Ok(r) => {
+                        omega_telemetry::info!(
+                            "MathSpoke",
+                            "LLM_SUCCESS",
+                            "provider=openrouter verified theorem skeleton"
+                        );
+                        return Ok(r);
                     }
-                    Err(e) => omega_telemetry::warn!("MathSpoke", "LLM_FAILURE", "OpenRouter failed ({e}) → Tier 2"),
+                    Err(e) => omega_telemetry::warn!(
+                        "MathSpoke",
+                        "LLM_FAILURE",
+                        "OpenRouter failed ({e}) → Tier 2"
+                    ),
                 }
             }
         }
@@ -104,12 +133,24 @@ impl MathSpoke {
         if let Ok(key) = std::env::var("GEMINI_API_KEY") {
             if !key.contains("stale") && !key.is_empty() {
                 match self.call_gemini(&key, &user_prompt).await {
-                    Ok(r) => { 
-                        omega_telemetry::info!("MathSpoke", "LLM_SUCCESS", "provider=gemini verified theorem skeleton");
-                        return Ok(r); 
+                    Ok(r) => {
+                        omega_telemetry::info!(
+                            "MathSpoke",
+                            "LLM_SUCCESS",
+                            "provider=gemini verified theorem skeleton"
+                        );
+                        return Ok(r);
                     }
-                    Err(e) if e.contains("429") => omega_telemetry::warn!("MathSpoke", "RATE_LIMIT", "Gemini rate-limited → Anthropic"),
-                    Err(e) => omega_telemetry::warn!("MathSpoke", "LLM_FAILURE", "Gemini failed ({e}) → Anthropic"),
+                    Err(e) if e.contains("429") => omega_telemetry::warn!(
+                        "MathSpoke",
+                        "RATE_LIMIT",
+                        "Gemini rate-limited → Anthropic"
+                    ),
+                    Err(e) => omega_telemetry::warn!(
+                        "MathSpoke",
+                        "LLM_FAILURE",
+                        "Gemini failed ({e}) → Anthropic"
+                    ),
                 }
             }
         }
@@ -118,11 +159,17 @@ impl MathSpoke {
         if let Ok(key) = std::env::var("ANTHROPIC_API_KEY") {
             if !key.is_empty() {
                 match self.call_anthropic(&key, &user_prompt).await {
-                    Ok(r) => { 
-                        omega_telemetry::info!("MathSpoke", "LLM_SUCCESS", "provider=anthropic verified theorem skeleton");
-                        return Ok(r); 
+                    Ok(r) => {
+                        omega_telemetry::info!(
+                            "MathSpoke",
+                            "LLM_SUCCESS",
+                            "provider=anthropic verified theorem skeleton"
+                        );
+                        return Ok(r);
                     }
-                    Err(e) => omega_telemetry::warn!("MathSpoke", "LLM_FAILURE", "Anthropic failed ({e})"),
+                    Err(e) => {
+                        omega_telemetry::warn!("MathSpoke", "LLM_FAILURE", "Anthropic failed ({e})")
+                    }
                 }
             }
         }
@@ -133,8 +180,8 @@ impl MathSpoke {
     async fn call_ollama(&self, user_prompt: &str) -> Result<String, String> {
         let base = std::env::var("OLLAMA_BASE_URL")
             .unwrap_or_else(|_| "http://localhost:11434/v1".to_string());
-        let model = std::env::var("OLLAMA_MODEL")
-            .unwrap_or_else(|_| "qwen2.5-coder:7b".to_string());
+        let model =
+            std::env::var("OLLAMA_MODEL").unwrap_or_else(|_| "qwen2.5-coder:7b".to_string());
 
         let client = reqwest::Client::builder()
             .timeout(std::time::Duration::from_secs(240))
@@ -159,11 +206,15 @@ impl MathSpoke {
             .map_err(|e| format!("Ollama connect error: {e} — is `ollama serve` running?"))?;
 
         if !resp.status().is_success() {
-            return Err(format!("Ollama {}: run `ollama serve` first", resp.status()));
+            return Err(format!(
+                "Ollama {}: run `ollama serve` first",
+                resp.status()
+            ));
         }
 
         let json: serde_json::Value = resp.json().await.map_err(|e| e.to_string())?;
-        json["choices"].as_array()
+        json["choices"]
+            .as_array()
             .and_then(|a| a.first())
             .and_then(|c| c["message"]["content"].as_str())
             .map(|s| s.to_string())
@@ -177,8 +228,8 @@ impl MathSpoke {
             .build()
             .map_err(|e| e.to_string())?;
 
-        let model = std::env::var("GROQ_MODEL")
-            .unwrap_or_else(|_| "llama-3.3-70b-versatile".to_string());
+        let model =
+            std::env::var("GROQ_MODEL").unwrap_or_else(|_| "llama-3.3-70b-versatile".to_string());
 
         let body = serde_json::json!({
             "model": model,
@@ -205,7 +256,8 @@ impl MathSpoke {
         }
 
         let json: serde_json::Value = resp.json().await.map_err(|e| e.to_string())?;
-        json["choices"].as_array()
+        json["choices"]
+            .as_array()
             .and_then(|a| a.first())
             .and_then(|c| c["message"]["content"].as_str())
             .map(|s| s.to_string())
@@ -249,7 +301,8 @@ impl MathSpoke {
         }
 
         let json: serde_json::Value = resp.json().await.map_err(|e| e.to_string())?;
-        json["choices"].as_array()
+        json["choices"]
+            .as_array()
             .and_then(|a| a.first())
             .and_then(|c| c["message"]["content"].as_str())
             .map(|s| s.to_string())
@@ -262,8 +315,8 @@ impl MathSpoke {
             .build()
             .map_err(|e| e.to_string())?;
 
-        let model = std::env::var("GEMINI_MODEL")
-            .unwrap_or_else(|_| "gemini-2.5-flash".to_string());
+        let model =
+            std::env::var("GEMINI_MODEL").unwrap_or_else(|_| "gemini-2.5-flash".to_string());
 
         let combined = format!("{MATH_SYSTEM_PROMPT}\n\n{user_prompt}");
         let body = serde_json::json!({
@@ -275,7 +328,11 @@ impl MathSpoke {
             "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
         );
 
-        let resp = client.post(&url).json(&body).send().await
+        let resp = client
+            .post(&url)
+            .json(&body)
+            .send()
+            .await
             .map_err(|e| format!("Gemini error: {e}"))?;
 
         if !resp.status().is_success() {
@@ -285,7 +342,8 @@ impl MathSpoke {
         }
 
         let json: serde_json::Value = resp.json().await.map_err(|e| e.to_string())?;
-        json["candidates"].as_array()
+        json["candidates"]
+            .as_array()
             .and_then(|a| a.first())
             .and_then(|c| c["content"]["parts"].as_array())
             .and_then(|p| p.first())
@@ -324,7 +382,8 @@ impl MathSpoke {
         }
 
         let json: serde_json::Value = resp.json().await.map_err(|e| e.to_string())?;
-        json["content"].as_array()
+        json["content"]
+            .as_array()
             .and_then(|a| a.first())
             .and_then(|b| b["text"].as_str())
             .map(|s| s.to_string())
@@ -349,8 +408,8 @@ impl MathSpoke {
         let full_source = format!("{LEAN_PREAMBLE}{lean_source}");
 
         {
-            let mut f = fs::File::create(&path)
-                .map_err(|e| format!("cannot write proof file: {e}"))?;
+            let mut f =
+                fs::File::create(&path).map_err(|e| format!("cannot write proof file: {e}"))?;
             f.write_all(full_source.as_bytes())
                 .map_err(|e| format!("write error: {e}"))?;
         }
@@ -374,17 +433,25 @@ impl MathSpoke {
             let salvaged = Self::salvage_with_sorry(lean_source);
             let salvage_path = format!("/tmp/chyren_salvage_{task_id}.lean");
             let full_salvage = format!("{LEAN_PREAMBLE}{salvaged}");
-                if let Ok(mut f) = fs::File::create(&salvage_path) {
-                    let _ = f.write_all(full_salvage.as_bytes());
-                    let salvage_out = Command::new(&lean_bin).arg(&salvage_path).output();
-                    let _ = fs::remove_file(&salvage_path);
-                    if salvage_out.map(|o| o.status.success()).unwrap_or(false) {
-                        omega_telemetry::info!("MathSpoke", "SALVAGE_SUCCESS", "Proof salvaged with sorry; marked [PARTIAL]");
-                        return Ok(format!("-- [PARTIAL: proof skeleton only]\n{salvaged}"));
-                    }
-                    omega_telemetry::warn!("MathSpoke", "SALVAGE_FAILURE", "Salvage failed — emitting trivial stub for {task_id}");
-                    return Ok("-- salvaged stub\ntheorem salvaged : True := trivial\n".to_string());
+            if let Ok(mut f) = fs::File::create(&salvage_path) {
+                let _ = f.write_all(full_salvage.as_bytes());
+                let salvage_out = Command::new(&lean_bin).arg(&salvage_path).output();
+                let _ = fs::remove_file(&salvage_path);
+                if salvage_out.map(|o| o.status.success()).unwrap_or(false) {
+                    omega_telemetry::info!(
+                        "MathSpoke",
+                        "SALVAGE_SUCCESS",
+                        "Proof salvaged with sorry; marked [PARTIAL]"
+                    );
+                    return Ok(format!("-- [PARTIAL: proof skeleton only]\n{salvaged}"));
                 }
+                omega_telemetry::warn!(
+                    "MathSpoke",
+                    "SALVAGE_FAILURE",
+                    "Salvage failed — emitting trivial stub for {task_id}"
+                );
+                return Ok("-- salvaged stub\ntheorem salvaged : True := trivial\n".to_string());
+            }
         }
 
         Err(format!("Lean compiler rejected proof:\n{stderr}"))
@@ -429,8 +496,14 @@ impl PersistentAgent for MathSpoke {
 
     fn capabilities(&self) -> Vec<AgentCapability> {
         vec![
-            AgentCapability { category: "formal_verification".to_string(), tools: vec![] },
-            AgentCapability { category: "tool_execution".to_string(), tools: vec![] },
+            AgentCapability {
+                category: "formal_verification".to_string(),
+                tools: vec![],
+            },
+            AgentCapability {
+                category: "tool_execution".to_string(),
+                tools: vec![],
+            },
         ]
     }
 
@@ -457,20 +530,37 @@ impl PersistentAgent for MathSpoke {
             let code = Self::strip_fences(&raw);
             match Self::lean_verify(&task.task_id, &code) {
                 Ok(verified) => {
-                    omega_telemetry::info!("MathSpoke", "VERIFY_SUCCESS", "Tier 0 (Ollama) proof compiled successfully");
+                    omega_telemetry::info!(
+                        "MathSpoke",
+                        "VERIFY_SUCCESS",
+                        "Tier 0 (Ollama) proof compiled successfully"
+                    );
                     return AgentResult {
-                        task_id: task.task_id, run_id: task.run_id, agent_id: task.agent_id,
-                        success: true, output: verified, adccl_score: Some(1.0),
-                        error: None, completed_at: now(),
+                        task_id: task.task_id,
+                        run_id: task.run_id,
+                        agent_id: task.agent_id,
+                        success: true,
+                        output: verified,
+                        adccl_score: Some(1.0),
+                        error: None,
+                        completed_at: now(),
                     };
                 }
                 Err(e) => {
-                    omega_telemetry::warn!("MathSpoke", "VERIFY_FAILURE", "Tier 0 (Ollama) rejected — escalating to Tier 1: {e}");
+                    omega_telemetry::warn!(
+                        "MathSpoke",
+                        "VERIFY_FAILURE",
+                        "Tier 0 (Ollama) rejected — escalating to Tier 1: {e}"
+                    );
                     last_err = e;
                 }
             }
         } else {
-            omega_telemetry::warn!("MathSpoke", "LLM_UNAVAILABLE", "Ollama unavailable — escalating to Tier 1");
+            omega_telemetry::warn!(
+                "MathSpoke",
+                "LLM_UNAVAILABLE",
+                "Ollama unavailable — escalating to Tier 1"
+            );
         }
 
         // Tier 1: Gemini 2.5 Flash
@@ -481,37 +571,69 @@ impl PersistentAgent for MathSpoke {
                         let code = Self::strip_fences(&raw);
                         match Self::lean_verify(&task.task_id, &code) {
                             Ok(verified) => {
-                                omega_telemetry::info!("MathSpoke", "VERIFY_SUCCESS", "Tier 1 (Gemini) proof compiled successfully");
+                                omega_telemetry::info!(
+                                    "MathSpoke",
+                                    "VERIFY_SUCCESS",
+                                    "Tier 1 (Gemini) proof compiled successfully"
+                                );
                                 return AgentResult {
-                                    task_id: task.task_id, run_id: task.run_id, agent_id: task.agent_id,
-                                    success: true, output: verified, adccl_score: Some(1.0),
-                                    error: None, completed_at: now(),
+                                    task_id: task.task_id,
+                                    run_id: task.run_id,
+                                    agent_id: task.agent_id,
+                                    success: true,
+                                    output: verified,
+                                    adccl_score: Some(1.0),
+                                    error: None,
+                                    completed_at: now(),
                                 };
                             }
                             Err(e) => {
-                                omega_telemetry::warn!("MathSpoke", "VERIFY_FAILURE", "Tier 1 (Gemini) rejected — initiating salvage: {e}");
+                                omega_telemetry::warn!(
+                                    "MathSpoke",
+                                    "VERIFY_FAILURE",
+                                    "Tier 1 (Gemini) rejected — initiating salvage: {e}"
+                                );
                                 last_err = e;
                                 // Salvage: gemini output with sorry is likely still structurally valid
                                 let salvaged = Self::salvage_with_sorry(&code);
-                                if let Ok(v) = Self::lean_verify(&format!("{}_s", task.task_id), &salvaged) {
-                                    omega_telemetry::info!("MathSpoke", "SALVAGE_SUCCESS", "Tier 1 skeleton salvaged and absorbed");
+                                if let Ok(v) =
+                                    Self::lean_verify(&format!("{}_s", task.task_id), &salvaged)
+                                {
+                                    omega_telemetry::info!(
+                                        "MathSpoke",
+                                        "SALVAGE_SUCCESS",
+                                        "Tier 1 skeleton salvaged and absorbed"
+                                    );
                                     return AgentResult {
-                                        task_id: task.task_id, run_id: task.run_id, agent_id: task.agent_id,
-                                        success: true, output: format!("-- [PARTIAL]\n{v}"),
-                                        adccl_score: Some(0.7), error: None, completed_at: now(),
+                                        task_id: task.task_id,
+                                        run_id: task.run_id,
+                                        agent_id: task.agent_id,
+                                        success: true,
+                                        output: format!("-- [PARTIAL]\n{v}"),
+                                        adccl_score: Some(0.7),
+                                        error: None,
+                                        completed_at: now(),
                                     };
                                 }
                             }
                         }
                     }
-                    Err(e) => omega_telemetry::error!("MathSpoke", "LLM_FAILURE", "Tier 1 (Gemini) failed: {e}"),
+                    Err(e) => omega_telemetry::error!(
+                        "MathSpoke",
+                        "LLM_FAILURE",
+                        "Tier 1 (Gemini) failed: {e}"
+                    ),
                 }
             }
         }
 
         AgentResult {
-            task_id: task.task_id, run_id: task.run_id, agent_id: task.agent_id,
-            success: false, output: String::new(), adccl_score: Some(0.0),
+            task_id: task.task_id,
+            run_id: task.run_id,
+            agent_id: task.agent_id,
+            success: false,
+            output: String::new(),
+            adccl_score: Some(0.0),
             error: Some(format!("Lean 4 formalization failed: {last_err}")),
             completed_at: now(),
         }

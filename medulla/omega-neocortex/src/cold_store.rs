@@ -77,17 +77,24 @@ impl ColdStore {
     }
 
     async fn ipfs_pin(&self, hash: &str, data: &[u8], url: &str) -> Result<String, ColdStoreError> {
-        let form = reqwest::multipart::Form::new()
-            .part("file", reqwest::multipart::Part::bytes(data.to_vec()).file_name(format!("{}.json", hash)));
+        let form = reqwest::multipart::Form::new().part(
+            "file",
+            reqwest::multipart::Part::bytes(data.to_vec()).file_name(format!("{}.json", hash)),
+        );
 
-        let resp = self.http.post(format!("{}/api/v0/add?pin=true", url))
+        let resp = self
+            .http
+            .post(format!("{}/api/v0/add?pin=true", url))
             .multipart(form)
             .send()
             .await
             .map_err(|e| ColdStoreError::Ipfs(e.to_string()))?;
 
         if resp.status().is_success() {
-            let json: serde_json::Value = resp.json().await.map_err(|e| ColdStoreError::Ipfs(e.to_string()))?;
+            let json: serde_json::Value = resp
+                .json()
+                .await
+                .map_err(|e| ColdStoreError::Ipfs(e.to_string()))?;
             if let Some(cid) = json["Hash"].as_str() {
                 return Ok(cid.to_string());
             }

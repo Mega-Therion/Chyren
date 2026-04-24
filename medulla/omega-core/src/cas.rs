@@ -128,7 +128,6 @@ pub fn reject_intent(intent: SovereignIntent, reason: &str) -> CasLedgerEntry {
     }
 }
 
-
 // ── I.A.F. stub ───────────────────────────────────────────────────────────────
 
 /// I.A.F. — Immutable Alignment Fabric

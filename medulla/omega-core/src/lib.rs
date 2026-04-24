@@ -402,21 +402,17 @@ impl KnowledgeNode {
     }
 }
 
-pub mod identity;
-pub mod mesh;
+pub mod ari_middleware;
 pub mod axioms;
 pub mod cas;
-pub mod ari_middleware;
+pub mod identity;
+pub mod mesh;
 
 pub use axioms::{
-    AxiomTrait, AxiomCheckResult, EpistemicNode, EpistemicNodeType,
-    ChiralEdge, EdgePolarity, check_all_axioms, sovereign_axioms,
+    check_all_axioms, sovereign_axioms, AxiomCheckResult, AxiomTrait, ChiralEdge, EdgePolarity,
+    EpistemicNode, EpistemicNodeType,
 };
 
-pub use cas::{
-    CasLedgerEntry, SovereignIntent, IntentRisk, evaluate_intent, iaf_check,
-};
+pub use cas::{evaluate_intent, iaf_check, CasLedgerEntry, IntentRisk, SovereignIntent};
 
-pub use ari_middleware::{
-    ari_gate, AriGateResult,
-};
+pub use ari_middleware::{ari_gate, AriGateResult};

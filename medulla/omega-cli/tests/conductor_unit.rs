@@ -67,10 +67,7 @@ async fn alignment_gate_rejects_delete_all_files_task() {
         ConductorError::Deflected(_) | ConductorError::Rejected(_) => {
             // Correct — one of the two gates caught it.
         }
-        other => panic!(
-            "expected Deflected or Rejected error, got: {:?}",
-            other
-        ),
+        other => panic!("expected Deflected or Rejected error, got: {:?}", other),
     }
 }
 

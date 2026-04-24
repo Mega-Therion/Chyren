@@ -43,8 +43,8 @@ impl OpenRouterSpoke {
     }
 
     async fn chat_completion(&self, input: &Value) -> Result<Value, String> {
-        let api_key = env::var("OPENROUTER_API_KEY")
-            .map_err(|_| "OPENROUTER_API_KEY not set".to_string())?;
+        let api_key =
+            env::var("OPENROUTER_API_KEY").map_err(|_| "OPENROUTER_API_KEY not set".to_string())?;
 
         let prompt = input.get("prompt").and_then(|p| p.as_str()).unwrap_or("");
         let system = input.get("system").and_then(|s| s.as_str()).unwrap_or("");
@@ -53,8 +53,14 @@ impl OpenRouterSpoke {
             .and_then(|m| m.as_str())
             .map(|s| s.to_string())
             .unwrap_or_else(|| self.model());
-        let max_tokens = input.get("max_tokens").and_then(|t| t.as_u64()).unwrap_or(2048);
-        let temperature = input.get("temperature").and_then(|t| t.as_f64()).unwrap_or(0.3);
+        let max_tokens = input
+            .get("max_tokens")
+            .and_then(|t| t.as_u64())
+            .unwrap_or(2048);
+        let temperature = input
+            .get("temperature")
+            .and_then(|t| t.as_f64())
+            .unwrap_or(0.3);
 
         let mut messages = Vec::new();
         if !system.is_empty() {
@@ -62,7 +68,10 @@ impl OpenRouterSpoke {
         }
         messages.push(json!({"role": "user", "content": prompt}));
 
-        let client = reqwest::Client::builder().timeout(std::time::Duration::from_secs(120)).build().unwrap_or_default();
+        let client = reqwest::Client::builder()
+            .timeout(std::time::Duration::from_secs(120))
+            .build()
+            .unwrap_or_default();
         let resp = client
             .post(format!("{}/chat/completions", self.base_url()))
             .header("Authorization", format!("Bearer {}", api_key))
@@ -132,7 +141,11 @@ impl Spoke for OpenRouterSpoke {
         let has_key = env::var("OPENROUTER_API_KEY").is_ok();
         Ok(SpokeStatus {
             name: "openrouter".to_string(),
-            health: if has_key { "ok".to_string() } else { "no_key".to_string() },
+            health: if has_key {
+                "ok".to_string()
+            } else {
+                "no_key".to_string()
+            },
             last_success: 0.0,
             recent_errors: 0,
             available_tools: 1,

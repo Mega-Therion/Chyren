@@ -9,8 +9,8 @@
 //! import graphs without cloning the full 200k-file repository.
 
 use super::{ingestor::IngestionRequest, IngestorAgent};
-use omega_core::{now, AgentTask, AgentResult};
 use omega_core::mesh::AgentCapability;
+use omega_core::{now, AgentResult, AgentTask};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashSet, VecDeque};
 
@@ -150,10 +150,7 @@ impl SovereignDiscipline {
                 "Mathlib/LinearAlgebra/Basis",
                 "Mathlib/LinearAlgebra/Matrix/Basic",
             ],
-            Self::AbstractAlgebra => &[
-                "Mathlib/Algebra/Group/Basic",
-                "Mathlib/Algebra/Ring/Basic",
-            ],
+            Self::AbstractAlgebra => &["Mathlib/Algebra/Group/Basic", "Mathlib/Algebra/Ring/Basic"],
             Self::Topology => &[
                 "Mathlib/Topology/Basic",
                 "Mathlib/Topology/Algebra/Group/Basic",
@@ -182,14 +179,8 @@ impl SovereignDiscipline {
                 "Mathlib/Probability/Kernel/Basic",
                 "Mathlib/Probability/ProbabilityMassFunction/Basic",
             ],
-            Self::LogicAndRhetoric => &[
-                "Mathlib/Logic/Basic",
-                "Mathlib/Logic/Equiv/Basic",
-            ],
-            Self::ClassicalPhilosophy => &[
-                "Mathlib/Logic/Basic",
-                "Mathlib/Order/Basic",
-            ],
+            Self::LogicAndRhetoric => &["Mathlib/Logic/Basic", "Mathlib/Logic/Equiv/Basic"],
+            Self::ClassicalPhilosophy => &["Mathlib/Logic/Basic", "Mathlib/Order/Basic"],
             _ => &["Mathlib/Logic/Basic"],
         }
     }
@@ -376,9 +367,7 @@ impl MathlibCrawler {
                 if line.starts_with("import Mathlib.") {
                     // "import Mathlib.NumberTheory.ZetaFunction"
                     // → "Mathlib/NumberTheory/ZetaFunction"
-                    let module = line
-                        .trim_start_matches("import ")
-                        .replace('.', "/");
+                    let module = line.trim_start_matches("import ").replace('.', "/");
                     Some(module)
                 } else {
                     None
@@ -501,7 +490,11 @@ impl SearchAndExtendAgent {
     }
 
     /// Run targeted Mathlib4 ingestion for a Sovereign Discipline.
-    pub async fn run_discipline(&self, discipline: SovereignDiscipline, max_depth: usize) -> SearchExtendReport {
+    pub async fn run_discipline(
+        &self,
+        discipline: SovereignDiscipline,
+        max_depth: usize,
+    ) -> SearchExtendReport {
         let mut report = SearchExtendReport {
             problem: discipline.name().to_string(),
             modules_crawled: 0,
@@ -568,8 +561,14 @@ impl PersistentAgent for SearchAndExtendAgent {
 
     fn capabilities(&self) -> Vec<AgentCapability> {
         vec![
-            AgentCapability { category: "content_ingestion".to_string(), tools: vec![] },
-            AgentCapability { category: "formal_verification".to_string(), tools: vec![] },
+            AgentCapability {
+                category: "content_ingestion".to_string(),
+                tools: vec![],
+            },
+            AgentCapability {
+                category: "formal_verification".to_string(),
+                tools: vec![],
+            },
         ]
     }
 
@@ -609,8 +608,12 @@ impl PersistentAgent for SearchAndExtendAgent {
                 "geometry" | "algebraic_geometry" => SovereignDiscipline::AlgebraicGeometry,
                 "analysis" | "complex_analysis" => SovereignDiscipline::ComplexAnalysis,
                 "euclidean" | "euclidean_geometry" => SovereignDiscipline::EuclideanGeometry,
-                "non_euclidean" | "non_euclidean_geometry" | "geodesic" => SovereignDiscipline::NonEuclideanGeometry,
-                "differential_equations" | "ode" | "pde" | "non_linear" => SovereignDiscipline::DifferentialEquations,
+                "non_euclidean" | "non_euclidean_geometry" | "geodesic" => {
+                    SovereignDiscipline::NonEuclideanGeometry
+                }
+                "differential_equations" | "ode" | "pde" | "non_linear" => {
+                    SovereignDiscipline::DifferentialEquations
+                }
                 "linear_algebra" | "vectors" => SovereignDiscipline::LinearAlgebra,
                 "abstract_algebra" | "algebra" => SovereignDiscipline::AbstractAlgebra,
                 "topology" => SovereignDiscipline::Topology,
@@ -621,13 +624,16 @@ impl PersistentAgent for SearchAndExtendAgent {
                 "cryptography" | "crypto" => SovereignDiscipline::Cryptography,
                 "statistics" | "prob" => SovereignDiscipline::Statistics,
                 "logic" | "rhetoric" | "argument" => SovereignDiscipline::LogicAndRhetoric,
-                "philosophy" | "socratic" | "aristotelian" => SovereignDiscipline::ClassicalPhilosophy,
+                "philosophy" | "socratic" | "aristotelian" => {
+                    SovereignDiscipline::ClassicalPhilosophy
+                }
                 _ => SovereignDiscipline::Arithmetic,
             };
             self.run_discipline(discipline, max_depth).await
         } else {
             // Default to Riemann if nothing specified
-            self.run(MillenniumProblem::RiemannHypothesis, max_depth).await
+            self.run(MillenniumProblem::RiemannHypothesis, max_depth)
+                .await
         };
 
         let success = !report.absorbed_hashes.is_empty();
@@ -669,8 +675,11 @@ mod tests {
         for p in problems {
             assert!(!p.name().is_empty());
             assert!(!p.domain().is_empty());
-            assert!(!p.mathlib4_entry_modules().is_empty(),
-                "{} has no entry modules", p.name());
+            assert!(
+                !p.mathlib4_entry_modules().is_empty(),
+                "{} has no entry modules",
+                p.name()
+            );
         }
     }
 

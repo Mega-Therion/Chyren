@@ -319,16 +319,16 @@ pub mod router;
 
 /// Persistent agent mesh: IngestorAgent, MathSpoke, PersistentAgent trait.
 pub mod agents;
+/// Embedded MQTT broker — starts rumqttd in a background thread.
+pub mod broker;
 /// Async event bus: AgentResult channel between agents and Conductor pipeline.
 pub mod bus;
 /// MQTT-based task dispatcher: routes TaskContracts to agents via AgentRegistry.
 pub mod dispatcher;
-/// Re-exports AgentRegistry from omega-core::mesh.
-pub mod registry;
 /// Recursive Epistemic Mesh — Chiral Graph self-correcting reasoning system.
 pub mod epistemic;
-/// Embedded MQTT broker — starts rumqttd in a background thread.
-pub mod broker;
+/// Re-exports AgentRegistry from omega-core::mesh.
+pub mod registry;
 
 #[cfg(test)]
 mod tests {

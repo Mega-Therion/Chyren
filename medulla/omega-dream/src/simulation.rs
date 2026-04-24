@@ -1,11 +1,11 @@
 //! omega-dream background simulation worker
-//! 
+//!
 //! Projects potential task outcomes using the Neocortex.
 
+use crate::Service as DreamService;
+use omega_neocortex::Neocortex;
 use std::sync::Arc;
 use tokio::time::{sleep, Duration};
-use omega_neocortex::Neocortex;
-use crate::Service as DreamService;
 
 /// Background worker that projects potential task outcomes from historical failure patterns.
 pub struct DreamSimulationWorker {
@@ -15,7 +15,10 @@ pub struct DreamSimulationWorker {
 
 impl DreamSimulationWorker {
     /// Create a new simulation worker with the given dream service and neocortex.
-    pub fn new(dream_service: Arc<tokio::sync::Mutex<DreamService>>, neocortex: Arc<Neocortex>) -> Self {
+    pub fn new(
+        dream_service: Arc<tokio::sync::Mutex<DreamService>>,
+        neocortex: Arc<Neocortex>,
+    ) -> Self {
         Self {
             dream_service,
             neocortex,

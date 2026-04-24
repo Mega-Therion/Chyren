@@ -1,5 +1,7 @@
 use async_trait::async_trait;
-use omega_spokes::{Spoke, SpokeCapability, SpokeConfig, SpokeStatus, ToolDefinition, ToolInvocation, ToolResult};
+use omega_spokes::{
+    Spoke, SpokeCapability, SpokeConfig, SpokeStatus, ToolDefinition, ToolInvocation, ToolResult,
+};
 
 /// The Ocular Spoke: Chyren's window into the physical world.
 pub struct VisionSpoke {
@@ -27,20 +29,20 @@ impl Spoke for VisionSpoke {
     }
 
     async fn discover_tools(&self) -> Result<Vec<ToolDefinition>, String> {
-        Ok(vec![
-            ToolDefinition {
-                name: "capture_frame".to_string(),
-                description: "Captures a frame from the primary ocular sensor and returns an embedding.".to_string(),
-                input_schema: serde_json::json!({
-                    "type": "object",
-                    "properties": {
-                        "sensor_id": { "type": "string" }
-                    }
-                }),
-                is_deterministic: false,
-                estimated_cost: 10,
-            }
-        ])
+        Ok(vec![ToolDefinition {
+            name: "capture_frame".to_string(),
+            description:
+                "Captures a frame from the primary ocular sensor and returns an embedding."
+                    .to_string(),
+            input_schema: serde_json::json!({
+                "type": "object",
+                "properties": {
+                    "sensor_id": { "type": "string" }
+                }
+            }),
+            is_deterministic: false,
+            estimated_cost: 10,
+        }])
     }
 
     async fn invoke_tool(&self, invocation: ToolInvocation) -> Result<ToolResult, String> {
@@ -59,7 +61,10 @@ impl Spoke for VisionSpoke {
                     execution_time_ms: 45,
                 })
             }
-            _ => Err(format!("Tool {} not found on vision spoke", invocation.tool)),
+            _ => Err(format!(
+                "Tool {} not found on vision spoke",
+                invocation.tool
+            )),
         }
     }
 

@@ -9,10 +9,8 @@
 //!   URL → fetch → MathSpoke (Lean 4) → KnowledgeNode → ColdStore + ProofIndex → MemoryGraph
 
 use async_trait::async_trait;
-use omega_core::{
-    gen_id, now, AgentResult, AgentTask, KnowledgeNode, ProofConstraint,
-};
 use omega_core::mesh::AgentCapability;
+use omega_core::{gen_id, now, AgentResult, AgentTask, KnowledgeNode, ProofConstraint};
 use omega_myelin::Service as MyelinService;
 use omega_neocortex::{cold_store::ColdStore, proof_index::ProofConstraintIndex, Neocortex};
 use std::sync::Arc;
@@ -119,9 +117,7 @@ impl IngestorAgent {
                 .last()
                 .unwrap_or(0);
             let truncated = &joined[..end];
-            format!(
-                "-- Domain: {domain_hint}\n-- Extracted mathematical content:\n{truncated}"
-            )
+            format!("-- Domain: {domain_hint}\n-- Extracted mathematical content:\n{truncated}")
         }
     }
 
@@ -184,10 +180,7 @@ impl IngestorAgent {
         }
 
         // Write to hot memory graph (semantic retrieval)
-        let summary_for_graph = format!(
-            "[KnowledgeNode:{hash}] {summary}",
-            summary = node.summary
-        );
+        let summary_for_graph = format!("[KnowledgeNode:{hash}] {summary}", summary = node.summary);
         self.myelin
             .write_node(summary_for_graph, omega_core::MemoryStratum::Canonical)
             .await;
@@ -226,8 +219,14 @@ impl PersistentAgent for IngestorAgent {
 
     fn capabilities(&self) -> Vec<AgentCapability> {
         vec![
-            AgentCapability { category: "content_ingestion".to_string(), tools: vec![] },
-            AgentCapability { category: "formal_verification".to_string(), tools: vec![] },
+            AgentCapability {
+                category: "content_ingestion".to_string(),
+                tools: vec![],
+            },
+            AgentCapability {
+                category: "formal_verification".to_string(),
+                tools: vec![],
+            },
         ]
     }
 
@@ -241,16 +240,18 @@ impl PersistentAgent for IngestorAgent {
     /// Execute an ingestion task. The payload must be a JSON-encoded IngestionRequest:
     /// `{"url": "...", "domain_hint": "...", "extraction_prompt": "..."}`
     async fn execute(&self, task: AgentTask) -> AgentResult {
-        let req: Result<IngestionRequest, _> = serde_json::from_str(&task.payload).map(
-            |v: serde_json::Value| IngestionRequest {
+        let req: Result<IngestionRequest, _> =
+            serde_json::from_str(&task.payload).map(|v: serde_json::Value| IngestionRequest {
                 url: v["url"].as_str().unwrap_or("").to_string(),
-                domain_hint: v["domain_hint"].as_str().unwrap_or("mathematics").to_string(),
+                domain_hint: v["domain_hint"]
+                    .as_str()
+                    .unwrap_or("mathematics")
+                    .to_string(),
                 extraction_prompt: v["extraction_prompt"]
                     .as_str()
                     .unwrap_or("Extract and formalize the main mathematical theorem")
                     .to_string(),
-            },
-        );
+            });
 
         let req = match req {
             Ok(r) if !r.url.is_empty() => r,

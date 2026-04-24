@@ -26,7 +26,7 @@ impl Ternary {
     }
 }
 
-use std::ops::{Add, Sub, Mul, Neg};
+use std::ops::{Add, Mul, Neg, Sub};
 
 impl Add for Ternary {
     type Output = Ternary;

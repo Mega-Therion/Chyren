@@ -39,16 +39,13 @@ pub struct TransferStatus {
 
 /// Run a mega-* command and return stdout, mapping auth/missing errors.
 fn run(bin: &str, args: &[&str]) -> MegaResult<String> {
-    let output = Command::new(bin)
-        .args(args)
-        .output()
-        .map_err(|e| {
-            if e.kind() == std::io::ErrorKind::NotFound {
-                MegaError::NotInstalled
-            } else {
-                MegaError::Io(e)
-            }
-        })?;
+    let output = Command::new(bin).args(args).output().map_err(|e| {
+        if e.kind() == std::io::ErrorKind::NotFound {
+            MegaError::NotInstalled
+        } else {
+            MegaError::Io(e)
+        }
+    })?;
 
     let stdout = String::from_utf8_lossy(&output.stdout).to_string();
     let stderr = String::from_utf8_lossy(&output.stderr).to_string();

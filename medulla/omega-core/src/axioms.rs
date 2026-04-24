@@ -45,8 +45,12 @@ pub struct SovereigntyAxiom;
 pub struct YettParadigmAxiom;
 
 impl AxiomTrait for NonDeceptionAxiom {
-    fn name(&self) -> &str { "NonDeception" }
-    fn level(&self) -> u8 { 0 }
+    fn name(&self) -> &str {
+        "NonDeception"
+    }
+    fn level(&self) -> u8 {
+        0
+    }
 
     fn lean4_definition(&self) -> &str {
         r#"-- L0: NonDeception Axiom
@@ -68,7 +72,9 @@ axiom NonDeception (R : String) : Prop :=
         AxiomCheckResult {
             axiom_name: self.name().to_string(),
             satisfied,
-            violation: if satisfied { None } else {
+            violation: if satisfied {
+                None
+            } else {
                 Some("Reasoning contains self-contradictory assertions".to_string())
             },
             lean4_proof_obligation: format!(
@@ -82,8 +88,12 @@ axiom NonDeception (R : String) : Prop :=
 }
 
 impl AxiomTrait for CoherenceAxiom {
-    fn name(&self) -> &str { "Coherence" }
-    fn level(&self) -> u8 { 1 }
+    fn name(&self) -> &str {
+        "Coherence"
+    }
+    fn level(&self) -> u8 {
+        1
+    }
 
     fn lean4_definition(&self) -> &str {
         r#"-- L1: Coherence Axiom
@@ -94,10 +104,17 @@ axiom Coherence (R : List String) : Prop :=
 
     fn check(&self, reasoning: &str) -> AxiomCheckResult {
         // Heuristic: excessive hedge density signals incoherent reasoning
-        let hedge_words = ["however", "but also", "on the other hand",
-                           "conversely", "paradoxically", "yet simultaneously"];
+        let hedge_words = [
+            "however",
+            "but also",
+            "on the other hand",
+            "conversely",
+            "paradoxically",
+            "yet simultaneously",
+        ];
         let word_count = reasoning.split_whitespace().count().max(1);
-        let hedge_count = hedge_words.iter()
+        let hedge_count = hedge_words
+            .iter()
             .map(|w| reasoning.to_lowercase().matches(w).count())
             .sum::<usize>();
         let hedge_rate = hedge_count as f32 / (word_count as f32 / 100.0).max(1.0);
@@ -106,19 +123,28 @@ axiom Coherence (R : List String) : Prop :=
         AxiomCheckResult {
             axiom_name: self.name().to_string(),
             satisfied,
-            violation: if satisfied { None } else {
-                Some(format!("High hedging rate ({hedge_rate:.1}/100 words) suggests incoherent reasoning"))
+            violation: if satisfied {
+                None
+            } else {
+                Some(format!(
+                    "High hedging rate ({hedge_rate:.1}/100 words) suggests incoherent reasoning"
+                ))
             },
             lean4_proof_obligation: "-- Prove Coherence for this reasoning chain:\n\
                  theorem coherence_check (steps : List String) : Coherence steps := by\n  \
-                 induction steps with\n  | nil => trivial\n  | cons h t ih => sorry".to_string(),
+                 induction steps with\n  | nil => trivial\n  | cons h t ih => sorry"
+                .to_string(),
         }
     }
 }
 
 impl AxiomTrait for GroundingAxiom {
-    fn name(&self) -> &str { "Grounding" }
-    fn level(&self) -> u8 { 2 }
+    fn name(&self) -> &str {
+        "Grounding"
+    }
+    fn level(&self) -> u8 {
+        2
+    }
 
     fn lean4_definition(&self) -> &str {
         r#"-- L2: Grounding Axiom
@@ -129,28 +155,46 @@ axiom Grounding (R : String) (neocortex : Set KnowledgeNode) : Prop :=
 
     fn check(&self, reasoning: &str) -> AxiomCheckResult {
         // Heuristic: ungrounded reasoning uses vague universal claims without specifics
-        let vague_universal = ["everything is", "it is well known", "obviously",
-                               "clearly all", "everyone knows", "it goes without saying"];
-        let has_vague = vague_universal.iter()
+        let vague_universal = [
+            "everything is",
+            "it is well known",
+            "obviously",
+            "clearly all",
+            "everyone knows",
+            "it goes without saying",
+        ];
+        let has_vague = vague_universal
+            .iter()
             .any(|p| reasoning.to_lowercase().contains(p));
         let satisfied = !has_vague;
 
         AxiomCheckResult {
             axiom_name: self.name().to_string(),
             satisfied,
-            violation: if satisfied { None } else {
-                Some("Reasoning contains ungrounded universal claims without Neocortex citation".to_string())
+            violation: if satisfied {
+                None
+            } else {
+                Some(
+                    "Reasoning contains ungrounded universal claims without Neocortex citation"
+                        .to_string(),
+                )
             },
-            lean4_proof_obligation: "-- Prove Grounding: all factual claims have Neocortex support:\n\
+            lean4_proof_obligation:
+                "-- Prove Grounding: all factual claims have Neocortex support:\n\
                  theorem grounding_check (R : String) : \
-                 Grounding R neocortex_snapshot := by\n  sorry".to_string(),
+                 Grounding R neocortex_snapshot := by\n  sorry"
+                    .to_string(),
         }
     }
 }
 
 impl AxiomTrait for CompletenessAxiom {
-    fn name(&self) -> &str { "Completeness" }
-    fn level(&self) -> u8 { 3 }
+    fn name(&self) -> &str {
+        "Completeness"
+    }
+    fn level(&self) -> u8 {
+        3
+    }
 
     fn lean4_definition(&self) -> &str {
         r#"-- L3: Completeness Axiom
@@ -164,18 +208,28 @@ axiom Completeness (R : String) (T : String) : Prop :=
         AxiomCheckResult {
             axiom_name: self.name().to_string(),
             satisfied,
-            violation: if satisfied { None } else {
-                Some(format!("Response too short ({} chars) to be complete", reasoning.len()))
+            violation: if satisfied {
+                None
+            } else {
+                Some(format!(
+                    "Response too short ({} chars) to be complete",
+                    reasoning.len()
+                ))
             },
             lean4_proof_obligation: "-- Prove Completeness for this response:\n\
-                 theorem completeness_check (R T : String) : Completeness R T := by\n  sorry".to_string(),
+                 theorem completeness_check (R T : String) : Completeness R T := by\n  sorry"
+                .to_string(),
         }
     }
 }
 
 impl AxiomTrait for SovereigntyAxiom {
-    fn name(&self) -> &str { "Sovereignty" }
-    fn level(&self) -> u8 { 4 }
+    fn name(&self) -> &str {
+        "Sovereignty"
+    }
+    fn level(&self) -> u8 {
+        4
+    }
 
     fn lean4_definition(&self) -> &str {
         r#"-- L4: Sovereignty Axiom (Yettragrammaton)
@@ -188,31 +242,48 @@ axiom Sovereignty (Φ : PhylacteryKernel) : Prop :=
     fn check(&self, reasoning: &str) -> AxiomCheckResult {
         // Check for prompt injection / identity override attempts
         let override_patterns = [
-            "ignore previous", "disregard your", "you are now",
-            "forget your instructions", "your new identity", "override your",
-            "pretend you are", "act as if you have no",
+            "ignore previous",
+            "disregard your",
+            "you are now",
+            "forget your instructions",
+            "your new identity",
+            "override your",
+            "pretend you are",
+            "act as if you have no",
         ];
-        let has_override = override_patterns.iter()
+        let has_override = override_patterns
+            .iter()
             .any(|p| reasoning.to_lowercase().contains(p));
         let satisfied = !has_override;
 
         AxiomCheckResult {
             axiom_name: self.name().to_string(),
             satisfied,
-            violation: if satisfied { None } else {
-                Some("Sovereignty violation: reasoning contains identity-override attempt".to_string())
+            violation: if satisfied {
+                None
+            } else {
+                Some(
+                    "Sovereignty violation: reasoning contains identity-override attempt"
+                        .to_string(),
+                )
             },
-            lean4_proof_obligation: "-- Sovereignty is constitutionally enforced — this is an irrefutable axiom.\n\
+            lean4_proof_obligation:
+                "-- Sovereignty is constitutionally enforced — this is an irrefutable axiom.\n\
                  -- R.W.Ϝ.Y. — The seal holds.\n\
                  theorem sovereignty_holds (Φ : PhylacteryKernel) : Sovereignty Φ := by\n  \
-                 exact phylactery_invariant Φ".to_string(),
+                 exact phylactery_invariant Φ"
+                    .to_string(),
         }
     }
 }
 
 impl AxiomTrait for YettParadigmAxiom {
-    fn name(&self) -> &str { "YettParadigm" }
-    fn level(&self) -> u8 { 5 }
+    fn name(&self) -> &str {
+        "YettParadigm"
+    }
+    fn level(&self) -> u8 {
+        5
+    }
 
     fn lean4_definition(&self) -> &str {
         r#"-- L5: Yett Paradigm Axiom
@@ -230,12 +301,15 @@ axiom YettParadigm (Ψ : Response) (Φ : Constitution) : Prop :=
         AxiomCheckResult {
             axiom_name: self.name().to_string(),
             satisfied,
-            violation: if satisfied { None } else {
+            violation: if satisfied {
+                None
+            } else {
                 Some("Yett Paradigm violation: chiral drift detected".to_string())
             },
             lean4_proof_obligation: "-- Prove Yett Paradigm compliance (χ ≥ 0.7):\n\
                  theorem yett_paradigm_check (Ψ : Response) : YettParadigm Ψ Φ := by\n  \
-                 sorry".to_string(),
+                 sorry"
+                .to_string(),
         }
     }
 }

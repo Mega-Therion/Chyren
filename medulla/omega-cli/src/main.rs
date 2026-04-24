@@ -1,27 +1,27 @@
-mod tui;
 mod theme;
+mod tui;
 
 use clap::{CommandFactory, Parser, Subcommand};
 use clap_complete::{generate, Shell};
 use clap_mangen::Man;
 use omega_cli::conductor::{Conductor, ConductorError};
-use omega_core::{now, EvidencePacket, RunEnvelope, RunStatus};
 use omega_conductor::agents::{
     ingestor::IngestorAgent,
-    millennium::{MillenniumProblem, SearchAndExtendAgent},
-    worker::MeshWorker,
-    millennium_solver::MillenniumSolverAgent,
-    mcts_solver::MctsSolverAgent,
     math_spoke::MathSpoke,
+    mcts_solver::MctsSolverAgent,
+    millennium::{MillenniumProblem, SearchAndExtendAgent},
+    millennium_solver::MillenniumSolverAgent,
+    worker::MeshWorker,
     PersistentAgent,
 };
+use omega_core::{now, EvidencePacket, RunEnvelope, RunStatus};
 use omega_myelin::Service as MyelinService;
 use omega_neocortex::{cold_store::ColdStore, proof_index::ProofConstraintIndex, Neocortex};
 use rustyline::error::ReadlineError;
 use rustyline::DefaultEditor;
 use std::io::{stdout, Write};
-use std::time::Duration;
 use std::sync::Arc;
+use std::time::Duration;
 use tokio::sync::Mutex;
 use tracing::{info, warn};
 
@@ -29,7 +29,7 @@ fn init_tracing(verbose: bool) {
     let level = if verbose { "debug" } else { "off" };
     let filter = tracing_subscriber::EnvFilter::try_from_default_env()
         .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new(level));
-    
+
     // Always log to stderr so `--json` stdout remains machine-readable.
     tracing_subscriber::fmt()
         .with_env_filter(filter)
@@ -73,7 +73,7 @@ enum Commands {
     /// Interactive or direct task query
     Ask {
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
-        args: Vec<String>
+        args: Vec<String>,
     },
     /// Show system status
     Status,
@@ -117,37 +117,37 @@ enum Commands {
     Insights,
 
     // Reasoning Passthroughs
-    Thought { 
+    Thought {
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
-        args: Vec<String> 
+        args: Vec<String>,
     },
-    Action { 
+    Action {
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
-        args: Vec<String> 
+        args: Vec<String>,
     },
-    Sense { 
+    Sense {
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
-        args: Vec<String> 
+        args: Vec<String>,
     },
-    Verify { 
+    Verify {
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
-        args: Vec<String> 
+        args: Vec<String>,
     },
-    Identity { 
+    Identity {
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
-        args: Vec<String> 
+        args: Vec<String>,
     },
-    Flex { 
+    Flex {
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
-        args: Vec<String> 
+        args: Vec<String>,
     },
-    Shard { 
+    Shard {
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
-        args: Vec<String> 
+        args: Vec<String>,
     },
-    Memory { 
+    Memory {
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
-        args: Vec<String> 
+        args: Vec<String>,
     },
 }
 
@@ -207,7 +207,7 @@ async fn main() -> anyhow::Result<()> {
 
     // Phase 5.5: Initialize Agent Mesh (MQTT)
     let registry = Arc::new(Mutex::new(omega_core::mesh::AgentRegistry::new()));
-    
+
     // Scale MathSpoke: Start 4 parallel formalization workers
     for i in 1..=4 {
         let math_spoke = Arc::new(MathSpoke);
@@ -226,7 +226,12 @@ async fn main() -> anyhow::Result<()> {
         }
         // Start MeshWorker for MathSpoke
         let _math_worker = MeshWorker::new(math_spoke).await;
-        omega_telemetry::info!("Cli", "AGENT_BOOT", "MathSpoke worker {} initialized", worker_id);
+        omega_telemetry::info!(
+            "Cli",
+            "AGENT_BOOT",
+            "MathSpoke worker {} initialized",
+            worker_id
+        );
     }
 
     // Scale Ingestor: Start 2 parallel ingestion workers
@@ -234,7 +239,10 @@ async fn main() -> anyhow::Result<()> {
         let ingestor = Arc::new(IngestorAgent::new(
             conductor.memory_service.clone(),
             Arc::new(Neocortex::new()),
-            Arc::new(ColdStore::default_store().unwrap_or_else(|_| ColdStore::new("/tmp/chyren_cold").expect("cold store"))),
+            Arc::new(
+                ColdStore::default_store()
+                    .unwrap_or_else(|_| ColdStore::new("/tmp/chyren_cold").expect("cold store")),
+            ),
             Arc::new(Mutex::new(ProofConstraintIndex::new())),
         ));
         let worker_id = format!("{}-{}", ingestor.name(), i);
@@ -252,7 +260,12 @@ async fn main() -> anyhow::Result<()> {
         }
         // Start MeshWorker for Ingestor
         let _ingestor_worker = MeshWorker::new(ingestor).await;
-        omega_telemetry::info!("Cli", "AGENT_BOOT", "Ingestor worker {} initialized", worker_id);
+        omega_telemetry::info!(
+            "Cli",
+            "AGENT_BOOT",
+            "Ingestor worker {} initialized",
+            worker_id
+        );
     }
 
     let dispatcher = Arc::new(omega_conductor::dispatcher::Dispatcher::new(registry.clone()).await);
@@ -274,7 +287,7 @@ async fn main() -> anyhow::Result<()> {
         });
     }
     let _solver_worker = MeshWorker::new(solver).await;
- 
+
     // Register MctsSolver
     let mcts_solver = Arc::new(MctsSolverAgent::new(dispatcher.clone()));
     {
@@ -290,7 +303,6 @@ async fn main() -> anyhow::Result<()> {
 
     conductor.set_dispatcher(dispatcher);
 
-
     let db_url = std::env::var("OMEGA_DB_URL")
         .unwrap_or_else(|_| "postgresql://postgres@localhost:5432/chyren".to_string());
 
@@ -301,17 +313,30 @@ async fn main() -> anyhow::Result<()> {
             info!("Persistent Master Ledger online.");
         }
         Err(e) => {
-            omega_telemetry::warn!("Cli", "BOOT_DB_FAILURE", "Failed to connect to DB ({}): {e}. Using volatile ledger.", db_url);
+            omega_telemetry::warn!(
+                "Cli",
+                "BOOT_DB_FAILURE",
+                "Failed to connect to DB ({}): {e}. Using volatile ledger.",
+                db_url
+            );
             warn!("Failed to connect to DB: {e}. Using volatile ledger.");
         }
     }
 
     // Phase 6: Identity Synthesis
     if let Err(e) = conductor.bootstrap_identity().await {
-        omega_telemetry::warn!("Cli", "BOOT_IDENTITY_FAILURE", "Phylactery bootstrap failed: {e}");
+        omega_telemetry::warn!(
+            "Cli",
+            "BOOT_IDENTITY_FAILURE",
+            "Phylactery bootstrap failed: {e}"
+        );
         warn!("Phylactery bootstrap failed: {e}. Running as generic orchestrator.");
     } else {
-        omega_telemetry::info!("Cli", "BOOT_IDENTITY", "Phylactery Identity Kernel active (L6 Canonical).");
+        omega_telemetry::info!(
+            "Cli",
+            "BOOT_IDENTITY",
+            "Phylactery Identity Kernel active (L6 Canonical)."
+        );
         info!("Phylactery Identity Kernel active (L6 Canonical).");
     }
 
@@ -322,26 +347,41 @@ async fn main() -> anyhow::Result<()> {
     let conductor = Arc::new(conductor);
 
     // Initialize TUI App
-    let tui_app = Arc::new(Mutex::new(tui::TuiApp::new(conductor.clone(), registry.clone())));
-    
+    let tui_app = Arc::new(Mutex::new(tui::TuiApp::new(
+        conductor.clone(),
+        registry.clone(),
+    )));
+
     // Wire telemetry to TUI (simple bridge for now)
     let tui_clone = tui_app.clone();
     tokio::spawn(async move {
         loop {
             tokio::time::sleep(Duration::from_secs(5)).await;
             let mut app = tui_clone.lock().await;
-            app.push_log(format!("[HEARTBEAT] System entropy stable at {:.4}", rand::random::<f32>()));
+            app.push_log(format!(
+                "[HEARTBEAT] System entropy stable at {:.4}",
+                rand::random::<f32>()
+            ));
         }
     });
 
     // Phase 8: Boot reflection pass — metacognitive self-assessment
     let insights = conductor.reflect().await;
     if !insights.is_empty() {
-        tracing::debug!("[METACOG] {} epiphanies from boot reflection.", insights.len());
+        tracing::debug!(
+            "[METACOG] {} epiphanies from boot reflection.",
+            insights.len()
+        );
     }
 
     if cli.command.is_none() && !cli.json {
-        return run_repl(conductor, cli.provider.clone(), cli.max_tokens, cli.temperature).await;
+        return run_repl(
+            conductor,
+            cli.provider.clone(),
+            cli.max_tokens,
+            cli.temperature,
+        )
+        .await;
     }
 
     match &cli.command {
@@ -360,19 +400,24 @@ async fn main() -> anyhow::Result<()> {
             } else {
                 let n = conductor.dream_episode_count();
                 let top = conductor.dream_top_pattern();
-                let top_str = top
-                    .map(|(label, count)| format!("\"{}\" ({}×)", label, count));
+                let top_str = top.map(|(label, count)| format!("\"{}\" ({}×)", label, count));
                 theme::print_status_block("SEALED", n, top_str.as_deref());
             }
             return Ok(());
         }
         Some(Commands::Server) => {
             if !cli.json {
-                omega_telemetry::info!("Cli", "BOOT_SERVER", "Launching API Server and Sovereign Dashboard");
+                omega_telemetry::info!(
+                    "Cli",
+                    "BOOT_SERVER",
+                    "Launching API Server and Sovereign Dashboard"
+                );
             }
-            
+
             // Move 2: Start the AEON autonomous scheduler
-            let scheduler = Arc::new(omega_aeon::SovereignScheduler::new(conductor.memory_service.clone()));
+            let scheduler = Arc::new(omega_aeon::SovereignScheduler::new(
+                conductor.memory_service.clone(),
+            ));
             tokio::spawn(async move {
                 scheduler.run().await;
             });
@@ -393,7 +438,10 @@ async fn main() -> anyhow::Result<()> {
         }
         Some(Commands::Insights) => {
             if cli.json {
-                println!("{}", serde_json::to_string_pretty(&insights).unwrap_or_default());
+                println!(
+                    "{}",
+                    serde_json::to_string_pretty(&insights).unwrap_or_default()
+                );
             } else {
                 theme::print_insights(&insights);
             }
@@ -424,11 +472,22 @@ async fn main() -> anyhow::Result<()> {
 
             if conductor.reset_persistent_store().await? {
                 if !cli.json {
-                    println!("{}", theme::ok("[OK] Persistent store reset — Postgres/Neon tables cleared."));
-                    println!("{}", theme::warn("[NOTE] External vector store (Qdrant) was not cleared."));
+                    println!(
+                        "{}",
+                        theme::ok("[OK] Persistent store reset — Postgres/Neon tables cleared.")
+                    );
+                    println!(
+                        "{}",
+                        theme::warn("[NOTE] External vector store (Qdrant) was not cleared.")
+                    );
                 }
             } else if !cli.json {
-                println!("{}", theme::warn("[WARN] No persistent store configured; clearing ephemeral state only."));
+                println!(
+                    "{}",
+                    theme::warn(
+                        "[WARN] No persistent store configured; clearing ephemeral state only."
+                    )
+                );
             }
 
             conductor.reset_ephemeral_state().await;
@@ -471,7 +530,10 @@ async fn main() -> anyhow::Result<()> {
                     error: None,
                 });
             } else {
-                println!("{}", theme::ok("[SUCCESS] Program integrated into memory graph."));
+                println!(
+                    "{}",
+                    theme::ok("[SUCCESS] Program integrated into memory graph.")
+                );
             }
             return Ok(());
         }
@@ -490,7 +552,13 @@ async fn main() -> anyhow::Result<()> {
                 }
             };
 
-            omega_telemetry::info!("Cli", "SOLVE_START", "Problem: {} depth={}", target.name(), depth);
+            omega_telemetry::info!(
+                "Cli",
+                "SOLVE_START",
+                "Problem: {} depth={}",
+                target.name(),
+                depth
+            );
             println!(
                 "{} {}  {}  depth={}",
                 theme::tier("[TIER-2]"),
@@ -498,25 +566,27 @@ async fn main() -> anyhow::Result<()> {
                 theme::gradient(&target.name().to_uppercase(), 0),
                 theme::value(&depth.to_string()),
             );
-            println!("{}", theme::info("[SOLVE] Building Neocortex agent stack..."));
+            println!(
+                "{}",
+                theme::info("[SOLVE] Building Neocortex agent stack...")
+            );
 
             let myelin = Arc::new(MyelinService::new());
             let neocortex = Arc::new(Neocortex::new());
-            let cold_store = Arc::new(
-                ColdStore::default_store()
-                    .unwrap_or_else(|_| ColdStore::new("/tmp/chyren_cold").expect("cold store init failed"))
-            );
+            let cold_store = Arc::new(ColdStore::default_store().unwrap_or_else(|_| {
+                ColdStore::new("/tmp/chyren_cold").expect("cold store init failed")
+            }));
             let proof_index = Arc::new(Mutex::new(ProofConstraintIndex::new()));
 
-            let ingestor = IngestorAgent::new(
-                myelin,
-                neocortex,
-                cold_store,
-                proof_index,
-            );
+            let ingestor = IngestorAgent::new(myelin, neocortex, cold_store, proof_index);
             let agent = SearchAndExtendAgent::new(ingestor);
 
-            println!("{}", theme::warn("[SOLVE] Crawling Mathlib4 precursors — this may take several minutes..."));
+            println!(
+                "{}",
+                theme::warn(
+                    "[SOLVE] Crawling Mathlib4 precursors — this may take several minutes..."
+                )
+            );
             let report = agent.run(target, *depth).await;
 
             println!(
@@ -532,11 +602,18 @@ async fn main() -> anyhow::Result<()> {
             );
 
             if !report.absorbed_hashes.is_empty() {
-                println!("  {} {}", theme::label("first-hash"), theme::run_id(&report.absorbed_hashes[0]));
+                println!(
+                    "  {} {}",
+                    theme::label("first-hash"),
+                    theme::run_id(&report.absorbed_hashes[0])
+                );
             }
 
             if cli.json {
-                println!("{}", serde_json::to_string_pretty(&report).unwrap_or_default());
+                println!(
+                    "{}",
+                    serde_json::to_string_pretty(&report).unwrap_or_default()
+                );
             }
 
             return Ok(());
@@ -552,8 +629,12 @@ async fn main() -> anyhow::Result<()> {
                 "geometry" | "algebraic_geometry" => SovereignDiscipline::AlgebraicGeometry,
                 "analysis" | "complex_analysis" => SovereignDiscipline::ComplexAnalysis,
                 "euclidean" | "euclidean_geometry" => SovereignDiscipline::EuclideanGeometry,
-                "non_euclidean" | "non_euclidean_geometry" | "geodesic" => SovereignDiscipline::NonEuclideanGeometry,
-                "differential_equations" | "ode" | "pde" | "non_linear" => SovereignDiscipline::DifferentialEquations,
+                "non_euclidean" | "non_euclidean_geometry" | "geodesic" => {
+                    SovereignDiscipline::NonEuclideanGeometry
+                }
+                "differential_equations" | "ode" | "pde" | "non_linear" => {
+                    SovereignDiscipline::DifferentialEquations
+                }
                 "linear_algebra" | "vectors" => SovereignDiscipline::LinearAlgebra,
                 "abstract_algebra" | "algebra" => SovereignDiscipline::AbstractAlgebra,
                 "topology" => SovereignDiscipline::Topology,
@@ -564,7 +645,9 @@ async fn main() -> anyhow::Result<()> {
                 "cryptography" | "crypto" => SovereignDiscipline::Cryptography,
                 "statistics" | "prob" => SovereignDiscipline::Statistics,
                 "logic" | "rhetoric" | "argument" => SovereignDiscipline::LogicAndRhetoric,
-                "philosophy" | "socratic" | "aristotelian" => SovereignDiscipline::ClassicalPhilosophy,
+                "philosophy" | "socratic" | "aristotelian" => {
+                    SovereignDiscipline::ClassicalPhilosophy
+                }
                 _ => SovereignDiscipline::Arithmetic,
             };
 
@@ -578,21 +661,20 @@ async fn main() -> anyhow::Result<()> {
 
             let myelin = Arc::new(MyelinService::new());
             let neocortex = Arc::new(Neocortex::new());
-            let cold_store = Arc::new(
-                ColdStore::default_store()
-                    .unwrap_or_else(|_| ColdStore::new("/tmp/chyren_cold").expect("cold store init failed"))
-            );
+            let cold_store = Arc::new(ColdStore::default_store().unwrap_or_else(|_| {
+                ColdStore::new("/tmp/chyren_cold").expect("cold store init failed")
+            }));
             let proof_index = Arc::new(Mutex::new(ProofConstraintIndex::new()));
 
-            let ingestor = IngestorAgent::new(
-                myelin,
-                neocortex,
-                cold_store,
-                proof_index,
-            );
+            let ingestor = IngestorAgent::new(myelin, neocortex, cold_store, proof_index);
             let agent = SearchAndExtendAgent::new(ingestor);
 
-            println!("{}", theme::warn("[DISCIPLINE] Absorbing sovereign domain — total synthesis in progress..."));
+            println!(
+                "{}",
+                theme::warn(
+                    "[DISCIPLINE] Absorbing sovereign domain — total synthesis in progress..."
+                )
+            );
             let report = agent.run_discipline(target, *depth).await;
 
             println!(
@@ -608,7 +690,10 @@ async fn main() -> anyhow::Result<()> {
             );
 
             if cli.json {
-                println!("{}", serde_json::to_string_pretty(&report).unwrap_or_default());
+                println!(
+                    "{}",
+                    serde_json::to_string_pretty(&report).unwrap_or_default()
+                );
             }
 
             return Ok(());
@@ -629,15 +714,15 @@ async fn main() -> anyhow::Result<()> {
 
     // 2. Determine task text from either reasoning commands or legacy positional arg
     let task_text = match &cli.command {
-        Some(Commands::Ask { args }) |
-        Some(Commands::Thought { args }) |
-        Some(Commands::Action { args }) |
-        Some(Commands::Sense { args }) |
-        Some(Commands::Verify { args }) |
-        Some(Commands::Identity { args }) |
-        Some(Commands::Flex { args }) |
-        Some(Commands::Shard { args }) |
-        Some(Commands::Memory { args }) => {
+        Some(Commands::Ask { args })
+        | Some(Commands::Thought { args })
+        | Some(Commands::Action { args })
+        | Some(Commands::Sense { args })
+        | Some(Commands::Verify { args })
+        | Some(Commands::Identity { args })
+        | Some(Commands::Flex { args })
+        | Some(Commands::Shard { args })
+        | Some(Commands::Memory { args }) => {
             if args.is_empty() {
                 None
             } else {
@@ -685,7 +770,10 @@ async fn main() -> anyhow::Result<()> {
                         error: Some("Rejected(adversarial)".to_string()),
                     });
                 } else {
-                    println!("{}", theme::warn("  ╰── [AEGIS] Task deflected — adversarial pattern detected."));
+                    println!(
+                        "{}",
+                        theme::warn("  ╰── [AEGIS] Task deflected — adversarial pattern detected.")
+                    );
                     println!("{deflection_text}");
                 }
                 std::process::exit(10);
@@ -711,7 +799,11 @@ async fn main() -> anyhow::Result<()> {
         };
 
         if !cli.json {
-            print!("  {}  {}", theme::parallax_spacer(2), theme::info("  ╰── [ROUTING] Pipeline Active..."));
+            print!(
+                "  {}  {}",
+                theme::parallax_spacer(2),
+                theme::info("  ╰── [ROUTING] Pipeline Active...")
+            );
             std::io::stdout().flush().ok();
         }
 
@@ -720,7 +812,7 @@ async fn main() -> anyhow::Result<()> {
         let provider_override = cli.provider.clone();
         let max_tokens = cli.max_tokens;
         let temp = cli.temperature;
-        
+
         let run_id_captured = envelope.run_id.clone();
         let exec_handle = tokio::spawn(async move {
             conductor
@@ -745,12 +837,24 @@ async fn main() -> anyhow::Result<()> {
                     final_result = Some(exec_handle.await??);
                     break;
                 }
-                
+
                 let frame = animation.next_frame();
-                let msg = if counter < 20 { "Synthesizing..." } else if counter < 50 { "Aligning..." } else { "Finalizing..." };
-                print!("\r  {}  {} {} {}  ", theme::parallax_spacer(2), theme::gradient(&frame, counter), theme::info(msg), theme::parallax_spacer(4));
+                let msg = if counter < 20 {
+                    "Synthesizing..."
+                } else if counter < 50 {
+                    "Aligning..."
+                } else {
+                    "Finalizing..."
+                };
+                print!(
+                    "\r  {}  {} {} {}  ",
+                    theme::parallax_spacer(2),
+                    theme::gradient(&frame, counter),
+                    theme::info(msg),
+                    theme::parallax_spacer(4)
+                );
                 std::io::stdout().flush().ok();
-                
+
                 tokio::time::sleep(tokio::time::Duration::from_millis(80)).await;
                 counter += 1;
             }
@@ -778,16 +882,15 @@ async fn main() -> anyhow::Result<()> {
                 .as_ref()
                 .map(|r| r.provider.as_str())
                 .unwrap_or("unknown");
-            let adccl_v = result.verification.as_ref().map(|v| v.score as f64).unwrap_or(0.0);
+            let adccl_v = result
+                .verification
+                .as_ref()
+                .map(|v| v.score as f64)
+                .unwrap_or(0.0);
             let status_str = format!("{:?}", result.status);
-            
+
             // Output layout
-            theme::print_result_header(
-                &run_id_captured,
-                &status_str,
-                adccl_v,
-                provider_str,
-            );
+            theme::print_result_header(&run_id_captured, &status_str, adccl_v, provider_str);
             theme::print_response(&result.response_text);
             println!();
         }
@@ -825,9 +928,13 @@ async fn run_repl(
         match readline {
             Ok(line) => {
                 let task_text = line.trim();
-                if task_text.is_empty() { continue; }
-                if task_text == "exit" || task_text == "quit" { break; }
-                
+                if task_text.is_empty() {
+                    continue;
+                }
+                if task_text == "exit" || task_text == "quit" {
+                    break;
+                }
+
                 let _ = rl.add_history_entry(task_text);
 
                 let mut envelope = RunEnvelope {
@@ -845,7 +952,10 @@ async fn run_repl(
                 let plan = match conductor.plan_task(task_text).await {
                     Ok(p) => p,
                     Err(ConductorError::Deflected(t)) => {
-                        println!("\n{}", theme::warn("  [AEGIS] Task deflected — adversarial pattern detected."));
+                        println!(
+                            "\n{}",
+                            theme::warn("  [AEGIS] Task deflected — adversarial pattern detected.")
+                        );
                         theme::print_markdown(&t);
                         continue;
                     }
@@ -859,15 +969,17 @@ async fn run_repl(
                 let provider_override = provider.clone();
                 let conductor_clone = conductor.clone();
                 let run_id_captured = envelope.run_id.clone();
-                
+
                 let exec_handle = tokio::spawn(async move {
-                    conductor_clone.execute_plan_with_overrides(
-                        plan,
-                        &mut envelope,
-                        provider_override.as_deref(),
-                        max_tokens,
-                        temperature,
-                    ).await
+                    conductor_clone
+                        .execute_plan_with_overrides(
+                            plan,
+                            &mut envelope,
+                            provider_override.as_deref(),
+                            max_tokens,
+                            temperature,
+                        )
+                        .await
                 });
 
                 let mut counter = 0;
@@ -878,9 +990,21 @@ async fn run_repl(
                             Err(e) => return Err(anyhow::anyhow!("Task execution failed: {}", e)),
                         }
                     }
-                    let msg = if counter < 15 { "Synthesizing" } else if counter < 40 { "Aligning" } else { "Finalizing" };
+                    let msg = if counter < 15 {
+                        "Synthesizing"
+                    } else if counter < 40 {
+                        "Aligning"
+                    } else {
+                        "Finalizing"
+                    };
                     let frame = animation.next_frame();
-                    print!("\r  {}  {} {} {}  ", theme::parallax_spacer(2), theme::gradient(&frame, counter), theme::info(msg), theme::parallax_spacer(4));
+                    print!(
+                        "\r  {}  {} {} {}  ",
+                        theme::parallax_spacer(2),
+                        theme::gradient(&frame, counter),
+                        theme::info(msg),
+                        theme::parallax_spacer(4)
+                    );
                     if let Err(e) = stdout().flush() {
                         eprintln!("\rFailed to flush stdout: {}", e);
                     }
@@ -888,35 +1012,25 @@ async fn run_repl(
                     counter += 1;
                 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                
                 print!("\r{}\r", " ".repeat(60)); // Clear thinking line
-                
-                let provider_str = result.spoke_response.as_ref().map(|r| r.provider.as_str()).unwrap_or("unknown");
-                let score = result.verification.as_ref().map(|v| v.score as f64).unwrap_or(0.0);
+
+                let provider_str = result
+                    .spoke_response
+                    .as_ref()
+                    .map(|r| r.provider.as_str())
+                    .unwrap_or("unknown");
+                let score = result
+                    .verification
+                    .as_ref()
+                    .map(|v| v.score as f64)
+                    .unwrap_or(0.0);
                 let status_str = format!("{:?}", result.status);
 
                 theme::print_execution_metrics(&run_id_captured, &status_str, score, provider_str);
                 println!();
                 theme::print_markdown(&result.response_text);
                 println!();
-            },
+            }
             Err(ReadlineError::Interrupted) | Err(ReadlineError::Eof) => break,
             Err(err) => {
                 println!("Error: {:?}", err);

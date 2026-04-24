@@ -3,7 +3,6 @@
 
 #![warn(missing_docs)]
 
-
 use serde::{Deserialize, Serialize};
 use std::fs::OpenOptions;
 use std::io::Write;
@@ -117,8 +116,11 @@ use futures_util::StreamExt as _;
 /// Start the Prometheus and WebSocket metrics server on the specified port.
 /// This runs in a background thread and does not block.
 pub async fn start_metrics_server(port: u16) -> std::io::Result<()> {
-    info!("Telemetry", "BOOT_METRICS", "Starting metrics server on 0.0.0.0:{}", port);
-    
+    info!(
+        "Telemetry",
+        "BOOT_METRICS", "Starting metrics server on 0.0.0.0:{}", port
+    );
+
     // Spawn the server as a background task
     tokio::spawn(async move {
         let server = match HttpServer::new(|| {
@@ -147,7 +149,7 @@ pub async fn start_metrics_server(port: u16) -> std::io::Result<()> {
 
 async fn websocket_handler(req: HttpRequest, stream: web::Payload) -> Result<HttpResponse, Error> {
     let (response, mut session, mut msg_stream) = actix_ws::handle(&req, stream)?;
-    
+
     let mut rx = EVENT_CHANNEL.subscribe();
 
     actix_web::rt::spawn(async move {
@@ -290,7 +292,7 @@ impl TelemetryBus {
         for sink in sinks {
             sink.record(&event);
         }
-        
+
         // Broadcast to WebSocket clients
         let _ = EVENT_CHANNEL.send(event);
     }

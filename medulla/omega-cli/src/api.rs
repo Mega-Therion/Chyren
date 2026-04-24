@@ -144,7 +144,9 @@ async fn record_dream_handler(
     conductor: web::Data<Arc<Conductor>>,
     req: web::Json<DreamRecordRequest>,
 ) -> impl Responder {
-    conductor.record_dream(&req.task, &req.response, req.score, &req.flags).await;
+    conductor
+        .record_dream(&req.task, &req.response, req.score, &req.flags)
+        .await;
     HttpResponse::Ok().body("Recorded")
 }
 

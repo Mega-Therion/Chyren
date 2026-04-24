@@ -5,8 +5,8 @@
 
 use super::PersistentAgent;
 use async_trait::async_trait;
-use omega_core::{now, AgentTask, AgentResult};
-use omega_core::mesh::{TaskContract, AgentCapability};
+use omega_core::mesh::{AgentCapability, TaskContract};
+use omega_core::{now, AgentResult, AgentTask};
 use std::sync::Arc;
 
 /// High-level strategist agent for coordinating Millennium Prize Problem solutions.
@@ -30,8 +30,14 @@ impl PersistentAgent for MillenniumSolverAgent {
 
     fn capabilities(&self) -> Vec<AgentCapability> {
         vec![
-            AgentCapability { category: "formal_verification".to_string(), tools: vec![] },
-            AgentCapability { category: "research".to_string(), tools: vec![] },
+            AgentCapability {
+                category: "formal_verification".to_string(),
+                tools: vec![],
+            },
+            AgentCapability {
+                category: "research".to_string(),
+                tools: vec![],
+            },
         ]
     }
 
@@ -47,12 +53,20 @@ impl PersistentAgent for MillenniumSolverAgent {
         // 2. Formulate a sub-task for MathSpoke
         // 3. Dispatch via MQTT
         // 4. Wait for result (in a real system, this would be async/reactive)
-        
-        omega_telemetry::info!("MillenniumSolver", "SOLVER_START", "Initiating strategy for task {}", task.task_id);
+
+        omega_telemetry::info!(
+            "MillenniumSolver",
+            "SOLVER_START",
+            "Initiating strategy for task {}",
+            task.task_id
+        );
 
         // For now, we simulate the strategy synthesis
-        let strategy = format!("Strategy for {}: Identify core axioms, extend precursors, and verify with MathSpoke.", task.payload);
-        
+        let strategy = format!(
+            "Strategy for {}: Identify core axioms, extend precursors, and verify with MathSpoke.",
+            task.payload
+        );
+
         // Dispatch a sub-task to MathSpoke (simplified)
         let sub_task = TaskContract {
             task_id: format!("{}-sub-1", task.task_id),
@@ -64,7 +78,11 @@ impl PersistentAgent for MillenniumSolverAgent {
 
         match self.dispatcher.send_task(sub_task).await {
             Ok(_) => {
-                omega_telemetry::info!("MillenniumSolver", "DISPATCH_SUCCESS", "Sub-task sent to MathSpoke");
+                omega_telemetry::info!(
+                    "MillenniumSolver",
+                    "DISPATCH_SUCCESS",
+                    "Sub-task sent to MathSpoke"
+                );
                 AgentResult {
                     task_id: task.task_id,
                     run_id: task.run_id,
@@ -77,7 +95,12 @@ impl PersistentAgent for MillenniumSolverAgent {
                 }
             }
             Err(e) => {
-                omega_telemetry::error!("MillenniumSolver", "DISPATCH_FAILURE", "Failed to dispatch sub-task: {}", e);
+                omega_telemetry::error!(
+                    "MillenniumSolver",
+                    "DISPATCH_FAILURE",
+                    "Failed to dispatch sub-task: {}",
+                    e
+                );
                 AgentResult {
                     task_id: task.task_id,
                     run_id: task.run_id,

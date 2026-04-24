@@ -98,8 +98,7 @@ impl ProofConstraintIndex {
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent)?;
         }
-        let bytes = serde_json::to_vec_pretty(self)
-            .map_err(std::io::Error::other)?;
+        let bytes = serde_json::to_vec_pretty(self).map_err(std::io::Error::other)?;
         fs::write(path, bytes)
     }
 
@@ -180,10 +179,13 @@ mod tests {
     #[test]
     fn test_ranking_by_overlap() {
         let mut idx = ProofConstraintIndex::new();
-        idx.insert("hash_a", &[
-            make_constraint("c4", "P1", "d"),
-            make_constraint("c5", "P2", "d"),
-        ]);
+        idx.insert(
+            "hash_a",
+            &[
+                make_constraint("c4", "P1", "d"),
+                make_constraint("c5", "P2", "d"),
+            ],
+        );
         idx.insert("hash_b", &[make_constraint("c6", "P1", "d")]);
 
         let results = idx.query_by_predicates(&["P1".to_string(), "P2".to_string()]);

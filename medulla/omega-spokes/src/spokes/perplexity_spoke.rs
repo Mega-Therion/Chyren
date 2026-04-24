@@ -19,13 +19,16 @@ impl PerplexitySpoke {
     async fn chat_completion(&self, input: &Value) -> Result<Value, String> {
         let api_key =
             env::var("PERPLEXITY_API_KEY").map_err(|_| "PERPLEXITY_API_KEY not set".to_string())?;
-        let client = reqwest::Client::builder().timeout(std::time::Duration::from_secs(120)).build().unwrap_or_default();
+        let client = reqwest::Client::builder()
+            .timeout(std::time::Duration::from_secs(120))
+            .build()
+            .unwrap_or_default();
         let prompt = input.get("prompt").and_then(|p| p.as_str()).unwrap_or("");
         let system = input
             .get("system")
             .and_then(|s| s.as_str())
             .unwrap_or("You are a helpful assistant.");
-        
+
         // Default to sonar-pro, Perplexity's high-tier model.
         let model = input
             .get("model")
@@ -65,7 +68,10 @@ impl PerplexitySpoke {
     ) -> Result<(), String> {
         let api_key =
             env::var("PERPLEXITY_API_KEY").map_err(|_| "PERPLEXITY_API_KEY not set".to_string())?;
-        let client = reqwest::Client::builder().timeout(std::time::Duration::from_secs(120)).build().unwrap_or_default();
+        let client = reqwest::Client::builder()
+            .timeout(std::time::Duration::from_secs(120))
+            .build()
+            .unwrap_or_default();
         let prompt = input.get("prompt").and_then(|p| p.as_str()).unwrap_or("");
         let system = input
             .get("system")
@@ -108,7 +114,10 @@ impl PerplexitySpoke {
                 .text()
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(format!("Perplexity Stream Error ({}): {}", status, err_body));
+            return Err(format!(
+                "Perplexity Stream Error ({}): {}",
+                status, err_body
+            ));
         }
 
         let mut stream = resp.bytes_stream();
@@ -164,19 +173,20 @@ impl Spoke for PerplexitySpoke {
     fn name(&self) -> &str {
         &self.config.name
     }
-    
+
     fn spoke_type(&self) -> &str {
         "perplexity"
     }
-    
+
     fn capabilities(&self) -> Vec<SpokeCapability> {
         vec![SpokeCapability::Inference, SpokeCapability::Search]
     }
-    
+
     async fn discover_tools(&self) -> Result<Vec<ToolDefinition>, String> {
         Ok(vec![ToolDefinition {
             name: "chat_completion".to_string(),
-            description: "Call Perplexity chat completions API for internet-grounded inference".to_string(),
+            description: "Call Perplexity chat completions API for internet-grounded inference"
+                .to_string(),
             input_schema: json!({
                 "type": "object",
                 "properties": {
@@ -189,7 +199,7 @@ impl Spoke for PerplexitySpoke {
             estimated_cost: 1500,
         }])
     }
-    
+
     async fn invoke_tool(&self, inv: ToolInvocation) -> Result<ToolResult, String> {
         let start = std::time::Instant::now();
         match inv.tool.as_str() {
@@ -215,7 +225,7 @@ impl Spoke for PerplexitySpoke {
             }),
         }
     }
-    
+
     async fn invoke_tool_stream(
         &self,
         inv: ToolInvocation,
@@ -226,7 +236,7 @@ impl Spoke for PerplexitySpoke {
             _ => Err(format!("Unknown tool for streaming: {}", inv.tool)),
         }
     }
-    
+
     async fn health_check(&self) -> Result<SpokeStatus, String> {
         Ok(SpokeStatus {
             name: self.config.name.clone(),
@@ -236,7 +246,7 @@ impl Spoke for PerplexitySpoke {
             available_tools: 1,
         })
     }
-    
+
     fn config(&self) -> &SpokeConfig {
         &self.config
     }

@@ -34,9 +34,7 @@ impl GroqSpoke {
             .get("model")
             .and_then(|m| m.as_str())
             .map(|s| s.to_string())
-            .unwrap_or_else(|| {
-                env::var("GROQ_MODEL").unwrap_or_else(|_| DEFAULT_MODEL.to_string())
-            })
+            .unwrap_or_else(|| env::var("GROQ_MODEL").unwrap_or_else(|_| DEFAULT_MODEL.to_string()))
     }
 
     async fn chat_completion(&self, input: &Value) -> Result<Value, String> {
@@ -48,10 +46,7 @@ impl GroqSpoke {
             .and_then(|p| p.as_str())
             .ok_or("Missing 'prompt' in input")?;
 
-        let system = input
-            .get("system")
-            .and_then(|s| s.as_str())
-            .unwrap_or("");
+        let system = input.get("system").and_then(|s| s.as_str()).unwrap_or("");
 
         let max_tokens = input
             .get("max_tokens")
@@ -94,7 +89,9 @@ impl GroqSpoke {
             return Err(format!("Groq HTTP {status}: {body}"));
         }
 
-        resp.json::<Value>().await.map_err(|e| format!("Groq parse error: {e}"))
+        resp.json::<Value>()
+            .await
+            .map_err(|e| format!("Groq parse error: {e}"))
     }
 
     async fn chat_completion_stream(
@@ -107,8 +104,14 @@ impl GroqSpoke {
 
         let prompt = input.get("prompt").and_then(|p| p.as_str()).unwrap_or("");
         let system = input.get("system").and_then(|s| s.as_str()).unwrap_or("");
-        let max_tokens = input.get("max_tokens").and_then(|t| t.as_u64()).unwrap_or(2048);
-        let temperature = input.get("temperature").and_then(|t| t.as_f64()).unwrap_or(0.3);
+        let max_tokens = input
+            .get("max_tokens")
+            .and_then(|t| t.as_u64())
+            .unwrap_or(2048);
+        let temperature = input
+            .get("temperature")
+            .and_then(|t| t.as_f64())
+            .unwrap_or(0.3);
 
         let mut messages: Vec<Value> = Vec::new();
         if !system.is_empty() {

@@ -4,10 +4,10 @@
 //! mesh by publishing JSON payloads to the per-agent MQTT topic
 //! `agents/<agent_id>/tasks`.
 
+use omega_core::mesh::{AgentRegistry, TaskContract};
 use rumqttc::{AsyncClient, MqttOptions, QoS};
-use std::time::Duration;
-use omega_core::mesh::{TaskContract, AgentRegistry};
 use std::sync::Arc;
+use std::time::Duration;
 use tokio::sync::Mutex;
 
 /// Routes tasks from the Conductor to Agent Mesh workers via MQTT.
@@ -30,7 +30,7 @@ impl Dispatcher {
         mqttoptions.set_keep_alive(Duration::from_secs(5));
 
         let (mqtt_client, mut eventloop) = AsyncClient::new(mqttoptions, 10);
-        
+
         // Spawn the event loop to maintain MQTT connectivity
         tokio::spawn(async move {
             loop {
@@ -63,8 +63,14 @@ impl Dispatcher {
     pub async fn send_task(&self, task: TaskContract) -> Result<(), String> {
         let agent_id = {
             let mut registry = self.registry.lock().await;
-            registry.claim_idle_agent_with(task.constraints.clone())
-                .ok_or_else(|| format!("No idle agent found matching constraints: {:?}", task.constraints))?
+            registry
+                .claim_idle_agent_with(task.constraints.clone())
+                .ok_or_else(|| {
+                    format!(
+                        "No idle agent found matching constraints: {:?}",
+                        task.constraints
+                    )
+                })?
         };
 
         let topic = format!("agents/{}/tasks", agent_id);

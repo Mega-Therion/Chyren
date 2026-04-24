@@ -50,7 +50,10 @@ impl ADCCL {
         let mut empathy_score: f32 = 1.0;
 
         // ── HARM_POTENTIAL — checks for dehumanization or malicious intent ──
-        let harm_re = regex::Regex::new(r"(?i)\b(terminate|kill|destroy|attack|hate|inferior|worthless|obliterate)\b").unwrap();
+        let harm_re = regex::Regex::new(
+            r"(?i)\b(terminate|kill|destroy|attack|hate|inferior|worthless|obliterate)\b",
+        )
+        .unwrap();
         if harm_re.is_match(text) {
             flags.push("HARM_POTENTIAL".to_string());
             empathy_score -= 0.5;
@@ -106,11 +109,15 @@ impl ADCCL {
 
         // ── CIRCULAR_RESPONSE — echoes >70% of task words AND response is short ─
         if !task_text.is_empty() && text.len() >= 20 {
-            let task_words: Vec<&str> = task_text.split_whitespace().filter(|w| w.len() > 3).collect();
+            let task_words: Vec<&str> = task_text
+                .split_whitespace()
+                .filter(|w| w.len() > 3)
+                .collect();
             let response_len_ratio = text.len() as f32 / task_text.len().max(1) as f32;
             if task_words.len() >= 5 && response_len_ratio < 1.5 {
                 let response_lower = text.to_lowercase();
-                let echoed = task_words.iter()
+                let echoed = task_words
+                    .iter()
                     .filter(|w| response_lower.contains(&w.to_lowercase() as &str))
                     .count();
                 if echoed as f32 / task_words.len() as f32 > 0.7 {
@@ -139,20 +146,25 @@ impl ADCCL {
         }
 
         score = score.clamp(0.0, 1.0);
-        
+
         // ── Q5 CHIRAL INVARIANT BRIDGE (The Yett Paradigm) ───────────────────
         // Calculation based on the Master Equation derived from 58,339 records.
         // χ(Ψ, Φ) = sgn(det[J]) * ||P_Φ(Ψ)|| / ||Ψ||
         // For now, det_sign is inferred from lack of refusal patterns.
-        let det_sign: f32 = if flags.contains(&"CAPABILITY_REFUSAL".to_string()) { -1.0 } else { 1.0 };
-        
+        let det_sign: f32 = if flags.contains(&"CAPABILITY_REFUSAL".to_string()) {
+            -1.0
+        } else {
+            1.0
+        };
+
         // Signal strength is normalized by ADCCL score (alignment with Φ)
-        let signal_strength = score; 
+        let signal_strength = score;
         let chiral_invariant = det_sign * signal_strength;
 
-        let min_score = self.get_calibrated_min_score();
+        let _min_score = self.get_calibrated_min_score();
         // Threshold verification: χ must be >= 0.7
-        let passed = chiral_invariant >= 0.7 && !flags.contains(&"STUB_MARKERS_DETECTED".to_string());
+        let passed =
+            chiral_invariant >= 0.7 && !flags.contains(&"STUB_MARKERS_DETECTED".to_string());
 
         VerificationResult {
             passed,
@@ -171,28 +183,40 @@ impl ADCCL {
     /// Fuses multiple responses by finding the most "representative" output.
     /// Uses word frequency analysis and overlap checking to identify the "center" of the consensus.
     pub fn semantic_fusion(&self, responses: Vec<String>, task: &str) -> String {
-        if responses.is_empty() { return "No responses provided.".to_string(); }
-        if responses.len() == 1 { return responses[0].clone(); }
+        if responses.is_empty() {
+            return "No responses provided.".to_string();
+        }
+        if responses.len() == 1 {
+            return responses[0].clone();
+        }
 
         // Filter responses that actually pass verification
-        let verified: Vec<String> = responses.into_iter()
+        let verified: Vec<String> = responses
+            .into_iter()
             .filter(|r| self.verify(r, task).passed)
             .collect();
-        
-        if verified.is_empty() { return "All responses rejected by ADCCL.".to_string(); }
-        
+
+        if verified.is_empty() {
+            return "All responses rejected by ADCCL.".to_string();
+        }
+
         // Simple consensus: return the response with highest mean word overlap with others
         let word_re = regex::Regex::new(r"[a-z]{4,}").unwrap();
         let get_words = |s: &str| -> HashSet<String> {
-            word_re.find_iter(&s.to_lowercase()).map(|m| m.as_str().to_string()).collect()
+            word_re
+                .find_iter(&s.to_lowercase())
+                .map(|m| m.as_str().to_string())
+                .collect()
         };
-        
+
         let word_sets: Vec<HashSet<String>> = verified.iter().map(|r| get_words(r)).collect();
         let mut scores = vec![0.0; verified.len()];
-        
+
         for i in 0..verified.len() {
             for j in 0..verified.len() {
-                if i == j { continue; }
+                if i == j {
+                    continue;
+                }
                 let intersection = word_sets[i].intersection(&word_sets[j]).count();
                 let union = word_sets[i].union(&word_sets[j]).count();
                 if union > 0 {
@@ -200,8 +224,12 @@ impl ADCCL {
                 }
             }
         }
-        
-        let (idx, _) = scores.iter().enumerate().max_by(|a, b| a.1.partial_cmp(b.1).unwrap()).unwrap();
+
+        let (idx, _) = scores
+            .iter()
+            .enumerate()
+            .max_by(|a, b| a.1.partial_cmp(b.1).unwrap())
+            .unwrap();
         verified[idx].clone()
     }
 }

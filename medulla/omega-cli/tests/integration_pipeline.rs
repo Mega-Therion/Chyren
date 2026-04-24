@@ -9,8 +9,8 @@ use async_trait::async_trait;
 use omega_cli::conductor::{Conductor, ConductorError};
 use omega_core::{EvidencePacket, RunEnvelope, RunStatus};
 use omega_spokes::{
-    Spoke, SpokeCapability, SpokeConfig, SpokeRegistry, SpokeStatus,
-    ToolDefinition, ToolInvocation, ToolResult,
+    Spoke, SpokeCapability, SpokeConfig, SpokeRegistry, SpokeStatus, ToolDefinition,
+    ToolInvocation, ToolResult,
 };
 use std::sync::Arc;
 

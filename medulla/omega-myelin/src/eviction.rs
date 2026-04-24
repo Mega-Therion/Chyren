@@ -47,7 +47,10 @@ impl StratumEvictionWorker {
     }
 
     /// Register a callback invoked for each evicted node (e.g. to write to ColdStore).
-    pub fn with_eviction_callback(mut self, cb: impl Fn(MemoryNode) + Send + Sync + 'static) -> Self {
+    pub fn with_eviction_callback(
+        mut self,
+        cb: impl Fn(MemoryNode) + Send + Sync + 'static,
+    ) -> Self {
         self.on_evict = Some(Arc::new(Box::new(cb)));
         self
     }

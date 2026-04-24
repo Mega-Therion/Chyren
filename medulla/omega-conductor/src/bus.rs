@@ -20,7 +20,10 @@ impl EventBus {
     /// Create a new `EventBus` with an internal channel capacity of 100.
     pub fn new() -> Self {
         let (tx, rx) = mpsc::channel(100);
-        Self { result_tx: tx, result_rx: rx }
+        Self {
+            result_tx: tx,
+            result_rx: rx,
+        }
     }
 }
 

@@ -85,17 +85,38 @@ mod tests {
 
     #[test]
     fn sensitive_routes_local() {
-        assert_eq!(ProviderRouter::classify("update the ledger entry"), RouteClass::Local);
-        assert_eq!(ProviderRouter::classify("run identity synthesis"), RouteClass::Local);
-        assert_eq!(ProviderRouter::classify("rotate the private key"), RouteClass::Local);
+        assert_eq!(
+            ProviderRouter::classify("update the ledger entry"),
+            RouteClass::Local
+        );
+        assert_eq!(
+            ProviderRouter::classify("run identity synthesis"),
+            RouteClass::Local
+        );
+        assert_eq!(
+            ProviderRouter::classify("rotate the private key"),
+            RouteClass::Local
+        );
     }
 
     #[test]
     fn default_routes_cloud() {
-        assert_eq!(ProviderRouter::classify("summarize this document"), RouteClass::Cloud);
-        assert_eq!(ProviderRouter::classify("design the API architecture"), RouteClass::Cloud);
-        assert_eq!(ProviderRouter::classify("solve the riemann hypothesis"), RouteClass::Cloud);
-        assert_eq!(ProviderRouter::classify("write a lean4 proof for this theorem"), RouteClass::Cloud);
+        assert_eq!(
+            ProviderRouter::classify("summarize this document"),
+            RouteClass::Cloud
+        );
+        assert_eq!(
+            ProviderRouter::classify("design the API architecture"),
+            RouteClass::Cloud
+        );
+        assert_eq!(
+            ProviderRouter::classify("solve the riemann hypothesis"),
+            RouteClass::Cloud
+        );
+        assert_eq!(
+            ProviderRouter::classify("write a lean4 proof for this theorem"),
+            RouteClass::Cloud
+        );
     }
 
     #[test]

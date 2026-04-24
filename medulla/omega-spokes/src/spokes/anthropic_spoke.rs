@@ -1,13 +1,13 @@
+use crate::spokes::witness::WitnessEnvelope;
 /// Anthropic API spoke for Claude inference
 use crate::{
     Spoke, SpokeCapability, SpokeConfig, SpokeStatus, ToolDefinition, ToolInvocation, ToolResult,
 };
-use crate::spokes::witness::WitnessEnvelope;
 use async_trait::async_trait;
 use serde_json::{json, Value};
+use sha2::{Digest, Sha256};
 use std::env;
 use tokio::sync::mpsc;
-use sha2::{Sha256, Digest};
 
 /// Anthropic spoke for Claude model access
 pub struct AnthropicSpoke {

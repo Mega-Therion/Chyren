@@ -100,9 +100,10 @@ impl DreamCompressor {
 
             // 2. Compression check: explicit derivable_from list populated
             if !node.derivable_from.is_empty() {
-                let all_present = node.derivable_from.iter().all(|h| {
-                    nodes.iter().any(|n| &n.content_hash == h)
-                });
+                let all_present = node
+                    .derivable_from
+                    .iter()
+                    .all(|h| nodes.iter().any(|n| &n.content_hash == h));
                 if all_present {
                     report.compressed.push(DerivationRule {
                         replaces_hash: node.content_hash.clone(),
@@ -221,8 +222,14 @@ mod tests {
     #[test]
     fn test_derivable_node_compressed() {
         let dc = DreamCompressor::new();
-        let base = fresh_node("theorem base : True := trivial", vec![make_constraint("P1")]);
-        let mut derived = fresh_node("theorem derived : True := trivial", vec![make_constraint("P1")]);
+        let base = fresh_node(
+            "theorem base : True := trivial",
+            vec![make_constraint("P1")],
+        );
+        let mut derived = fresh_node(
+            "theorem derived : True := trivial",
+            vec![make_constraint("P1")],
+        );
         derived.derivable_from = vec![base.content_hash.clone()];
 
         let report = dc.analyze(&[base, derived]);
@@ -245,7 +252,10 @@ mod tests {
     fn test_unique_node_retained() {
         let dc = DreamCompressor::new();
         let nodes = vec![
-            fresh_node("theorem u1 : True := trivial", vec![make_constraint("UniqueA")]),
+            fresh_node(
+                "theorem u1 : True := trivial",
+                vec![make_constraint("UniqueA")],
+            ),
             fresh_node("theorem u2 : 1=1 := rfl", vec![make_constraint("UniqueB")]),
         ];
         let report = dc.analyze(&nodes);

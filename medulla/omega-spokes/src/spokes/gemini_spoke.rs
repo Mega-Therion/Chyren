@@ -77,7 +77,10 @@ impl GeminiSpoke {
             .and_then(|p| p.as_str())
             .ok_or("Missing prompt")?;
 
-        let client = reqwest::Client::builder().timeout(std::time::Duration::from_secs(120)).build().unwrap_or_default();
+        let client = reqwest::Client::builder()
+            .timeout(std::time::Duration::from_secs(120))
+            .build()
+            .unwrap_or_default();
         let body = json!({
             "contents": [{"parts": [{"text": prompt}]}]
         });

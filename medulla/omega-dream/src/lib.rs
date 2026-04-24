@@ -97,10 +97,10 @@ impl Service {
             return Ok(());
         }
         let json = fs::read_to_string(path).map_err(|e| format!("Failed to read dreams: {}", e))?;
-        let episodes: Vec<DreamEpisode> = serde_json::from_str(&json)
-            .map_err(|e| format!("Failed to parse dreams: {}", e))?;
+        let episodes: Vec<DreamEpisode> =
+            serde_json::from_str(&json).map_err(|e| format!("Failed to parse dreams: {}", e))?;
         self.episodes = episodes;
-        
+
         // Rebuild pattern cache
         self.pattern_cache.clear();
         for _episode in &self.episodes {
@@ -251,10 +251,10 @@ impl Default for Service {
     }
 }
 
+pub mod identity;
+pub mod simulation;
 /// Dream synthesis and recursive compression engine.
 pub mod synthesis;
-pub mod simulation;
-pub mod identity;
 
 pub use synthesis::{CompressionReport, DerivationRule, DreamCompressor};
 

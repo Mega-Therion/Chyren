@@ -19,10 +19,13 @@ impl DeepSeekSpoke {
     }
 
     async fn chat_completion(&self, input: &Value) -> Result<Value, String> {
-        let api_key = env::var("DEEPSEEK_API_KEY")
-            .map_err(|_| "DEEPSEEK_API_KEY not set".to_string())?;
+        let api_key =
+            env::var("DEEPSEEK_API_KEY").map_err(|_| "DEEPSEEK_API_KEY not set".to_string())?;
 
-        let client = reqwest::Client::builder().timeout(std::time::Duration::from_secs(120)).build().unwrap_or_default();
+        let client = reqwest::Client::builder()
+            .timeout(std::time::Duration::from_secs(120))
+            .build()
+            .unwrap_or_default();
         let prompt = input.get("prompt").and_then(|p| p.as_str()).unwrap_or("");
         let system = input.get("system").and_then(|s| s.as_str()).unwrap_or("");
         let model = input
@@ -60,7 +63,11 @@ impl DeepSeekSpoke {
         if !resp.status().is_success() {
             let status = resp.status();
             let err = resp.text().await.unwrap_or_default();
-            return Err(format!("DeepSeek HTTP {}: {}", status, &err[..err.len().min(300)]));
+            return Err(format!(
+                "DeepSeek HTTP {}: {}",
+                status,
+                &err[..err.len().min(300)]
+            ));
         }
 
         resp.json().await.map_err(|e| e.to_string())

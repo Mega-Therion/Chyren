@@ -35,7 +35,7 @@ impl MemoryStore {
         let pool = sqlx::PgPool::connect(url).await?;
 
         // Ensure the schema exists — idempotent.
-        // We split these into separate queries because sqlx::query() with multiple statements 
+        // We split these into separate queries because sqlx::query() with multiple statements
         // can fail as a "prepared statement" on some Postgres drivers/proxies (e.g. Neon).
         sqlx::query(
             r#"
