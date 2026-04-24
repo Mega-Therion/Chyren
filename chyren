@@ -479,6 +479,11 @@ def cmd_dream(args: argparse.Namespace) -> int:
             
         return subprocess.run(cmd, cwd=REPO_DIR, env=env).returncode
 
+    if getattr(args, 'playbooks', False):
+        script_dir = CORTEX_DIR / "ops" / "scripts"
+        py = get_python_exe()
+        return run_subprocess([py, str(script_dir / "skill_ingestor.py")]).returncode
+
     with exclusive_lock(DREAM_LOCK):
         py = get_python_exe()
         identity = CORTEX_DIR / "chyren_py" / "identity_synthesis.py"
@@ -568,6 +573,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_dream.add_argument("--ingest-hf", action="store_true", help="Run the autonomous HF ingestion pipeline.")
     p_dream.add_argument("--queue", action="store_true", help="Show current HF ingestion queue status.")
     p_dream.add_argument("--enqueue", metavar="ID", help="Prioritize a specific dataset in the HF queue.")
+    p_dream.add_argument("--playbooks", action="store_true", help="Ingest local skill playbooks and cookbooks into memory.")
 
     p_sov = sub.add_parser("sovereign", help="Launch the high-integrity development workspace (Docker).")
     p_sov.add_argument("--build", action="store_true", help="Force rebuild the sovereign image.")

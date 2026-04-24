@@ -45,6 +45,31 @@ async def handle_list_tools() -> list[types.Tool]:
             },
         ),
         types.Tool(
+            name="search_hf_models",
+            description="Search for models on Hugging Face Hub.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "Search query (e.g., 'llama-3')"},
+                    "task": {"type": "string", "description": "Filter by task (e.g., 'text-generation')"},
+                    "limit": {"type": "integer", "description": "Max number of results", "default": 5},
+                },
+                "required": ["query"],
+            },
+        ),
+        types.Tool(
+            name="download_model_snapshot",
+            description="Download a model snapshot from Hugging Face Hub to local cache.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "repo": {"type": "string", "description": "Model repository ID"},
+                    "revision": {"type": "string", "description": "Model revision/branch (optional)"},
+                },
+                "required": ["repo"],
+            },
+        ),
+        types.Tool(
             name="ingest_hf_to_chyren",
             description="Trigger an autonomous ingestion task for a Hugging Face dataset into Chyren's memory.",
             inputSchema={
@@ -99,6 +124,33 @@ async def handle_call_tool(name: str, arguments: dict | None) -> list[types.Text
                 rows.append(row)
             
             return [types.TextContent(type="text", text=f"Sample from {repo} ({split}):\n" + json.dumps(rows, indent=2, default=str))]
+
+        elif name == "search_hf_models":
+            query = arguments.get("query")
+            task = arguments.get("task")
+            limit = arguments.get("limit", 5)
+            
+            from huggingface_hub import list_models
+            results = list_models(search=query, filter=task, limit=limit, sort="downloads", direction=-1)
+            
+            output = []
+            for m in results:
+                likes = getattr(m, "likes", 0)
+                output.append(f"- {m.id} | Likes: {likes} | Task: {m.pipeline_tag or 'unknown'}")
+            
+            if not output:
+                return [types.TextContent(type="text", text=f"No models found for query: {query}")]
+            
+            return [types.TextContent(type="text", text="Hugging Face Models found:\n" + "\n".join(output))]
+
+        elif name == "download_model_snapshot":
+            repo = arguments.get("repo")
+            revision = arguments.get("revision")
+            
+            from huggingface_hub import snapshot_download
+            path = snapshot_download(repo_id=repo, revision=revision)
+            
+            return [types.TextContent(type="text", text=f"Model {repo} downloaded to local cache: {path}")]
 
         elif name == "ingest_hf_to_chyren":
             repo = arguments.get("repo")
