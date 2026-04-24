@@ -9,7 +9,13 @@ import { startHeartbeat, stopHeartbeat } from '@/lib/haptics-ry'
 import { clearDraft } from '@/lib/draft-ry'
 import { createTtsEngine, type TtsEngine, playLatencyChime } from '@/lib/tts-ry'
 
-import { NeuralBrain, type BrainState } from '@/components/NeuralBrain'
+import type { BrainState } from '@/components/NeuralBrain'
+import dynamic from 'next/dynamic'
+
+const ChyrenCosmos = dynamic(
+  () => import('@/components/ChyrenCosmos').then(m => m.ChyrenCosmos),
+  { ssr: false }
+)
 
 interface Message {
   id: string
@@ -195,10 +201,8 @@ export default function ChatPage() {
 
   return (
     <div className="omega-viewport bg-black">
-      <div className="omega-bg-fx">
-        <NeuralBrain _isActive={brainState !== 'idle'} audioLevel={audioLevel} state={brainState} />
-        <div className="omega-orb orb-1" />
-        <div className="omega-orb orb-2" />
+      <div className="omega-bg-fx" style={{ pointerEvents: 'none' }}>
+        <ChyrenCosmos state={brainState} audioLevel={audioLevel} />
       </div>
 
       <main className="phone-container !bg-black/40 !border-white/5 !shadow-2xl">
