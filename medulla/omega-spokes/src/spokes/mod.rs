@@ -13,9 +13,11 @@ pub mod perplexity_spoke;
 pub mod search_spoke;
 pub mod witness;
 
+pub mod claude_code_spoke;
 pub mod vision_spoke;
 
 pub use anthropic_spoke::AnthropicSpoke;
+pub use claude_code_spoke::ClaudeCodeSpoke;
 pub use deepseek_spoke::DeepSeekSpoke;
 pub use gemini_spoke::GeminiSpoke;
 pub use groq_spoke::GroqSpoke;
