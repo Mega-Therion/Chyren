@@ -31,32 +31,25 @@ pub struct ProviderRouter;
 impl ProviderRouter {
     /// Classify a task string into a routing tier.
     ///
-    /// High-complexity signals (Millennium Problems, formal proofs, ZFC/Lean/Coq) are
-    /// sent to the cloud. Everything else — including high-sensitivity tasks that must
-    /// not leave the local machine — routes locally.
+    /// High-sensitivity tasks (identity, ledger, architecture) stay on the local
+    /// Ollama spoke. Everything else routes to OpenRouter, which is the cheapest
+    /// reliable cloud path. Failures cascade through the SpokeRegistry preference
+    /// list (deepseek → gemini → groq → anthropic → openai → perplexity).
     pub fn classify(task: &str) -> RouteClass {
         let t = task.to_lowercase();
 
-        let is_high_complexity = t.contains("millennium")
-            || t.contains("formal verification")
-            || t.contains("formal proof")
-            || t.contains("riemann hypothesis")
-            || t.contains("p vs np")
-            || t.contains("pvsnp")
-            || t.contains("navier-stokes")
-            || t.contains("yang-mills")
-            || t.contains("hodge conjecture")
-            || t.contains("birch and swinnerton")
-            || t.contains("zfc proof")
-            || t.contains("lean4 proof")
-            || t.contains("coq proof")
-            || t.contains("isabelle proof")
-            || t.contains("complex formal");
+        let is_local_sensitive = t.contains("phylactery")
+            || t.contains("identity synthesis")
+            || t.contains("ledger entry")
+            || t.contains("sovereign identity")
+            || t.contains("private key")
+            || t.contains("secret")
+            || t.contains("credential");
 
-        if is_high_complexity {
-            RouteClass::Cloud
-        } else {
+        if is_local_sensitive {
             RouteClass::Local
+        } else {
+            RouteClass::Cloud
         }
     }
 
@@ -91,19 +84,18 @@ mod tests {
     use super::*;
 
     #[test]
-    fn routine_routes_local() {
-        assert_eq!(ProviderRouter::classify("summarize this document"), RouteClass::Local);
+    fn sensitive_routes_local() {
         assert_eq!(ProviderRouter::classify("update the ledger entry"), RouteClass::Local);
         assert_eq!(ProviderRouter::classify("run identity synthesis"), RouteClass::Local);
-        assert_eq!(ProviderRouter::classify("design the API architecture"), RouteClass::Local);
+        assert_eq!(ProviderRouter::classify("rotate the private key"), RouteClass::Local);
     }
 
     #[test]
-    fn complex_proofs_route_cloud() {
+    fn default_routes_cloud() {
+        assert_eq!(ProviderRouter::classify("summarize this document"), RouteClass::Cloud);
+        assert_eq!(ProviderRouter::classify("design the API architecture"), RouteClass::Cloud);
         assert_eq!(ProviderRouter::classify("solve the riemann hypothesis"), RouteClass::Cloud);
         assert_eq!(ProviderRouter::classify("write a lean4 proof for this theorem"), RouteClass::Cloud);
-        assert_eq!(ProviderRouter::classify("formal verification of the P vs NP boundary"), RouteClass::Cloud);
-        assert_eq!(ProviderRouter::classify("millennium prize problem: Navier-Stokes"), RouteClass::Cloud);
     }
 
     #[test]

@@ -186,7 +186,7 @@ impl SearchSpoke {
             }));
         }
 
-        let client = reqwest::Client::new();
+        let client = reqwest::Client::builder().timeout(std::time::Duration::from_secs(120)).build().unwrap_or_default();
 
         // Example: Using a generic search endpoint (could be Google Custom Search, Bing, etc.)
         let search_url = format!(
@@ -226,7 +226,7 @@ impl SearchSpoke {
             .and_then(|u| u.as_str())
             .ok_or("Missing 'url' in input")?;
 
-        let client = reqwest::Client::new();
+        let client = reqwest::Client::builder().timeout(std::time::Duration::from_secs(120)).build().unwrap_or_default();
 
         let response = client
             .get(url)
@@ -270,7 +270,7 @@ impl SearchSpoke {
 
         let params = input.get("params").and_then(|p| p.as_object()).cloned();
 
-        let client = reqwest::Client::new();
+        let client = reqwest::Client::builder().timeout(std::time::Duration::from_secs(120)).build().unwrap_or_default();
 
         let response = match method.as_str() {
             "GET" => {

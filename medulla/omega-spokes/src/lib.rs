@@ -208,14 +208,18 @@ impl SpokeRegistry {
             }
         }
 
+        // Fallback order: cheapest/most-reliable first, premium providers last.
+        // route_with_model prepends the explicitly-requested provider; this list is the
+        // cascade when that one fails.
         reg.preference = vec![
-            "openai".into(),
+            "openrouter".into(),
+            "ollama".into(),
+            "deepseek".into(),
+            "gemini".into(),
             "groq".into(),
             "anthropic".into(),
-            "gemini".into(),
-            "deepseek".into(),
+            "openai".into(),
             "perplexity".into(),
-            "ollama".into(),
         ];
 
         reg

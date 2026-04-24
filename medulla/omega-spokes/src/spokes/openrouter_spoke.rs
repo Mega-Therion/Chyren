@@ -62,7 +62,7 @@ impl OpenRouterSpoke {
         }
         messages.push(json!({"role": "user", "content": prompt}));
 
-        let client = reqwest::Client::new();
+        let client = reqwest::Client::builder().timeout(std::time::Duration::from_secs(120)).build().unwrap_or_default();
         let resp = client
             .post(format!("{}/chat/completions", self.base_url()))
             .header("Authorization", format!("Bearer {}", api_key))

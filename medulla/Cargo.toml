@@ -20,6 +20,7 @@ members = [
     "omega-phylactery",
     "omega-telegram-gateway",
     "omega-neocortex", "omega-vision",
+    "omega-mega",
 ]
 
 [workspace.dependencies]

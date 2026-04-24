@@ -566,18 +566,30 @@ impl Conductor {
         let start_time = now();
         envelope.task = plan.steps.join("\n");
 
+        // CHYREN_FORCE_PROVIDER overrides all routing AND disables Tier-1/2 escalation.
+        // Use this to pin the pipeline to a single provider (e.g. "ollama") when cloud
+        // keys are unavailable.
+        let force_provider = std::env::var("CHYREN_FORCE_PROVIDER").ok().filter(|s| !s.is_empty());
+
         // Hybrid Sovereign routing: if no explicit provider was requested, let the
-        // ProviderRouter classify the task. High-sensitivity and routine tasks stay
-        // local (Ollama); high-complexity formal/mathematical tasks go to OpenRouter.
-        let routed_provider: Option<String> = preferred_provider
-            .map(|p| p.to_string())
+        // ProviderRouter classify the task.
+        let routed_provider: Option<String> = force_provider
+            .clone()
+            .or_else(|| preferred_provider.map(|p| p.to_string()))
             .or_else(|| Some(ProviderRouter::route(&envelope.task).to_string()));
         let preferred_provider: Option<&str> = routed_provider.as_deref();
 
-        info!(
-            "[ROUTER] task routed to provider={}",
-            preferred_provider.unwrap_or("(default)")
-        );
+        if force_provider.is_some() {
+            info!(
+                "[ROUTER] CHYREN_FORCE_PROVIDER set, pinning to provider={} (escalation disabled)",
+                preferred_provider.unwrap_or("(default)")
+            );
+        } else {
+            info!(
+                "[ROUTER] task routed to provider={}",
+                preferred_provider.unwrap_or("(default)")
+            );
+        }
 
         // AEON lifecycle tracking.
         {
@@ -650,7 +662,7 @@ impl Conductor {
         verification = t0_v;
 
         // ── TIER 1: Upshift (if Tier 0 failed) ──────────────────────────────────
-        if !verification.passed {
+        if !verification.passed && force_provider.is_none() {
             let t1_provider = omega_conductor::router::ProviderRouter::upshift_provider();
             let t1_model = omega_conductor::router::ProviderRouter::upshift_model();
             info!(
@@ -686,7 +698,7 @@ impl Conductor {
         }
 
         // ── TIER 2: Council arbitration (if Tier 1 still failed) ────────────────
-        if !verification.passed {
+        if !verification.passed && force_provider.is_none() {
             info!(
                 "[TIER-2] Invoking multi-spoke Council (tier-1 score={:.2})",
                 verification.score
@@ -732,7 +744,7 @@ impl Conductor {
                     });
                 }
             }
-        } else if verification.passed {
+        } else if verification.passed && force_provider.is_none() {
             // Tier 0 or Tier 1 passed local ADCCL — run Council as final confirmation.
             if let Ok(council_v) = self.verify_via_council(&spoke_response.text, &envelope.task).await {
                 omega_telemetry::CHYREN_ADCCL_SCORE.set(council_v.score as f64);
