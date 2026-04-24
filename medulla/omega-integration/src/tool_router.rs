@@ -3,6 +3,7 @@
 use omega_spokes::{SpokeCapability, SpokeRegistry};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use tracing::warn;
 
 /// A tool registered in the router, mapped to the spoke that executes it.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -51,10 +52,10 @@ impl ToolRouter {
                     }
                 }
                 Err(e) => {
-                    eprintln!(
-                        "[ToolRouter] discover_tools failed for spoke '{}': {}",
-                        spoke.name(),
-                        e
+                    warn!(
+                        spoke = spoke.name(),
+                        error = %e,
+                        "ToolRouter: discover_tools failed"
                     );
                 }
             }

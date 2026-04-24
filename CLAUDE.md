@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **Medulla** (`medulla/`) — Rust Workspace: canonical runtime — 17 crates covering security, memory, scheduling, CLI, and API server. All live requests route here.
 - **Cortex** (`cortex/`) — Python layer: identity synthesis (`chyren_py/`), data ops scripts (`ops/scripts/`). No longer invoked for runtime requests.
-- **Web** (`web/`) — Next.js 15 cognitive shell frontend
+- **Web** (`chyren-os/interface/`) — Next.js 15 cognitive shell frontend (actively deployed to Vercel; `web_old/` is a stale snapshot)
 - **Gateway** (`gateway/`) — Vite + React 19 external spoke gateway
 - **Brain Stem** (`./chyren`) — Python router script dispatching all commands to Medulla; Python cortex only runs during `dream` maintenance mode
 
@@ -44,14 +44,17 @@ pytest tests/test_adccl_hub.py                     # Single test file
 pytest -k test_name                                # Single test by name
 ```
 
-### Web Frontend
+### Web Frontend (`chyren-os/interface/`)
 ```bash
-cd web
+cd chyren-os/interface
 npm run dev          # Dev server on localhost:3000
 npm run build        # Production build (runs scripts/generate-context.mjs first)
-npm run lint         # ESLint (max-warnings=0)
+npm run lint         # ESLint
 npm run typecheck    # tsc --noEmit
+npm run test         # Vitest unit tests
 ```
+Deployed to Vercel. Sync env vars with `scripts/sync-vercel-env-from-one-true.sh`.
+Key libs: `lib/adccl.ts` (TypeScript ADCCL port, threshold 0.7), `lib/hardening.ts` (rate limiting + prompt injection), `lib/phylactery.ts` (identity context), `lib/neon-context.ts` (live ledger fetch).
 
 ### Gateway
 ```bash
@@ -66,7 +69,7 @@ pnpm lint            # ESLint
 ```bash
 make ci              # Rust fmt + clippy + test (local CI equivalent)
 make cortex-test     # Python tests (PYTHONPATH=cortex pytest tests/)
-make web-ci          # Next.js: typecheck + lint + build
+make web-ci          # Next.js: typecheck + lint + build (runs in chyren-os/interface/)
 make gateway-ci      # Gateway: tsc + lint + build
 ```
 
@@ -132,6 +135,9 @@ Every provider response is scored before ledger commit:
 ### Provider Injection Pattern
 All provider spokes receive: system prompt with sovereign identity + Yettragrammaton integrity hash + current ledger state as context.
 
+### Sovereign Provider Router (`omega-conductor/src/router.rs`)
+Two-tier routing: **Local** (Ollama — sensitive tasks: identity, ledger, secrets) and **Cloud** (OpenRouter — everything else, cascades through deepseek → gemini → groq → anthropic → openai → perplexity on failure). Set `OPENROUTER_ESCALATION_MODEL` in `one-true.env` to override the upshift model.
+
 ### Agent Mesh (in-progress, not merged to main — `cursor/integration-hardening` branch)
 An MQTT-based agent orchestration layer being added to `omega-conductor`:
 - `omega-core/src/mesh.rs` — `TaskContract` (typed task routing envelope) + `AgentCapability` + `AgentRegistry`
@@ -170,9 +176,26 @@ Always source this file before running Cortex or Medulla directly (`source ~/.om
 
 Follow [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`, `style:`, `refactor:`, `test:`, `docs:` with imperative subject lines. PRs must include: problem statement, summary of changes, linked issues (if any), test evidence, and screenshots for UI changes (`web/` or `gateway/`).
 
+## chyren-os/ — What Each Layer Is
+
+`chyren-os/` contains three distinct things — do not treat them as one system:
+
+| Subdirectory | Status | Description |
+|---|---|---|
+| `chyren-os/interface/` | **Active — deployed to Vercel** | The live Next.js 15 frontend. This IS `web/`. See Build section above. |
+| `chyren-os/kernel/` | Historical reference | Older Rust workspace (same omega-* crates) that `medulla/` evolved from. Missing `omega-cim`, `omega-ternary`, `omega-vision`, `omega-mega`, `openrouter_spoke`, `vision_spoke`. Do not actively develop here. |
+| `chyren-os/supervisor/` | Historical reference | Predecessor to `cortex/chyren_py/` — older `identity_synthesis.py` and phylactery loader. `cortex/chyren_py/` is canonical. |
+| `chyren-os/state/` | Runtime state | Phylactery kernel snapshot and runtime state files — do not delete. |
+| `chyren-os/boot/init.rs` | Stub | OS entry point stub — not wired into any build system. |
+
+**Phylactery kernel copies** — five exist, only one is canonical:
+- `cortex/chyren_py/phylactery_kernel.json` — **canonical** (3031 bytes, newest)
+- `chyren-os/interface/lib/phylactery-kernel.json` — browser-accessible, kept small intentionally; update when identity changes
+- All others (`chyren-os/kernel/data/`, `chyren-os/state/`, `chyren-os/supervisor/`) — stale snapshots, not loaded at runtime
+
 ## Other Root-Level Directories
 
-- `chyren-os/` — Experimental OS-layer abstraction (`boot/`, `kernel/`, `supervisor/`, `interface/`, `state/`)
+- `chyren-os/` — Three distinct layers under one roof (see above)
 - `hub/` — Swarm attestation utilities (`swarm_attestation.py`)
 - `api/` — Alexa integration (`alexa.js`, `interaction_model.json`)
 - `ops/` — Legacy bootstrap and proxy scripts (not part of active runtime)

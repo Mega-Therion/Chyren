@@ -579,6 +579,13 @@ impl ThreatFabric {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::Mutex;
+
+    // ThreatFabric tests write and read temp files. Under parallel test
+    // execution the OS scheduler can interleave the file-write from one test
+    // with the read in another, producing non-deterministic verify failures.
+    // Serialise all fabric tests with a process-wide mutex.
+    static FABRIC_LOCK: Mutex<()> = Mutex::new(());
 
     fn layer(forbidden: &[&str]) -> AlignmentLayer {
         AlignmentLayer::new(Constitution {
@@ -736,6 +743,7 @@ mod tests {
 
     #[test]
     fn threat_fabric_ingest_and_known() {
+        let _lock = FABRIC_LOCK.lock().unwrap();
         let dir = tempdir_path();
         let fabric = ThreatFabric::open_at(dir.join("threat_fabric.jsonl"));
         let report = BehavioralReport {
@@ -752,6 +760,7 @@ mod tests {
 
     #[test]
     fn threat_fabric_entries_are_signed() {
+        let _lock = FABRIC_LOCK.lock().unwrap();
         let dir = tempdir_path();
         let fabric = ThreatFabric::open_at(dir.join("threat_fabric.jsonl"));
         let report = BehavioralReport {

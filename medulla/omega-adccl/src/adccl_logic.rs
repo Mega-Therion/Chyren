@@ -179,10 +179,7 @@ impl ADCCL {
             let stop_count = words
                 .iter()
                 .filter(|w| {
-                    stopwords.contains(
-                        w.to_lowercase()
-                            .trim_matches(|c: char| !c.is_alphabetic()),
-                    )
+                    stopwords.contains(w.to_lowercase().trim_matches(|c: char| !c.is_alphabetic()))
                 })
                 .count();
             if !words.is_empty() && stop_count as f32 / words.len() as f32 > 0.65 {
