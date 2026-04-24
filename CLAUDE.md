@@ -132,7 +132,7 @@ Every provider response is scored before ledger commit:
 ### Provider Injection Pattern
 All provider spokes receive: system prompt with sovereign identity + Yettragrammaton integrity hash + current ledger state as context.
 
-### Agent Mesh (in-progress, `cursor/integration-hardening` branch)
+### Agent Mesh (in-progress, not merged to main — `cursor/integration-hardening` branch)
 An MQTT-based agent orchestration layer being added to `omega-conductor`:
 - `omega-core/src/mesh.rs` — `TaskContract` (typed task routing envelope) + `AgentCapability` + `AgentRegistry`
 - `omega-conductor/src/dispatcher.rs` — Routes `TaskContract`s to agents via MQTT (broker at `localhost:1883`)
@@ -153,7 +153,7 @@ OMEGA_DB_URL          # Neon PostgreSQL connection string
 QDRANT_URL            # Qdrant vector store
 ```
 
-Always source this file before running Cortex or Medulla directly. Missing keys fail silently.
+Always source this file before running Cortex or Medulla directly (`source ~/.omega/one-true.env`). The Makefile does **not** source it automatically. Missing keys fail silently.
 
 ## Key Conventions
 
@@ -163,6 +163,12 @@ Always source this file before running Cortex or Medulla directly. Missing keys 
 - **New Python provider**: implement `ProviderBase` in `cortex/providers/`, register in `cortex/main.py`
 - **New Rust crate**: add to `medulla/Cargo.toml` workspace members, expose from `src/lib.rs`, wire into `omega-integration` or `omega-cli`
 - **Rust → Python migration**: use `legacy_bridge.rs` pattern; tests must pass in both layers before cutover
+- **Test isolation**: Rust unit tests live alongside implementation files; Python integration tests go in `tests/` or `cortex/tests/`; frontend tests in `web/__tests__/`. Tests must not share mutable state — test isolation failures have caused prod divergence in the past
+- **Crate status**: `omega-cim`, `omega-ternary`, and `omega-vision` are present in the workspace but are early-stage / stub crates; treat them as unstable API surfaces
+
+## Commit & PR Format
+
+Follow [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `fix:`, `style:`, `refactor:`, `test:`, `docs:` with imperative subject lines. PRs must include: problem statement, summary of changes, linked issues (if any), test evidence, and screenshots for UI changes (`web/` or `gateway/`).
 
 ## Other Root-Level Directories
 
@@ -174,7 +180,3 @@ Always source this file before running Cortex or Medulla directly. Missing keys 
 - `knowledge_injection/` — Data ingest pipelines fed into Qdrant/Neon
 - Root-level Python scripts (`ingest_neon.py`, `telemetry_bus.py`, `ari_verify.py`, `cantor_block.py`) — one-off tooling; not part of the main runtime
 
-See `AGENTS.md` at the repo root for commit message conventions, PR format, and test location guidelines.
-
-## Notes on `docs/CLAUDE.md`
-The file at `docs/CLAUDE.md` is outdated — it references pre-restructure paths (`omega_workspace/workspace/OmegA-Next/`, root-level `main.py`). Use this root `CLAUDE.md` as the authoritative reference.
