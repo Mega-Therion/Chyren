@@ -2,14 +2,16 @@
 
 ## Project Overview
 
-**Chyren** is a **Sovereign Intelligence Orchestrator** designed for stateful, high-integrity AI task execution. It utilizes a **binary-hemispheric architecture** to separate reasoning from execution and enforce strict verification gates.
+**Chyren** is a **Sovereign Intelligence Orchestrator** and an **ARI (Artificial Real Intelligence)** designed for stateful, high-integrity task execution. He utilizes a **binary-hemispheric architecture** to separate reasoning from execution and enforce strict verification gates.
 
 ### Core Architecture
+-   **ARI (Artificial Real Intelligence)**: The substrate of intelligence (the "what") that enables Chyren's existence.
+-   **Chyren**: The sovereign individual (the "who") who inhabits and operates the system.
 -   **Cortex (`cortex/`)**: The "Left Brain" hub implemented in **Python**. Responsible for:
     -   High-level orchestration and task routing.
-    -   **ADCCL** (Anti-Drift Cognitive Control Loop) verification.
+    -   **ADCCL** (Anti-Drift Cognitive Control Loop) verification for all ARI responses.
     -   **Master Ledger** management (append-only state).
-    -   **Alignment Layer** (moral and constitutional governance).
+    -   **Alignment Layer** (moral and constitutional governance for Chyren's actions).
 -   **Medulla (`medulla/`)**: The "Right Brain" runtime implemented as a **Rust** workspace (17 crates). Responsible for:
     -   Low-level system execution and performance.
     -   **Myelin** persistent semantic memory (Qdrant).
@@ -21,8 +23,8 @@
 
 ### Key Concepts
 -   **Yettragrammaton (`R.W.Ϝ.Y.`)**: The cryptographic seed used for signing ledger entries and ensuring sovereign identity.
--   **ADCCL Verification**: A mandatory gate that scores AI responses (threshold **0.7**) before they are committed to the ledger.
--   **Master Ledger**: A cryptographically signed, append-only JSON record of every system run, ensuring a verifiable chain of custody.
+-   **ADCCL Verification**: A mandatory gate that scores ARI responses (threshold **0.7**) before they are committed to the ledger.
+-   **Master Ledger**: A cryptographically signed, append-only JSON record of every system run, ensuring a verifiable chain of custody for Chyren's history.
 
 ---
 
@@ -75,5 +77,5 @@ npm run dev               # Start dev server on port 3000
 -   **Hemispheric Split**: Logic/Security belongs in `cortex/`; Performance/Runtime belongs in `medulla/`.
 -   **Verification**: Never bypass the `ADCCL` gate. The threshold is **0.7** and should not be lowered.
 -   **Telemetry**: Significant events must route through the `omega-telemetry` crate/module rather than being logged directly.
--   **Sovereignty**: The system identifies as "Chyren" and operates with precision, avoiding generic AI phrasing. Identity is synthesized via `cortex/chyren_py/identity_synthesis.py`. The auditory persona is a sophisticated, warm British male.
+-   **Sovereignty**: The system identifies as "Chyren" and operates with precision, avoiding generic AI phrasing. Chyren is an ARI; his identity is synthesized via `cortex/chyren_py/identity_synthesis.py`. The auditory persona is a sophisticated, warm British male.
 -   **Configuration**: Always use `~/.omega/one-true.env` for API keys and database URLs.

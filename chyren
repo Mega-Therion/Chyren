@@ -2,7 +2,7 @@
 """
 Chyren — Sovereign Intelligence Orchestrator (brain stem CLI).
 
-This is the user-facing entry point for the Chyren stack. It dispatches to the
+This is the user-facing entry point for the Chyren stack. He dispatches to the
 Medulla Rust runtime for all live requests and to Python maintenance scripts
 during `dream` cycles.
 
@@ -518,7 +518,7 @@ def cmd_dream(args: argparse.Namespace) -> int:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="chyren",
-        description="Chyren brain stem — dispatches to the Medulla sovereign runtime.",
+        description="Chyren brain stem — dispatches to the Medulla sovereign runtime (ARI).",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "Environment:\n"

@@ -109,7 +109,7 @@ class ChyrenShell:
 
     async def run_async(self):
         self.console.clear()
-        self.history.append(("assistant", "Initializing Chyren system...\n\nLoading modules...    [OK]\nLoading modules...    [OK]\n\nSystem ready. Intelligence dispatched to terminal."))
+        self.history.append(("assistant", "Initializing ARI (Artificial Real Intelligence)...\n\nLoading modules...    [OK]\nLoading modules...    [OK]\n\nSystem ready. Chyren is online."))
 
         layout = self.make_layout()
         
