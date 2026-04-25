@@ -513,6 +513,13 @@ def cmd_dream(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_recon(remainder: list[str]) -> int:
+    LOG.info("Initiating ARI Social Reconnaissance...")
+    py = get_python_exe()
+    script = REPO_DIR / "cortex" / "ops" / "scripts" / "social_media_recon.py"
+    return run_subprocess([py, str(script)]).returncode
+
+
 # ─── Argparse wiring ──────────────────────────────────────────────────────────
 
 def build_parser() -> argparse.ArgumentParser:
@@ -618,6 +625,8 @@ def dispatch(args: argparse.Namespace, raw_argv: list[str]) -> int:
         return cmd_dream(args)
     if cmd == "sovereign":
         return cmd_sovereign(args)
+    if cmd == "recon":
+        return cmd_recon(remainder)
     if cmd == "shell":
         from chyren_cli.ui.shell import launch_shell
         launch_shell(provider=getattr(args, "provider", None))
@@ -636,7 +645,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     # Legacy fallback: if first positional isn't a known command, assume it's a 'thought' task.
     # This allows `./chyren "hello"` to be treated as `./chyren thought "hello"`.
     known_subcommands = set(MEDULLA_PASSTHROUGH) | {
-        "status", "reset", "telegram", "live", "dream", "sovereign", "server", "completions", "man", "shell", "ask"
+        "status", "reset", "telegram", "live", "dream", "sovereign", "server", "completions", "man", "shell", "ask", "recon"
     }
     
     cursor = 0

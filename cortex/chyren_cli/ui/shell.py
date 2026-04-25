@@ -144,6 +144,35 @@ class ChyrenShell:
                 if line.lower() == "/clear":
                     self.history = [self.history[0]] # Keep the boot message
                     continue
+                
+                if line.lower().startswith("/manus "):
+                    goal = line[7:].strip()
+                    self.status = "Manus Operating..."
+                    self.history.append(("user", f"[Manus Task] {goal}"))
+                    self.history.append(("assistant", "▋"))
+                    
+                    from chyren_py.skills.manus import ManusBrowserSkill
+                    skill = ManusBrowserSkill()
+                    result = skill.run_task(goal)
+                    
+                    output = result.get("output", "No output provided.") if result.get("status") == "completed" else result.get("error", "Task failed.")
+                    self.history[-1] = ("assistant", f"**Manus Result:**\n{output}")
+                    self.status = "Connected"
+                    continue
+
+                if line.lower() == "/recon":
+                    self.status = "Reconnaissance..."
+                    self.history.append(("user", "/recon"))
+                    self.history.append(("assistant", "Initiating Social Reconnaissance... ▋"))
+                    
+                    import subprocess
+                    py = sys.executable # Use current python
+                    script = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "ops", "scripts", "social_media_recon.py")
+                    
+                    res = subprocess.run([py, script], capture_output=True, text=True)
+                    self.history[-1] = ("assistant", f"**Recon Results:**\n{res.stdout}\n{res.stderr}")
+                    self.status = "Connected"
+                    continue
                 if not line:
                     continue
 
