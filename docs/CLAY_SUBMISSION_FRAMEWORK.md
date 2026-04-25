@@ -11,7 +11,7 @@
 
 We present the Yett-Chyren Framework, a unified geometric approach to the seven Clay Millennium Prize Problems grounded in the theory of holonomy on principal fiber bundles over the Stiefel manifold $V_m(\mathbb{R}^N)$. The central object is a canonical connection on a principal $SO(m)$-bundle whose holonomy group, basepointed at a canonical gauge-fixing frame called the Yettragrammaton, governs the classification of trajectories in a high-dimensional constitutional parameter space. Three invariants — the Sovereignty Score $\Omega$ (global Berry-phase accumulation), the Chiral Invariant $\chi$ (local holonomy sign times alignment ratio), and the Winding Number $\omega$ ($U(1)$ sub-holonomy) — are shown to be local and global facets of a single geometric invariant. The framework is animated by a controlled Lindblad master equation whose dissipator structure is conjectured to generate the holonomy algebra via Lie-bracket span.
 
-Six formal proof obligations are stated precisely in Lean4 and in natural-language mathematics. We report honestly on the current status of each: Obligations 1–6 are all **[CONJECTURED]** with complete proof strategies given; none carries a closed proof at this time. The Lean4 file `YettParadigm.lean` contains scaffolded theorem statements, all currently closed by `sorry`. For each of the seven Millennium Problems we give a precise statement of the Clay formulation, describe the Yett reduction (how the problem maps into the holonomy framework), identify what the framework would establish if the six obligations were proved, and give an honest assessment of the remaining gaps. No Millennium Problem is claimed as solved. The document's purpose is to establish the reduction program rigorously and invite expert collaboration on the open obligations.
+Six formal proof obligations are stated precisely in Lean4 and in natural-language mathematics. We report honestly on the current status of each: Obligations 1–6 are all **[CONJECTURED]** with complete proof strategies given; none carries a closed proof at this time. The Lean4 file `YettParadigm.lean` contains scaffolded theorem statements, all currently closed by `sorry`. For each of the Clay Millennium Problems we give a precise statement of the Clay formulation, describe the Yett reduction (how the problem maps into the holonomy framework), identify what the framework would establish if the six obligations were proved, and give an honest assessment of the remaining gaps. No Millennium Problem is claimed as solved. The document's purpose is to establish the reduction program rigorously and invite expert collaboration on the open obligations.
 
 **Keywords:** holonomy, Stiefel manifold, Berry phase, Lindblad dynamics, Millennium Problems, principal fiber bundles, geometric phase, sovereign intelligence.
 
@@ -25,7 +25,7 @@ The Yett Paradigm begins with an empirical observation about a particular class 
 
 The Yett-Chyren Master Law (Theorem 6.1 below, currently **[CONJECTURED]**) states: a trajectory through constitutional parameter space is sovereignly valid if and only if (a) its holonomy at every moment lies in $SO^+(m)$, the identity component of $SO(m)$, and (b) the total accumulated Berry phase over the trajectory exceeds a thermodynamically determined minimum threshold $\Omega_{\min}$.
 
-The claim that this holonomy criterion connects to the seven Millennium Problems is the reduction program of Section 5. Each connection is at a different depth: some problems (Yang-Mills, Navier-Stokes) connect naturally to the differential geometry and dissipative dynamics of the framework; others (Riemann Hypothesis, BSD) connect through more speculative analogies that are explicitly labeled as such.
+The claim that this holonomy criterion connects to the Clay Millennium Problems is the reduction program of Section 5. Each connection is at a different depth: some problems (Yang-Mills, Navier-Stokes) connect naturally to the differential geometry and dissipative dynamics of the framework; others (Riemann Hypothesis) connect through more speculative analogies that are explicitly labeled as such.
 
 ### 1.2 Why Holonomy?
 
@@ -39,7 +39,7 @@ In the Yett framework, the "parameter space" is the Stiefel manifold $V_m(\mathb
 
 ### 1.3 Roadmap
 
-Section 2 establishes all mathematical prerequisites. Section 3 defines the three invariants and the Yettragrammaton gauge fix. Section 4 states the six formal obligations. Section 5 treats each of the seven Millennium Problems. Section 6 states the Master Law. Sections 7–9 provide notation, open questions, and references.
+Section 2 establishes all mathematical prerequisites. Section 3 defines the three invariants and the Yettragrammaton gauge fix. Section 4 states the six formal obligations. Section 5 treats each of the Clay Millennium Problems. Section 6 states the Master Law. Sections 7–9 provide notation, open questions, and references.
 
 **A note on proof status labels.** This document uses the following labels throughout:
 
@@ -391,7 +391,7 @@ $$\beta_{\text{crit}} \approx \ln 2 \approx 0.693$$
 
 ## 5. The Seven Millennium Problems — Holonomy Reductions
 
-**Preamble.** None of the seven Clay Millennium Problems is claimed as solved by this framework. What the framework offers is a program of reduction: if Obligations 1–6 were fully proved, certain structural results would follow that bear on each problem. The reductions vary greatly in depth. For Navier-Stokes and Yang-Mills, the connection is natural and geometric. For Riemann, BSD, and Hodge, the connection is more speculative and requires additional conjectures beyond Obligations 1–6. For P vs NP, the connection is highly speculative and is labeled accordingly. The Poincaré Conjecture is already resolved by Perelman; Section 5.7 explains what holonomy perspective the framework adds.
+**Preamble.** None of the seven Clay Millennium Problems is claimed as solved by this framework. What the framework offers is a program of reduction: if Obligations 1–6 were fully proved, certain structural results would follow that bear on each problem. The reductions vary greatly in depth. For Navier-Stokes and Yang-Mills, the connection is natural and geometric. For Riemann, and Hodge, the connection is more speculative and requires additional conjectures beyond Obligations 1–6. For P vs NP, the connection is highly speculative and is labeled accordingly. The Poincaré Conjecture is already resolved by Perelman; Section 5.6 explains what holonomy perspective the framework adds.
 
 We are scrupulous about the following distinction: **what the framework establishes** means what would follow from Obligations 1–6 (themselves currently unproved). **What remains open** means what would still need to be proved even if Obligations 1–6 were established.
 
@@ -580,42 +580,7 @@ The Yang-Mills connection is the strongest of the Millennium reductions in terms
 
 ---
 
-### 5.6 Birch and Swinnerton-Dyer Conjecture
-
-**5.6.1 Problem Statement (Clay Formulation).**
-
-Let $E$ be an elliptic curve over $\mathbb{Q}$. The Birch and Swinnerton-Dyer (BSD) conjecture asserts that the rank of the Mordell-Weil group $E(\mathbb{Q})$ equals the order of vanishing of the L-function $L(E, s)$ at $s = 1$:
-
-$$\operatorname{rank}(E(\mathbb{Q})) = \operatorname{ord}_{s=1} L(E, s)$$
-
-**Status: [OPEN]** — proved for rank 0 and rank 1 in special cases (Kolyvagin 1988, Gross-Zagier 1986); open in general.
-
-**5.6.2 The Yett Reduction.**
-
-The Yett framework's connection to BSD is through the structure of L-functions and their relationship to topological invariants.
-
-The L-function $L(E, s)$ encodes arithmetic information about $E$. The **rank-holonomy conjecture** of the Yett framework posits: the Mordell-Weil rank corresponds to the winding number $\omega$ of the trajectory tracing the coefficients of $L(E, s)$ under a suitable embedding. Specifically: embed the coefficients $a_n(E)$ of $L(E, s) = \sum a_n n^{-s}$ into $\mathcal{H} = \mathbb{R}^N$ as a vector $\Psi_E$. Then $\operatorname{rank}(E(\mathbb{Q})) = |\omega(\Psi_E)|$.
-
-The vanishing order of $L(E, s)$ at $s = 1$ is related to the Berry phase accumulation $\int_0^T \phi(t) \, dt$ along the spectral deformation $s: 1 \mapsto 1 + it$ — analogous to the way the winding number counts zeros of a holomorphic function.
-
-**5.6.3 What the Framework Would Establish.**
-
-*[CONJECTURED]:* A correspondence between the Mordell-Weil rank and the winding number $\omega$ for specific embeddings of L-function data. This would be a new arithmetic invariant, not a proof of BSD.
-
-**5.6.4 What Remains Open.**
-
-- The specific embedding of L-function coefficients into $\mathcal{H}$.
-- Whether winding number and rank agree for this embedding.
-- The BSD conjecture: **[OPEN]** in general.
-- The partial results of Kolyvagin (1988) and Gross-Zagier (1986) are **[AXIOM]** for the rank 0 and rank 1 cases.
-
-**5.6.5 Honest Assessment.**
-
-The rank-holonomy conjecture is speculative. There is no reason, from first principles, to expect the Mordell-Weil rank (an arithmetic invariant) to coincide with the winding number (a topological invariant of a curve in $\mathbb{R}^N$ defined by an artificial embedding of L-function data). The Lean4 axiom `axiom bsd_rank_equivalence : True` is a trivial placeholder. The BSD conjecture remains **[OPEN]**.
-
----
-
-### 5.7 Poincaré Conjecture (Perelman's Resolution)
+### 5.6 Poincaré Conjecture (Perelman's Resolution)
 
 **5.7.1 Problem Statement and Resolution.**
 
@@ -754,7 +719,6 @@ The following is an enumerated, precise list of what remains to be proved. Items
 
 11. **[YM]** Can the Yett Lindblad spectral gap (Obligation 6) be made quantitative, and does it give a lower bound on the Yang-Mills mass gap for any family of gauge theories?
 
-12. **[BSD]** Is the winding number $\omega(\Psi_E)$ of the L-function embedding $\Psi_E$ equal to the Mordell-Weil rank $\operatorname{rank}(E(\mathbb{Q}))$ for any natural embedding of $L(E,s)$ coefficients into $\mathcal{H}$?
 
 13. **[MASTER]** Is the Master Law (Theorem 6.1) the correct formalization of sovereignty, or does the correct formulation require additional conditions (e.g., analyticity of $\Psi(t)$, boundary conditions at $t = 0$ and $t = T$, or conditions on the control budget $\{U_0, U_1, U_2\}$)?
 
@@ -770,7 +734,6 @@ The following is an enumerated, precise list of what remains to be proved. Items
 
 4. Berry, M.V. (1984). Quantal phase factors accompanying adiabatic changes. *Proceedings of the Royal Society of London A*, 392(1802), 45–57. — Berry connection and geometric phase; used throughout Section 3.
 
-5. Birch, B., Swinnerton-Dyer, H.P.F. (1965). Notes on elliptic curves (II). *Journal für die reine und angewandte Mathematik*, 218, 79–108.
 
 6. Borel, A. (1949). Some remarks about Lie groups transitive on spheres and tori. *Bulletin of the American Mathematical Society*, 55(6), 580–587.
 
@@ -865,7 +828,6 @@ The Lean4 imports reference `Mathlib.Geometry.Manifold.Instances.Stiefel` and `M
 | Ambrose-Singer theorem | **[AXIOM]** | Ambrose-Singer 1953 |
 | Berry phase = connection holonomy | **[AXIOM]** | Simon 1983 |
 | Perelman's Poincaré proof | **[PROVED]** | Perelman 2002–2003 |
-| Gross-Zagier/Kolyvagin (rank 0,1 BSD) | **[AXIOM]** | Kolyvagin 1988, Gross-Zagier 1986 |
 | $\operatorname{Hol}(g) = SO(m)$ (O1) | **[CONJECTURED]** | Full curvature computation on $V_m(\mathbb{R}^N)$ |
 | Curvature-drift connection (O2) | **[CONJECTURED]** | Identification of $[L_k,L_j]$ with curvature values |
 | Equivalence $\chi \geq 0.7 \iff SO^+(m)$ (O3) | **[CONJECTURED]** | Holonomy computation along loops $\gamma_\Psi$ |
