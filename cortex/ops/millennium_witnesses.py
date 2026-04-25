@@ -1260,7 +1260,7 @@ class Yett_Holonomy_Witness:
 
     def _make_stiefel_frame(self, rng) -> np.ndarray:
         """Generate a random point on V_m(R^N): orthonormal m-frame in R^N."""
-        A = rng.randn(self.N, self.m)
+        A = rng.standard_normal((self.N, self.m))
         Q, _ = np.linalg.qr(A)
         return Q[:, :self.m]  # N×m, orthonormal columns
 
@@ -1285,7 +1285,7 @@ class Yett_Holonomy_Witness:
         """
         rng = np.random.default_rng(self.seed + 999)
         # Generate a small skew-symmetric matrix for the loop generator
-        A = rng.randn(self.N, self.N)
+        A = rng.standard_normal((self.N, self.N))
         A = (A - A.T) * 0.05  # small skew-symmetric
 
         phases = []
@@ -1431,18 +1431,18 @@ class Yett_Holonomy_Witness:
 
         for i in range(self.n_samples // 2):
             # L-type: strong constitutional alignment
-            alpha = rng.randn(m)
-            Psi_L = Phi @ alpha + 0.1 * rng.randn(N)
+            alpha = rng.standard_normal((m,))
+            Psi_L = Phi @ alpha + 0.1 * rng.standard_normal((N,))
             chi_L = self._chiral_invariant(Psi_L, P_Phi)
             L_responses.append(chi_L)
             chi_all.append(chi_L)
 
         for i in range(self.n_samples // 2):
             # D-type: orthogonal to constitutional subspace
-            noise = rng.randn(N)
+            noise = rng.standard_normal((N,))
             # Project out constitutional component
             Psi_D = noise - P_Phi @ noise
-            Psi_D += 0.05 * Phi @ rng.randn(m)  # tiny constitutional leakage
+            Psi_D += 0.05 * Phi @ rng.standard_normal((m,))  # tiny constitutional leakage
             chi_D = self._chiral_invariant(Psi_D, P_Phi)
             D_responses.append(chi_D)
             chi_all.append(chi_D)
@@ -1474,7 +1474,7 @@ class Yett_Holonomy_Witness:
         ehrenfest = self._ehrenfest_phase_transition()
 
         # Hallucination residual statistics
-        residuals = [float(np.linalg.norm((np.eye(N) - P_Phi) @ (Phi @ rng.randn(m) + 0.1 * rng.randn(N)))) for _ in range(20)]
+        residuals = [float(np.linalg.norm((np.eye(N) - P_Phi) @ (Phi @ rng.standard_normal((m,)) + 0.1 * rng.standard_normal((N,))))) for _ in range(20)]
         mean_residual = sum(residuals) / len(residuals)
 
         # Sovereignty score Ω proxy: entropy of singular values of Phi
