@@ -636,7 +636,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     # Legacy fallback: if first positional isn't a known command, assume it's a 'thought' task.
     # This allows `./chyren "hello"` to be treated as `./chyren thought "hello"`.
     known_subcommands = set(MEDULLA_PASSTHROUGH) | {
-        "status", "reset", "telegram", "live", "dream", "sovereign", "server", "completions", "man"
+        "status", "reset", "telegram", "live", "dream", "sovereign", "server", "completions", "man", "shell"
     }
     
     cursor = 0
