@@ -15,6 +15,10 @@ CHYREN_THEME = Theme({
     "adccl.rejected": "bold #ff0000",
     "panel.border": "#333333",
     "text.refined": "#cccccc",
+    "glass.border": "#00d4ff",
+    "glass.bg": "#0a0a1a",
+    "bubble.user": "#8a2be2",
+    "bubble.assistant": "#00ffff",
 })
 
 def get_gradient_text(text: str, start_color: str = "#00ffff", end_color: str = "#ff00ff") -> str:

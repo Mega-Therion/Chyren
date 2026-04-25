@@ -11,6 +11,7 @@ from chyren_cli.core.state import HistoryStore
 from chyren_cli.providers.gemini import GeminiProvider
 from chyren_cli.providers.openrouter import OpenRouterProvider
 from chyren_cli.ui.render import render_banner, render_stream, render_text
+from chyren_cli.ui.shell import launch_shell
 
 app = typer.Typer(
     add_completion=False,
@@ -72,32 +73,11 @@ def prompt_cmd(
 @app.command("repl")
 def repl_cmd(
     provider: Optional[str] = typer.Option(None, "--provider", "-p", help="Preferred provider"),
-    plain: bool = typer.Option(False, "--plain", help="Plain text output (CI/piping)"),
 ) -> None:
     """
-    REPL mode: iterative prompting with history.
+    REPL mode: Futuristic interactive shell with glassmorphic UI.
     """
-    render_banner()
-    router = _router()
-    store = HistoryStore.default()
-    session_id = store.create_session()
-
-    typer.echo("Chyren REPL. Type /exit to quit.")
-    while True:
-        try:
-            line = input("> ").strip()
-        except EOFError:
-            break
-        if not line:
-            continue
-        if line in ("/exit", "/quit"):
-            break
-
-        expanded = expand_injections(line)
-        store.add_message(session_id, role="user", content=line)
-        events = router.stream(expanded, system="", model="", preferred=provider)
-        out = render_stream(events, plain=plain)
-        store.add_message(session_id, role="assistant", content=out)
+    launch_shell(provider=provider)
 
 
 @app.command("history")

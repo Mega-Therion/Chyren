@@ -578,6 +578,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_sov = sub.add_parser("sovereign", help="Launch the high-integrity development workspace (Docker).")
     p_sov.add_argument("--build", action="store_true", help="Force rebuild the sovereign image.")
     p_sov.add_argument("--migrate", metavar="PATH", help="Migrate the repository to a target path (e.g. USB drive).")
+    
+    p_shell = sub.add_parser("shell", help="Launch the futuristic glassmorphic Cognitive Shell.")
+    p_shell.add_argument("--provider", help="Preferred intelligence provider.")
 
     return parser
 
@@ -615,6 +618,10 @@ def dispatch(args: argparse.Namespace, raw_argv: list[str]) -> int:
         return cmd_dream(args)
     if cmd == "sovereign":
         return cmd_sovereign(args)
+    if cmd == "shell":
+        from chyren_cli.ui.shell import launch_shell
+        launch_shell(provider=getattr(args, "provider", None))
+        return 0
 
     LOG.error("unknown command: %s", cmd)
     return 2
