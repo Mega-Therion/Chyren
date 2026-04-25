@@ -4,7 +4,7 @@ version.workspace = true
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
-description = "The Neocortex: Matrix-style program library for Chyren. Loadable knowledge programs ingested at runtime — domain-signed, integrity-verified, injected into the sovereign mind."
+description = "The omega-neocortex component of the Chyren Sovereign Intelligence Orchestrator."
 
 [dependencies]
 omega-core = { path = "../omega-core" }
