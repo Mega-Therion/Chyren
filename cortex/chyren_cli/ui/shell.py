@@ -1,5 +1,6 @@
 import asyncio
 import sys
+import os
 from datetime import datetime
 from typing import List, Optional, Tuple
 
@@ -12,6 +13,11 @@ from rich.align import Align
 from rich.box import ROUNDED
 from rich.markdown import Markdown
 from rich.table import Table
+
+from prompt_toolkit import PromptSession
+from prompt_toolkit.history import InMemoryHistory
+from prompt_toolkit.completion import WordCompleter, PathCompleter
+from prompt_toolkit.styles import Style as PtStyle
 
 from chyren_cli.ui.theme import CHYREN_THEME
 from chyren_cli.core.router import ProviderRouter
@@ -33,12 +39,18 @@ class ChyrenShell:
         self.history: List[Tuple[str, str]] = []
         self.provider = provider
         self.session_id = HistoryStore.default().create_session()
-        self.input_buffer = ""
         self.status = "Connected"
         self.version = "v2.5"
+        
+        # Prompt Toolkit Setup
+        self.prompt_session = PromptSession(history=InMemoryHistory())
+        self.completer = PathCompleter()
+        self.pt_style = PtStyle.from_dict({
+            'prompt': '#8a2be2 bold',
+            '': '#ffffff',
+        })
 
     def get_header(self) -> Panel:
-        """Renders the top status bar mimicking the mobile/sovereign OS look."""
         grid = Table.grid(expand=True)
         grid.add_column(justify="left", ratio=1)
         grid.add_column(justify="center", ratio=2)
@@ -50,21 +62,15 @@ class ChyrenShell:
             Text("📶 🔋  ", style="neon.cyan")
         )
         
-        return Panel(
-            grid,
-            style="neon.purple",
-            box=ROUNDED,
-            height=3,
-            border_style="neon.purple"
-        )
+        return Panel(grid, style="neon.purple", box=ROUNDED, height=3, border_style="neon.purple")
 
     def get_message_bubble(self, role: str, content: str) -> Panel:
-        """Renders a glassmorphic message bubble."""
         color = "bubble.assistant" if role == "assistant" else "bubble.user"
         title = "CHYREN" if role == "assistant" else "YOU"
         
+        # Added code highlighting and better formatting
         return Panel(
-            Markdown(content),
+            Markdown(content, code_theme="monokai"),
             title=f"[bold {color}]{title}[/]",
             title_align="left",
             border_style=color,
@@ -73,11 +79,10 @@ class ChyrenShell:
             expand=True
         )
 
-    def get_footer(self) -> Panel:
-        """Renders the input area and status bar."""
+    def get_footer(self, current_input: str = "") -> Panel:
         input_panel = Panel(
-            Text(self.input_buffer if self.input_buffer else "Type a command...", 
-                 style="dim white" if not self.input_buffer else "white"),
+            Text(current_input if current_input else "Waiting for sovereign command...", 
+                 style="dim white" if not current_input else "white"),
             border_style="neon.cyan",
             box=ROUNDED,
             title="[bold neon.cyan] ⌅ [/]",
@@ -91,11 +96,7 @@ class ChyrenShell:
             (" ✨ Sovereign Integrity Verified", "italic dim white")
         )
         
-        return Panel(
-            Group(input_panel, status_line),
-            border_style="panel.border",
-            box=ROUNDED
-        )
+        return Panel(Group(input_panel, status_line), border_style="panel.border", box=ROUNDED)
 
     def make_layout(self) -> Layout:
         layout = Layout()
@@ -108,9 +109,7 @@ class ChyrenShell:
 
     async def run_async(self):
         self.console.clear()
-        
-        # Initial boot message
-        self.history.append(("assistant", "Initializing Chyren system...\n\nLoading modules...    [OK]\nLoading modules...    [OK]\n\nSystem ready."))
+        self.history.append(("assistant", "Initializing Chyren system...\n\nLoading modules...    [OK]\nLoading modules...    [OK]\n\nSystem ready. Intelligence dispatched to terminal."))
 
         layout = self.make_layout()
         
@@ -118,45 +117,51 @@ class ChyrenShell:
             while True:
                 layout["header"].update(self.get_header())
                 
-                # Render messages (show last 3 to fit comfortably)
+                # Render history
                 message_group = []
+                # Dynamically adjust visible history
                 for role, content in self.history[-3:]:
                     message_group.append(self.get_message_bubble(role, content))
                 
                 layout["body"].update(Align.center(Group(*message_group), vertical="middle"))
                 layout["footer"].update(self.get_footer())
                 
+                # Get input using prompt_toolkit for Pro features
                 live.stop()
                 try:
-                    line = self.console.input(Text(" ❯ ", style="neon.purple"))
+                    line = await self.prompt_session.prompt_async(
+                        [('class:prompt', ' ❯ ')],
+                        completer=self.completer,
+                        style=self.pt_style
+                    )
+                    line = line.strip()
                 except (EOFError, KeyboardInterrupt):
                     break
                 live.start()
                 
                 if line.lower() in ("/exit", "/quit"):
                     break
+                if line.lower() == "/clear":
+                    self.history = [self.history[0]] # Keep the boot message
+                    continue
                 if not line:
                     continue
 
                 self.history.append(("user", line))
                 self.status = "Thinking..."
-                self.history.append(("assistant", "▋")) # Loading cursor
+                self.history.append(("assistant", "▋"))
                 
                 expanded = expand_injections(line)
                 full_resp = ""
                 
-                # Stream into the last history entry
                 async for event in self.router.stream(expanded, preferred=self.provider):
                     if event.type == "delta" and event.text:
                         full_resp += event.text
                         self.history[-1] = ("assistant", full_resp + "▋")
-                        # Live will automatically refresh
                 
-                # Finalize message
                 self.history[-1] = ("assistant", full_resp)
                 self.status = "Connected"
                 
-                # Persist
                 HistoryStore.default().add_message(self.session_id, "user", line)
                 HistoryStore.default().add_message(self.session_id, "assistant", full_resp)
 

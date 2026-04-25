@@ -44,7 +44,7 @@ DREAM_LOCK = STATE_DIR / ".dream.lock"
 
 LOG = logging.getLogger("chyren")
 
-MEDULLA_REASONING_CMDS = {"thought", "sense", "verify", "identity", "insights"}
+MEDULLA_REASONING_CMDS = {"thought", "sense", "verify", "identity", "insights", "ask"}
 MEDULLA_EXECUTION_CMDS = {"action", "flex", "shard", "ingest", "memory", "solve", "discipline"}
 MEDULLA_PASSTHROUGH = MEDULLA_REASONING_CMDS | MEDULLA_EXECUTION_CMDS
 
@@ -636,7 +636,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     # Legacy fallback: if first positional isn't a known command, assume it's a 'thought' task.
     # This allows `./chyren "hello"` to be treated as `./chyren thought "hello"`.
     known_subcommands = set(MEDULLA_PASSTHROUGH) | {
-        "status", "reset", "telegram", "live", "dream", "sovereign", "server", "completions", "man", "shell"
+        "status", "reset", "telegram", "live", "dream", "sovereign", "server", "completions", "man", "shell", "ask"
     }
     
     cursor = 0
@@ -653,9 +653,10 @@ def main(argv: Optional[list[str]] = None) -> int:
             raw_argv.insert(cursor, "thought")
         break
     else:
-        # No positional argument found - if raw_argv is empty or only flags, 
-        # the parser will handle showing help.
-        pass
+        # No positional argument found - launch the shell by default
+        from chyren_cli.ui.shell import launch_shell
+        launch_shell()
+        return 0
 
     args = parser.parse_args(raw_argv)
     configure_logging(args.log_level, args.log_format)
