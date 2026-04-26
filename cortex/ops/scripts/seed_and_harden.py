@@ -127,7 +127,7 @@ def seed_and_harden():
     for content, source, importance, namespace in memories:
         entry_id = str(uuid.uuid4())
         cur.execute("""
-            INSERT INTO omega_memory_entries (id, content, source, importance, namespace, created_at)
+            INSERT INTO chyren_memory_entries (id, content, source, importance, namespace, created_at)
             VALUES (%s, %s, %s, %s, %s, %s)
         """, (entry_id, content, source, importance, namespace, datetime.now().isoformat()))
 

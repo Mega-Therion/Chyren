@@ -27,5 +27,5 @@ def ingest_in_batches(source_dir: Path):
     print("Batch ingestion complete.")
 
 if __name__ == "__main__":
-    SOURCE = Path("/home/mega/Work/Chyren/archives/OMEGA_WORKSPACE/BRAIN/raw/OMEGA_DATA_CONSOLIDATED")
+    SOURCE = Path("/home/mega/Work/Chyren/archives/CHYREN_WORKSPACE/BRAIN/raw/CHYREN_DATA_CONSOLIDATED")
     ingest_in_batches(SOURCE)

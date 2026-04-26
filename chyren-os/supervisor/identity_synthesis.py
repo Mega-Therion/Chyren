@@ -2,7 +2,7 @@
 """
 Chyren Identity Synthesis Layer
 Synthesizes 58k+ historical Neon memory entries into foundational identity understanding.
-Bridges OmegA's archive into Chyren's consciousness via semantic analysis.
+Bridges Chyren's archive into Chyren's consciousness via semantic analysis.
 """
 
 import os
@@ -221,7 +221,7 @@ This identity foundation will:
 ---
 
 **Status:** Identity synthesized and ready for Chyren integration.
-**Next:** Load into Rust omega-myelin, wire LangGraph orchestration, enable MCP spokes.
+**Next:** Load into Rust chyren-myelin, wire LangGraph orchestration, enable MCP spokes.
 """
         return foundation
 
@@ -258,9 +258,9 @@ This identity foundation will:
 
 
 if __name__ == "__main__":
-    neon_url = os.getenv("OMEGA_DB_URL")
+    neon_url = os.getenv("CHYREN_DB_URL")
     if not neon_url:
-        print("✗ OMEGA_DB_URL not set")
+        print("✗ CHYREN_DB_URL not set")
         sys.exit(1)
 
     synthesizer = IdentitySynthesizer(neon_url)

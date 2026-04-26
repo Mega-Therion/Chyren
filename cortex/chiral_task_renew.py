@@ -17,7 +17,7 @@ hub = ChiralRouter(router)
 task = """
 Develop an operational execution plan for 'Project RENEW'. 
 1. Logistics of the 'ONE Ecosystem' transport hubs.
-2. Data pipeline for 'OmegA' AI.
+2. Data pipeline for 'Chyren' AI.
 3. Revenue-generation model.
 4. Legislative pivot framing for Arkansas JBC.
 """

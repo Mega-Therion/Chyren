@@ -68,4 +68,4 @@ This identity foundation will:
 ---
 
 **Status:** Identity synthesized and ready for Chyren integration.
-**Next:** Load into Rust omega-myelin, wire LangGraph orchestration, enable MCP spokes.
+**Next:** Load into Rust chyren-myelin, wire LangGraph orchestration, enable MCP spokes.

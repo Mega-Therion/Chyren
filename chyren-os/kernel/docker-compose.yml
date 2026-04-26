@@ -26,7 +26,7 @@ services:
   # The Cognitive Interface (Next.js)
   chyren-web:
     build:
-      context: ./chyren-web
+      context: ../chyren-os/interface
       dockerfile: Dockerfile
     ports:
       - "3000:3000"

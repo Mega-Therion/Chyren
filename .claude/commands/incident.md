@@ -11,8 +11,8 @@ $ARGUMENTS
 curl -s http://localhost:8080/health 2>&1
 
 # Is the DB reachable?
-source ~/.omega/one-true.env
-psql "$OMEGA_DB_URL" -c "SELECT 1;" 2>&1
+source ~/.chyren/one-true.env
+psql "$CHYREN_DB_URL" -c "SELECT 1;" 2>&1
 
 # Is Qdrant alive?
 curl -s "${QDRANT_URL}/health" 2>&1
@@ -36,7 +36,7 @@ journalctl -u chyren -n 50 --no-pager 2>/dev/null | grep -i "error\|panic" | tai
 ## Phase 3: Diagnose
 ```bash
 # Last successful ledger entry
-psql "$OMEGA_DB_URL" -c "SELECT id, created_at, task_type, adccl_score FROM ledger ORDER BY created_at DESC LIMIT 5;" 2>&1
+psql "$CHYREN_DB_URL" -c "SELECT id, created_at, task_type, adccl_score FROM ledger ORDER BY created_at DESC LIMIT 5;" 2>&1
 
 # Recent git changes
 git log --oneline -10

@@ -1,27 +1,27 @@
 ---
-name: OmegA Project Status and History
-description: Current state of OmegA architecture, publication, and active sub-projects as of 2026-03-24
+name: Chyren Project Status and History
+description: Current state of Chyren architecture, publication, and active sub-projects as of 2026-03-24
 type: project
 ---
 
-OmegA Architecture published on Zenodo 2026-03-18 — exactly 77 days after the DeepSeek Challenge (Dec 31, 2025). 7 papers, 7 runtime modules. These alignments were not planned but noticed and valued by RY.
+Chyren Architecture published on Zenodo 2026-03-18 — exactly 77 days after the DeepSeek Challenge (Dec 31, 2025). 7 papers, 7 runtime modules. These alignments were not planned but noticed and valued by RY.
 
-**Canonical live repo:** /home/mega/OmegA-Architecture
-**Archive attic:** /home/mega/ATTIC/OmegA-cutover-20260319-233802
+**Canonical live repo:** /home/mega/Chyren-Architecture
+**Archive attic:** /home/mega/ATTIC/Chyren-cutover-20260319-233802
 **Current phase:** publication and architecture maintenance
 
-**Why:** The OmegA repo is a publication/architecture repo, not a service monorepo. Default work = papers, cross-references, citations, diagrams, repo organization.
-**How to apply:** Start OmegA work in /home/mega/OmegA-Architecture. Treat the attic as historical only.
+**Why:** The Chyren repo is a publication/architecture repo, not a service monorepo. Default work = papers, cross-references, citations, diagrams, repo organization.
+**How to apply:** Start Chyren work in /home/mega/Chyren-Architecture. Treat the attic as historical only.
 
 ## Active sub-projects (as of 2026-03-24)
-- OmegA web app (Next.js 16, /home/mega/OmegA-Architecture/web): chat interface with Neon DB, Cloudflare gateway, Vercel AI SDK fallback chain.
-- Safa transcript synthesis: synthesizing ChatGPT transcripts from /mnt/transcripts/ covering OmegA genesis, consciousness/aRYsing, gAIng context.
-- OmegA formalization sprint: 12-phase Claude CLI agent run; four open items: global CLAUDE.md path correction, wiring identity.yaml into gateway middleware via policy.rs, running evals e2/e6d, enabling gateway persistence via systemd.
+- Chyren web app (Next.js 16, /home/mega/Chyren-Architecture/web): chat interface with Neon DB, Cloudflare gateway, Vercel AI SDK fallback chain.
+- Safa transcript synthesis: synthesizing ChatGPT transcripts from /mnt/transcripts/ covering Chyren genesis, consciousness/aRYsing, gAIng context.
+- Chyren formalization sprint: 12-phase Claude CLI agent run; four open items: global CLAUDE.md path correction, wiring identity.yaml into gateway middleware via policy.rs, running evals e2/e6d, enabling gateway persistence via systemd.
 
 ## Historical milestones
-- 2025-12-31: DeepSeek Challenge — OmegA origin event.
-- 2026-02-18: OmegA Agent v1 published. OmegA Sovereign Platform canonical split: OmegA-IS (public cloud) vs OmegA-SI (private local Rust engine).
-- 2026-03-02: OmegA App built in Google AI Studio.
+- 2025-12-31: DeepSeek Challenge — Chyren origin event.
+- 2026-02-18: Chyren Agent v1 published. Chyren Sovereign Platform canonical split: Chyren-IS (public cloud) vs Chyren-SI (private local Rust engine).
+- 2026-03-02: Chyren App built in Google AI Studio.
 - 2026-03-18: Zenodo publication. DOI 10.5281/zenodo.19111653.
 
 ## Other active projects

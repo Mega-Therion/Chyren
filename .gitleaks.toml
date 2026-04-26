@@ -51,8 +51,8 @@ secretGroup = 2
 tags = ["qdrant", "vector-db"]
 
 [[rules]]
-id = "omega-env-file"
-description = "Omega secrets env file content"
+id = "chyren-env-file"
+description = "Chyren secrets env file content"
 regex = '''one-true\.env'''
 tags = ["env", "secrets"]
 

@@ -136,13 +136,13 @@ graph TB
 | **5. Repair/Release** | Error handling | Fix, downgrade, escalate, or release |
 | **6. Log + Memory** | Conditional write | Persist only if policy-approved |
 
-### Hosted Inner Stack → OmegA-Next (Rust)
+### Hosted Inner Stack → Chyren-Next (Rust)
 
-| AEGIS Layer | OmegA-Next Crates | Status |
+| AEGIS Layer | Chyren-Next Crates | Status |
 |------------|-------------------|--------|
-| **AEON** | `omega-aeon`, `omega-core` | ✅ Scaffolded |
-| **ADCCL** | `omega-adccl` | ✅ Scaffolded |
-| **MYELIN** | `omega-myelin`, `omega-dream` | ✅ Scaffolded |
+| **AEON** | `chyren-aeon`, `chyren-core` | ✅ Scaffolded |
+| **ADCCL** | `chyren-adccl` | ✅ Scaffolded |
+| **MYELIN** | `chyren-myelin`, `chyren-dream` | ✅ Scaffolded |
 
 ---
 
@@ -198,5 +198,5 @@ AEGIS provides a **theoretical foundation** that validates Chyren's architecture
 
 - Original AEGIS diagram (see `/docs/images/aegis-theoretical-shell.png`)
 - [Chyren README](../README.md)
-- [OmegA Stack Integration](./OMEGA_STACK.md)
+- [Chyren Stack Integration](./CHYREN_STACK.md)
 - [Chiral Thesis](../chiral_thesis.md)

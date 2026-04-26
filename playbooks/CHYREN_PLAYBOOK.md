@@ -21,7 +21,7 @@ This playbook defines the high-level orchestration patterns (recipes) used by th
 1. Cortex identifies a task requiring system access (e.g., "Reset the ledger").
 2. Cortex generates a cryptographically signed instruction packet.
 3. Medulla receives the packet, verifies the `Yettragrammaton` signature.
-4. Medulla executes the `omega-core` primitive and returns a status code.
+4. Medulla executes the `chyren-core` primitive and returns a status code.
 
 ## 3. Pattern: Epiphany Synthesis
 **ID**: `PLAY-EPIPHANY-001`

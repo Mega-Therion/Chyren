@@ -17,13 +17,13 @@ test: medulla-test
 ci: medulla-fmt medulla-lint medulla-test
 
 medulla-fmt:
-	cd medulla && cargo fmt --all
+	cd chyren-os/kernel && cargo fmt --all
 
 medulla-lint:
-	cd medulla && cargo clippy --workspace --all-targets --all-features -- -D warnings
+	cd chyren-os/kernel && cargo clippy --workspace --all-targets --all-features -- -D warnings
 
 medulla-test:
-	cd medulla && cargo test --workspace
+	cd chyren-os/kernel && cargo test --workspace
 
 cortex-test:
 	PYTHONPATH=cortex pytest tests/

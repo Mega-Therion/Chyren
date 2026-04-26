@@ -15,7 +15,7 @@ Run this checklist before merging to `main` or cutting a release tag. All items 
 - [ ] Secret scan passed — no API keys, tokens, or passwords committed to the repo
   - Run: `git log --diff-filter=A -p -- '*' | grep -Ei '(api[_-]?key|secret|password|token)\s*=\s*[^$]'` and verify no hits
   - Or use `truffleHog` / `gitleaks` if available
-- [ ] `~/.omega/one-true.env` is confirmed git-ignored (`git check-ignore ~/.omega/one-true.env`)
+- [ ] `~/.chyren/one-true.env` is confirmed git-ignored (`git check-ignore ~/.chyren/one-true.env`)
 - [ ] No hardcoded Vercel project IDs, org IDs, or team tokens in source files
 
 ## 3. Preflight

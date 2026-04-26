@@ -78,27 +78,27 @@ Edit `.env` with your settings:
 ```env
 # Chyren Core Configuration
 CHYREN_LOG_LEVEL=info
-CHYREN_WORKSPACE_PATH=./omega_workspace
+CHYREN_WORKSPACE_PATH=./chyren_workspace
 
 # ADCCL Parameters
 ADCCL_STRICTNESS=0.5
 ADCCL_ENABLE_PREFLIGHT=true
 ADCCL_GATE_THRESHOLD=0.7
 
-# OmegA Integration (optional)
-OMEGA_API_ENDPOINT=http://localhost:8080
-OMEGA_AUTH_TOKEN=your_token_here
+# Chyren Integration (optional)
+CHYREN_API_ENDPOINT=http://localhost:8080
+CHYREN_AUTH_TOKEN=your_token_here
 ```
 
 ### 3. Initialize Workspace
 
 ```bash
-# Create and initialize the OmegA workspace
+# Create and initialize the Chyren workspace
 cargo run -- init
 ```
 
 This creates:
-- `omega_workspace/` - Main workspace directory
+- `chyren_workspace/` - Main workspace directory
 - State files for ADCCL tracking
 - Provider configuration templates
 
@@ -166,7 +166,7 @@ Chyren exposes a thin “brain-stem” wrapper at `./chyren` which routes:
 
 #### Destructive Reset (Opt-In)
 
-Reset clears Postgres/Neon tables if `OMEGA_DB_URL` is configured, and also clears
+Reset clears Postgres/Neon tables if `CHYREN_DB_URL` is configured, and also clears
 in-process ephemeral state. External vector stores (Qdrant) are not cleared.
 
 ```bash
@@ -259,17 +259,17 @@ EOF
 chyren check-batch --file actions.yaml --output results.json
 ```
 
-### Workflow 3: Integration with OmegA Stack
+### Workflow 3: Integration with Chyren Stack
 
 ```bash
-# Configure OmegA integration
-export OMEGA_API_ENDPOINT="https://omega.example.com"
-export OMEGA_AUTH_TOKEN="your_token"
+# Configure Chyren integration
+export CHYREN_API_ENDPOINT="https://chyren.example.com"
+export CHYREN_AUTH_TOKEN="your_token"
 
-# Start Chyren as OmegA middleware
-chyren serve --mode omega-middleware --port 8080
+# Start Chyren as Chyren middleware
+chyren serve --mode chyren-middleware --port 8080
 
-# OmegA requests now flow through Chyren's ADCCL verification
+# Chyren requests now flow through Chyren's ADCCL verification
 ```
 
 ## Understanding ADCCL Output

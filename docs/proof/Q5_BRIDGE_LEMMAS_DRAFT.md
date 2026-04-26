@@ -40,13 +40,13 @@ What a proof of this lemma would need:
 
 ## Lemma 2: Curvature Detects Induced Commutators
 
-Let `omega` be the witness connection and let `X_i`, `X_j` be the induced fields associated to `L_i`, `L_j`.
+Let `chyren` be the witness connection and let `X_i`, `X_j` be the induced fields associated to `L_i`, `L_j`.
 
 Lemma target:
 
-If the witness model fixes `omega` and the induced fields `X_i`, then the curvature quantity evaluated on those fields,
+If the witness model fixes `chyren` and the induced fields `X_i`, then the curvature quantity evaluated on those fields,
 
-`Omega_curv(X_i, X_j)`,
+`Chyren_curv(X_i, X_j)`,
 
 is sensitive to the commutator structure of the induced fields and therefore distinguishes the commuting and noncommuting witness cases at the curvature level.
 

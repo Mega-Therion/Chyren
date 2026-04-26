@@ -1,4 +1,4 @@
-# OmegA Stack Integration Blueprint
+# Chyren Stack Integration Blueprint
 
 **Unified Cognitive Agent Stack Architecture**
 
@@ -8,14 +8,14 @@
 
 ## Overview
 
-The **OmegA Stack** defines a unified cognitive architecture for building sovereign AI agents. It consists of four fundamental layers, each responsible for a specific aspect of cognitive function:
+The **Chyren Stack** defines a unified cognitive architecture for building sovereign AI agents. It consists of four fundamental layers, each responsible for a specific aspect of cognitive function:
 
 1. **AEGIS** - Governance, Safety & Control Layer
 2. **AEON** - Identity, Task & State Core  
 3. **ADCCL** - Deliberation, Claims & Planning Layer
 4. **MYELIN** - Path-Dependent Memory Substrate
 
-**Chyren** implements this stack across both Python (current) and Rust (OmegA-Next migration target).
+**Chyren** implements this stack across both Python (current) and Rust (Chyren-Next migration target).
 
 ---
 
@@ -127,7 +127,7 @@ graph TB
 | **Output Filter** | Prevents harmful or policy-violating outputs | `core/deflection.py` |
 | **Action Audit Log** | Immutable cryptographic ledger | `core/ledger.py` |
 
-**OmegA-Next (Rust):** `omega-aegis`, `omega-conductor`
+**Chyren-Next (Rust):** `chyren-aegis`, `chyren-conductor`
 
 ---
 
@@ -144,7 +144,7 @@ graph TB
 | **Safety Monitors** | Real-time threat detection | `core/threat_fabric.py` |
 | **Mode Contexts** | Execution mode management (e.g., research vs. production) | *Roadmap: Add mode switching* |
 
-**OmegA-Next (Rust):** `omega-core`, `omega-aeon`
+**Chyren-Next (Rust):** `chyren-core`, `chyren-aeon`
 
 ---
 
@@ -160,7 +160,7 @@ graph TB
 | **Claim Budget** | Tracks claims made during execution | *Roadmap: Add claim tracking* |
 | **Evidence Buffer** | Stores grounding evidence for verification | `core/ledger.py` (context retrieval) |
 
-**OmegA-Next (Rust):** `omega-adccl`
+**Chyren-Next (Rust):** `chyren-adccl`
 
 ---
 
@@ -176,7 +176,7 @@ graph TB
 | **Hardening & Decay** | Memory consolidation and forgetting | *Roadmap: Temporal decay* |
 | **Traversal & Update** | Read/write operations on memory graph | `core/ledger.py` (append-only) |
 
-**OmegA-Next (Rust):** `omega-myelin`, `omega-dream`, `omega-worldmodel`
+**Chyren-Next (Rust):** `chyren-myelin`, `chyren-dream`, `chyren-worldmodel`
 
 ---
 
@@ -192,14 +192,14 @@ The stack interfaces with the external world through:
 
 ---
 
-## Chyren → OmegA-Next Migration Map
+## Chyren → Chyren-Next Migration Map
 
-| OmegA Layer | Python (Current) | Rust (Target) | Status |
+| Chyren Layer | Python (Current) | Rust (Target) | Status |
 |-------------|------------------|---------------|--------|
-| **AEGIS** | `core/alignment.py`, `core/ledger.py`, `core/deflection.py` | `omega-aegis`, `omega-conductor` | ✅ Scaffolded |
-| **AEON** | `chyren_py/phylactery_kernel.json`, `main.py` | `omega-core`, `omega-aeon` | ✅ Scaffolded |
-| **ADCCL** | `core/adccl.py` | `omega-adccl` | ✅ Scaffolded |
-| **MYELIN** | `core/ledger.py` (basic) | `omega-myelin`, `omega-dream`, `omega-worldmodel` | ✅ Scaffolded |
+| **AEGIS** | `core/alignment.py`, `core/ledger.py`, `core/deflection.py` | `chyren-aegis`, `chyren-conductor` | ✅ Scaffolded |
+| **AEON** | `chyren_py/phylactery_kernel.json`, `main.py` | `chyren-core`, `chyren-aeon` | ✅ Scaffolded |
+| **ADCCL** | `core/adccl.py` | `chyren-adccl` | ✅ Scaffolded |
+| **MYELIN** | `core/ledger.py` (basic) | `chyren-myelin`, `chyren-dream`, `chyren-worldmodel` | ✅ Scaffolded |
 
 ---
 
@@ -224,9 +224,9 @@ Provider adapters cannot extract hidden data or leak information outside the AEG
 
 ## Integration with AEGIS Vessel Session
 
-The OmegA Stack implements the **6-step AEGIS Vessel Session**:
+The Chyren Stack implements the **6-step AEGIS Vessel Session**:
 
-| AEGIS Step | OmegA Layer | Implementation |
+| AEGIS Step | Chyren Layer | Implementation |
 |-----------|-------------|----------------|
 | **1. Plan** | AEON + ADCCL | TSO decides next step using Goal Contracts |
 | **2. Ground** | MYELIN | Retrieve evidence from Memory Graph |
@@ -241,13 +241,13 @@ The OmegA Stack implements the **6-step AEGIS Vessel Session**:
 
 ### Immediate (Phase 3)
 1. ✅ **Scaffold all Rust crates** (completed)
-2. 🚧 **Implement provider integration in Rust** (`omega-integration`)
-3. 🚧 **Port ADCCL verification to Rust** (`omega-adccl`)
+2. 🚧 **Implement provider integration in Rust** (`chyren-integration`)
+3. 🚧 **Port ADCCL verification to Rust** (`chyren-adccl`)
 
 ### Phase 4 (Python → Rust Migration)
-1. **Migrate orchestration logic** from `main.py` to `omega-conductor`
-2. **Implement MYELIN memory graph** in `omega-myelin`
-3. **Add World Model** in `omega-worldmodel`
+1. **Migrate orchestration logic** from `main.py` to `chyren-conductor`
+2. **Implement MYELIN memory graph** in `chyren-myelin`
+3. **Add World Model** in `chyren-worldmodel`
 
 ### Phase 5 (Production)
 1. **Zero-downtime cutover** from Python to Rust
@@ -258,7 +258,7 @@ The OmegA Stack implements the **6-step AEGIS Vessel Session**:
 
 ## Why This Matters
 
-The OmegA Stack is not just an architecture — it's a **standard for building sovereign AI**.
+The Chyren Stack is not just an architecture — it's a **standard for building sovereign AI**.
 
 - ✅ **Separates identity from capability** — the AI owns its identity, not the model provider
 - ✅ **Enforces verification before memory** — prevents hallucinations from polluting long-term memory
@@ -272,4 +272,4 @@ The OmegA Stack is not just an architecture — it's a **standard for building s
 - [AEGIS Documentation](./AEGIS.md)
 - [Chyren README](../README.md)
 - [Chiral Thesis](../chiral_thesis.md)
-- [OmegA-Next Workspace](../omega_workspace/workspace/OmegA-Next/)
+- [Chyren-Next Workspace](../chyren_workspace/workspace/Chyren-Next/)

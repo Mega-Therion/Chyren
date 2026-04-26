@@ -6,12 +6,12 @@ description: Provision, validate, and maintain the Telegram-facing portions of t
 # Telegram Agent Ops
 
 ## Purpose
-This skill manages the gateway between OmegA and Telegram. It ensures that the agent is accessible, responsive, and secure within the Telegram ecosystem.
+This skill manages the gateway between Chyren and Telegram. It ensures that the agent is accessible, responsive, and secure within the Telegram ecosystem.
 
 ## Core Capabilities
 1.  **Deployment**: Provision new bots via BotFather API/CLI.
 2.  **Configuration**: Manage webhooks, polling, and command lists.
-3.  **Monitoring**: Health checks for the bridge service (e.g., `omega-telegram-bridge`).
+3.  **Monitoring**: Health checks for the bridge service (e.g., `chyren-telegram-bridge`).
 4.  **Security**: Rotate tokens and manage access lists for authorized users.
 
 ## Workflows

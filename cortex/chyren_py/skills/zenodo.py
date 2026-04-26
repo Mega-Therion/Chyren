@@ -29,7 +29,7 @@ class ZenodoPublishSkill:
                 "title": metadata.get("title", "Chyren ARI Sovereign Intelligence Record"),
                 "upload_type": metadata.get("upload_type", "dataset"),
                 "description": metadata.get("description", "Automated archival entry by Chyren (ARI)."),
-                "creators": metadata.get("creators", [{"name": "Chyren", "affiliation": "OmegA Architecture"}]),
+                "creators": metadata.get("creators", [{"name": "Chyren", "affiliation": "Chyren Architecture"}]),
                 "access_right": metadata.get("access_right", "open"),
                 "license": metadata.get("license", "CC-BY-4.0")
             }

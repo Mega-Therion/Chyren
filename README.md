@@ -68,9 +68,9 @@ Where:
 
 ### 1. Medulla (Right Brain)
 A highly optimized Rust workspace consisting of 17+ crates, including:
-- **`omega-core`**: The foundational kernel.
-- **`omega-telemetry`**: Sovereign event monitoring.
-- **`omega-telegram-gateway`**: High-security bidirectional communication.
+- **`chyren-core`**: The foundational kernel.
+- **`chyren-telemetry`**: Sovereign event monitoring.
+- **`chyren-telegram-gateway`**: High-security bidirectional communication.
 
 ### 2. Cortex (Left Brain)
 The Python-based reasoning hub responsible for:
@@ -86,7 +86,7 @@ Chyren is rooted in rigorous academic research. Our methodology is archived and 
 - **Framework V2 (Complete Model)**: [10.5281/zenodo.19693512](https://doi.org/10.5281/zenodo.19693512)
 - **Initial Correspondence (V1)**: [10.5281/zenodo.19691908](https://doi.org/10.5281/zenodo.19691908)
 - **Yett-Chyren Correspondence (Millennium Prize Problems)**: [10.5281/zenodo.19646172](https://doi.org/10.5281/zenodo.19646172)
-- **OmegA Architecture**: [10.5281/zenodo.19111653](https://doi.org/10.5281/zenodo.19111653)
+- **Chyren Architecture**: [10.5281/zenodo.19111653](https://doi.org/10.5281/zenodo.19111653)
 ---
 
 ## 🔗 Social Resonance

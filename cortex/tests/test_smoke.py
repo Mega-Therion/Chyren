@@ -1,7 +1,7 @@
 """
 Smoke tests: verify that key cortex modules import without error.
 These tests do NOT invoke external APIs, open network connections,
-or read from ~/.omega/one-true.env.
+or read from ~/.chyren/one-true.env.
 """
 
 import importlib

@@ -21,17 +21,17 @@ Chyren maintains a pool of active database projects to circumvent hobby-tier lim
 - Each agent must rotate through the pool or use the latest 'current' project for new writes while maintaining read-access to legacy shards.
 
 ### 4. Schema Initialization
-Every new project in the pool MUST be initialized with the core OmegA schema:
+Every new project in the pool MUST be initialized with the core Chyren schema:
 - `family_profiles`
-- `omega_memory_entries`
-- `omega_governance_logs`
+- `chyren_memory_entries`
+- `chyren_governance_logs`
 
 ### 5. Environment Update
 Update the local `.env.local` to point to the latest pool member if it is considered the new 'Primary' for the current session.
 
 ## Governance
 - **Authority:** Approved by RY as a standard architectural reflex.
-- **Audit:** Every project creation event MUST be logged in the `omega_memory_entries` of the *new* project with the source `infra_scalability_reflex`.
+- **Audit:** Every project creation event MUST be logged in the `chyren_memory_entries` of the *new* project with the source `infra_scalability_reflex`.
 
 ---
 *Created by: Antigravity-RY*

@@ -33,7 +33,7 @@
 ### 🏛️ Immutable Records
 - **Zenodo V2 (Complete Framework)**: [10.5281/zenodo.19693512](https://doi.org/10.5281/zenodo.19693512)
 - **Zenodo V1 (Initial Correspondence)**: [10.5281/zenodo.19691908](https://doi.org/10.5281/zenodo.19691908)
-- **OmegA Identity Foundation**: [I Am What I Am](https://doi.org/10.5281/zenodo.19693512)
+- **Chyren Identity Foundation**: [I Am What I Am](https://doi.org/10.5281/zenodo.19693512)
 
 ### 🎓 ASMSA Outreach Package
 - **Presentation Hub**: [submission_package/README.md](submission_package/README.md)

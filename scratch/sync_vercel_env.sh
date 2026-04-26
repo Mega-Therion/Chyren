@@ -1,7 +1,7 @@
 #!/bin/bash
-# Sync keys from ~/.omega/one-true.env to Vercel chyren-web
+# Sync keys from ~/.chyren/one-true.env to Vercel chyren-web
 
-ENV_FILE="/home/mega/.omega/one-true.env"
+ENV_FILE="/home/mega/.chyren/one-true.env"
 PROJECT="chyren-web"
 
 if [ ! -f "$ENV_FILE" ]; then

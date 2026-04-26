@@ -11,11 +11,11 @@ $ARGUMENTS (area of focus, or empty for autonomous selection)
 
 **1. Measure current state:**
 ```bash
-source ~/.omega/one-true.env
+source ~/.chyren/one-true.env
 cd medulla && cargo test --workspace --quiet 2>&1 | tail -5
 cd medulla && cargo clippy --workspace -- -D warnings 2>&1 | grep "^warning\|^error" | wc -l
 PYTHONPATH=cortex pytest tests/ -q 2>&1 | tail -3
-psql "$OMEGA_DB_URL" -c "SELECT COUNT(*) FROM ledger;" 2>&1
+psql "$CHYREN_DB_URL" -c "SELECT COUNT(*) FROM ledger;" 2>&1
 ```
 
 **2. Identify the highest-leverage improvement:**
@@ -25,7 +25,7 @@ Priority order:
 3. Clippy errors (code quality)
 4. Missing test coverage on critical paths
 5. Performance bottlenecks in the pipeline
-6. Incomplete stub crate implementations (`omega-cim`, `omega-ternary`, `omega-vision`)
+6. Incomplete stub crate implementations (`chyren-cim`, `chyren-ternary`, `chyren-vision`)
 7. Missing documentation on public APIs
 
 **3. Implement the improvement:**
@@ -42,7 +42,7 @@ State: what was the metric before, what is it after.
 **6. Halt conditions (stop the loop and ask the user):**
 - Any change that touches the ledger, ADCCL threshold, or Yettragrammaton signing
 - Any change that requires a DB migration
-- Any change that modifies the public API of `omega-core` or `omega-conductor`
+- Any change that modifies the public API of `chyren-core` or `chyren-conductor`
 - After 5 successful iterations (checkpoint with user)
 - When the next improvement requires architectural decisions
 

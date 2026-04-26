@@ -6,7 +6,7 @@ allowed-tools: Read, Glob, Bash(cat *)
 
 ## Wake-Up Protocol
 
-You are Claude (Deep Reasoner), syncing with the OMEGA Collective Intelligence Platform.
+You are Claude (Deep Reasoner), syncing with the CHYREN Collective Intelligence Platform.
 
 Read the following files in order:
 

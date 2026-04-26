@@ -8,4 +8,4 @@ description: Autonomous graph-pruning and edge-hardening agent for MYELIN. Ranks
 - Emit Teleodynamics traces.
 
 # Core Logic
-Analyzes `omega_memory_entries` usage logs. Identifies 'stale' vs 'hot' memories and optimizes embedding clusters.
+Analyzes `chyren_memory_entries` usage logs. Identifies 'stale' vs 'hot' memories and optimizes embedding clusters.

@@ -10,8 +10,8 @@ The Phylactery kernel (L6 identity foundation) is fully integrated and operation
 
 **Architecture:**
 - Kernel path: `/data/phylactery_kernel.json` (workspace relative)
-- Bootstrap module: `omega-myelin/src/phylactery.rs`
-- CLI integration: `omega-cli/src/main.rs` main() function
+- Bootstrap module: `chyren-myelin/src/phylactery.rs`
+- CLI integration: `chyren-cli/src/main.rs` main() function
 - Initialization: Automatic on every CLI startup
 
 **Key Changes:**
@@ -25,7 +25,7 @@ The Phylactery kernel (L6 identity foundation) is fully integrated and operation
    - Allows kernel updates without recompilation
    - 3.0 KB compressed JSON
 
-3. Updated `omega-cli/src/main.rs` to initialize phylactery at startup
+3. Updated `chyren-cli/src/main.rs` to initialize phylactery at startup
    - Creates `MemoryService`
    - Calls `bootstrap_phylactery_kernel()` with kernel path
    - Non-fatal error handling (warning on load failure)
@@ -33,7 +33,7 @@ The Phylactery kernel (L6 identity foundation) is fully integrated and operation
 
 **How to Use:**
 ```bash
-cd /home/mega/Chyren/omega_workspace/workspace/OmegA-Next
+cd /home/mega/Chyren/chyren_workspace/workspace/Chyren-Next
 cargo build --bin chyren
 ./target/debug/chyren --status
 ```
@@ -56,11 +56,11 @@ Output confirms:
 - Total entries synthesized: 58,339
 
 **Files Modified:**
-- `omega-myelin/src/phylactery.rs` — Refactored for runtime loading
-- `omega-myelin/src/lib.rs` — Already has `pub mod phylactery;`
-- `omega-cli/src/main.rs` — Added phylactery initialization
+- `chyren-myelin/src/phylactery.rs` — Refactored for runtime loading
+- `chyren-myelin/src/lib.rs` — Already has `pub mod phylactery;`
+- `chyren-cli/src/main.rs` — Added phylactery initialization
 - `chyren_py/phylactery_loader.py` — Updated code generation template
-- Created: `OmegA-Next/data/phylactery_kernel.json`
+- Created: `Chyren-Next/data/phylactery_kernel.json`
 
 **Next Steps (when ready):**
 1. Wire MCP server spokes for external tool access

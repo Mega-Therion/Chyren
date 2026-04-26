@@ -8,13 +8,13 @@ def generate_skill(name, description):
     
     # Create SKILL.md template
     with open(f"{skill_path}/SKILL.md", "w") as f:
-        f.write(f"# {name.capitalize()}\n\n{description}\n\n## OmegA Architecture Compliance\n- AEGIS: Governance tier active.\n- AEON: Time-indexed execution.\n- ADCCL: Adaptive control loops.\n- MYELIN: Knowledge graph integration.\n\n## Audit-Traceability\n- Teleodynamic event emission active for all steps.")
+        f.write(f"# {name.capitalize()}\n\n{description}\n\n## Chyren Architecture Compliance\n- AEGIS: Governance tier active.\n- AEON: Time-indexed execution.\n- ADCCL: Adaptive control loops.\n- MYELIN: Knowledge graph integration.\n\n## Audit-Traceability\n- Teleodynamic event emission active for all steps.")
     
     # Create registration config
     config = {
         "name": name,
         "status": "enabled",
-        "compliance": "omega-v5",
+        "compliance": "chyren-v5",
         "teleodynamics": "enabled"
     }
     

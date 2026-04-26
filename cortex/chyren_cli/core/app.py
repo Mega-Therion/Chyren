@@ -126,11 +126,11 @@ def health_cmd() -> None:
         table.add_row("Python Hub", "[red]ERROR[/]", str(e))
 
     # 3. Rust Workspace (Build Check)
-    target = "/home/mega/Chyren/omega_workspace/workspace/OmegA-Next/target/debug/chyren_api"
+    target = "/home/mega/Chyren/chyren_workspace/workspace/Chyren-Next/target/debug/chyren_api"
     if os.path.exists(target):
-        table.add_row("OmegA-Next (Rust)", "[green]READY[/]", "Binary compiled")
+        table.add_row("Chyren-Next (Rust)", "[green]READY[/]", "Binary compiled")
     else:
-        table.add_row("OmegA-Next (Rust)", "[yellow]UNBUILT[/]", "Cargo build required")
+        table.add_row("Chyren-Next (Rust)", "[yellow]UNBUILT[/]", "Cargo build required")
 
     console.print(table)
 

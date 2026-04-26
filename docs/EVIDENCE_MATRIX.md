@@ -8,7 +8,7 @@ This matrix separates what is demonstrably implemented in this repository from w
 | Multi-runtime architecture | Rust workspace + Python orchestration + web/gateway frontends | `medulla/`, `cortex/`, `web/`, `gateway/` |
 | Verification-first design intent | ADCCL threshold and reject/repair framing in technical docs | [`CHIRAL_THESIS.md`](./CHIRAL_THESIS.md), [`AEGIS.md`](./AEGIS.md) |
 | Unified CLI routing | Python brain-stem routes commands to cortex/medulla binaries | [`../chyren`](../chyren) |
-| Rust modularization | Distinct `omega-*` crates for major concerns | `medulla/Cargo.toml` workspace members |
+| Rust modularization | Distinct `chyren-*` crates for major concerns | `medulla/Cargo.toml` workspace members |
 | Governance and operator posture | Runbook, security policy, contribution standards | [`RUNBOOK.md`](./RUNBOOK.md), [`SECURITY.md`](./SECURITY.md), [`CONTRIBUTING.md`](./CONTRIBUTING.md) |
 
 ## Novel/Original Framing (Internal)

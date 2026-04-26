@@ -16,7 +16,7 @@ Before opening an issue, please check the available documentation:
 | [CLAUDE.md](./CLAUDE.md) | Claude Code context and development guide |
 | [GEMINI.md](./GEMINI.md) | Gemini CLI context and technical stack |
 | [docs/AEGIS.md](./docs/AEGIS.md) | AEGIS governance & integrity specification |
-| [docs/OMEGA_STACK.md](./docs/OMEGA_STACK.md) | OmegA Stack integration blueprint |
+| [docs/CHYREN_STACK.md](./docs/CHYREN_STACK.md) | Chyren Stack integration blueprint |
 | [docs/CHIRAL_THESIS.md](./docs/CHIRAL_THESIS.md) | Mathematical foundation & proofs |
 | [CONTRIBUTING.md](./CONTRIBUTING.md) | How to contribute to Chyren |
 | [SECURITY.md](./SECURITY.md) | Security policy & vulnerability reporting |

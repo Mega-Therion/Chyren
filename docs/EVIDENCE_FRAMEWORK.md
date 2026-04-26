@@ -27,7 +27,7 @@ This document defines how Chyren architectural claims are classified, tracked, a
 - May require manual configuration, seed data, or dev-only flags
 - No production monitoring or SLA attached
 
-**Advancement requirement:** Feature is merged to main, runs in the production pipeline under real traffic, has automated test coverage, and is monitored via `omega-telemetry`.
+**Advancement requirement:** Feature is merged to main, runs in the production pipeline under real traffic, has automated test coverage, and is monitored via `chyren-telemetry`.
 
 ---
 
@@ -35,8 +35,8 @@ This document defines how Chyren architectural claims are classified, tracked, a
 **Definition:** The claim is validated in the live production pipeline. It is tested, monitored, and has observable telemetry proving it operates as claimed under real conditions.
 
 **Typical signals:**
-- Wired into `omega-conductor` production path (not gated by feature flag)
-- `omega-telemetry` events are emitted and queryable
+- Wired into `chyren-conductor` production path (not gated by feature flag)
+- `chyren-telemetry` events are emitted and queryable
 - At least one automated regression test in CI
 - Behavior on rejection/failure is documented and handled gracefully
 - Performance characteristics (latency, error rate) are known
@@ -52,7 +52,7 @@ This document defines how Chyren architectural claims are classified, tracked, a
 | Field | Value |
 |---|---|
 | **Current Tier** | Tier 2 — Experimental |
-| **Location** | `medulla/omega-adccl/` |
+| **Location** | `medulla/chyren-adccl/` |
 | **Existing Evidence** | Crate exists with scoring logic; threshold constant (0.7) is wired; unit tests present |
 | **Gap to Tier 3** | No production telemetry trace proving live rejections occur; no benchmark of false-reject rate; calibration ramp (0.1 → 0.7 over 60 min) not integration-tested under real load |
 | **Evidence Needed** | Telemetry dashboard showing ADCCL verdicts per-session; regression test that injects known-stub responses and verifies rejection; false-reject rate < 5% on a held-out golden dataset |
@@ -80,8 +80,8 @@ This document defines how Chyren architectural claims are classified, tracked, a
 | Field | Value |
 |---|---|
 | **Current Tier** | Tier 2 — Experimental |
-| **Location** | `medulla/omega-conductor/`, `medulla/omega-cli/` |
-| **Existing Evidence** | `omega-conductor` crate wires the pipeline stages; CLI routes commands to conductor |
+| **Location** | `medulla/chyren-conductor/`, `medulla/chyren-cli/` |
+| **Existing Evidence** | `chyren-conductor` crate wires the pipeline stages; CLI routes commands to conductor |
 | **Gap to Tier 3** | No end-to-end integration test that exercises all five stages in sequence with observable stage-by-stage output; no trace showing AEON scheduler is active (vs bypassed) |
 | **Evidence Needed** | E2E test with structured log output per stage; AEON scheduler producing verifiable scheduling decisions; at least one production run log captured in `docs/evidence/` |
 
@@ -94,7 +94,7 @@ This document defines how Chyren architectural claims are classified, tracked, a
 | Field | Value |
 |---|---|
 | **Current Tier** | Tier 2 — Experimental |
-| **Location** | `medulla/omega-core/` (ledger types), Neon PostgreSQL (`OMEGA_DB_URL`) |
+| **Location** | `medulla/chyren-core/` (ledger types), Neon PostgreSQL (`CHYREN_DB_URL`) |
 | **Existing Evidence** | Ledger schema exists; append-only design documented; signing logic referenced in codebase |
 | **Gap to Tier 3** | No automated test that attempts a mutation and asserts it is rejected; no proof that the signing key is verified on read; no backup/recovery procedure tested |
 | **Evidence Needed** | Mutation-rejection test; read-time signature verification test; documented (and tested) backup procedure |

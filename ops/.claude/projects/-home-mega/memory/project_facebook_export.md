@@ -8,6 +8,6 @@ Facebook does a 2-part data export. Part 1 (posts, messages, profile, connection
 
 **Part 2 (data logs) is still pending** — RY is waiting on delivery from Facebook.
 
-**Why:** Complete Facebook history needs both parts for full coverage in OmegA's DB.
+**Why:** Complete Facebook history needs both parts for full coverage in Chyren's DB.
 
 **How to apply:** When RY mentions the Facebook export or asks to rovi Facebook data again, check if part 2 has arrived in INBOX before running ingest. Run `rovi_social.py` again once part 2 lands — the checkpoint will skip already-ingested files automatically.

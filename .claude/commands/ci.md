@@ -5,7 +5,7 @@ You are the CI system. Run the full gate that must pass before any PR merges. Th
 ## Gate Sequence (all must pass)
 
 ```bash
-source ~/.omega/one-true.env
+source ~/.chyren/one-true.env
 
 # Rust
 cd medulla

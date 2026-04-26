@@ -13,7 +13,7 @@ import os
 from dotenv import load_dotenv
 
 # Load the Sovereign Hub keys from the central registry
-load_dotenv("/home/mega/.omega/one-true.env")
+load_dotenv("/home/mega/.chyren/one-true.env")
 
 from mcp_hub import MCPHub
 from orchestrator import ChiralOrchestrator

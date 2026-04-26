@@ -5,7 +5,7 @@ Query the live status of all Chyren OS subsystems from inside a Claude Code sess
 ## Execution
 
 ```bash
-source ~/.omega/one-true.env
+source ~/.chyren/one-true.env
 
 echo "=== Brain Stem ==="
 ./chyren status 2>&1
@@ -14,7 +14,7 @@ echo "=== API Server ==="
 curl -s http://localhost:8080/health 2>&1 || echo "API server: offline"
 
 echo "=== Ledger ==="
-psql "$OMEGA_DB_URL" -c "SELECT COUNT(*) as entries, MAX(created_at) as latest FROM ledger;" 2>&1
+psql "$CHYREN_DB_URL" -c "SELECT COUNT(*) as entries, MAX(created_at) as latest FROM ledger;" 2>&1
 
 echo "=== Qdrant ==="
 curl -s "${QDRANT_URL}/health" 2>&1 || echo "Qdrant: offline or QDRANT_URL not set"

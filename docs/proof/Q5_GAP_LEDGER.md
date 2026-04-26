@@ -7,14 +7,14 @@ This document records what blocks a claim that Q5 is solved today.
 - The repo does not yet define the exact bridge from `L_k` commutators to a specific connection or curvature tensor. Source: `docs/MASTER_EQUATION.md`
 - The repo does not yet provide a Lean 4 workspace for Q5. Source: `docs/proof/FORMALIZATION_STATUS.md`
 - The repo does not yet contain a theorem-grade proof of the holonomy claim. Source: `docs/MASTER_EQUATION.md`, `docs/proof/FORMALIZATION_STATUS.md`
-- The repo’s current executable `ADCCL` gate now includes a **Chiral Invariant bridge** in `medulla/omega-adccl/src/adccl_logic.rs` that maps heuristics to holonomy classes. Source: `medulla/omega-adccl/src/adccl_logic.rs`
-- The repo’s proof infrastructure is currently index-and-doc based, not a formal proof kernel. Source: `medulla/omega-neocortex/src/proof_index.rs`
+- The repo’s current executable `ADCCL` gate now includes a **Chiral Invariant bridge** in `medulla/chyren-adccl/src/adccl_logic.rs` that maps heuristics to holonomy classes. Source: `medulla/chyren-adccl/src/adccl_logic.rs`
+- The repo’s proof infrastructure is currently index-and-doc based, not a formal proof kernel. Source: `medulla/chyren-neocortex/src/proof_index.rs`
 
 ## Soft Blockers
 
 - The master equation uses a rich geometric vocabulary, but several symbols still need formal alignment with code. Source: `docs/MASTER_EQUATION.md`
-- The `0.7` threshold is treated as meaningful in the repo, but its universality is unproved. Source: `docs/MASTER_EQUATION.md`, `CLAUDE.md`, `medulla/omega-adccl/src/lib.rs`
-- The role of `ProofIndex` in the Q5 proof is still architectural rather than mathematical. Source: `medulla/omega-neocortex/src/proof_index.rs`
+- The `0.7` threshold is treated as meaningful in the repo, but its universality is unproved. Source: `docs/MASTER_EQUATION.md`, `CLAUDE.md`, `medulla/chyren-adccl/src/lib.rs`
+- The role of `ProofIndex` in the Q5 proof is still architectural rather than mathematical. Source: `medulla/chyren-neocortex/src/proof_index.rs`
 
 ## Open Questions
 

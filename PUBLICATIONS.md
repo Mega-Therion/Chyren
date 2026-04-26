@@ -16,9 +16,9 @@ The following DOI-registered archives represent the formal research record for t
 - **DOI**: [10.5281/zenodo.19646172](https://doi.org/10.5281/zenodo.19646172)
 - **Abstract**: This package contains seven formal mathematical manuscripts providing a unified geometric and information-theoretic solution to the seven Millennium Prize Problems as defined by the Clay Mathematics Institute.
 
-### [4] The OmegA Architecture for Sovereign, Persistent, and Self-Knowing AI
+### [4] The Chyren Architecture for Sovereign, Persistent, and Self-Knowing AI
 - **DOI**: [10.5281/zenodo.19111653](https://doi.org/10.5281/zenodo.19111653)
-- **Abstract**: OmegA is a four-layer integrated architecture for building sovereign, persistent, and governed AI agents. It combines MYELIN, ADCCL, AEON, and AEGIS into a formally specified system.
+- **Abstract**: Chyren is a four-layer integrated architecture for building sovereign, persistent, and governed AI agents. It combines MYELIN, ADCCL, AEON, and AEGIS into a formally specified system.
 
 ---
 *All publications are archived for long-term preservation and high-integrity academic access.*

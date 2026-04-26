@@ -10,7 +10,7 @@ $ARGUMENTS
 **Phase 1 — Reproduce**
 Get the exact error: full stack trace, panic message, or wrong output. Run:
 ```bash
-source ~/.omega/one-true.env
+source ~/.chyren/one-true.env
 cd medulla && cargo test --package <relevant-crate> -- <test_name> --nocapture 2>&1
 # or
 ./chyren <command> 2>&1
@@ -36,6 +36,6 @@ Add a test that would have caught this bug. The test goes in the same crate, in 
 ## Rules
 - Never apply a fix you haven't verified
 - Never skip Phase 6
-- If the bug is in `omega-adccl` scoring: do not adjust the 0.7 threshold — fix the scorer logic
+- If the bug is in `chyren-adccl` scoring: do not adjust the 0.7 threshold — fix the scorer logic
 
 $ARGUMENTS

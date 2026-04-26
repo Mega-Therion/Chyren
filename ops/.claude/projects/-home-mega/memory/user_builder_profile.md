@@ -23,7 +23,7 @@ RY is an ambitious, execution-first builder who throws complex multi-layered tas
 - When sessions break, the next one often burns time just getting back to baseline
 
 ## Project areas (as of 2026-03-30)
-- OmegA web app (primary) — Next.js/Vercel, Neon DB, voice interface
+- Chyren web app (primary) — Next.js/Vercel, Neon DB, voice interface
 - Voice service debugging — Python, ElevenLabs, LiveKit
 - System/environment maintenance — disk, config, MCP servers
 - Publication and architecture repo — papers, evals, release gates

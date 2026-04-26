@@ -2,7 +2,7 @@
 """
 Q1 Witness v1: Information Growth Rate (SVD Entropy Expansion)
 
-This script demonstrates the first term of the Sovereignty Score (Omega).
+This script demonstrates the first term of the Sovereignty Score (Chyren).
 It simulates the evolution of the constitutional basis Phi as new 
 verified responses are added.
 

@@ -4,7 +4,7 @@ You are the omnibuild orchestrator. This is the highest-confidence build path â€
 
 ## Phase 1: Environment
 ```bash
-source ~/.omega/one-true.env
+source ~/.chyren/one-true.env
 echo "Environment: OK"
 python3 -c "import json; d=json.load(open('cortex/chyren_py/phylactery_kernel.json')); print(f'Phylactery: {len(d)} entries')" 2>&1
 ```

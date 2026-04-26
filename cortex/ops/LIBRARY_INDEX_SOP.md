@@ -4,7 +4,7 @@
 To transform Chyren's sharded database pool into a unified "Great Library" where information is retrieved via a centralized **Card Catalog**. This prevents the agent from "wandering the stacks" blindly and allows targeted retrieval from specific shards.
 
 ## 🗃️ The Index Card Schema
-Each entry in the `omega_library_catalog` acts as a physical index card:
+Each entry in the `chyren_library_catalog` acts as a physical index card:
 
 - **Location (Shard ID):** Which project in the `db_pool.json` holds the data.
 - **Shelf (Table Name):** The specific table (e.g., `family_profiles`, `history_logs`).
@@ -18,7 +18,7 @@ Each entry in the `omega_library_catalog` acts as a physical index card:
 3.  **The Librarian Reflex**: Before searching raw data, Chyren checks the Index Cards to identify which shards must be "pulled from the shelf."
 
 ## 📜 SOP-002: Librarian Protocol
-- **Search First**: Query `omega_library_catalog` to resolve the Shard ID.
+- **Search First**: Query `chyren_library_catalog` to resolve the Shard ID.
 - **Connection Rotation**: Dynamically switch the `DATABASE_URL` to the target shard.
 - **Retrieve**: Fetch the specific record.
 

@@ -72,7 +72,7 @@ chain = [best(research_skills), best(implement_skills), best(verify_skills)]
 **Ship to production:**
 `review-pr` (Claude) → `sovereign-deployer` (Claude) → `teleodynamics-observer` (Claude)
 
-**Build OmegA memory feature:**
+**Build Chyren memory feature:**
 `spec-to-code-auditor` (Codex) → `neon-postgres` (Claude) → `eval-forge` (Claude)
 
 **Design system update:**

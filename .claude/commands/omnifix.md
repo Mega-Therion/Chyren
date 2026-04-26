@@ -9,7 +9,7 @@ $ARGUMENTS (if empty: full system scan)
 
 **1. Compile errors:**
 ```bash
-source ~/.omega/one-true.env && cd medulla && cargo check --workspace 2>&1 | grep "^error"
+source ~/.chyren/one-true.env && cd medulla && cargo check --workspace 2>&1 | grep "^error"
 ```
 
 **2. Test failures:**
@@ -30,8 +30,8 @@ cd web && npm run typecheck 2>&1 | grep "error TS"
 
 **5. Security issues:**
 ```bash
-grep -rn "unwrap()\|expect(" medulla/omega-*/src/*.rs 2>/dev/null | grep -v "#\[cfg(test)\]" | grep -v "//.*unwrap" | head -20
-grep -rn "println!\|eprintln!" medulla/omega-*/src/*.rs 2>/dev/null | grep -v "#\[cfg(test)\]" | head -10
+grep -rn "unwrap()\|expect(" medulla/chyren-*/src/*.rs 2>/dev/null | grep -v "#\[cfg(test)\]" | grep -v "//.*unwrap" | head -20
+grep -rn "println!\|eprintln!" medulla/chyren-*/src/*.rs 2>/dev/null | grep -v "#\[cfg(test)\]" | head -10
 ```
 
 ## Fix Prioritization

@@ -2,19 +2,19 @@
 """
 embed_knowledge_matrix.py
 ─────────────────────────
-Generates vector embeddings for every domain in omega_knowledge_domains and
+Generates vector embeddings for every domain in chyren_knowledge_domains and
 upserts them into the Qdrant 'knowledge_matrix' collection.
 
 Provider priority: Gemini gemini-embedding-001 (dim=3072) → OpenAI text-embedding-3-small (dim=1536)
 
 Run:
-    source ~/.omega/one-true.env
+    source ~/.chyren/one-true.env
     QDRANT_URL=http://localhost:6333 python3 cortex/ops/scripts/embed_knowledge_matrix.py
     python3 cortex/ops/scripts/embed_knowledge_matrix.py --dry-run
     python3 cortex/ops/scripts/embed_knowledge_matrix.py --rebuild
 
 Env vars:
-    OMEGA_CATALOG_DB_URL  — Neon catalog Postgres URL (required)
+    CHYREN_CATALOG_DB_URL  — Neon catalog Postgres URL (required)
     GEMINI_API_KEY        — preferred embedding provider
     OPENAI_API_KEY        — fallback embedding provider
     QDRANT_URL            — Qdrant HTTP endpoint (default: http://localhost:6333)
@@ -57,7 +57,7 @@ def fetch_all_domains(conn) -> list[dict]:
                COALESCE(description, '')      AS description,
                COALESCE(purpose, '')          AS purpose,
                COALESCE(reasoning_primer, '') AS reasoning_primer
-        FROM omega_knowledge_domains
+        FROM chyren_knowledge_domains
         ORDER BY level ASC, sort_order ASC
     """
     with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
@@ -170,12 +170,12 @@ def main():
     parser.add_argument("--rebuild", action="store_true", help="Drop and recreate Qdrant collection")
     args = parser.parse_args()
 
-    db_url      = os.environ.get("OMEGA_CATALOG_DB_URL", "")
+    db_url      = os.environ.get("CHYREN_CATALOG_DB_URL", "")
     gemini_key  = os.environ.get("GEMINI_API_KEY", "")
     openai_key  = os.environ.get("OPENAI_API_KEY", "")
 
     if not db_url:
-        print("ERROR: OMEGA_CATALOG_DB_URL not set"); sys.exit(1)
+        print("ERROR: CHYREN_CATALOG_DB_URL not set"); sys.exit(1)
     if not gemini_key and not openai_key:
         print("ERROR: Set GEMINI_API_KEY or OPENAI_API_KEY"); sys.exit(1)
 

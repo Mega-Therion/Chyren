@@ -16,7 +16,7 @@ git branch --show-current
 
 **Build status:**
 ```bash
-source ~/.omega/one-true.env
+source ~/.chyren/one-true.env
 cd medulla && cargo check --workspace 2>&1 | tail -5
 ```
 
@@ -28,7 +28,7 @@ PYTHONPATH=cortex pytest tests/ -q 2>&1 | tail -5
 
 **Database:**
 ```bash
-psql "$OMEGA_DB_URL" -c "SELECT COUNT(*) as entries, MAX(created_at) as latest FROM ledger;" 2>&1
+psql "$CHYREN_DB_URL" -c "SELECT COUNT(*) as entries, MAX(created_at) as latest FROM ledger;" 2>&1
 ```
 
 ## Report Format

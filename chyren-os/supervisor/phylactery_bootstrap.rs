@@ -2,8 +2,8 @@
 //! Auto-generated from identity_synthesis output
 //! Loads RY's identity foundation into Chyren's memory system
 
-use omega_myelin::Service as MemoryService;
-use omega_core::MemoryStratum;
+use chyren_myelin::Service as MemoryService;
+use chyren_core::MemoryStratum;
 
 pub fn bootstrap_phylactery_kernel(memory: &mut MemoryService) -> Result<(), String> {
     let kernel_data = r#"{

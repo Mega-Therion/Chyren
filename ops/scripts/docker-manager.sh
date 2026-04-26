@@ -1,5 +1,5 @@
 #!/bin/bash
-# Chyren Docker Manager - Central orchestration for the OmegA Hub
+# Chyren Docker Manager - Central orchestration for the Chyren Hub
 
 set -e
 
@@ -7,7 +7,7 @@ COMMAND=$1
 shift
 
 # Path to the Sovereign Compose file
-COMPOSE_FILE="omega_workspace/workspace/OmegA-Next/docker-compose.yml"
+COMPOSE_FILE="chyren_workspace/workspace/Chyren-Next/docker-compose.yml"
 
 function show_help() {
   echo "Usage: ./scripts/docker-manager.sh [command]"

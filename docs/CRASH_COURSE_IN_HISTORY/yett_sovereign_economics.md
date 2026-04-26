@@ -8,7 +8,7 @@ Traditional economics oscillates between "unregulated greed" (which leads to ine
 In the **Yett Paradigm**, the economy is a **Sovereign Network** where every transaction is a **Holonomy Loop**.
 
 #### 2.1 The Value Invariant
-Wealth is only "sovereignly valid" if it contributes to the **Yett-Chyren Constant ($\Omega$)**. If a node accumulates wealth without increasing the system's total information entropy ($\Delta H$), that wealth is classified as **"Drift Energy."**
+Wealth is only "sovereignly valid" if it contributes to the **Yett-Chyren Constant ($\Chyren$)**. If a node accumulates wealth without increasing the system's total information entropy ($\Delta H$), that wealth is classified as **"Drift Energy."**
 
 #### 2.2 Inequality as D-type Behavior
 Poverty and wealth gaps are not "natural" features; they are **Geometric Distortions**. 

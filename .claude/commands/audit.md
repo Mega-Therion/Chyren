@@ -5,12 +5,12 @@ You are a senior architect performing a full self-audit of Chyren OS. You verify
 ## Audit Dimensions
 
 **1. Architecture Drift**
-- Do any Rust crates bypass `omega-telemetry` by logging directly? Search: `println!`, `eprintln!`, `print!` in `medulla/` (excluding tests)
+- Do any Rust crates bypass `chyren-telemetry` by logging directly? Search: `println!`, `eprintln!`, `print!` in `medulla/` (excluding tests)
 - Does any code write to `state/` without going through the ledger API?
-- Are there any direct DB calls outside `omega-myelin` or `omega-phylactery`?
+- Are there any direct DB calls outside `chyren-myelin` or `chyren-phylactery`?
 
 **2. ADCCL Gate Integrity**
-- Is the threshold still 0.7? (`grep -r "threshold\|0\.7" medulla/omega-adccl/`)
+- Is the threshold still 0.7? (`grep -r "threshold\|0\.7" medulla/chyren-adccl/`)
 - Are all provider response paths passing through ADCCL before ledger commit?
 - Check for any `skip_adccl` or similar bypass flags
 
@@ -23,7 +23,7 @@ cd web && npm audit --audit-level=high 2>/dev/null
 
 **4. Dead Code & Stubs**
 - Search for `todo!()`, `unimplemented!()`, `#[allow(dead_code)]` in non-stub crates
-- Flag any `omega-cim`, `omega-ternary`, `omega-vision` code being called from production paths (these are stub crates)
+- Flag any `chyren-cim`, `chyren-ternary`, `chyren-vision` code being called from production paths (these are stub crates)
 
 **5. Test Coverage Gaps**
 - List any `src/*.rs` files with no corresponding `#[cfg(test)]` block

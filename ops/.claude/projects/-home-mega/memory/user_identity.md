@@ -10,7 +10,7 @@ GitHub: Mega-Therion
 Location: Little Rock / Jacksonville, Arkansas. Home base: Ouachita National Forest region (Montgomery County / Avilla).
 Role: Independent AI Systems Researcher, self-employed tech entrepreneur, full-stack developer, inventor.
 Background: Former CNC machinist; now self-taught across AI systems, software architecture, and multi-disciplinary venture building.
-Published: OmegA four-layer sovereign AI architecture on Zenodo — DOI 10.5281/zenodo.19111653.
+Published: Chyren four-layer sovereign AI architecture on Zenodo — DOI 10.5281/zenodo.19111653.
 
 Primary stack: Python, JavaScript/Node.js, Rust (aspiring), Bash — deployed via n8n, Supabase, Docker, Cloudflare Tunnel, Vercel, Ollama, Claude Code CLI.
 Creative/visual brand: "Views by Ryan" (photography, logo systems, ambigrams, visual identity).

@@ -9,7 +9,7 @@ import subprocess
 def ingest_neon_db(project_id):
     print(f"Ingesting from: {project_id}")
     # Fetch all records
-    sql = "SELECT content FROM omega_memory_entries LIMIT 100;"
+    sql = "SELECT content FROM chyren_memory_entries LIMIT 100;"
     result = subprocess.run(["python3", "main.py", "sql_query", project_id, sql], capture_output=True, text=True)
     
     # Process and graft

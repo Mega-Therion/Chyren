@@ -21,7 +21,7 @@ cd medulla
 cargo build                                  # Debug build
 cargo build --release                        # Release (opt-level=3, LTO)
 cargo test --workspace                       # All tests
-cargo test --package omega-adccl             # Single crate tests
+cargo test --package chyren-adccl             # Single crate tests
 cargo clippy --workspace -- -D warnings      # Lint
 cargo fmt --all -- --check                   # Format check
 cargo fmt --all                              # Format apply
@@ -99,29 +99,29 @@ docker-compose up    # Starts chyren-api (8080), chyren-web (3000), postgres, qd
 ### Medulla (Rust — 17 crates)
 | Crate | Role |
 |---|---|
-| `omega-core` | Foundation types, contracts, task envelopes |
-| `omega-conductor` | Full pipeline orchestration (Alignment → AEON → Provider → ADCCL → Ledger) |
-| `omega-aegis` | Security gates, policy enforcement, constitution checks |
-| `omega-adccl` | Drift/hallucination detection; score 0.0–1.0, threshold 0.7 |
-| `omega-myelin` | Persistent semantic memory (Qdrant vector store) |
-| `omega-spokes` | Provider SDK adapters + registry |
-| `omega-aeon` | Temporal/scheduling subsystem |
-| `omega-phylactery` | Identity and integrity persistence |
-| `omega-cli` | Clap-based CLI + actix-web API server (port 8080) |
-| `omega-dream` | Long-term memory and pattern synthesis |
-| `omega-metacog` | Self-reflection and introspection |
-| `omega-neocortex` | Higher-order reasoning integration layer |
-| `omega-worldmodel` | Environmental state and context management |
-| `omega-telemetry` | Instrumentation — all events must route through here |
-| `omega-integration` | Cross-crate routing |
-| `omega-eval` | Evaluation framework |
-| `omega-telegram-gateway` | Telegram bot integration |
-| `omega-cim` | Compositional identity mapping |
-| `omega-ternary` | Ternary logic / trivalent reasoning layer |
-| `omega-vision` | Multimodal / visual input processing |
+| `chyren-core` | Foundation types, contracts, task envelopes |
+| `chyren-conductor` | Full pipeline orchestration (Alignment → AEON → Provider → ADCCL → Ledger) |
+| `chyren-aegis` | Security gates, policy enforcement, constitution checks |
+| `chyren-adccl` | Drift/hallucination detection; score 0.0–1.0, threshold 0.7 |
+| `chyren-myelin` | Persistent semantic memory (Qdrant vector store) |
+| `chyren-spokes` | Provider SDK adapters + registry |
+| `chyren-aeon` | Temporal/scheduling subsystem |
+| `chyren-phylactery` | Identity and integrity persistence |
+| `chyren-cli` | Clap-based CLI + actix-web API server (port 8080) |
+| `chyren-dream` | Long-term memory and pattern synthesis |
+| `chyren-metacog` | Self-reflection and introspection |
+| `chyren-neocortex` | Higher-order reasoning integration layer |
+| `chyren-worldmodel` | Environmental state and context management |
+| `chyren-telemetry` | Instrumentation — all events must route through here |
+| `chyren-integration` | Cross-crate routing |
+| `chyren-eval` | Evaluation framework |
+| `chyren-telegram-gateway` | Telegram bot integration |
+| `chyren-cim` | Compositional identity mapping |
+| `chyren-ternary` | Ternary logic / trivalent reasoning layer |
+| `chyren-vision` | Multimodal / visual input processing |
 
 ### Data Layer
-- **Master Ledger**: PostgreSQL (Neon) — append-only, cryptographically signed; `OMEGA_DB_URL` env var
+- **Master Ledger**: PostgreSQL (Neon) — append-only, cryptographically signed; `CHYREN_DB_URL` env var
 - **Myelin**: Qdrant vector store for semantic memory; `QDRANT_URL` env var
 - **Phylactery Kernel**: `cortex/chyren_py/phylactery_kernel.json` — ~58k identity entries, loaded at startup
 
@@ -135,41 +135,41 @@ Every provider response is scored before ledger commit:
 ### Provider Injection Pattern
 All provider spokes receive: system prompt with sovereign identity + Yettragrammaton integrity hash + current ledger state as context.
 
-### Sovereign Provider Router (`omega-conductor/src/router.rs`)
+### Sovereign Provider Router (`chyren-conductor/src/router.rs`)
 Two-tier routing: **Local** (Ollama — sensitive tasks: identity, ledger, secrets) and **Cloud** (OpenRouter — everything else, cascades through deepseek → groq → anthropic → openai → perplexity on failure). Set `OPENROUTER_ESCALATION_MODEL` in `one-true.env` to override the upshift model.
 
 ### Agent Mesh (in-progress, not merged to main — `cursor/integration-hardening` branch)
-An MQTT-based agent orchestration layer being added to `omega-conductor`:
-- `omega-core/src/mesh.rs` — `TaskContract` (typed task routing envelope) + `AgentCapability` + `AgentRegistry`
-- `omega-conductor/src/dispatcher.rs` — Routes `TaskContract`s to agents via MQTT (broker at `localhost:1883`)
-- `omega-conductor/src/bus.rs` — Async `EventBus` (tokio mpsc channel) feeding `AgentResult`s back into the Conductor pipeline
-- `omega-conductor/src/registry.rs` — Re-exports `AgentRegistry` from `omega-core::mesh`
-- `omega-conductor/src/agents/` — Per-domain agent implementations (e.g. `math_spoke`)
-- `omega-spokes/src/spokes/witness.rs` — `WitnessEnvelope`: signs response payload hashes with `YETTRAGRAMMATON_SECRET` for integrity verification
+An MQTT-based agent orchestration layer being added to `chyren-conductor`:
+- `chyren-core/src/mesh.rs` — `TaskContract` (typed task routing envelope) + `AgentCapability` + `AgentRegistry`
+- `chyren-conductor/src/dispatcher.rs` — Routes `TaskContract`s to agents via MQTT (broker at `localhost:1883`)
+- `chyren-conductor/src/bus.rs` — Async `EventBus` (tokio mpsc channel) feeding `AgentResult`s back into the Conductor pipeline
+- `chyren-conductor/src/registry.rs` — Re-exports `AgentRegistry` from `chyren-core::mesh`
+- `chyren-conductor/src/agents/` — Per-domain agent implementations (e.g. `math_spoke`)
+- `chyren-spokes/src/spokes/witness.rs` — `WitnessEnvelope`: signs response payload hashes with `YETTRAGRAMMATON_SECRET` for integrity verification
 
 ## Configuration
 
-All secrets come from `~/.omega/one-true.env` (not in git):
+All secrets come from `~/.chyren/one-true.env` (not in git):
 ```
 ANTHROPIC_API_KEY
 OPENAI_API_KEY
 DEEPSEEK_API_KEY
-OMEGA_DB_URL          # Neon PostgreSQL connection string
+CHYREN_DB_URL          # Neon PostgreSQL connection string
 QDRANT_URL            # Qdrant vector store
 ```
 
-Always source this file before running Cortex or Medulla directly (`source ~/.omega/one-true.env`). The Makefile does **not** source it automatically. Missing keys fail silently.
+Always source this file before running Cortex or Medulla directly (`source ~/.chyren/one-true.env`). The Makefile does **not** source it automatically. Missing keys fail silently.
 
 ## Key Conventions
 
-- **Telemetry**: Never log significant events directly — route through `omega-telemetry` crate
+- **Telemetry**: Never log significant events directly — route through `chyren-telemetry` crate
 - **Ledger**: Append-only. Never delete `state/` files; history is irreversible
 - **Phylactery**: Run `python chyren_py/identity_synthesis.py` to refresh a stale kernel
 - **New Python provider**: implement `ProviderBase` in `cortex/providers/`, register in `cortex/main.py`
-- **New Rust crate**: add to `medulla/Cargo.toml` workspace members, expose from `src/lib.rs`, wire into `omega-integration` or `omega-cli`
+- **New Rust crate**: add to `medulla/Cargo.toml` workspace members, expose from `src/lib.rs`, wire into `chyren-integration` or `chyren-cli`
 - **Rust → Python migration**: use `legacy_bridge.rs` pattern; tests must pass in both layers before cutover
 - **Test isolation**: Rust unit tests live alongside implementation files; Python integration tests go in `tests/` or `cortex/tests/`; frontend tests in `web/__tests__/`. Tests must not share mutable state — test isolation failures have caused prod divergence in the past
-- **Crate status**: `omega-cim`, `omega-ternary`, and `omega-vision` are present in the workspace but are early-stage / stub crates; treat them as unstable API surfaces
+- **Crate status**: `chyren-cim`, `chyren-ternary`, and `chyren-vision` are present in the workspace but are early-stage / stub crates; treat them as unstable API surfaces
 
 ## Commit & PR Format
 
@@ -182,7 +182,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `f
 | Subdirectory | Status | Description |
 |---|---|---|
 | `chyren-os/interface/` | **Active — deployed to Vercel** | The live Next.js 15 frontend. This IS `web/`. See Build section above. |
-| `chyren-os/kernel/` | Historical reference | Older Rust workspace (same omega-* crates) that `medulla/` evolved from. Missing `omega-cim`, `omega-ternary`, `omega-vision`, `omega-mega`, `openrouter_spoke`, `vision_spoke`. Do not actively develop here. |
+| `chyren-os/kernel/` | Historical reference | Older Rust workspace (same chyren-* crates) that `medulla/` evolved from. Missing `chyren-cim`, `chyren-ternary`, `chyren-vision`, `chyren-mega`, `openrouter_spoke`, `vision_spoke`. Do not actively develop here. |
 | `chyren-os/supervisor/` | Historical reference | Predecessor to `cortex/chyren_py/` — older `identity_synthesis.py` and phylactery loader. `cortex/chyren_py/` is canonical. |
 | `chyren-os/state/` | Runtime state | Phylactery kernel snapshot and runtime state files — do not delete. |
 | `chyren-os/boot/init.rs` | Stub | OS entry point stub — not wired into any build system. |

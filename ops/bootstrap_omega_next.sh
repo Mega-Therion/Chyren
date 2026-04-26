@@ -1,9 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
-# OmegA Next-Generation Architecture Bootstrap Script
+# Chyren Next-Generation Architecture Bootstrap Script
 # Scaffolds the complete Rust workspace from the blueprint
-# Usage: bash bootstrap_omega_next.sh --new /path/to/workspace [--old /path/to/old/repo] [--edition Chyrho] [--salvage] [--materialize-wrappers]
+# Usage: bash bootstrap_chyren_next.sh --new /path/to/workspace [--old /path/to/old/repo] [--edition Chyrho] [--salvage] [--materialize-wrappers]
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OLD_REPO=""
@@ -30,7 +30,7 @@ if [[ -z "$NEW_WORKSPACE" ]]; then
 fi
 
 echo "=================================================="
-echo "OmegA Next-Generation Architecture Bootstrap"
+echo "Chyren Next-Generation Architecture Bootstrap"
 echo "=================================================="
 echo "Edition: $EDITION"
 echo "Workspace: $NEW_WORKSPACE"
@@ -47,30 +47,30 @@ done
 
 # Create workspace directory structure
 echo "[2/8] Creating workspace structure..."
-mkdir -p "$NEW_WORKSPACE"/{workspace/OmegA-Next,canon,scripts,artifacts,docs,handover}
-mkdir -p "$NEW_WORKSPACE/workspace/OmegA-Next/"{src,target}
+mkdir -p "$NEW_WORKSPACE"/{workspace/Chyren-Next,canon,scripts,artifacts,docs,handover}
+mkdir -p "$NEW_WORKSPACE/workspace/Chyren-Next/"{src,target}
 
 # Create Cargo.toml workspace root
-cat > "$NEW_WORKSPACE/workspace/OmegA-Next/Cargo.toml" << 'EOF'
+cat > "$NEW_WORKSPACE/workspace/Chyren-Next/Cargo.toml" << 'EOF'
 [workspace]
 members = [
-    "omega-core",
-    "omega-aegis",
-    "omega-aeon",
-    "omega-adccl",
-    "omega-myelin",
-    "omega-dream",
-    "omega-metacog",
-    "omega-worldmodel",
-    "omega-integration",
-    "omega-telemetry",
-    "omega-cli",
+    "chyren-core",
+    "chyren-aegis",
+    "chyren-aeon",
+    "chyren-adccl",
+    "chyren-myelin",
+    "chyren-dream",
+    "chyren-metacog",
+    "chyren-worldmodel",
+    "chyren-integration",
+    "chyren-telemetry",
+    "chyren-cli",
 ]
 
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
-authors = ["OmegA Collective"]
+authors = ["Chyren Collective"]
 license = "PROPRIETARY"
 
 [profile.release]
@@ -82,24 +82,24 @@ EOF
 echo "[3/8] Generating crate skeletons..."
 
 declare -A CRATES=(
-  [omega-core]="defines shared types and contracts"
-  [omega-aegis]="implements envelope compilation, risk gating, provider adapters"
-  [omega-aeon]="implements phylactery service, TSO runtime, MUSE++ parsing, routing"
-  [omega-adccl]="implements drift control, goal contracts, plan skeletons, verification"
-  [omega-myelin]="implements graph memory overlay, retrieval episodes, plasticity"
-  [omega-dream]="implements dream session runner, epiphany generation"
-  [omega-metacog]="implements performance snapshots, self-assessment"
-  [omega-worldmodel]="implements world state, entities, actions, causal graphs"
-  [omega-integration]="implements agent registry, subtask packaging, consensus"
-  [omega-telemetry]="defines unified event schema, event emission"
+  [chyren-core]="defines shared types and contracts"
+  [chyren-aegis]="implements envelope compilation, risk gating, provider adapters"
+  [chyren-aeon]="implements phylactery service, TSO runtime, MUSE++ parsing, routing"
+  [chyren-adccl]="implements drift control, goal contracts, plan skeletons, verification"
+  [chyren-myelin]="implements graph memory overlay, retrieval episodes, plasticity"
+  [chyren-dream]="implements dream session runner, epiphany generation"
+  [chyren-metacog]="implements performance snapshots, self-assessment"
+  [chyren-worldmodel]="implements world state, entities, actions, causal graphs"
+  [chyren-integration]="implements agent registry, subtask packaging, consensus"
+  [chyren-telemetry]="defines unified event schema, event emission"
 )
 
 for crate in "${!CRATES[@]}"; do
-  crate_path="$NEW_WORKSPACE/workspace/OmegA-Next/$crate"
+  crate_path="$NEW_WORKSPACE/workspace/Chyren-Next/$crate"
   mkdir -p "$crate_path/src"
 
   # Generate Cargo.toml
-  if [[ "$crate" == "omega-cli" ]]; then
+  if [[ "$crate" == "chyren-cli" ]]; then
     cat > "$crate_path/Cargo.toml" << EOF
 [package]
 name = "$crate"
@@ -113,12 +113,12 @@ name = "chyren"
 path = "src/main.rs"
 
 [dependencies]
-omega-core = { path = "../omega-core" }
-omega-aegis = { path = "../omega-aegis" }
-omega-aeon = { path = "../omega-aeon" }
-omega-adccl = { path = "../omega-adccl" }
-omega-myelin = { path = "../omega-myelin" }
-omega-telemetry = { path = "../omega-telemetry" }
+chyren-core = { path = "../chyren-core" }
+chyren-aegis = { path = "../chyren-aegis" }
+chyren-aeon = { path = "../chyren-aeon" }
+chyren-adccl = { path = "../chyren-adccl" }
+chyren-myelin = { path = "../chyren-myelin" }
+chyren-telemetry = { path = "../chyren-telemetry" }
 tokio = { version = "1", features = ["full"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -131,7 +131,7 @@ use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
 #[command(name = "chyren")]
-#[command(about = "OmegA/Chyren Sovereign Intelligence Hub")]
+#[command(about = "Chyren/Chyren Sovereign Intelligence Hub")]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -152,7 +152,7 @@ enum Commands {
 #[tokio::main]
 async fn main() {
     let cli = Cli::parse();
-    println!("Chyren: OmegA Sovereign Intelligence Hub");
+    println!("Chyren: Chyren Sovereign Intelligence Hub");
     println!("Edition: {} | Status: In-Flight ⚙️", env!("CARGO_PKG_VERSION"));
     println!("{:?}", cli.command);
 }
@@ -169,8 +169,8 @@ license.workspace = true
 [lib]
 
 [dependencies]
-omega-core = { path = "../omega-core" }
-omega-telemetry = { path = "../omega-telemetry" }
+chyren-core = { path = "../chyren-core" }
+chyren-telemetry = { path = "../chyren-telemetry" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1", optional = true, features = ["full"] }
@@ -212,8 +212,8 @@ LIB_EOF
   fi
 done
 
-# Create omega-telemetry (special: defines shared event schema)
-cat > "$NEW_WORKSPACE/workspace/OmegA-Next/omega-telemetry/src/lib.rs" << 'TELEMETRY_EOF'
+# Create chyren-telemetry (special: defines shared event schema)
+cat > "$NEW_WORKSPACE/workspace/Chyren-Next/chyren-telemetry/src/lib.rs" << 'TELEMETRY_EOF'
 //! Unified telemetry and event emission
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -268,8 +268,8 @@ echo "[4/8] Creating manifest files..."
 # Write release manifest
 cat > "$NEW_WORKSPACE/canon/release_manifest.json" << MANIFEST_EOF
 {
-  "system_name": "OmegA",
-  "identity_name": "OmegA",
+  "system_name": "Chyren",
+  "identity_name": "Chyren",
   "product_name": "Chyren",
   "edition_name": "$EDITION",
   "channel": "development",
@@ -285,7 +285,7 @@ cat > "$NEW_WORKSPACE/canon/machine_identity.json" << IDENTITY_EOF
 {
   "runtime_identity": "chyren-$EDITION-$(date +%s)",
   "continuity_mode": "pre-canon",
-  "host_cache": "$NEW_WORKSPACE/.omega-local-cache/$EDITION",
+  "host_cache": "$NEW_WORKSPACE/.chyren-local-cache/$EDITION",
   "workspace_root": "$NEW_WORKSPACE"
 }
 IDENTITY_EOF
@@ -299,24 +299,24 @@ set -euo pipefail
 
 # Detect USB or local workspace
 if [[ -d "/media/CHYREN" ]]; then
-  export OMEGA_ROOT="/media/CHYREN"
+  export CHYREN_ROOT="/media/CHYREN"
 elif [[ -d "/mnt/CHYREN" ]]; then
-  export OMEGA_ROOT="/mnt/CHYREN"
+  export CHYREN_ROOT="/mnt/CHYREN"
 else
   # Use environment variable or default to current directory
-  export OMEGA_ROOT="${OMEGA_ROOT:-$(pwd)}"
+  export CHYREN_ROOT="${CHYREN_ROOT:-$(pwd)}"
 fi
 
 # Create local cache directory if it doesn't exist
-export OMEGA_HOST_CACHE="${OMEGA_HOST_CACHE:-$OMEGA_ROOT/.omega-local-cache}"
-mkdir -p "$OMEGA_HOST_CACHE"
+export CHYREN_HOST_CACHE="${CHYREN_HOST_CACHE:-$CHYREN_ROOT/.chyren-local-cache}"
+mkdir -p "$CHYREN_HOST_CACHE"
 
-echo "OmegA Workspace: $OMEGA_ROOT"
-echo "Host Cache: $OMEGA_HOST_CACHE"
+echo "Chyren Workspace: $CHYREN_ROOT"
+echo "Host Cache: $CHYREN_HOST_CACHE"
 echo ""
 
-cd "$OMEGA_ROOT/workspace/OmegA-Next"
-cargo run --package omega-cli -- "$@"
+cd "$CHYREN_ROOT/workspace/Chyren-Next"
+cargo run --package chyren-cli -- "$@"
 LAUNCHER_EOF
 
 chmod +x "$NEW_WORKSPACE/scripts/launch-chyren.sh"
@@ -324,30 +324,30 @@ chmod +x "$NEW_WORKSPACE/scripts/launch-chyren.sh"
 # Create PowerShell launcher
 cat > "$NEW_WORKSPACE/scripts/launch-chyren.ps1" << 'LAUNCHER_PS1'
 $usbPaths = @("D:", "E:", "F:", "G:")
-$omegaRoot = $null
+$chyrenRoot = $null
 
 foreach ($drive in $usbPaths) {
     if (Test-Path "$drive\CHYREN") {
-        $omegaRoot = "$drive\CHYREN"
+        $chyrenRoot = "$drive\CHYREN"
         break
     }
 }
 
-if (-not $omegaRoot) {
-    $omegaRoot = $env:OMEGA_ROOT -or (Get-Location).Path
+if (-not $chyrenRoot) {
+    $chyrenRoot = $env:CHYREN_ROOT -or (Get-Location).Path
 }
 
-$env:OMEGA_ROOT = $omegaRoot
-$env:OMEGA_HOST_CACHE = $env:OMEGA_HOST_CACHE -or "$env:USERPROFILE\.omega-host-cache\chyren"
+$env:CHYREN_ROOT = $chyrenRoot
+$env:CHYREN_HOST_CACHE = $env:CHYREN_HOST_CACHE -or "$env:USERPROFILE\.chyren-host-cache\chyren"
 
-New-Item -ItemType Directory -Force -Path $env:OMEGA_HOST_CACHE | Out-Null
+New-Item -ItemType Directory -Force -Path $env:CHYREN_HOST_CACHE | Out-Null
 
-Write-Host "OmegA Workspace: $omegaRoot"
-Write-Host "Host Cache: $env:OMEGA_HOST_CACHE"
+Write-Host "Chyren Workspace: $chyrenRoot"
+Write-Host "Host Cache: $env:CHYREN_HOST_CACHE"
 Write-Host ""
 
-Push-Location "$omegaRoot\workspace\OmegA-Next"
-cargo run --package omega-cli -- @args
+Push-Location "$chyrenRoot\workspace\Chyren-Next"
+cargo run --package chyren-cli -- @args
 Pop-Location
 LAUNCHER_PS1
 
@@ -387,10 +387,10 @@ if [[ "$DO_SALVAGE" == true && -n "$OLD_REPO" ]]; then
   cp -r "$OLD_REPO" "$NEW_WORKSPACE/legacy_intake/old_repo"
 
   echo "  Generating migration diffs..."
-  diff -r "$NEW_WORKSPACE/legacy_intake/old_repo" "$NEW_WORKSPACE/workspace/OmegA-Next" > "$NEW_WORKSPACE/legacy_intake/migration_diff.txt" || true
+  diff -r "$NEW_WORKSPACE/legacy_intake/old_repo" "$NEW_WORKSPACE/workspace/Chyren-Next" > "$NEW_WORKSPACE/legacy_intake/migration_diff.txt" || true
 
   cat > "$NEW_WORKSPACE/legacy_intake/MIGRATION_SUMMARY.md" << 'MIGRATION_EOF'
-# Migration Summary: Python Chyren → Rust OmegA/Chyren
+# Migration Summary: Python Chyren → Rust Chyren/Chyren
 
 ## Source Structure
 The original Python Chyren implementation in `old_repo` contains:
@@ -402,13 +402,13 @@ The original Python Chyren implementation in `old_repo` contains:
 ## Target Mapping
 | Python Module | Rust Crate | Status |
 |---|---|---|
-| core/alignment.py | omega-aegis (policy gate) | Salvage to AEGIS |
-| core/sandbox.py | omega-adccl (verification) | Salvage to ADCCL |
-| core/deflection.py | omega-aegis (risk response) | Salvage to AEGIS |
-| core/threat_fabric.py | omega-myelin (memory graph) | Salvage to MYELIN |
-| providers/* | omega-aegis (provider adapters) | Reimplement as adapters |
-| main.py (Hub) | omega-aeon (orchestrator) | Reimplement with TSO |
-| core/integrity.py | omega-core (crypto) | Port directly |
+| core/alignment.py | chyren-aegis (policy gate) | Salvage to AEGIS |
+| core/sandbox.py | chyren-adccl (verification) | Salvage to ADCCL |
+| core/deflection.py | chyren-aegis (risk response) | Salvage to AEGIS |
+| core/threat_fabric.py | chyren-myelin (memory graph) | Salvage to MYELIN |
+| providers/* | chyren-aegis (provider adapters) | Reimplement as adapters |
+| main.py (Hub) | chyren-aeon (orchestrator) | Reimplement with TSO |
+| core/integrity.py | chyren-core (crypto) | Port directly |
 
 ## Legacy Bridge Pattern
 Each crate provides a `legacy_bridge.rs` module that:
@@ -418,12 +418,12 @@ Each crate provides a `legacy_bridge.rs` module that:
 4. Will be removed once native Rust implementation is complete
 
 ## Porting Order
-1. omega-core: Port type definitions and cryptography
-2. omega-telemetry: Define event schema
-3. omega-aegis: Port envelope, risk gating, provider routing
-4. omega-myelin: Port memory storage to graph model
-5. omega-adccl: Port verification and drift control logic
-6. omega-aeon: Reimplement orchestrator with phylactery service
+1. chyren-core: Port type definitions and cryptography
+2. chyren-telemetry: Define event schema
+3. chyren-aegis: Port envelope, risk gating, provider routing
+4. chyren-myelin: Port memory storage to graph model
+5. chyren-adccl: Port verification and drift control logic
+6. chyren-aeon: Reimplement orchestrator with phylactery service
 7. Other layers: Dream, metacog, worldmodel, integration
 
 MIGRATION_EOF
@@ -432,11 +432,11 @@ fi
 echo "[8/8] Documentation and next steps..."
 
 cat > "$NEW_WORKSPACE/docs/BOOTSTRAP_SUMMARY.md" << 'SUMMARY_EOF'
-# OmegA Next-Generation Architecture Bootstrap Summary
+# Chyren Next-Generation Architecture Bootstrap Summary
 
 ## What Was Created
 
-✓ Rust workspace with 11 crates (omega-core through omega-cli)
+✓ Rust workspace with 11 crates (chyren-core through chyren-cli)
 ✓ Cargo.toml with workspace configuration
 ✓ Unified telemetry event schema
 ✓ Release and machine identity manifests
@@ -448,19 +448,19 @@ cat > "$NEW_WORKSPACE/docs/BOOTSTRAP_SUMMARY.md" << 'SUMMARY_EOF'
 
 ```
 $NEW_WORKSPACE/
-├── workspace/OmegA-Next/        # Main Rust workspace
+├── workspace/Chyren-Next/        # Main Rust workspace
 │   ├── Cargo.toml
-│   ├── omega-core/              # Shared types, crypto
-│   ├── omega-aegis/             # Outer shell, risk gating
-│   ├── omega-aeon/              # Cognitive OS, phylactery
-│   ├── omega-adccl/             # Drift control, verification
-│   ├── omega-myelin/            # Graph memory
-│   ├── omega-dream/             # Dream-to-waking feedback
-│   ├── omega-metacog/           # Self-assessment
-│   ├── omega-worldmodel/        # Causal models
-│   ├── omega-integration/       # gAIng coordination
-│   ├── omega-telemetry/         # Event schema
-│   └── omega-cli/               # CLI binary
+│   ├── chyren-core/              # Shared types, crypto
+│   ├── chyren-aegis/             # Outer shell, risk gating
+│   ├── chyren-aeon/              # Cognitive OS, phylactery
+│   ├── chyren-adccl/             # Drift control, verification
+│   ├── chyren-myelin/            # Graph memory
+│   ├── chyren-dream/             # Dream-to-waking feedback
+│   ├── chyren-metacog/           # Self-assessment
+│   ├── chyren-worldmodel/        # Causal models
+│   ├── chyren-integration/       # gAIng coordination
+│   ├── chyren-telemetry/         # Event schema
+│   └── chyren-cli/               # CLI binary
 ├── canon/                        # Manifests and metadata
 │   ├── release_manifest.json
 │   └── machine_identity.json
@@ -477,14 +477,14 @@ $NEW_WORKSPACE/
 
 1. **Verify setup:**
    ```bash
-   cd $NEW_WORKSPACE/workspace/OmegA-Next
+   cd $NEW_WORKSPACE/workspace/Chyren-Next
    cargo build
    ```
 
-2. **Start implementing omega-core types:**
-   Edit `omega-core/src/lib.rs` to define RunEnvelope, TaskStateObject, EvidencePacket, etc.
+2. **Start implementing chyren-core types:**
+   Edit `chyren-core/src/lib.rs` to define RunEnvelope, TaskStateObject, EvidencePacket, etc.
 
-3. **Implement omega-telemetry event sinks:**
+3. **Implement chyren-telemetry event sinks:**
    Stdout, file, and Kafka sinks for unified observability.
 
 4. **Port existing Python logic:**
@@ -497,8 +497,8 @@ $NEW_WORKSPACE/
 
 Local development:
 ```bash
-cd workspace/OmegA-Next
-cargo run --package omega-cli -- boot
+cd workspace/Chyren-Next
+cargo run --package chyren-cli -- boot
 ```
 
 Via launcher:
@@ -523,9 +523,9 @@ echo ""
 echo "Workspace created at: $NEW_WORKSPACE"
 echo ""
 echo "Next steps:"
-echo "  1. cd $NEW_WORKSPACE/workspace/OmegA-Next"
+echo "  1. cd $NEW_WORKSPACE/workspace/Chyren-Next"
 echo "  2. cargo build           # Verify compilation"
 echo "  3. cargo test --lib      # Run placeholder tests"
-echo "  4. Edit omega-core/src/lib.rs to define types"
+echo "  4. Edit chyren-core/src/lib.rs to define types"
 echo ""
 echo "To launch: $NEW_WORKSPACE/scripts/launch-chyren.sh"

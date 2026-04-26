@@ -24,7 +24,7 @@ NEON_URL = POOL["active_primary"]
 SUPA_BASE = "https://eletftuboucrsrnapqoq.supabase.co/rest/v1"
 SUPA_KEY  = next(p["service_key"] for p in POOL["pool"] if p["id"] == "supabase_sovereign")
 
-BASE      = Path("/home/mega/Work/Chyren/archives/OMEGA_WORKSPACE")
+BASE      = Path("/home/mega/Work/Chyren/archives/CHYREN_WORKSPACE")
 BRAIN     = BASE / "BRAIN"
 DOCS      = BASE / "DOCS"
 SOV_BIO   = BRAIN / "biography/RY_Sovereign_Biography"
@@ -243,7 +243,7 @@ def ingest_processed_2026():
 
     rows = []
     for md in md_files:
-        # Filename: 2026-01-07_Mobile_App_for_OMEGAI.md
+        # Filename: 2026-01-07_Mobile_App_for_CHYRENI.md
         stem = md.stem
         date_match = re.match(r"(\d{4}-\d{2}-\d{2})", stem)
         dt = date_match.group(1) + "T00:00:00" if date_match else "2026-01-01T00:00:00"

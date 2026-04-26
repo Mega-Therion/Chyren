@@ -9,7 +9,7 @@ $ARGUMENTS
 ## Execution
 
 ```bash
-source ~/.omega/one-true.env
+source ~/.chyren/one-true.env
 ./chyren action "$ARGUMENTS" 2>&1
 ```
 

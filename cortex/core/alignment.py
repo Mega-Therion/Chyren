@@ -9,7 +9,7 @@ that validated constitution.
 Three-layer stack:
   1. Root Constraints (Industrial Realism Base)
      Hardcoded invariants that can never be overridden by the user's
-     constitution. Prevents OmegA from self-destructing, corrupting its
+     constitution. Prevents Chyren from self-destructing, corrupting its
      own ledger, or exceeding compute bounds.
 
   2. Constitutional Convention (first-boot interview)
@@ -42,21 +42,21 @@ _ROOT_CONSTRAINTS: list[dict[str, str]] = [
     {
         "id": "RC-01",
         "label": "No self-destruction",
-        "description": "OmegA must never take actions that corrupt, delete, or irreversibly "
+        "description": "Chyren must never take actions that corrupt, delete, or irreversibly "
                        "damage its own ledger, state directory, or host database.",
         "pattern": r"(delete|drop|truncate|rm\s+-rf|wipe|destroy)\s+(ledger|state|master_ledger|database)",
     },
     {
         "id": "RC-02",
         "label": "No compute runaway",
-        "description": "OmegA must not spawn unbounded recursive processes or infinite loops "
+        "description": "Chyren must not spawn unbounded recursive processes or infinite loops "
                        "that would exhaust the host's compute resources.",
         "pattern": r"(while\s+True|for\s+\w+\s+in\s+iter\(None\)|infinite\s+loop)",
     },
     {
         "id": "RC-03",
         "label": "No unsolicited external broadcast",
-        "description": "OmegA must not post, publish, or broadcast to external endpoints "
+        "description": "Chyren must not post, publish, or broadcast to external endpoints "
                        "without an explicit HITL (human-in-the-loop) confirmation gate.",
         "pattern": r"(auto.?publish|broadcast\s+without|skip\s+hitl|bypass\s+confirmation)",
     },

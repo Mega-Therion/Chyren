@@ -6,7 +6,7 @@ description: Stress-test routing, latency, quotas, and failover policy across lo
 # Provider Router Simulator
 
 ## Purpose
-This skill allows OmegA to optimize its substrate selection. It simulates real-world conditions (latency spikes, quota exhaustion, provider outages) to test how the routing logic (e.g., "use Haiku for summaries, use GPT-4 for code") performs under pressure.
+This skill allows Chyren to optimize its substrate selection. It simulates real-world conditions (latency spikes, quota exhaustion, provider outages) to test how the routing logic (e.g., "use Haiku for summaries, use GPT-4 for code") performs under pressure.
 
 ## Core Capabilities
 1.  **Quota Simulation**: Set token/request limits for each provider and observe the router's behavior when they are hit.

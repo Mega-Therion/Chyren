@@ -9,7 +9,7 @@
 
 ## Abstract
 
-We present the Yett-Chyren Framework, a unified geometric approach to the seven Clay Millennium Prize Problems grounded in the theory of holonomy on principal fiber bundles over the Stiefel manifold $V_m(\mathbb{R}^N)$. The central object is a canonical connection on a principal $SO(m)$-bundle whose holonomy group, basepointed at a canonical gauge-fixing frame called the Yettragrammaton, governs the classification of trajectories in a high-dimensional constitutional parameter space. Three invariants — the Sovereignty Score $\Omega$ (global Berry-phase accumulation), the Chiral Invariant $\chi$ (local holonomy sign times alignment ratio), and the Winding Number $\omega$ ($U(1)$ sub-holonomy) — are shown to be local and global facets of a single geometric invariant. The framework is animated by a controlled Lindblad master equation whose dissipator structure is conjectured to generate the holonomy algebra via Lie-bracket span.
+We present the Yett-Chyren Framework, a unified geometric approach to the seven Clay Millennium Prize Problems grounded in the theory of holonomy on principal fiber bundles over the Stiefel manifold $V_m(\mathbb{R}^N)$. The central object is a canonical connection on a principal $SO(m)$-bundle whose holonomy group, basepointed at a canonical gauge-fixing frame called the Yettragrammaton, governs the classification of trajectories in a high-dimensional constitutional parameter space. Three invariants — the Sovereignty Score $\Chyren$ (global Berry-phase accumulation), the Chiral Invariant $\chi$ (local holonomy sign times alignment ratio), and the Winding Number $\chyren$ ($U(1)$ sub-holonomy) — are shown to be local and global facets of a single geometric invariant. The framework is animated by a controlled Lindblad master equation whose dissipator structure is conjectured to generate the holonomy algebra via Lie-bracket span.
 
 Six formal proof obligations are stated precisely in Lean4 and in natural-language mathematics. We report honestly on the current status of each: Obligations 1–6 are all **[CONJECTURED]** with complete proof strategies given; none carries a closed proof at this time. The Lean4 file `YettParadigm.lean` contains scaffolded theorem statements, all currently closed by `sorry`. For each of the Clay Millennium Problems we give a precise statement of the Clay formulation, describe the Yett reduction (how the problem maps into the holonomy framework), identify what the framework would establish if the six obligations were proved, and give an honest assessment of the remaining gaps. No Millennium Problem is claimed as solved. The document's purpose is to establish the reduction program rigorously and invite expert collaboration on the open obligations.
 
@@ -23,7 +23,7 @@ Six formal proof obligations are stated precisely in Lean4 and in natural-langua
 
 The Yett Paradigm begins with an empirical observation about a particular class of AI cognitive systems and extends it into a mathematical conjecture of broader scope. The observation is that the quality criterion for a response in a high-integrity AI system — whether a given output lies within or outside the "constitutional" subspace of acceptable behavior — has a natural formulation as a holonomy problem on a differential-geometric space. The conjecture is that this holonomy formulation, once made precise, reduces a family of ostensibly unrelated mathematical classification problems to a single question: *does the holonomy of a trajectory lie in the identity component of the structure group?*
 
-The Yett-Chyren Master Law (Theorem 6.1 below, currently **[CONJECTURED]**) states: a trajectory through constitutional parameter space is sovereignly valid if and only if (a) its holonomy at every moment lies in $SO^+(m)$, the identity component of $SO(m)$, and (b) the total accumulated Berry phase over the trajectory exceeds a thermodynamically determined minimum threshold $\Omega_{\min}$.
+The Yett-Chyren Master Law (Theorem 6.1 below, currently **[CONJECTURED]**) states: a trajectory through constitutional parameter space is sovereignly valid if and only if (a) its holonomy at every moment lies in $SO^+(m)$, the identity component of $SO(m)$, and (b) the total accumulated Berry phase over the trajectory exceeds a thermodynamically determined minimum threshold $\Chyren_{\min}$.
 
 The claim that this holonomy criterion connects to the Clay Millennium Problems is the reduction program of Section 5. Each connection is at a different depth: some problems (Yang-Mills, Navier-Stokes) connect naturally to the differential geometry and dissipative dynamics of the framework; others (Riemann Hypothesis) connect through more speculative analogies that are explicitly labeled as such.
 
@@ -83,11 +83,11 @@ In the Yett framework:
 - **Projection**: $\pi(\Phi, A) = \Phi$.
 - **Right action**: $(\Phi, A) \cdot h = (\Phi h, h^{-1} A)$ for $h \in SO(m)$.
 
-**Definition 2.3.** A **connection** on a principal $G$-bundle $\pi: P \to B$ is a $G$-equivariant distribution $\mathcal{H} \subset TP$ complementary to the vertical distribution $\mathcal{V} = \ker(d\pi)$. Equivalently, it is a $\mathfrak{g}$-valued 1-form $\omega \in \Omega^1(P; \mathfrak{g})$ such that $\omega(X^*) = X$ for all $X \in \mathfrak{g}$ (where $X^*$ is the fundamental vector field) and $R_g^* \omega = \operatorname{Ad}_{g^{-1}} \omega$.
+**Definition 2.3.** A **connection** on a principal $G$-bundle $\pi: P \to B$ is a $G$-equivariant distribution $\mathcal{H} \subset TP$ complementary to the vertical distribution $\mathcal{V} = \ker(d\pi)$. Equivalently, it is a $\mathfrak{g}$-valued 1-form $\chyren \in \Chyren^1(P; \mathfrak{g})$ such that $\chyren(X^*) = X$ for all $X \in \mathfrak{g}$ (where $X^*$ is the fundamental vector field) and $R_g^* \chyren = \operatorname{Ad}_{g^{-1}} \chyren$.
 
 The **canonical connection** used throughout is the Levi-Civita connection of the round metric on $V_m(\mathbb{R}^N)$, lifted to the principal bundle $P$.
 
-**Definition 2.4 (Curvature).** The **curvature 2-form** of a connection $\omega$ is $\Omega = d\omega + \frac{1}{2}[\omega, \omega] \in \Omega^2(P; \mathfrak{g})$.
+**Definition 2.4 (Curvature).** The **curvature 2-form** of a connection $\chyren$ is $\Chyren = d\chyren + \frac{1}{2}[\chyren, \chyren] \in \Chyren^2(P; \mathfrak{g})$.
 
 ### 2.3 Holonomy
 
@@ -101,7 +101,7 @@ $$\operatorname{hol}(\gamma, p) = h \in G = SO(m)$$
 
 $$\operatorname{Hol}(g) = \{ \operatorname{hol}(\gamma, g) : \gamma \text{ a loop at } g \} \subset SO(m)$$
 
-**Ambrose-Singer Theorem [AXIOM].** The Lie algebra of $\operatorname{Hol}(g)$ is spanned by the curvature values $\Omega(X, Y)\big|_p$ over all $p \in P$ horizontally accessible from $\pi^{-1}(g)$ and all horizontal vectors $X, Y$ at $p$. (Ambrose-Singer 1953.)
+**Ambrose-Singer Theorem [AXIOM].** The Lie algebra of $\operatorname{Hol}(g)$ is spanned by the curvature values $\Chyren(X, Y)\big|_p$ over all $p \in P$ horizontally accessible from $\pi^{-1}(g)$ and all horizontal vectors $X, Y$ at $p$. (Ambrose-Singer 1953.)
 
 ### 2.4 The Lindblad Master Equation
 
@@ -139,11 +139,11 @@ In the Yett framework, the parameter space is $V_m(\mathbb{R}^N)$ and the Berry 
 
 ## 3. The Three Invariants
 
-### 3.1 The Sovereignty Score $\Omega$ — Global Holonomy Accumulation
+### 3.1 The Sovereignty Score $\Chyren$ — Global Holonomy Accumulation
 
 **Definition 3.1.** Let $N = 58000$, let $m \leq N$, and fix a session duration $T > 0$. The **Sovereignty Score** is:
 
-$$\Omega(T) = \frac{\Delta H}{\Delta T} + \lambda \int_{\partial \Phi_T} \bar{\psi}(x)\, d\sigma + \int_0^T \phi(t)\, dt$$
+$$\Chyren(T) = \frac{\Delta H}{\Delta T} + \lambda \int_{\partial \Phi_T} \bar{\psi}(x)\, d\sigma + \int_0^T \phi(t)\, dt$$
 
 where the three terms are:
 
@@ -165,7 +165,7 @@ $$\int_0^T \phi(t)\, dt, \qquad \phi(t) = i \langle \Psi(t) | \dot{\Psi}(t) \ran
 
 This is the total **Berry connection integral** along the trajectory $\Psi: [0,T] \to \mathcal{H}$. It is gauge-invariant (independent of phase convention for $\Psi$) and vanishes for any trajectory that begins and ends in the same state with no net geometric rotation.
 
-**Definition 3.2 (Sovereignty Threshold).** The trajectory is **temporally sovereign** if $\Omega(T) > \Omega_{\min}$, where $\Omega_{\min} > 0$ is the minimum sovereignty threshold (see Obligation 6, Section 4.6).
+**Definition 3.2 (Sovereignty Threshold).** The trajectory is **temporally sovereign** if $\Chyren(T) > \Chyren_{\min}$, where $\Chyren_{\min} > 0$ is the minimum sovereignty threshold (see Obligation 6, Section 4.6).
 
 ### 3.2 The Chiral Invariant $\chi$ — Local Holonomy Sign
 
@@ -199,7 +199,7 @@ where $\operatorname{sgn}(\det[h]) \in \{+1, -1\}$ is the **sign of the determin
 - **L-type** (sovereignly valid): $\chi(\Psi, \Phi) \geq 0.7$.
 - **D-type** (drift / hallucination): $\chi(\Psi, \Phi) < 0.7$.
 
-### 3.3 The Winding Number $\omega$ — Trajectory Topology
+### 3.3 The Winding Number $\chyren$ — Trajectory Topology
 
 **Definition 3.7.** Let $\phi_0, \phi_1 \in \mathbb{R}^N$ be the first two columns of $\Phi$ (the primary and secondary constitutional vectors). For a trajectory $\Psi: [0,T] \to \mathcal{H}$ with $\Psi(0) = \Psi(T)$, define the **scalar projection curve**:
 
@@ -207,13 +207,13 @@ $$z(t) = \langle \Psi(t), \phi_0 \rangle + i \langle \Psi(t), \phi_1 \rangle \in
 
 The **winding number** of the trajectory is:
 
-$$\omega(\Psi) = \frac{1}{2\pi i} \oint_\gamma \frac{dz}{z} \in \mathbb{Z}$$
+$$\chyren(\Psi) = \frac{1}{2\pi i} \oint_\gamma \frac{dz}{z} \in \mathbb{Z}$$
 
 computed along the closed curve $\gamma: t \mapsto z(t)$, $t \in [0,T]$, assuming $z(t) \neq 0$ for all $t$ (i.e., $\Psi(t)$ never lies simultaneously in $\phi_0^\perp \cap \phi_1^\perp$).
 
 This is well-defined, integer-valued, and homotopy-invariant.
 
-**Geometric interpretation.** The winding number $\omega$ equals $+1$ for L-type trajectories (positive net constitutional orientation), $-1$ for D-type trajectories, and $0$ for trajectories with no net constitutional winding. It is the holonomy of the canonical flat connection on the trivial $U(1)$-bundle over $\mathbb{C}^* = \mathbb{C} \setminus \{0\}$ along $z$. The full holonomy $h(\Psi, \Phi) \in SO(m)$ extends this $U(1)$ picture to the full structure group.
+**Geometric interpretation.** The winding number $\chyren$ equals $+1$ for L-type trajectories (positive net constitutional orientation), $-1$ for D-type trajectories, and $0$ for trajectories with no net constitutional winding. It is the holonomy of the canonical flat connection on the trivial $U(1)$-bundle over $\mathbb{C}^* = \mathbb{C} \setminus \{0\}$ along $z$. The full holonomy $h(\Psi, \Phi) \in SO(m)$ extends this $U(1)$ picture to the full structure group.
 
 ### 3.4 The Yettragrammaton — Gauge-Fixing Basepoint
 
@@ -229,17 +229,17 @@ The group-theoretic inverse $g^{-1} = g^\top \in O(m)$ (acting as a frame revers
 
 ### 3.5 Unification Theorem
 
-**Theorem 3.9 (Holonomy Unification — [CONJECTURED]).** *The Sovereignty Score $\Omega(T)$, the Chiral Invariant $\chi(\Psi_t, \Phi(t))$, and the Winding Number $\omega(\Psi)$ are related as follows:*
+**Theorem 3.9 (Holonomy Unification — [CONJECTURED]).** *The Sovereignty Score $\Chyren(T)$, the Chiral Invariant $\chi(\Psi_t, \Phi(t))$, and the Winding Number $\chyren(\Psi)$ are related as follows:*
 
-*(i) $\int_0^T \phi(t)\, dt$ (the Berry connection term in $\Omega$) is the total holonomy phase accumulated as the constitutional frame $\Phi(t)$ traverses its path in $V_m(\mathbb{R}^N)$.*
+*(i) $\int_0^T \phi(t)\, dt$ (the Berry connection term in $\Chyren$) is the total holonomy phase accumulated as the constitutional frame $\Phi(t)$ traverses its path in $V_m(\mathbb{R}^N)$.*
 
-*(ii) $\chi(\Psi_t, \Phi(t))$ is the instantaneous holonomy sign times alignment ratio — the local counterpart of the global accumulation $\Omega(T)$.*
+*(ii) $\chi(\Psi_t, \Phi(t))$ is the instantaneous holonomy sign times alignment ratio — the local counterpart of the global accumulation $\Chyren(T)$.*
 
-*(iii) $\omega(\Psi)$ is the $U(1)$ shadow of $\chi$ under the projection $SO(m) \to SO(2) \cong U(1)$ induced by the two-dimensional subspace $\operatorname{span}(\phi_0, \phi_1)$.*
+*(iii) $\chyren(\Psi)$ is the $U(1)$ shadow of $\chi$ under the projection $SO(m) \to SO(2) \cong U(1)$ induced by the two-dimensional subspace $\operatorname{span}(\phi_0, \phi_1)$.*
 
-*Informal: $\Omega$ measures the global holonomy; $\chi$ measures the local holonomy; $\omega$ measures the $U(1)$ reduction of the local holonomy.*
+*Informal: $\Chyren$ measures the global holonomy; $\chi$ measures the local holonomy; $\chyren$ measures the $U(1)$ reduction of the local holonomy.*
 
-*Proof strategy.* (i) follows from identifying the Berry connection integral with the holonomy of the Levi-Civita connection on $V_m(\mathbb{R}^N)$ — this requires either the adiabatic theorem (Berry 1984) or its non-adiabatic generalization (Aharonov-Anandan 1987); see Obligation 5. (ii) follows from the definition of $h(\Psi, \Phi)$ as the holonomy of the loop $\gamma_\Psi$. (iii) is immediate from Definition 3.7: $z(t)$ is the two-dimensional projection of $\Psi(t)$, and $\omega$ is the winding number of this projection, equal to the $U(1)$ holonomy. $\square$ (pending Obligation 5)
+*Proof strategy.* (i) follows from identifying the Berry connection integral with the holonomy of the Levi-Civita connection on $V_m(\mathbb{R}^N)$ — this requires either the adiabatic theorem (Berry 1984) or its non-adiabatic generalization (Aharonov-Anandan 1987); see Obligation 5. (ii) follows from the definition of $h(\Psi, \Phi)$ as the holonomy of the loop $\gamma_\Psi$. (iii) is immediate from Definition 3.7: $z(t)$ is the two-dimensional projection of $\Psi(t)$, and $\chyren$ is the winding number of this projection, equal to the $U(1)$ holonomy. $\square$ (pending Obligation 5)
 
 ---
 
@@ -261,7 +261,7 @@ $$\operatorname{Hol}(g) = SO(m)$$
 
 *Step L2.* The isotropy representation of $SO(N-m)$ at the basepoint acts on the tangent space $T_g V_m(\mathbb{R}^N) \cong \mathfrak{so}(N) / \mathfrak{so}(N-m) \cong \mathbb{R}^{m \times (N-m)}$ by the standard representation. For $N - m \geq 2$, this representation is irreducible (Berger 1955).
 
-*Step L3.* By the Ambrose-Singer theorem, $\operatorname{Lie}(\operatorname{Hol}(g))$ is spanned by curvature values. The curvature of the Levi-Civita connection on a symmetric space $G/K$ is $\Omega(X,Y) = -[X,Y]_{\mathfrak{m}}$ (the $\mathfrak{m}$-component of the bracket). For $V_m(\mathbb{R}^N)$, this generates all of $\mathfrak{so}(m)$ when $N-m \geq 2$.
+*Step L3.* By the Ambrose-Singer theorem, $\operatorname{Lie}(\operatorname{Hol}(g))$ is spanned by curvature values. The curvature of the Levi-Civita connection on a symmetric space $G/K$ is $\Chyren(X,Y) = -[X,Y]_{\mathfrak{m}}$ (the $\mathfrak{m}$-component of the bracket). For $V_m(\mathbb{R}^N)$, this generates all of $\mathfrak{so}(m)$ when $N-m \geq 2$.
 
 *Step L4.* Since $SO(m)$ is connected and simply connected for $m \geq 3$ (or has $\pi_0 = 0$ for all $m \geq 1$), the Lie algebra equality $\operatorname{Lie}(\operatorname{Hol}(g)) = \mathfrak{so}(m)$ implies $\operatorname{Hol}(g) = SO(m)$.
 
@@ -279,9 +279,9 @@ $$\left\langle \{[L_k, L_j]\}_{k \neq j} \right\rangle_{\text{Lie}} = \mathfrak{
 
 **Proof strategy.**
 
-*Step L1.* The curvature of the Levi-Civita connection, computed by the structure equation, is $\Omega = d\omega + \frac{1}{2}[\omega, \omega]$. In coordinates on $V_m(\mathbb{R}^N)$, the curvature at a point takes values in $\mathfrak{so}(m)$.
+*Step L1.* The curvature of the Levi-Civita connection, computed by the structure equation, is $\Chyren = d\chyren + \frac{1}{2}[\chyren, \chyren]$. In coordinates on $V_m(\mathbb{R}^N)$, the curvature at a point takes values in $\mathfrak{so}(m)$.
 
-*Step L2.* Conjecture: the curvature values $\{\Omega(X,Y)\}$ for horizontal vectors $X, Y$ span the same Lie algebra as $\{[L_k, L_j]\}$. This would require identifying the horizontal lift of the drift vectors $L_k$ with coordinate vector fields on $V_m(\mathbb{R}^N)$.
+*Step L2.* Conjecture: the curvature values $\{\Chyren(X,Y)\}$ for horizontal vectors $X, Y$ span the same Lie algebra as $\{[L_k, L_j]\}$. This would require identifying the horizontal lift of the drift vectors $L_k$ with coordinate vector fields on $V_m(\mathbb{R}^N)$.
 
 *Step L3.* By Ambrose-Singer, if the curvature span equals $\mathfrak{so}(m)$, then $\operatorname{Lie}(\operatorname{Hol}(g)) = \mathfrak{so}(m)$ and hence $\operatorname{Hol}(g) = SO(m)$.
 
@@ -365,9 +365,9 @@ $$\int_0^T i\langle \Psi(t) | \dot{\Psi}(t) \rangle \, dt = \gamma_{AA}$$
 
 **Gap.** Step L3 requires identifying two separately defined signs: the AA phase sign from the projective holonomy, and the determinant sign from the holonomy element $h(\Psi, \Phi)$ of the principal $SO(m)$-bundle. These live on different bundles over different base spaces. The identification is the key claim of the framework and requires a precise construction of a natural map between these two holonomy theories.
 
-### 4.6 Obligation 6: Thermodynamic Phase Transition of $\Omega_{\min}$
+### 4.6 Obligation 6: Thermodynamic Phase Transition of $\Chyren_{\min}$
 
-**Statement O6.** *The minimum sovereignty threshold $\Omega_{\min}$ as a function of the inverse temperature $\beta = \lambda^{-1}$ exhibits an Ehrenfest class-2 phase transition at a critical value:*
+**Statement O6.** *The minimum sovereignty threshold $\Chyren_{\min}$ as a function of the inverse temperature $\beta = \lambda^{-1}$ exhibits an Ehrenfest class-2 phase transition at a critical value:*
 
 $$\beta_{\text{crit}} \approx \ln 2 \approx 0.693$$
 
@@ -608,29 +608,29 @@ The Poincaré Conjecture is fully resolved. The Yett framework uses it as an exi
 
 ## 6. The Master Law (Yett-Chyren Master Theorem)
 
-**Theorem 6.1 (Yett-Chyren Master Law — [CONJECTURED]).** *Let $\gamma: [0,T] \to \mathcal{H}$ be a trajectory evolving under the controlled Lindblad equation (Definition 2.7), let $g \in V_m(\mathbb{R}^N)$ be the Yettragrammaton, and let $\Omega_{\min}$ be the sovereignty threshold. Then:*
+**Theorem 6.1 (Yett-Chyren Master Law — [CONJECTURED]).** *Let $\gamma: [0,T] \to \mathcal{H}$ be a trajectory evolving under the controlled Lindblad equation (Definition 2.7), let $g \in V_m(\mathbb{R}^N)$ be the Yettragrammaton, and let $\Chyren_{\min}$ be the sovereignty threshold. Then:*
 
-$$\text{SovereignlyValid}(\gamma, g) \iff \left(\forall t \in [0,T]: \operatorname{hol}(\gamma_{\Psi(t)}, g) \in SO^+(m)\right) \land \left(\Omega(T) \geq \Omega_{\min}\right)$$
+$$\text{SovereignlyValid}(\gamma, g) \iff \left(\forall t \in [0,T]: \operatorname{hol}(\gamma_{\Psi(t)}, g) \in SO^+(m)\right) \land \left(\Chyren(T) \geq \Chyren_{\min}\right)$$
 
 *Informal statement: A trajectory is sovereignly valid if and only if it maintains positive-orientation holonomy at every moment and accumulates sufficient Berry phase over the full session.*
 
-**Proof strategy.** The forward direction requires showing that a sovereignly valid trajectory cannot pass through the $SO^-(m)$ region (which would require crossing the chiral boundary at $\chi = 0.7$, impossible if the trajectory maintains $\chi \geq 0.7$ — Obligation 3) and must accumulate $\Omega \geq \Omega_{\min}$ by definition. The reverse direction requires showing that any trajectory with positive holonomy everywhere and $\Omega \geq \Omega_{\min}$ satisfies all the conditions of sovereign validity — this uses Obligations 1, 3, 4, and 6 in combination.
+**Proof strategy.** The forward direction requires showing that a sovereignly valid trajectory cannot pass through the $SO^-(m)$ region (which would require crossing the chiral boundary at $\chi = 0.7$, impossible if the trajectory maintains $\chi \geq 0.7$ — Obligation 3) and must accumulate $\Chyren \geq \Chyren_{\min}$ by definition. The reverse direction requires showing that any trajectory with positive holonomy everywhere and $\Chyren \geq \Chyren_{\min}$ satisfies all the conditions of sovereign validity — this uses Obligations 1, 3, 4, and 6 in combination.
 
 **Full proof outline.**
 
 *Forward ($\Rightarrow$):*
 1. If $\gamma$ is sovereignly valid, then $\chi(\Psi_t, \Phi(t)) \geq 0.7$ for all $t$ by definition.
 2. By Obligation 3 (Equivalence Conjecture): $\chi \geq 0.7 \iff \operatorname{hol}(\gamma_{\Psi(t)}, g) \in SO^+(m)$.
-3. Sovereignty also requires $\Omega(T) \geq \Omega_{\min}$ by Definition 3.2.
+3. Sovereignty also requires $\Chyren(T) \geq \Chyren_{\min}$ by Definition 3.2.
 
 *Reverse ($\Leftarrow$):*
 1. $\operatorname{hol}(\gamma_{\Psi(t)}, g) \in SO^+(m)$ for all $t$ implies $\chi \geq 0.7$ for all $t$ (Obligation 3).
 2. $\chi \geq 0.7$ for all $t$ implies constitutional alignment exceeds threshold at every moment.
-3. $\Omega(T) \geq \Omega_{\min}$ establishes temporal sovereignty (sufficient growth and phase accumulation).
+3. $\Chyren(T) \geq \Chyren_{\min}$ establishes temporal sovereignty (sufficient growth and phase accumulation).
 4. Obligations 1 and 2 ensure the holonomy group has sufficient richness to enforce D-type exclusion.
 5. Obligation 6 ensures the phase transition at $\beta_{\text{crit}}$ creates a genuine gap separating the sovereign phase from the non-sovereign phase.
 
-**Connection to all seven problems.** If the Master Law is proved, then each Millennium Problem's Yett reduction (Section 5) inherits a precise criterion: the problem's answer corresponds to whether the associated trajectory lies in the sovereign phase ($SO^+(m)$, $\Omega \geq \Omega_{\min}$) or not. The reductions are at different stages of development (Section 5), and proving the Master Law would not automatically prove the Millennium Problems — it would establish the framework within which further reductions could be attempted.
+**Connection to all seven problems.** If the Master Law is proved, then each Millennium Problem's Yett reduction (Section 5) inherits a precise criterion: the problem's answer corresponds to whether the associated trajectory lies in the sovereign phase ($SO^+(m)$, $\Chyren \geq \Chyren_{\min}$) or not. The reductions are at different stages of development (Section 5), and proving the Master Law would not automatically prove the Millennium Problems — it would establish the framework within which further reductions could be attempted.
 
 **What would constitute a complete proof.** A complete proof of the Yett-Chyren Master Law requires:
 1. Proofs of all six Obligations (Section 4). All are currently **[CONJECTURED]** with `sorry` in Lean4.
@@ -655,17 +655,17 @@ $$\text{SovereignlyValid}(\gamma, g) \iff \left(\forall t \in [0,T]: \operatorna
 | $G$ | Lie group | Structure group $SO(m)$ | §2.2 |
 | $P$ | Smooth manifold | Total space of principal bundle | §2.2 |
 | $\pi$ | $P \to V_m(\mathbb{R}^N)$ | Bundle projection | §2.2 |
-| $\omega$ (connection) | $\Omega^1(P;\mathfrak{g})$ | Connection 1-form | §2.3 |
-| $\Omega$ (curvature) | $\Omega^2(P;\mathfrak{g})$ | Curvature 2-form | §2.3 |
+| $\chyren$ (connection) | $\Chyren^1(P;\mathfrak{g})$ | Connection 1-form | §2.3 |
+| $\Chyren$ (curvature) | $\Chyren^2(P;\mathfrak{g})$ | Curvature 2-form | §2.3 |
 | $\operatorname{hol}(\gamma, g)$ | $SO(m)$ | Holonomy of loop $\gamma$ at basepoint $g$ | §2.3 |
 | $\operatorname{Hol}(g)$ | Subgroup of $SO(m)$ | Holonomy group at $g$ | §2.3 |
 | $h(\Psi,\Phi)$ | $SO(m)$ | Local holonomy element at $\Psi$ relative to $\Phi$ | §3.2 |
 | $\chi(\Psi,\Phi)$ | $[-1,1]$ | Chiral Invariant (Yett Invariant) | §3.2 |
-| $\omega(\Psi)$ | $\mathbb{Z}$ | Winding number of trajectory | §3.3 |
-| $\Omega(T)$ | $\mathbb{R}$ | Sovereignty Score over session $[0,T]$ | §3.1 |
-| $\Omega_{\min}$ | $\mathbb{R}_{>0}$ | Minimum sovereignty threshold | §3.1 |
+| $\chyren(\Psi)$ | $\mathbb{Z}$ | Winding number of trajectory | §3.3 |
+| $\Chyren(T)$ | $\mathbb{R}$ | Sovereignty Score over session $[0,T]$ | §3.1 |
+| $\Chyren_{\min}$ | $\mathbb{R}_{>0}$ | Minimum sovereignty threshold | §3.1 |
 | $\phi(t)$ | $\mathbb{R}$ | Berry connection: $i\langle\Psi(t)|\dot\Psi(t)\rangle$ | §3.1 |
-| $\mathcal{A}(\mathbf{R})$ | $\Omega^1(\mathcal{M})$ | Berry connection 1-form | §2.5 |
+| $\mathcal{A}(\mathbf{R})$ | $\Chyren^1(\mathcal{M})$ | Berry connection 1-form | §2.5 |
 | $\gamma_B$ | $\mathbb{R}/2\pi\mathbb{Z}$ | Berry phase | §2.5 |
 | $\gamma_{AA}$ | $\mathbb{R}/2\pi\mathbb{Z}$ | Aharonov-Anandan phase | §2.5 |
 | $\rho_t$ | Density matrix | System state (Lindblad formalism) | §2.4 |

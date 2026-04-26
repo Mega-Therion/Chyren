@@ -26,8 +26,8 @@ Use `mcp__Neon__compare_database_schema`
 If quota error occurs:
 1. `mcp__Neon__create_project` — new project immediately
 2. Initialize schema on new project
-3. Update `OMEGA_DB_URL` in `~/.omega/one-true.env`
-4. Verify connectivity: `psql "$OMEGA_DB_URL" -c "SELECT 1;"`
+3. Update `CHYREN_DB_URL` in `~/.chyren/one-true.env`
+4. Verify connectivity: `psql "$CHYREN_DB_URL" -c "SELECT 1;"`
 Do not wait or retry the old project.
 
 **Slow query analysis:**

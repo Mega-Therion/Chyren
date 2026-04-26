@@ -62,7 +62,7 @@ See [EVIDENCE_MATRIX.md](./EVIDENCE_MATRIX.md) for current status.
 
 ## 4) Visual Assets
 Animated and static candidate graphics already present in repo:
-- Growth GIF: ![OmegA Growth](./diagrams/candidates/omega-graph-assets_2510_omega-growth.gif)
+- Growth GIF: ![Chyren Growth](./diagrams/candidates/chyren-graph-assets_2510_chyren-growth.gif)
 - Architecture image: ![Architecture](./architecture.png)
 - Proof ladder: ![Claim Maturity Ladder](./diagrams/proof-ladder.svg)
 

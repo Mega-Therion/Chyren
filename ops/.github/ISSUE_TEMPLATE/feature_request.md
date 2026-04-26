@@ -20,11 +20,11 @@ assignees: ''
 - [ ] Master Ledger
 - [ ] Phylactery identity kernel
 - [ ] Provider Spokes
-- [ ] OmegA-Next (Rust)
+- [ ] Chyren-Next (Rust)
 - [ ] chyren-web
 - [ ] CLI
 
-## OmegA Stack Layer
+## Chyren Stack Layer
 - [ ] AEGIS (Governance)
 - [ ] AEON (Identity)
 - [ ] ADCCL (Deliberation)

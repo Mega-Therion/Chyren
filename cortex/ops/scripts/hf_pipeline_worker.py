@@ -20,8 +20,8 @@ GEMINI_DIM = 3072
 BATCH_SIZE = 100
 
 def get_db_conn():
-    db_url = os.environ.get("OMEGA_CATALOG_DB_URL")
-    if not db_url: raise ValueError("OMEGA_CATALOG_DB_URL not set")
+    db_url = os.environ.get("CHYREN_CATALOG_DB_URL")
+    if not db_url: raise ValueError("CHYREN_CATALOG_DB_URL not set")
     return psycopg2.connect(db_url)
 
 def embed_text(text):

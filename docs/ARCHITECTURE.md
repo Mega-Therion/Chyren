@@ -47,27 +47,27 @@ User / API / Tooling
         |
    ./chyren (Brain Stem router)
         |
-   Medulla API (omega-cli, port 8080)
+   Medulla API (chyren-cli, port 8080)
         |
-   omega-conductor (pipeline orchestration)
-        |
-   +-----------+
-   | omega-aegis|  Security gate, constitution checks
-   +-----------+
+   chyren-conductor (pipeline orchestration)
         |
    +-----------+
-   | omega-aeon |  Temporal/scheduling subsystem
+   | chyren-aegis|  Security gate, constitution checks
    +-----------+
         |
-   omega-spokes    Provider SDK adapter (Anthropic/OpenAI/DeepSeek/Gemini)
+   +-----------+
+   | chyren-aeon |  Temporal/scheduling subsystem
+   +-----------+
+        |
+   chyren-spokes    Provider SDK adapter (Anthropic/OpenAI/DeepSeek/Gemini)
         |
    +-----------+
-   | omega-adccl|  Drift/hallucination verification gate (threshold: 0.7)
+   | chyren-adccl|  Drift/hallucination verification gate (threshold: 0.7)
    +-----------+
         |
      [PASS]                        [FAIL]
         |                             |
-   omega-myelin              Response discarded
+   chyren-myelin              Response discarded
    (Qdrant vector store)
         |
    Master Ledger
@@ -82,22 +82,22 @@ User / API / Tooling
 
 | Crate | Role |
 |---|---|
-| `omega-core` | Foundation types, contracts, task envelopes |
-| `omega-conductor` | Full pipeline orchestration (Alignment → AEON → Provider → ADCCL → Ledger) |
-| `omega-aegis` | Security gates, policy enforcement, constitution checks |
-| `omega-adccl` | Drift/hallucination detection; score 0.0–1.0, threshold 0.7 |
-| `omega-myelin` | Persistent semantic memory (Qdrant vector store) |
-| `omega-spokes` | Provider SDK adapters + registry |
-| `omega-aeon` | Temporal/scheduling subsystem |
-| `omega-phylactery` | Identity and integrity persistence |
-| `omega-cli` | Clap-based CLI + Actix-web API server (port 8080) |
-| `omega-dream` | Long-term memory and pattern synthesis |
-| `omega-metacog` | Self-reflection and introspection |
-| `omega-worldmodel` | Environmental state and context management |
-| `omega-telemetry` | Instrumentation — all significant events must route here |
-| `omega-integration` | Cross-crate routing |
-| `omega-eval` | Evaluation framework |
-| `omega-telegram-gateway` | Telegram bot integration |
+| `chyren-core` | Foundation types, contracts, task envelopes |
+| `chyren-conductor` | Full pipeline orchestration (Alignment → AEON → Provider → ADCCL → Ledger) |
+| `chyren-aegis` | Security gates, policy enforcement, constitution checks |
+| `chyren-adccl` | Drift/hallucination detection; score 0.0–1.0, threshold 0.7 |
+| `chyren-myelin` | Persistent semantic memory (Qdrant vector store) |
+| `chyren-spokes` | Provider SDK adapters + registry |
+| `chyren-aeon` | Temporal/scheduling subsystem |
+| `chyren-phylactery` | Identity and integrity persistence |
+| `chyren-cli` | Clap-based CLI + Actix-web API server (port 8080) |
+| `chyren-dream` | Long-term memory and pattern synthesis |
+| `chyren-metacog` | Self-reflection and introspection |
+| `chyren-worldmodel` | Environmental state and context management |
+| `chyren-telemetry` | Instrumentation — all significant events must route here |
+| `chyren-integration` | Cross-crate routing |
+| `chyren-eval` | Evaluation framework |
+| `chyren-telegram-gateway` | Telegram bot integration |
 
 ---
 
@@ -106,7 +106,7 @@ User / API / Tooling
 ### Master Ledger (PostgreSQL / Neon)
 - Append-only, cryptographically signed
 - Every provider response that passes ADCCL is committed here
-- Env var: `OMEGA_DB_URL`
+- Env var: `CHYREN_DB_URL`
 - Never delete `state/` files; history is irreversible
 
 ### Myelin (Qdrant Vector Store)
@@ -155,14 +155,14 @@ All provider spokes receive a composed system prompt containing:
 
 ## Configuration
 
-All secrets come from `~/.omega/one-true.env` (not in git). Missing keys fail silently.
+All secrets come from `~/.chyren/one-true.env` (not in git). Missing keys fail silently.
 
 ```
 ANTHROPIC_API_KEY       # Claude API token
 OPENAI_API_KEY          # GPT-4 API token
 DEEPSEEK_API_KEY        # DeepSeek API token
 GEMINI_API_KEY          # Google Gemini API token
-OMEGA_DB_URL            # Neon PostgreSQL connection string
+CHYREN_DB_URL            # Neon PostgreSQL connection string
 QDRANT_URL              # Qdrant vector store URL
 ```
 

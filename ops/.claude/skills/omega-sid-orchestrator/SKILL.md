@@ -1,5 +1,5 @@
 ---
-name: omega-sid-orchestrator
+name: chyren-sid-orchestrator
 description: Sovereign Intelligence Dashboard (SID) orchestrator. Coordinates Perplexity market search, Comet (Puppeteer) scraping, and Neon Postgres ingestion for industrial reconnaissance.
 ---
 

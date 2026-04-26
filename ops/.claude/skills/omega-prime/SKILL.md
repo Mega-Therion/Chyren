@@ -1,26 +1,26 @@
 ---
-name: omega-prime
-description: This skill should be used when the user asks to "/omega-prime", "run omega-prime", "orchestrate the OmegA stack", "coordinate Claude Codex  and Aider", or wants a governed multi-agent Plan-Delegate-Execute-Verify-Log workflow for OmegA.
+name: chyren-prime
+description: This skill should be used when the user asks to "/chyren-prime", "run chyren-prime", "orchestrate the Chyren stack", "coordinate Claude Codex  and Aider", or wants a governed multi-agent Plan-Delegate-Execute-Verify-Log workflow for Chyren.
 version: 0.1.0
 ---
 
-# Omega Prime
+# Chyren Prime
 
 ## Purpose
 
-Use Omega Prime as the highest-level orchestration skill for OmegA Sovereign work. Convert a single objective into a governed execution plan, split the work across the right local agents, run the implementation through the correct subsystem, verify the result, and record the outcome in `~/NEXUS/ERGON.md`.
+Use Chyren Prime as the highest-level orchestration skill for Chyren Sovereign work. Convert a single objective into a governed execution plan, split the work across the right local agents, run the implementation through the correct subsystem, verify the result, and record the outcome in `~/NEXUS/ERGON.md`.
 
 Keep private reasoning internal. Emit only the objective, the plan, the delegated work, the verification evidence, and the log entry.
 
 ## Invocation
 
-- Treat `/omega-prime [OBJECTIVE]` as the canonical invocation.
+- Treat `/chyren-prime [OBJECTIVE]` as the canonical invocation.
 - Treat `$ARGUMENTS` as the objective when the skill is reached through a command wrapper.
-- Treat the objective as a system-level request to improve, extend, validate, govern, or recover the OmegA stack.
+- Treat the objective as a system-level request to improve, extend, validate, govern, or recover the Chyren stack.
 
 ## Non-Negotiables
 
-- Use `/home/mega/OMEGA_WORKSPACE/CANON/OmegA-Architecture` as the canonical source of truth.
+- Use `/home/mega/CHYREN_WORKSPACE/CANON/Chyren-Architecture` as the canonical source of truth.
 - Preserve other agents' work. Never overwrite unrelated changes without explicit need.
 - Never expose secrets, vault contents, or raw credentials in logs or output.
 - Never skip verification. Every meaningful execution path must end with evidence.
@@ -67,7 +67,7 @@ Begin by reconstructing state before changing anything.
 - Read the latest lines of `~/NEXUS/ERGON.md` for collective activity.
 - Read `~/NEXUS/STATUS.md` for phase state and blockers.
 - Read the active project `log.md` if the work is inside a project tree.
-- Scan the OmegA repo with `tools/repo_cartographer.py` or equivalent repository mapping.
+- Scan the Chyren repo with `tools/repo_cartographer.py` or equivalent repository mapping.
 - Prefer current logs and canonical docs over stale summaries or archived copies.
 - Use `tools/harvester.py` as the research-harvest template, but rely on real repo/log scanning when the stub does not provide enough structure.
 
@@ -105,7 +105,7 @@ Load `references/agent-routing.md` for the delegation matrix and handoff rules.
 
 ### 4) Sovereign Security & Governance
 
-Enforce OmegA governance on every action.
+Enforce Chyren governance on every action.
 
 - Redact secrets and sensitive values from logs, summaries, and handoffs.
 - Validate that requested changes stay within the canonical workspace and approved boundaries.
@@ -133,7 +133,7 @@ Load `references/validation-and-deployment.md` for the finalization order and on
 When instructions disagree across logs, briefs, or sessions, resolve them in this order:
 
 1. Current user objective in the active turn.
-2. Canonical repo docs in `CANON/OmegA-Architecture`.
+2. Canonical repo docs in `CANON/Chyren-Architecture`.
 3. The newest timestamped entry in `~/NEXUS/ERGON.md`.
 4. The active project `log.md`.
 5. Other agent session notes.

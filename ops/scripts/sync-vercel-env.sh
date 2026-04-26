@@ -11,12 +11,12 @@ for arg in "$@"; do
   fi
 done
 
-ENV_FILE="${CHYREN_ENV_FILE:-$HOME/.omega/one-true.env}"
+ENV_FILE="${CHYREN_ENV_FILE:-$HOME/.chyren/one-true.env}"
 
 # ── Preflight: env file must exist ────────────────────────────────────────────
 if [[ ! -f "$ENV_FILE" ]]; then
   echo "ERROR: env file not found at $ENV_FILE"
-  echo "  Set CHYREN_ENV_FILE or create $HOME/.omega/one-true.env"
+  echo "  Set CHYREN_ENV_FILE or create $HOME/.chyren/one-true.env"
   exit 1
 fi
 
@@ -27,8 +27,8 @@ if ! command -v vercel >/dev/null 2>&1; then
 fi
 
 # ── Preflight: required keys must all exist in env file ───────────────────────
-KEYS=("OMEGA_DB_URL" "SUPABASE_URL" "SUPABASE_SERVICE_KEY" "ANTHROPIC_API_KEY" "GEMINI_API_KEY")
-REQUIRED_KEYS=("ANTHROPIC_API_KEY" "GEMINI_API_KEY" "OMEGA_DB_URL")
+KEYS=("CHYREN_DB_URL" "SUPABASE_URL" "SUPABASE_SERVICE_KEY" "ANTHROPIC_API_KEY" "GEMINI_API_KEY")
+REQUIRED_KEYS=("ANTHROPIC_API_KEY" "GEMINI_API_KEY" "CHYREN_DB_URL")
 
 MISSING=()
 for req in "${REQUIRED_KEYS[@]}"; do

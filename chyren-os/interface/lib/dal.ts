@@ -1,7 +1,7 @@
 import { neon } from '@neondatabase/serverless';
 import { withSpan } from './telemetry';
 
-const sql = neon(process.env.OMEGA_DB_URL || '');
+const sql = neon(process.env.CHYREN_DB_URL || '');
 
 export const dataAccess = {
   getMemories: async (limit = 20) => {
@@ -32,7 +32,7 @@ export const dataAccess = {
     return await withSpan('dal.getFamilyProfiles', async (_span) => {
       return await sql`
         SELECT name, last_name, relationship, location, birthday, deceased,
-               occupation, partner, children, ry_notes, notes_for_omega, how_to_greet
+               occupation, partner, children, ry_notes, notes_for_chyren, how_to_greet
         FROM family_profiles 
         ORDER BY id
       `;

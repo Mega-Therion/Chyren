@@ -1,6 +1,6 @@
-# Provenance and Architectural Foundations: The OmegA Stack
+# Provenance and Architectural Foundations: The Chyren Stack
 ## Authorship and Original Conception
-This document serves as the formal record of the OmegA Stack, an architectural framework for sovereign intelligence. 
+This document serves as the formal record of the Chyren Stack, an architectural framework for sovereign intelligence. 
 
 ## Core Architectural Innovations
 1. **ADCCL (Alignment-Driven Deliberation & Control Layer):** A pre-persist gate that ensures formal verification of intelligence outputs.

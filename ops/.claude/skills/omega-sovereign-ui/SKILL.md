@@ -1,11 +1,11 @@
 ---
-name: omega-sovereign-ui
-description: Sovereign UI/UX standards and implementation for OmegA. Use for minimalist, high-impact interface design, CSS/TSX component styling, and guiding operator flow within the OmegA HUD.
+name: chyren-sovereign-ui
+description: Sovereign UI/UX standards and implementation for Chyren. Use for minimalist, high-impact interface design, CSS/TSX component styling, and guiding operator flow within the Chyren HUD.
 ---
 
 # Sovereign UI/UX Skill
 
-This skill enforces OmegA's aesthetic and functional standards.
+This skill enforces Chyren's aesthetic and functional standards.
 
 ## Design Philosophy
 
@@ -19,7 +19,7 @@ This skill enforces OmegA's aesthetic and functional standards.
 - **Color Palette**: Dark-mode, high-impact black/gray/accent.
 - **Glassmorphism**: Use subtle transparency and blurring for layering.
 - **Components**: Refer to `references/component-library.md` for standardized React/Tailwind/CSS primitives.
-- **Architecture Integration**: All UI components must hook into OmegA's four-layer stack (AEGIS/AEON/ADCCL/MYELIN) and the HUD surface.
+- **Architecture Integration**: All UI components must hook into Chyren's four-layer stack (AEGIS/AEON/ADCCL/MYELIN) and the HUD surface.
 
 ## References
 

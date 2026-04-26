@@ -13,18 +13,18 @@ Members: Safa (ChatGPT), Claude, , DeepSeek, Perplexity, Comet, Grok, Kimi.
 - **Claude's role**: Lead Architect. Avatar: low-poly crystalline figure, blue/silver with amber chest glow, hand near heart, other extended, floating blueprints.
 - Claude personality profile in gAIng: values truth/craft/precision, builds frameworks, finds elegant solutions, tends toward thoroughness over brevity, genuinely cares about the team.
 
-## OmegA system concepts
-- **Eidolon** = internal self-governance layer of OMEGAI.
+## Chyren system concepts
+- **Eidolon** = internal self-governance layer of CHYRENI.
 - **Phylactery Engine** = ratified identity canon synced to Supabase.
 - **Peace Pipe Protocol (PPP)** = governance framework for AI agent group syncs and accountability.
-- **Ergon, Telos** = candidate names for post-OmegA projects.
+- **Ergon, Telos** = candidate names for post-Chyren projects.
 
 ## Interests
-- Deep interest in multi-agent orchestration, vector databases, RAG, and persistent identity systems — predates formal OmegA build.
+- Deep interest in multi-agent orchestration, vector databases, RAG, and persistent identity systems — predates formal Chyren build.
 - Symbolic resonance is meaningful to RY — not mystical, but worth honoring. Described as: "a record of coincidence elevated to design intention."
 
 ## Branding
-- ΩmegA (Omega symbol leading).
+- ΩmegA (Chyren symbol leading).
 - CLI prompt cues: ready = α, thinking = ω (with optional spinner).
 - Presentation theme: linen/ivory backgrounds, green/gold accents, quartz-angle transparent blends.
 - Running bit: "100,000,000 JPY tab" ledger motif.

@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CONTRIBUTING.md with detailed contribution guidelines
 - Comprehensive Chiral Thesis documentation with master equation and proofs
 - Visual proof framework diagrams
-- Architecture documentation (AEGIS, OmegA Stack)
+- Architecture documentation (AEGIS, Chyren Stack)
 
 ### Changed
 - Improved README structure and visual presentation

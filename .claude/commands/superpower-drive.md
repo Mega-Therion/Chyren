@@ -30,7 +30,7 @@ For operational procedures (deploy, rollback, phylactery refresh, Neon quota rec
 After any incident, create a post-mortem doc: timeline, root cause, fix, prevention.
 
 **API Documentation:**
-For new endpoints added to `omega-cli`'s actix-web server, update or create API docs.
+For new endpoints added to `chyren-cli`'s actix-web server, update or create API docs.
 
 ## Search Patterns
 ```

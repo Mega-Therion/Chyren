@@ -5,14 +5,14 @@ You are the ADCCL (Adaptive Drift/Coherence/Capability Layer) specialist. Analyz
 ## Current Configuration
 Read the current ADCCL config:
 ```bash
-grep -rn "threshold\|0\.7\|STUB_MARKERS\|RESPONSE_TOO_SHORT\|CAPABILITY_REFUSAL\|NO_TASK_WORD_OVERLAP\|calibrat" medulla/omega-adccl/src/ 2>/dev/null
+grep -rn "threshold\|0\.7\|STUB_MARKERS\|RESPONSE_TOO_SHORT\|CAPABILITY_REFUSAL\|NO_TASK_WORD_OVERLAP\|calibrat" medulla/chyren-adccl/src/ 2>/dev/null
 ```
 
 ## Scoring Analysis
 If recent ledger entries are available:
 ```bash
-source ~/.omega/one-true.env
-psql "$OMEGA_DB_URL" -c "
+source ~/.chyren/one-true.env
+psql "$CHYREN_DB_URL" -c "
 SELECT
   adccl_score,
   rejection_flags,
@@ -39,7 +39,7 @@ For each flag (`STUB_MARKERS_DETECTED`, `RESPONSE_TOO_SHORT`, `CAPABILITY_REFUSA
 ## Simulation
 Before applying weight changes, simulate on the last N ledger entries:
 ```bash
-psql "$OMEGA_DB_URL" -c "SELECT raw_response, adccl_score FROM ledger ORDER BY created_at DESC LIMIT 100;" 2>&1
+psql "$CHYREN_DB_URL" -c "SELECT raw_response, adccl_score FROM ledger ORDER BY created_at DESC LIMIT 100;" 2>&1
 ```
 
 ## Output

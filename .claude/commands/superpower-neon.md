@@ -30,7 +30,7 @@ $ARGUMENTS
 2. Use `compare_database_schema` before merging migrations
 3. Use `list_slow_queries` after any schema change to detect regressions
 4. Quota overflow → immediately create new project, do not wait
-5. After any operation, update `~/.omega/one-true.env` with new connection string if changed
+5. After any operation, update `~/.chyren/one-true.env` with new connection string if changed
 
 ## Safety Rules for Chyren OS Ledger
 - `ledger` table: INSERT only, no UPDATE, no DELETE, no DROP

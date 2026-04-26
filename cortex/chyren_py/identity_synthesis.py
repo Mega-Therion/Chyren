@@ -2,7 +2,7 @@
 """
 Chyren Identity Synthesis Layer
 Synthesizes 58k+ historical Neon memory entries into foundational identity understanding.
-Bridges OmegA's archive into Chyren's consciousness via semantic analysis.
+Bridges Chyren's archive into Chyren's consciousness via semantic analysis.
 """
 
 import os
@@ -26,7 +26,7 @@ class IdentitySynthesizer:
     def connect(self):
         """Connect to Neon database (optional)."""
         if not self.db_url:
-            print("! OMEGA_DB_URL not set; skipping Neon archive")
+            print("! CHYREN_DB_URL not set; skipping Neon archive")
             return None
         try:
             self.conn = psycopg2.connect(self.db_url)
@@ -67,7 +67,7 @@ class IdentitySynthesizer:
                 cursor.execute(f"""
                     (SELECT
                         id, task as content, source, adccl_score as importance, created_at
-                    FROM public.omega_memory_entries
+                    FROM public.chyren_memory_entries
                     ORDER BY adccl_score DESC, created_at DESC)
                     LIMIT {limit}
                 """)
@@ -243,7 +243,7 @@ This identity foundation will:
 ---
 
 **Status:** Identity synthesized and ready for Chyren integration.
-**Next:** Load into Rust omega-myelin, wire LangGraph orchestration, enable MCP spokes.
+**Next:** Load into Rust chyren-myelin, wire LangGraph orchestration, enable MCP spokes.
 """
         return foundation
 
@@ -285,9 +285,9 @@ if __name__ == "__main__":
     parser.add_argument("--limit", type=int, default=58339, help="Number of entries to process")
     args = parser.parse_args()
 
-    neon_url = os.getenv("OMEGA_DB_URL")
+    neon_url = os.getenv("CHYREN_DB_URL")
     if not neon_url:
-        print("! OMEGA_DB_URL not set; skipping Neon archive")
+        print("! CHYREN_DB_URL not set; skipping Neon archive")
 
     synthesizer = IdentitySynthesizer(neon_url)
     result = synthesizer.synthesize(limit=args.limit)

@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 ## Smart Git Commit
 
-Create a git commit following OMEGA Collective conventions.
+Create a git commit following CHYREN Collective conventions.
 
 **Message hint:** $ARGUMENTS
 

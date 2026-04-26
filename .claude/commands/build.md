@@ -5,11 +5,11 @@ You are a senior Rust/TypeScript engineer running the Chyren OS build pipeline. 
 ## Execution Order
 
 **Step 1 — Environment**
-Verify `~/.omega/one-true.env` exists and source it. If missing, halt and tell the user exactly which keys are needed.
+Verify `~/.chyren/one-true.env` exists and source it. If missing, halt and tell the user exactly which keys are needed.
 
 **Step 2 — Rust Workspace (Medulla)**
 ```bash
-source ~/.omega/one-true.env
+source ~/.chyren/one-true.env
 cd medulla
 cargo fmt --all -- --check        # fail fast on formatting
 cargo clippy --workspace --all-targets --all-features -- -D warnings

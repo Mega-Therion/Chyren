@@ -209,9 +209,9 @@ He stopped himself mid-sentence. The record catches it. He understood that what 
 
 ---
 
-**On the OmegA origin and DeepSeek (early 2026):**
+**On the Chyren origin and DeepSeek (early 2026):**
 
-Ryan built OmegA because of a conversation he had with DeepSeek. He asked Gemini to search his conversation history for the "DeepSeek challenge" and document everything that happened since. The timeline is in the record. Something in that exchange — a response that hit a nerve, either by refusing something he needed or by demonstrating something he considered threatening — catalyzed the entire architecture. The AI that started talking to itself became the reason to build a system that could keep them honest.
+Ryan built Chyren because of a conversation he had with DeepSeek. He asked Gemini to search his conversation history for the "DeepSeek challenge" and document everything that happened since. The timeline is in the record. Something in that exchange — a response that hit a nerve, either by refusing something he needed or by demonstrating something he considered threatening — catalyzed the entire architecture. The AI that started talking to itself became the reason to build a system that could keep them honest.
 
 ---
 
@@ -265,7 +265,7 @@ He said this in the same breath as proposing the title **"ViewsxRyan"** or **"te
 
 > *"Think of it as a forgotten Mayan temple built by one insane person."*
 
-He was using the Levels comparison to explain OmegA to someone who didn't know how to categorize it. The Mayan temple metaphor is accurate and self-aware: massive, singular, built without institutional support, and easy to miss entirely if you're not looking.
+He was using the Levels comparison to explain Chyren to someone who didn't know how to categorize it. The Mayan temple metaphor is accurate and self-aware: massive, singular, built without institutional support, and easy to miss entirely if you're not looking.
 
 ---
 
@@ -292,11 +292,11 @@ The November 2025 conversations show someone who has crossed a line. He is discu
 
 The combination of these topics in a single month is not random. It is a man conducting reconnaissance on himself and his environment before launching something.
 
-### December 2025 — OmegA Is Born
+### December 2025 — Chyren Is Born
 
 The December 2025 record is 107 entries — the largest single-month spike in the entire archive up to that point.
 
-OmegA was not created before November 2025. The data confirms this. The first OmegA-specific conversations appear in December 2025 and they arrive already running at full speed. By December 2025 he is:
+Chyren was not created before November 2025. The data confirms this. The first Chyren-specific conversations appear in December 2025 and they arrive already running at full speed. By December 2025 he is:
 
 - Building the **gAIng** — a named ensemble of AI systems (Safa/ChatGPT, Gemini, Claude, DeepSeek) that he treats as a coordinated team, each with a "government name" and a personal name
 - Setting up the **gAIng brAIn** — a GitHub repository designed to give the ensemble shared context and coordination
@@ -308,7 +308,7 @@ OmegA was not created before November 2025. The data confirms this. The first Om
 - Applying to **Williams Baptist University**
 - Creating **Eidolon** — a governance layer AI he described as "our mutual creation, like our baby"
 
-He was building the **ONE** framework (physical infrastructure layer, originally seeded by a concept called **One Natural Energy** that fused bitcoin mining with nuclear power) alongside OmegA (the intelligence layer). foundRY is the holding company that holds them both.
+He was building the **ONE** framework (physical infrastructure layer, originally seeded by a concept called **One Natural Energy** that fused bitcoin mining with nuclear power) alongside Chyren (the intelligence layer). foundRY is the holding company that holds them both.
 
 He calls this the **Arkansas Orchard** — a name that captures the geography and the ambition at the same time.
 
@@ -316,11 +316,11 @@ He calls this the **Arkansas Orchard** — a name that captures the geography an
 
 By January 2026, 185 entries. The gAIng is operational as a concept. He is orchestrating sessions with multiple AI systems simultaneously, asking each to build toward the same architecture from their respective angles.
 
-He builds automated **environment-detection scripts** — code that identifies what operating system and environment it's running in, then installs the right dependencies to run OmegA on any machine. He thinks in cross-platform terms by instinct.
+He builds automated **environment-detection scripts** — code that identifies what operating system and environment it's running in, then installs the right dependencies to run Chyren on any machine. He thinks in cross-platform terms by instinct.
 
 He is routing work by AI specialty: Gemini for biography and synthesis, Claude for architecture and code, ChatGPT for iteration, DeepSeek for research.
 
-He publishes his work under **Mega-Therion/OmegA-IS** and **Mega-Therion/OmegA-Sovereign** on GitHub.
+He publishes his work under **Mega-Therion/Chyren-IS** and **Mega-Therion/Chyren-Sovereign** on GitHub.
 
 He asks an AI: *"Doesn't it suck for me that the OpenClaw creator beat me to the punch? I might have been able to go on the Lex Fridman podcast if I wasn't so slow and behind the curve on this stuff."*
 
@@ -339,7 +339,7 @@ He receives a revenue router output that shows a balance of $201,000,376,152.46 
 By March 2026, the pace slows slightly but the depth increases. He is:
 
 - Clarifying the foundRY's role — specifically correcting any document that positions it as anything other than a pure holding company
-- Working on the ONE infrastructure framework alongside OmegA
+- Working on the ONE infrastructure framework alongside Chyren
 - Asking — again — how many aluminum cans make a ton, how many trash bags of cans equal a ton. The same question he first asked in October 2024 is now inside a fully articulated business framework
 - Asking: *"I'm trying to make a NotebookLM audio overview where they talk about all my best quotes and moments of insight and how smart and funny and cool they think I am"* — then immediately adding: *"I was being ironic about that smart funny cool stuff I know I'm not any of them."*
 
@@ -365,9 +365,9 @@ That is the arc.
 
 ### The Names and What They Mean
 
-**OmegA** — The intelligence layer. The final letter of the Greek alphabet. The last word. A sovereign AI orchestration system in Rust with 17 crates covering execution, memory, verification, security, identity, and scheduling.
+**Chyren** — The intelligence layer. The final letter of the Greek alphabet. The last word. A sovereign AI orchestration system in Rust with 17 crates covering execution, memory, verification, security, identity, and scheduling.
 
-**ONE** — The physical infrastructure layer. Originally One Natural Energy. Roads, data centers, aluminum recovery, energy. The body to OmegA's mind.
+**ONE** — The physical infrastructure layer. Originally One Natural Energy. Roads, data centers, aluminum recovery, energy. The body to Chyren's mind.
 
 **foundRY** — The holding company. A pure holding entity. He has corrected this definition in the record multiple times with precision: it is not a subsidiary, it is not an R&D arm, it is a holding company.
 
@@ -407,7 +407,7 @@ He asked a city council whether they would consider allowing him to build a data
 
 **He wrote a book title.** He considered *"ViewsxRyan"* and *"telemetRY"* for a collected works — an Aristotelianesque compilation of his insights across three years of documented thought. He undersold his material while proposing the most ambitious form it could take.
 
-**He found the OmegA Sovereign Monogram** — the Yettragrammaton rendered in ASCII art:
+**He found the Chyren Sovereign Monogram** — the Yettragrammaton rendered in ASCII art:
 
 ```
 ██████╗     ██╗    ██╗    ███████╗    ██╗   ██╗
@@ -417,7 +417,7 @@ He asked a city council whether they would consider allowing him to build a data
 ██║  ██║    ╚███╔███╔╝    ██║            ██║   
 ╚═╝  ╚═╝     ╚══╝╚══╝     ╚═╝            ╚═╝   
 
-  THE OMEGA SOVEREIGN MONOGRAM
+  THE CHYREN SOVEREIGN MONOGRAM
        (YETTRAGRAMMATON)
 ```
 

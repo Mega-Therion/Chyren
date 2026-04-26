@@ -79,7 +79,7 @@ def harden_pets():
     update_facts(cur, 'Travis', 'Beechy', travis_facts)
     cur.execute("UPDATE family_profiles SET occupation = 'Carpenter, Handyman & Expert Outdoorsman (Master Animal Caller)' WHERE name = 'Travis' AND last_name = 'Beechy'")
 
-    # 7. Inject into omega_memory_entries
+    # 7. Inject into chyren_memory_entries
     print("Injecting new memories...")
     memories = [
         ("Teresa Yett's dogs are Luna (female) and Wookie (male).", "pet_hardening", 0.95, "canonical"),
@@ -92,11 +92,11 @@ def harden_pets():
     ]
 
     for content, source, importance, namespace in memories:
-        cur.execute("SELECT id FROM omega_memory_entries WHERE content = %s", (content,))
+        cur.execute("SELECT id FROM chyren_memory_entries WHERE content = %s", (content,))
         if not cur.fetchone():
             entry_id = str(uuid.uuid4())
             cur.execute("""
-                INSERT INTO omega_memory_entries (id, content, source, importance, namespace, confidence, domain, version, created_at)
+                INSERT INTO chyren_memory_entries (id, content, source, importance, namespace, confidence, domain, version, created_at)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (entry_id, content, source, importance, namespace, 1.0, "identity", 1, datetime.now().isoformat()))
 

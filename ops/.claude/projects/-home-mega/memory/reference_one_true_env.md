@@ -4,8 +4,8 @@ description: Canonical location of all API keys and secrets — the single sourc
 type: reference
 ---
 
-Path: `/home/mega/.omega/one-true.env`
+Path: `/home/mega/.chyren/one-true.env`
 
 This is the canonical secrets file. When RY says "the one true env" or asks where a key is stored, check here first.
 
-Also note: `/home/mega/.omega_master.env` and `/home/mega/.omega_keys.env` exist as alternates — check one-true.env first.
+Also note: `/home/mega/.chyren_master.env` and `/home/mega/.chyren_keys.env` exist as alternates — check one-true.env first.

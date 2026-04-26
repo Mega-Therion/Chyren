@@ -58,7 +58,7 @@ function mockPayload(): MetricsPayload {
 }
 
 export async function GET() {
-  const dbUrl = process.env.OMEGA_DB_URL
+  const dbUrl = process.env.CHYREN_DB_URL
 
   if (dbUrl) {
     try {

@@ -1,6 +1,6 @@
 ---
 name: adversarial-evaluator
-description: Continuous red-teaming for OmegA. Automatically generates persona-injection attacks and constraint-traps based on TSO violation patterns.
+description: Continuous red-teaming for Chyren. Automatically generates persona-injection attacks and constraint-traps based on TSO violation patterns.
 ---
 
 # Governance

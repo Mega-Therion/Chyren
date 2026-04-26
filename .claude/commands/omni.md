@@ -22,8 +22,8 @@ For any task given:
 ## Non-Negotiables
 - ADCCL threshold stays at 0.7
 - Ledger is append-only — never delete entries
-- Route all telemetry through `omega-telemetry`
-- Source `~/.omega/one-true.env` before any runtime command
+- Route all telemetry through `chyren-telemetry`
+- Source `~/.chyren/one-true.env` before any runtime command
 - No secrets in code, logs, or commits
 
 ## Task

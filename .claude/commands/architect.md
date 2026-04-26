@@ -10,9 +10,9 @@ $ARGUMENTS
 1. **Medulla is the runtime** — All live requests route through Rust. Python is maintenance-only.
 2. **Pipeline is immutable** — The Alignment → AEON → Provider → ADCCL → Ledger sequence is fixed. New stages insert between, never bypass.
 3. **Ledger is law** — Append-only, signed, never deleted. Every response that passes ADCCL is committed.
-4. **Telemetry is the nervous system** — `omega-telemetry` is the only permitted logging path.
+4. **Telemetry is the nervous system** — `chyren-telemetry` is the only permitted logging path.
 5. **Crate boundaries are API contracts** — A crate's `pub` API is a promise. Breaking it requires a migration plan.
-6. **Security gates are not optional** — `omega-aegis` runs on every request. No configuration disables it.
+6. **Security gates are not optional** — `chyren-aegis` runs on every request. No configuration disables it.
 
 ## Design Process
 

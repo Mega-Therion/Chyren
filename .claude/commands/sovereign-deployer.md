@@ -1,6 +1,6 @@
 ---
 name: sovereign-deployer
-description: Governance-compliant deployment engine for OmegA Sovereign.
+description: Governance-compliant deployment engine for Chyren Sovereign.
 ---
 # Governance
 - Enforce AEGIS Run Envelope.

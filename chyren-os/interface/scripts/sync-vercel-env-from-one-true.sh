@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Push selected env vars from config/.omega/one-true.env into the linked Vercel project.
+# Push selected env vars from config/.chyren/one-true.env into the linked Vercel project.
 # Browser-visible vars stay NEXT_PUBLIC_*; server secrets that the web runtime needs are synced too.
 # Usage: sync-vercel-env-from-one-true.sh [--dry-run]
 set -euo pipefail
@@ -12,17 +12,17 @@ for arg in "$@"; do
 done
 
 WEB_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-ENV_FILE="${CHYREN_ENV_FILE:-$WEB_ROOT/../config/.omega/one-true.env}"
+ENV_FILE="${CHYREN_ENV_FILE:-$WEB_ROOT/../config/.chyren/one-true.env}"
 PROJECT_JSON="$WEB_ROOT/.vercel/project.json"
 
 if [[ ! -f "$ENV_FILE" ]]; then
   echo "ERROR: env file not found at $ENV_FILE"
-  echo "  Set CHYREN_ENV_FILE or create $HOME/.omega/one-true.env"
+  echo "  Set CHYREN_ENV_FILE or create $HOME/.chyren/one-true.env"
   exit 1
 fi
 
 # Preflight: verify required keys are present in the env file
-REQUIRED_SYNC_VARS=(ANTHROPIC_API_KEY OPENAI_API_KEY GEMINI_API_KEY OMEGA_DB_URL)
+REQUIRED_SYNC_VARS=(ANTHROPIC_API_KEY OPENAI_API_KEY GEMINI_API_KEY CHYREN_DB_URL)
 set -a
 # shellcheck source=/dev/null
 source "$ENV_FILE"
@@ -102,7 +102,7 @@ sync_one ANTHROPIC_API_KEY
 sync_one GEMINI_API_KEY
 sync_one GOOGLE_TTS_API_KEY
 sync_one CRON_SECRET
-sync_one OMEGA_DB_URL
+sync_one CHYREN_DB_URL
 
 if [[ "$DRY_RUN" == "1" ]]; then
   echo ""

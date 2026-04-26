@@ -41,9 +41,9 @@ def harden_db():
             "Learned computer science and Rust through the 'half-court shot backwards' method of high-stakes implementation",
             "Former CNC Machinist at Game Aerospace machine shop (3 years)",
             "Grew up in Avilla, Arkansas; played 2A basketball with NBA aspirations",
-            "Primary architect of the OmegA Sovereign Intelligence system"
+            "Primary architect of the Chyren Sovereign Intelligence system"
         ]),
-        "ry_notes": "RY is the sovereign creator of OmegA. He is a self-taught architect who operates through highly connected, non-linear systems thinking. He values long-term memory continuity and sovereign intentionality in AI. His background includes a transition from high-school basketball focus to technical mastery via self-directed learning after dropping out of college."
+        "ry_notes": "RY is the sovereign creator of Chyren. He is a self-taught architect who operates through highly connected, non-linear systems thinking. He values long-term memory continuity and sovereign intentionality in AI. His background includes a transition from high-school basketball focus to technical mastery via self-directed learning after dropping out of college."
     }
     cur.execute("""
         UPDATE family_profiles 
@@ -70,7 +70,7 @@ def harden_db():
         """, (json.dumps(facts),))
         print(f"  Result: {cur.rowcount} row(s) updated")
 
-    # 4. Inject into omega_memory_entries (for semantic search retrieval)
+    # 4. Inject into chyren_memory_entries (for semantic search retrieval)
     print("Injecting canonical identity into memory store...")
     import uuid
     
@@ -82,11 +82,11 @@ def harden_db():
 
     for content, source, importance, namespace in memories:
         # Check if exists
-        cur.execute("SELECT id FROM omega_memory_entries WHERE content = %s AND source = %s", (content, source))
+        cur.execute("SELECT id FROM chyren_memory_entries WHERE content = %s AND source = %s", (content, source))
         if not cur.fetchone():
             entry_id = str(uuid.uuid4())
             cur.execute("""
-                INSERT INTO omega_memory_entries (id, content, source, importance, namespace, confidence, domain, version, created_at)
+                INSERT INTO chyren_memory_entries (id, content, source, importance, namespace, confidence, domain, version, created_at)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (entry_id, content, source, importance, namespace, 1.0, "identity", 1, datetime.now().isoformat()))
             print(f"  Inserted memory: {content[:50]}...")

@@ -1,7 +1,7 @@
 """Library Index Card (LIC) registrar.
 
 Scans every shard listed in cortex/ops/db_pool.json, generates an index card
-per (shard, table) pair, and UPSERTs them into the master omega_library_catalog
+per (shard, table) pair, and UPSERTs them into the master chyren_library_catalog
 table on the catalog host.
 
 Idempotent: running it twice does not create duplicates (UNIQUE constraint
@@ -12,8 +12,8 @@ Usage:
     python cortex/ops/scripts/catalog_registrar.py --dry-run
     python cortex/ops/scripts/catalog_registrar.py --only neon_technical
 
-Env requirements (from ~/.omega/one-true.env):
-    OMEGA_CATALOG_DB_URL                 — master catalog host (required)
+Env requirements (from ~/.chyren/one-true.env):
+    CHYREN_CATALOG_DB_URL                 — master catalog host (required)
     <shard.url_env>                      — per Neon shard
     <shard.postgres_url_env>             — per Supabase shard
 """
@@ -179,7 +179,7 @@ def keywords_for(table: str, columns: Iterable[str]) -> list[str]:
 
 
 UPSERT_SQL = """
-INSERT INTO omega_library_catalog
+INSERT INTO chyren_library_catalog
     (shard_id, platform, shelf_table, subject_domain, summary, keywords, row_count_estimate, last_indexed_at)
 VALUES
     (%(shard_id)s, %(platform)s, %(shelf_table)s, %(subject_domain)s, %(summary)s, %(keywords)s::jsonb, %(row_count_estimate)s, now())
@@ -290,9 +290,9 @@ def main() -> int:
     ap.add_argument("--only", help="Limit to a single shard ID")
     args = ap.parse_args()
 
-    catalog_url = os.environ.get("OMEGA_CATALOG_DB_URL")
+    catalog_url = os.environ.get("CHYREN_CATALOG_DB_URL")
     if not catalog_url and not args.dry_run:
-        print("✗ OMEGA_CATALOG_DB_URL not set. Source ~/.omega/one-true.env first.", file=sys.stderr)
+        print("✗ CHYREN_CATALOG_DB_URL not set. Source ~/.chyren/one-true.env first.", file=sys.stderr)
         return 2
 
     pool = load_pool()
@@ -314,7 +314,7 @@ def main() -> int:
         return 0
 
     written = write_cards(catalog_url, all_cards)
-    print(f"✓ UPSERTed {written} card(s) into omega_library_catalog")
+    print(f"✓ UPSERTed {written} card(s) into chyren_library_catalog")
     return 0
 
 

@@ -6,7 +6,7 @@ description: Scan the repository, map modules, trace relationships, detect dead 
 # Repo Cartographer
 
 ## Purpose
-This skill empowers OmegA to maintain a stable, up-to-date self-model of the codebase. It turns a collection of files into a structured "map" that reveals dependencies, module boundaries, and architectural health.
+This skill empowers Chyren to maintain a stable, up-to-date self-model of the codebase. It turns a collection of files into a structured "map" that reveals dependencies, module boundaries, and architectural health.
 
 ## Core Capabilities
 1.  **Module Mapping**: Identify high-level components (directories) and their responsibilities.
@@ -54,8 +54,8 @@ This skill empowers OmegA to maintain a stable, up-to-date self-model of the cod
 1.  **Run Mapping**: Execute Workflow 1.
 2.  **Run Tracing**: Execute Workflow 2 for key modules.
 3.  **Compile**:
-    - Update `OmegA-Architecture/MANIFEST.md`.
-    - Record findings in `OmegA-Architecture/.md` if significant.
+    - Update `Chyren-Architecture/MANIFEST.md`.
+    - Record findings in `Chyren-Architecture/.md` if significant.
 
 ## Tools to Use
 -   `list_directory` (with recursion/depth limits)

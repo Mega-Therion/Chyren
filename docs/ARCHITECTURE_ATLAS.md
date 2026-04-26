@@ -85,9 +85,9 @@ Current proof pack: [`docs/evidence/v0.2/`](./evidence/v0.2/README.md)
 Latest machine-readable status snapshot:
 - [`proof-20260412T003547Z-status.csv`](./evidence/v0.2/raw/proof-20260412T003547Z-status.csv)
 
-## 6) Novelty Matrix (gAIng / OmegA / Chyren)
+## 6) Novelty Matrix (gAIng / Chyren / Chyren)
 
-| Dimension | Conventional Agent Stack | Chyren/OmegA Posture | Evidence Level |
+| Dimension | Conventional Agent Stack | Chyren/Chyren Posture | Evidence Level |
 |---|---|---|---|
 | Verification timing | Often post-hoc or optional | Mandatory pre-persist gate (`ADCCL`) | Implemented + passing proof-pack gate |
 | Runtime topology | Single runtime bias | Deliberate cortex/medulla split (Python+Rust) | Implemented workspace structure |
@@ -97,7 +97,7 @@ Latest machine-readable status snapshot:
 
 ## 7) Visual Explainers
 
-- Growth animation: ![OmegA Growth](./diagrams/candidates/omega-graph-assets_2510_omega-growth.gif)
+- Growth animation: ![Chyren Growth](./diagrams/candidates/chyren-graph-assets_2510_chyren-growth.gif)
 - Claim maturity ladder: ![Claim Maturity Ladder](./diagrams/proof-ladder.svg)
 - Extended visual companion: [`SHOWCASE.md`](./SHOWCASE.md)
 

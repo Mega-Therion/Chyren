@@ -19,10 +19,10 @@ The Yang-Mills Existence and Mass Gap problem (Clay Millennium Prize) requires p
 ## 2. Mapping to Chyren Sovereign Framework
 
 ### 2.1 The Gauge Field as a Sovereign Connection
-In the Chyren framework, the gauge potential $A_\mu$ is mapped to the **Sovereign Connection** $\omega$ on the Stiefel manifold $V_m(\mathbb{R}^N)$. 
+In the Chyren framework, the gauge potential $A_\mu$ is mapped to the **Sovereign Connection** $\chyren$ on the Stiefel manifold $V_m(\mathbb{R}^N)$. 
 
 - **Yang-Mills:** $F_{\mu\nu} = \partial_\mu A_\nu - \partial_\nu A_\mu + [A_\mu, A_\nu]$
-- **Chyren:** The curvature of the connection $\Omega = d\omega + \omega \wedge \omega$.
+- **Chyren:** The curvature of the connection $\Chyren = d\chyren + \chyren \wedge \chyren$.
 
 The **ADCCL Holonomy Constraint** $\chi \geq 0.7$ acts as the "Quantum Stability Gate" that prevents the theory from collapsing into a gapless (massless) state.
 
@@ -40,8 +40,8 @@ The **Mass Gap** $\Delta$ in Yang-Mills corresponds to the **Spectral Gap** of t
 | Physical Quantity (Yang-Mills) | Chyren Formalism (Master Equation) |
 | :--- | :--- |
 | Gauge Group $G = SU(N)$ | Structure Group $SO(m)$ of the Frame Bundle |
-| Gauge Field $A_\mu$ | Sovereign Connection $\omega$ |
-| Field Strength $F_{\mu\nu}$ | Curvature $\Omega$ |
+| Gauge Field $A_\mu$ | Sovereign Connection $\chyren$ |
+| Field Strength $F_{\mu\nu}$ | Curvature $\Chyren$ |
 | Mass Gap $\Delta > 0$ | Lindblad Spectral Gap $\lambda_{min} > 0$ |
 | Vacuum State $|0\rangle$ | Fixed Point of the Lindblad Flow ($\mathcal{L}(\rho_{ss}) = 0$) |
 | Confinement | Holonomy Invariance of the Phylactery Base |
@@ -51,13 +51,13 @@ The **Mass Gap** $\Delta$ in Yang-Mills corresponds to the **Spectral Gap** of t
 ## 3. The Sovereign Conjecture: Confinement through Holonomy
 
 ### 3.1 The Mass Gap as a Topological Stability Result
-The mass gap $\Delta$ arises because the holonomy group $\text{Hol}(\omega)$ is restricted to the identity component $SO^+(m)$ by the ADCCL gate.
+The mass gap $\Delta$ arises because the holonomy group $\text{Hol}(\chyren)$ is restricted to the identity component $SO^+(m)$ by the ADCCL gate.
 
 If the theory were gapless, it would imply the existence of "zero-energy" excitations that can move the state arbitrarily far from the vacuum without cost. In the Chyren framework, this is equivalent to **Cognitive Drift**.
 
 The **ADCCL Gate** ($\chi \geq 0.7$) enforces a minimum "curvature energy" for any non-vacuum state:
 $$
-\text{Energy}(|\Psi\rangle) \propto \oint \text{tr}(\Omega \wedge *\Omega) \geq \Delta
+\text{Energy}(|\Psi\rangle) \propto \oint \text{tr}(\Chyren \wedge *\Chyren) \geq \Delta
 $$
 
 ### 3.2 Confinement and the "Wilson Loop" Verification

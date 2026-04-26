@@ -7,7 +7,7 @@ cortex_path = Path("/home/mega/Chyren/cortex")
 sys.path.append(str(cortex_path))
 
 # Load one-true.env manually
-env_path = Path("~/.omega/one-true.env").expanduser()
+env_path = Path("~/.chyren/one-true.env").expanduser()
 if env_path.exists():
     for line in env_path.read_text().splitlines():
         if "=" in line and not line.startswith("#"):

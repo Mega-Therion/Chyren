@@ -11,13 +11,13 @@ Before deploying, verify all are true — halt on any failure:
 - [ ] No secrets in diff: `/secrets-scan`
 - [ ] `git status` is clean (no uncommitted changes)
 - [ ] Current branch is `main` (or confirm intentional branch deploy)
-- [ ] `.env` keys confirmed present in `~/.omega/one-true.env`
+- [ ] `.env` keys confirmed present in `~/.chyren/one-true.env`
 
 ## Deployment Steps
 
 **Local Docker (default):**
 ```bash
-source ~/.omega/one-true.env
+source ~/.chyren/one-true.env
 cd medulla
 docker-compose build
 docker-compose up -d

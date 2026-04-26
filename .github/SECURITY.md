@@ -42,7 +42,7 @@ We follow a **coordinated disclosure** model. We ask that you give us a reasonab
 
 The following components are in scope:
 
-- **Medulla** (`medulla/`) — Rust runtime, API server (port 8080), all omega-* crates
+- **Medulla** (`medulla/`) — Rust runtime, API server (port 8080), all chyren-* crates
 - **Web** (`web/`) — Next.js 15 frontend
 - **Gateway** (`gateway/`) — Vite + React 19 external gateway
 - **Cortex** (`cortex/`) — Python data tooling

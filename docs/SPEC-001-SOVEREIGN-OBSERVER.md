@@ -21,6 +21,6 @@ The Sovereign Observer is an asynchronous, event-driven agent designed to monito
 - **Eviction Policy**: Successful routine task logs are purged after 24 hours. Only "Rejection" and "Error" data is retained indefinitely.
 
 ## Implementation Plan
-1. `medulla/omega-conductor/src/agents/observer.rs`: Implement the listener.
-2. `omega-telemetry`: Add event-broadcasting for `ADCCL_REJECTION`.
-3. `omega-myelin`: Add storage support for the `EvidenceMatrix`.
+1. `medulla/chyren-conductor/src/agents/observer.rs`: Implement the listener.
+2. `chyren-telemetry`: Add event-broadcasting for `ADCCL_REJECTION`.
+3. `chyren-myelin`: Add storage support for the `EvidenceMatrix`.

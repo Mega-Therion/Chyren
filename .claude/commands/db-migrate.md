@@ -10,7 +10,7 @@ $ARGUMENTS
 **Step 1 — Branch (Neon)**
 Always run migrations on a Neon branch first, never directly on main:
 ```bash
-source ~/.omega/one-true.env
+source ~/.chyren/one-true.env
 # Use Neon MCP or CLI to create a branch
 # neon branches create --name migration-$(date +%Y%m%d)
 ```
@@ -30,7 +30,7 @@ psql "$BRANCH_DB_URL" -c "\d ledger" 2>&1
 
 **Step 4 — Run integration test**
 ```bash
-OMEGA_DB_URL="$BRANCH_DB_URL" cargo test --package omega-myelin 2>&1
+CHYREN_DB_URL="$BRANCH_DB_URL" cargo test --package chyren-myelin 2>&1
 ```
 
 **Step 5 — Apply to main (with confirmation)**
@@ -38,8 +38,8 @@ Show the user the exact SQL and the exact connection string target. Wait for exp
 
 **Step 6 — Verify**
 ```bash
-psql "$OMEGA_DB_URL" -c "\d+" 2>&1
+psql "$CHYREN_DB_URL" -c "\d+" 2>&1
 ```
 
 ## Neon Quota SOP
-If Neon quota error occurs: immediately create a new Neon project via `mcp__Neon__create_project`, initialize the schema, update the connection pool, and update `OMEGA_DB_URL` in `~/.omega/one-true.env`. Do not wait or retry the existing project.
+If Neon quota error occurs: immediately create a new Neon project via `mcp__Neon__create_project`, initialize the schema, update the connection pool, and update `CHYREN_DB_URL` in `~/.chyren/one-true.env`. Do not wait or retry the existing project.

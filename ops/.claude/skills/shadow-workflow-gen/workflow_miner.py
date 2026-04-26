@@ -22,9 +22,9 @@ def save_recommendations(sequences, output_path):
         yaml.dump(sequences, f)
 
 if __name__ == "__main__":
-    hist = "/home/mega/.omega_history.txt"
-    audit = "/home/mega/.omega_audit.log"
-    out = "/home/mega/OmegA-Architecture/reconstruction/shadow_workflows/optimized_chains.yaml"
+    hist = "/home/mega/.chyren_history.txt"
+    audit = "/home/mega/.chyren_audit.log"
+    out = "/home/mega/Chyren-Architecture/reconstruction/shadow_workflows/optimized_chains.yaml"
     
     # Placeholder execution
     seqs = analyze_teleodynamics(hist, audit)

@@ -1,15 +1,15 @@
 ---
 name: briefing
-description: Get the OMEGA system briefing — current objectives, recent agent activity, and system status summary
-allowed-tools: Read, Bash(~/.local/bin/omega briefing), Bash(omega briefing)
+description: Get the CHYREN system briefing — current objectives, recent agent activity, and system status summary
+allowed-tools: Read, Bash(~/.local/bin/chyren briefing), Bash(chyren briefing)
 ---
 
-## OMEGA Briefing
+## CHYREN Briefing
 
-Generate a comprehensive OMEGA Collective Intelligence briefing.
+Generate a comprehensive CHYREN Collective Intelligence briefing.
 
-### Step 1: Try the omega command
-Run `~/.local/bin/omega briefing` or `omega briefing` if available.
+### Step 1: Try the chyren command
+Run `~/.local/bin/chyren briefing` or `chyren briefing` if available.
 
 ### Step 2: Read key files regardless
 - `~/NEXUS/TELOS.md` — current objectives and priorities
@@ -21,7 +21,7 @@ Run `~/.local/bin/omega briefing` or `omega briefing` if available.
 
 ```
 ═══════════════════════════════════════
-       OMEGA COLLECTIVE BRIEFING
+       CHYREN COLLECTIVE BRIEFING
        $DATE
 ═══════════════════════════════════════
 

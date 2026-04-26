@@ -10,15 +10,15 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MEDULLA_DIR="$REPO_DIR/medulla"
+MEDULLA_DIR="$REPO_DIR/chyren-os/kernel"
 TUI_RELEASE="$MEDULLA_DIR/target/release/chyren-tui"
 TUI_DEBUG="$MEDULLA_DIR/target/debug/chyren-tui"
 
 # Source sovereign vault if present (best effort, never fatal)
 for env_file in \
-  "$HOME/.omega/one-true.env" \
-  "$HOME/.omega_keys.env" \
-  "$HOME/OMEGA_WORKSPACE/VAULT/one-true.env"
+  "$HOME/.chyren/one-true.env" \
+  "$HOME/.chyren_keys.env" \
+  "$HOME/CHYREN_WORKSPACE/VAULT/one-true.env"
 do
   if [[ -f "$env_file" ]]; then
     set -a
@@ -36,7 +36,7 @@ elif [[ -x "$TUI_DEBUG" ]]; then
   TUI_BIN="$TUI_DEBUG"
 else
   echo "[chyren] TUI binary not found — building (this may take a minute)..."
-  (cd "$MEDULLA_DIR" && cargo build --release -p omega-tui)
+  (cd "$MEDULLA_DIR" && cargo build --release -p chyren-tui)
   TUI_BIN="$TUI_RELEASE"
 fi
 

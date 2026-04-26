@@ -1,6 +1,6 @@
-"""Omega Knowledge Matrix seeder.
+"""Chyren Knowledge Matrix seeder.
 
-Populates omega_knowledge_domains with every branch of human knowledge:
+Populates chyren_knowledge_domains with every branch of human knowledge:
 mathematics, logic, rhetoric, philosophy, computer science, all 7 classical
 liberal arts, natural sciences, social sciences, humanities, applied fields,
 and modern interdisciplinary domains.
@@ -1326,7 +1326,7 @@ EDGES: list[tuple[str, str, str, float]] = [
 # ─── DB write ─────────────────────────────────────────────────────────────────
 
 UPSERT_DOMAIN_SQL = """
-INSERT INTO omega_knowledge_domains
+INSERT INTO chyren_knowledge_domains
     (slug, name, parent_slug, level, sort_order, realm, reasoning_mode,
      description, purpose, core_axioms, key_methods, key_figures,
      sister_slugs, query_patterns, reasoning_primer,
@@ -1359,7 +1359,7 @@ ON CONFLICT (slug) DO UPDATE SET
 """
 
 UPSERT_EDGE_SQL = """
-INSERT INTO omega_knowledge_edges (from_slug, to_slug, relationship, weight)
+INSERT INTO chyren_knowledge_edges (from_slug, to_slug, relationship, weight)
 VALUES (%(from_slug)s, %(to_slug)s, %(relationship)s, %(weight)s)
 ON CONFLICT (from_slug, to_slug, relationship) DO UPDATE SET weight = EXCLUDED.weight;
 """
@@ -1368,9 +1368,9 @@ ON CONFLICT (from_slug, to_slug, relationship) DO UPDATE SET weight = EXCLUDED.w
 def ensure_schema(conn):
     with conn.cursor() as cur:
         print("→ Ensuring catalog schema...")
-        cur.execute("ALTER TABLE omega_knowledge_domains ADD COLUMN IF NOT EXISTS formal_anchor TEXT;")
-        cur.execute("ALTER TABLE omega_knowledge_domains ADD COLUMN IF NOT EXISTS millennium_target BOOLEAN DEFAULT FALSE;")
-        cur.execute("ALTER TABLE omega_knowledge_domains ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'unmapped';")
+        cur.execute("ALTER TABLE chyren_knowledge_domains ADD COLUMN IF NOT EXISTS formal_anchor TEXT;")
+        cur.execute("ALTER TABLE chyren_knowledge_domains ADD COLUMN IF NOT EXISTS millennium_target BOOLEAN DEFAULT FALSE;")
+        cur.execute("ALTER TABLE chyren_knowledge_domains ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'unmapped';")
     conn.commit()
 
 
@@ -1428,14 +1428,14 @@ def write_edges(conn, edges: list[tuple], dry_run: bool) -> int:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Omega Knowledge Matrix seeder")
+    ap = argparse.ArgumentParser(description="Chyren Knowledge Matrix seeder")
     ap.add_argument("--dry-run", action="store_true", help="Enumerate but do not write")
     ap.add_argument("--reset", action="store_true", help="Truncate tables before seeding")
     args = ap.parse_args()
 
-    catalog_url = os.environ.get("OMEGA_CATALOG_DB_URL")
+    catalog_url = os.environ.get("CHYREN_CATALOG_DB_URL")
     if not catalog_url and not args.dry_run:
-        print("✗ OMEGA_CATALOG_DB_URL not set. Source ~/.omega/one-true.env first.", file=sys.stderr)
+        print("✗ CHYREN_CATALOG_DB_URL not set. Source ~/.chyren/one-true.env first.", file=sys.stderr)
         return 2
 
     print(f"→ {len(DOMAINS)} domain nodes  /  {len(EDGES)} edges")
@@ -1460,7 +1460,7 @@ def main() -> int:
         ensure_schema(conn)
         if args.reset:
             with conn.cursor() as cur:
-                cur.execute("TRUNCATE omega_knowledge_edges, omega_knowledge_domains RESTART IDENTITY CASCADE;")
+                cur.execute("TRUNCATE chyren_knowledge_edges, chyren_knowledge_domains RESTART IDENTITY CASCADE;")
             conn.commit()
             print("✓ Tables truncated")
 

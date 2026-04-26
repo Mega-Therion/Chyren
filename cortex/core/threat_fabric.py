@@ -1,7 +1,7 @@
 """
 core/threat_fabric.py — Module 4: Global Immunity (Phylactic Memory Sync).
 
-The Threat Fabric is an antifragile immune system. An attack on one OmegA
+The Threat Fabric is an antifragile immune system. An attack on one Chyren
 instance extracts a behavioral pattern, strips all PII, and broadcasts the
 sanitized vector to the Threat Fabric ledger. Every instance that ingests
 this ledger becomes immune to the same vector.

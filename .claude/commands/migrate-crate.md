@@ -15,13 +15,13 @@ Read the target Python module completely. Document:
 - Error cases
 
 **Step 2: Identify the target Rust crate**
-Which existing `omega-*` crate is the right home? Or does this need a new crate (`/crate-new`)?
+Which existing `chyren-*` crate is the right home? Or does this need a new crate (`/crate-new`)?
 
 **Step 3: Implement in Rust**
 - Match the Python behavior exactly — no behavior changes during migration
 - Use `thiserror` for errors
 - Use `async`/`await` if the Python used any I/O
-- Route all logging through `omega-telemetry`
+- Route all logging through `chyren-telemetry`
 
 **Step 4: Add the `legacy_bridge.rs`**
 Create `medulla/<target-crate>/src/legacy_bridge.rs`:

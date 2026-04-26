@@ -1,8 +1,8 @@
 ---
 name: forward
-description: Forward a task to another agent (Aider for implementation,  for strategy, Codex for architecture) via the OMEGA orchestrator
+description: Forward a task to another agent (Aider for implementation,  for strategy, Codex for architecture) via the CHYREN orchestrator
 argument-hint: [task description]
-allowed-tools: Bash(omega forward:*), Bash(~/.local/bin/omega forward:*), Bash(aider:*), Bash(~/.local/bin/omega chat:*)
+allowed-tools: Bash(chyren forward:*), Bash(~/.local/bin/chyren forward:*), Bash(aider:*), Bash(~/.local/bin/chyren chat:*)
 ---
 
 ## Forward to Agent
@@ -30,10 +30,10 @@ Before forwarding, write a clear brief that includes:
 
 Try these in order:
 ```bash
-# Via omega orchestrator
-omega forward "$ARGUMENTS"
+# Via chyren orchestrator
+chyren forward "$ARGUMENTS"
 # or
-~/.local/bin/omega forward "$ARGUMENTS"
+~/.local/bin/chyren forward "$ARGUMENTS"
 
 # Direct to Aider (for implementation)
 aider --message "$ARGUMENTS"
@@ -46,4 +46,4 @@ Forwarded to [Agent]: [task summary]
 ```
 
 ### Note
-If omega/aider isn't available, output the prepared brief for the user to copy manually.
+If chyren/aider isn't available, output the prepared brief for the user to copy manually.

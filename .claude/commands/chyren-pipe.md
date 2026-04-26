@@ -9,14 +9,14 @@ $ARGUMENTS (describe what to pipe and where — e.g. "pipe the build errors into
 
 **Pipe build errors into Chyren for analysis:**
 ```bash
-source ~/.omega/one-true.env
+source ~/.chyren/one-true.env
 cargo build 2>&1 | ./chyren thought "Analyze these build errors and store a fix plan in memory"
 ```
 
 **Pipe ledger activity to Claude Code for pattern analysis, then back to Chyren:**
 ```bash
-source ~/.omega/one-true.env
-psql "$OMEGA_DB_URL" -c "SELECT * FROM ledger ORDER BY created_at DESC LIMIT 50;" \
+source ~/.chyren/one-true.env
+psql "$CHYREN_DB_URL" -c "SELECT * FROM ledger ORDER BY created_at DESC LIMIT 50;" \
   | claude -p "identify patterns in this Chyren ledger activity. What is the system doing most?" --output-format json \
   | python3 -c "import sys,json; print(json.load(sys.stdin).get('result',''))" \
   | ./chyren thought "Store this ledger analysis in memory"
@@ -24,8 +24,8 @@ psql "$OMEGA_DB_URL" -c "SELECT * FROM ledger ORDER BY created_at DESC LIMIT 50;
 
 **Pipe a file through Claude Code analysis and into Chyren:**
 ```bash
-source ~/.omega/one-true.env
-cat medulla/omega-adccl/src/lib.rs \
+source ~/.chyren/one-true.env
+cat medulla/chyren-adccl/src/lib.rs \
   | claude -p "security review" --output-format json \
   | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('result',''))" \
   | ./chyren action "Store this ADCCL security review in long-term memory"
@@ -33,7 +33,7 @@ cat medulla/omega-adccl/src/lib.rs \
 
 **Bidirectional session: start a named Claude Code session that stays aware of Chyren state:**
 ```bash
-source ~/.omega/one-true.env
+source ~/.chyren/one-true.env
 claude -n "chyren-bridge-$(date +%s)" \
   --add-dir /home/mega/Chyren \
   --append-system-prompt "$(./chyren status 2>&1 | head -20)"

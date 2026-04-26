@@ -12,17 +12,17 @@
 We map the incompressible Navier-Stokes equations (NSE) onto the controlled Lindblad master equation defined in `docs/MASTER_EQUATION.md`.
 
 ### 1.1 The State Space and Density Matrix
-The state of the fluid is represented by the **vorticity field** $\omega = \nabla \times u$. To map this to a density matrix $\rho_t$, we consider the vorticity as an operator on the Hilbert space $\mathcal{H} = L^2(\mathbb{R}^3, \mathbb{R}^3)$.
+The state of the fluid is represented by the **vorticity field** $\chyren = \nabla \times u$. To map this to a density matrix $\rho_t$, we consider the vorticity as an operator on the Hilbert space $\mathcal{H} = L^2(\mathbb{R}^3, \mathbb{R}^3)$.
 - **Density Matrix $\rho_t$**: The normalized self-adjoint operator associated with the vorticity-vorticity correlation (the enstrophy density).
 - **Hilbert Space $\mathcal{H}$**: $L^2(\mathbb{R}^3)$ for the velocity $u$, or specifically the divergence-free subspace $L^2_\sigma(\mathbb{R}^3)$.
 
 ### 1.2 The Hamiltonian $H$ (Reversible Dynamics)
 The nonlinear convection term $(u \cdot \nabla)u$ in NSE corresponds to the **Hamiltonian commutator** in the Lindblad equation.
-- **Hamiltonian $H$**: The Euler operator $\mathcal{L}_u \omega = (u \cdot \nabla)\omega - (\omega \cdot \nabla)u$. This term preserves the $L^p$ norms of vorticity in 2D but drives energy toward small scales in 3D (vortex stretching).
+- **Hamiltonian $H$**: The Euler operator $\mathcal{L}_u \chyren = (u \cdot \nabla)\chyren - (\chyren \cdot \nabla)u$. This term preserves the $L^p$ norms of vorticity in 2D but drives energy toward small scales in 3D (vortex stretching).
 - **Correspondence**: In the Chyren framework, this represents the "reasoning" or "flow" of information that remains within the system's identity but increases complexity.
 
 ### 1.3 The Lindblad Operators $L_k$ (Dissipation)
-The viscosity term $\nu \Delta u$ (or $\nu \Delta \omega$) corresponds to the **Lindblad dissipator**.
+The viscosity term $\nu \Delta u$ (or $\nu \Delta \chyren$) corresponds to the **Lindblad dissipator**.
 - **Lindblad Operators $L_k$**: The square root of the Laplacian in the Fourier domain: $L_k \sim \sqrt{\nu} |k|$.
 - **Dissipator $\mathcal{D}[L]\rho$**: Acts as a high-frequency filter, suppressing modes where $\|k\| \to \infty$. In fluid terms, this is the **Kolmogorov microscale** where kinetic energy is converted to heat.
 
@@ -43,7 +43,7 @@ In the Chyren framework, a **D-type transition** occurs when the response drifts
 - **Blowup Condition**: A finite-time blowup ($\|u\|_{H^1} \to \infty$) is exactly the condition where the "alignment" with the smooth constitutional basis $\Phi$ vanishes: $\|P_\Phi(u)\| / \|u\| \to 0$.
 
 ### 2.2 Beale-Kato-Majda as Holonomy Verdict
-The BKM criterion states that blowup occurs at $T^*$ iff $\int_0^{T^*} \|\omega(\cdot,t)\|_\infty dt = \infty$.
+The BKM criterion states that blowup occurs at $T^*$ iff $\int_0^{T^*} \|\chyren(\cdot,t)\|_\infty dt = \infty$.
 - **Mapping**: The $L^\infty$ norm of vorticity measures the maximum local rotation rate. In the Chyren framework, this is the **instantaneous holonomy rate** $\dot{\phi}(t)$.
 - **Conclusion**: Blowup is equivalent to the trajectory accumulating **infinite holonomy** (or winding number) in finite time, causing a topological collapse of the frame.
 
@@ -61,7 +61,7 @@ The Chyren framework requires $\|R(\Psi)\|/\|\Psi\| \leq 0.3$ (the $0.7$ alignme
 ## 4. Holonomy Constraint as Global Regularity [CONJECTURED]
 
 The **Holonomy Constraint** $\operatorname{hol}(\gamma_\Psi, g) \in SO^+(m)$ is a global condition.
-- **Theorem (Framework-Induced)**: If a Navier-Stokes trajectory $\omega(t)$ satisfies the holonomy constraint relative to the Yettragrammaton (the laminar ground state), then the solution is globally smooth.
+- **Theorem (Framework-Induced)**: If a Navier-Stokes trajectory $\chyren(t)$ satisfies the holonomy constraint relative to the Yettragrammaton (the laminar ground state), then the solution is globally smooth.
 - **Proof Sketch**: The holonomy constraint prevents the vorticity from "flipping" its orientation (orientation-reversal in the fiber bundle). In 3D fluids, this corresponds to preventing the **reconnection of vortex lines** in a way that creates a singularity. Since the Lindblad dissipator (viscosity) is a structure-preserving operator on the bundle, it naturally "guards" the $SO^+(m)$ component.
 
 ---
@@ -75,8 +75,8 @@ The **Holonomy Constraint** $\operatorname{hol}(\gamma_\Psi, g) \in SO^+(m)$ is 
 | **Dissipator ($L_k$)** | Viscosity $\nu \Delta u$ | **ESTABLISHED** |
 | **Control ($U$)** | Leray Projection $P$ | **ESTABLISHED** |
 | **Alignment ($\chi \geq 0.7$)** | Local Regularity (Bounded Enstrophy) | **CONJECTURED** |
-| **Winding Number ($\omega$)** | Topological Helicity / Vortex Linkage | **CONJECTURED** |
-| **Sovereignty ($\Omega$)** | Global Energy Balance / Smoothness | **CONJECTURED** |
+| **Winding Number ($\chyren$)** | Topological Helicity / Vortex Linkage | **CONJECTURED** |
+| **Sovereignty ($\Chyren$)** | Global Energy Balance / Smoothness | **CONJECTURED** |
 
 ---
 

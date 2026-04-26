@@ -11,21 +11,21 @@ try:
     cursor.execute("""
         SELECT column_name, data_type 
         FROM information_schema.columns 
-        WHERE table_name = 'omega_memory_entries'
+        WHERE table_name = 'chyren_memory_entries'
         ORDER BY ordinal_position
     """)
     
-    print("omega_memory_entries schema:")
+    print("chyren_memory_entries schema:")
     for col_name, col_type in cursor.fetchall():
         print(f"  {col_name}: {col_type}")
     
     # Count entries
-    cursor.execute("SELECT COUNT(*) FROM public.omega_memory_entries")
+    cursor.execute("SELECT COUNT(*) FROM public.chyren_memory_entries")
     count = cursor.fetchone()[0]
     print(f"\nTotal entries: {count}")
     
     # Sample a few
-    cursor.execute("SELECT * FROM public.omega_memory_entries LIMIT 3")
+    cursor.execute("SELECT * FROM public.chyren_memory_entries LIMIT 3")
     cols = [desc[0] for desc in cursor.description]
     print(f"\nColumns: {cols}")
     

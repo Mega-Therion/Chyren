@@ -28,9 +28,9 @@ def init_shard():
     """)
     print("  Ensured table: family_profiles")
 
-    # 2. Create table omega_memory_entries (and memory_entries alias if needed)
+    # 2. Create table chyren_memory_entries (and memory_entries alias if needed)
     cur.execute("""
-        CREATE TABLE IF NOT EXISTS omega_memory_entries (
+        CREATE TABLE IF NOT EXISTS chyren_memory_entries (
             id TEXT PRIMARY KEY,
             content TEXT NOT NULL,
             source TEXT NOT NULL,
@@ -42,11 +42,11 @@ def init_shard():
             created_at TEXT NOT NULL
         );
     """)
-    print("  Ensured table: omega_memory_entries")
+    print("  Ensured table: chyren_memory_entries")
 
-    # 3. Create table omega_library_catalog (The Index Card System)
+    # 3. Create table chyren_library_catalog (The Index Card System)
     cur.execute("""
-        CREATE TABLE IF NOT EXISTS omega_library_catalog (
+        CREATE TABLE IF NOT EXISTS chyren_library_catalog (
             card_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             shard_id TEXT NOT NULL,
             shelf_table TEXT NOT NULL,
@@ -58,7 +58,7 @@ def init_shard():
             created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
         );
     """)
-    print("  Ensured table: omega_library_catalog (Index Card System)")
+    print("  Ensured table: chyren_library_catalog (Index Card System)")
 
     conn.commit()
     cur.close()

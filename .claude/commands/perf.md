@@ -9,7 +9,7 @@ $ARGUMENTS (crate, endpoint, or operation to profile)
 
 **Compile with profiling:**
 ```bash
-source ~/.omega/one-true.env
+source ~/.chyren/one-true.env
 cd medulla
 RUSTFLAGS="-C debug-assertions=off" cargo build --release 2>&1
 ```
@@ -21,19 +21,19 @@ cargo bench --package <crate> 2>&1
 
 **Find allocation hotspots:**
 ```bash
-grep -rn "clone()\|to_string()\|to_owned()\|collect()\|Vec::new()" medulla/omega-conductor/src/ medulla/omega-spokes/src/ 2>/dev/null | head -30
+grep -rn "clone()\|to_string()\|to_owned()\|collect()\|Vec::new()" medulla/chyren-conductor/src/ medulla/chyren-spokes/src/ 2>/dev/null | head -30
 ```
 
 **Find blocking calls in async context:**
 ```bash
-grep -rn "std::thread::sleep\|blocking\|std::sync::Mutex" medulla/omega-*/src/ 2>/dev/null | grep -v "#\[cfg(test)\]" | head -20
+grep -rn "std::thread::sleep\|blocking\|std::sync::Mutex" medulla/chyren-*/src/ 2>/dev/null | grep -v "#\[cfg(test)\]" | head -20
 ```
 
 ## Database Performance
 ```bash
-source ~/.omega/one-true.env
+source ~/.chyren/one-true.env
 # Slow queries
-psql "$OMEGA_DB_URL" -c "
+psql "$CHYREN_DB_URL" -c "
 SELECT query, calls, total_exec_time/calls as avg_ms, rows
 FROM pg_stat_statements
 ORDER BY total_exec_time DESC LIMIT 10;" 2>&1
@@ -43,7 +43,7 @@ Use `mcp__Neon__list_slow_queries` and `mcp__Neon__prepare_query_tuning` for Neo
 ## Provider Latency
 ```bash
 # Check if there are timeout configs on provider calls
-grep -rn "timeout\|Duration\|TimeoutLayer" medulla/omega-spokes/src/ 2>/dev/null | head -10
+grep -rn "timeout\|Duration\|TimeoutLayer" medulla/chyren-spokes/src/ 2>/dev/null | head -10
 ```
 
 ## Optimization Rules

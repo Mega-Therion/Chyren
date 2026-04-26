@@ -1,7 +1,7 @@
 # CI Architecture
 
 All canonical workflows live in `.github/workflows/`. The `ops/` directory previously
-contained a duplicate workflow tree targeting stale paths (`omega_workspace/…`) — those
+contained a duplicate workflow tree targeting stale paths (`chyren_workspace/…`) — those
 have been removed. Do not create workflows outside `.github/workflows/`.
 
 ---
@@ -29,7 +29,7 @@ No `continue-on-error` is set on any job or step. Every failure blocks the merge
 
 **Triggers:** push of `v*` tags, `workflow_dispatch` (with macOS/Windows toggles)
 
-Builds the `chyren` CLI binary from `medulla/` via `cargo build --release -p omega-cli
+Builds the `chyren` CLI binary from `medulla/` via `cargo build --release -p chyren-cli
 --bin chyren` and uploads `.tar.gz` / `.zip` artifacts to a GitHub draft release.
 
 Requires **self-hosted runners** (Linux/X64 required; macOS and Windows optional).
@@ -97,7 +97,7 @@ These rules apply to all workflows in this repository:
   reporting, dependency review — and even then, prefer fixing the underlying issue).
 - All Rust steps use `-D warnings` with `cargo clippy` — warnings are errors.
 - Web build steps set `NEXT_PUBLIC_API_BASE_URL: https://placeholder.local` so the
-  `generate-context.mjs` script can skip gracefully when `OMEGA_DB_URL` is absent in CI.
+  `generate-context.mjs` script can skip gracefully when `CHYREN_DB_URL` is absent in CI.
 - Python CI is limited to syntax checks (`py_compile`) for dream-mode scripts since
   the cortex layer is not a runtime dependency.
 

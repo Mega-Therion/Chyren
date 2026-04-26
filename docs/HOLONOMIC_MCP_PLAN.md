@@ -38,7 +38,7 @@ The "Holonomic Fractal Hub-and-Spoke" model is a radical evolution of the standa
 - [x] Integrate `mcp_hub.py` into `main.py` (Cortex orchestrator) so that "Thought" commands can access SaaS tools via the hub before sending the plan to Medulla.
 
 ### Phase 2: The Right Brain Bridge (Rust Medulla)
-- [x] Create `mcp_spoke.rs` in `medulla/omega-spokes`.
+- [x] Create `mcp_spoke.rs` in `medulla/chyren-spokes`.
 - [x] Implement the `Spoke` trait for `McpSpoke`, mapping `discover_tools` and `invoke_tool` to raw JSON-RPC over STDIO.
 - [x] Wire the Medulla to a secure, local MCP server (e.g., filesystem or local database) to ensure the execution layer has high-performance access to system primitives.
 

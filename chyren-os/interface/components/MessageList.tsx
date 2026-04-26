@@ -29,7 +29,7 @@ export function MessageList({ messages, isLoading = false, onQuote }: MessageLis
       <div className="flex-1 flex flex-col items-center justify-center gap-6 px-8 grid-bg">
         <div className="text-center">
           <div
-            className="font-mono text-7xl font-light mb-4 omega-glow select-none"
+            className="font-mono text-7xl font-light mb-4 chyren-glow select-none"
             style={{ color: '#6366f1' }}
           >
             Ω

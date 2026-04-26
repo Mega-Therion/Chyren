@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Deploy chyren-web to Vercel with env from config/.omega/one-true.env (override with CHYREN_ENV_FILE).
+# Deploy chyren-web to Vercel with env from config/.chyren/one-true.env (override with CHYREN_ENV_FILE).
 # Usage: deploy-vercel.sh [--dry-run] [--prod] [extra vercel deploy flags...]
 set -euo pipefail
 
@@ -15,7 +15,7 @@ for arg in "$@"; do
 done
 
 WEB_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-ENV_FILE="${CHYREN_ENV_FILE:-$WEB_ROOT/../config/.omega/one-true.env}"
+ENV_FILE="${CHYREN_ENV_FILE:-$WEB_ROOT/../config/.chyren/one-true.env}"
 PROJECT_JSON="$WEB_ROOT/.vercel/project.json"
 TEMP_ROOT_LINK=0
 TMP_OUT=""
@@ -45,7 +45,7 @@ else
   echo "No env file at $ENV_FILE (optional); continuing with current shell env."
 fi
 
-REQUIRED_VARS=(ANTHROPIC_API_KEY OPENAI_API_KEY GEMINI_API_KEY OMEGA_DB_URL)
+REQUIRED_VARS=(ANTHROPIC_API_KEY OPENAI_API_KEY GEMINI_API_KEY CHYREN_DB_URL)
 MISSING_VARS=()
 for req in "${REQUIRED_VARS[@]}"; do
   if [[ -z "${!req:-}" ]]; then

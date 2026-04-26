@@ -23,7 +23,7 @@ Rotate the compromised credential immediately, before doing anything else to the
 | `OPENAI_API_KEY` | platform.openai.com → API keys → Delete & create new |
 | `DEEPSEEK_API_KEY` | platform.deepseek.com → API Keys → Revoke & create new |
 | `GEMINI_API_KEY` | console.cloud.google.com → APIs & Services → Credentials → Delete & create new |
-| `OMEGA_DB_URL` | Neon console → Project settings → Reset connection password; update pool string |
+| `CHYREN_DB_URL` | Neon console → Project settings → Reset connection password; update pool string |
 | `QDRANT_URL` / Qdrant API key | Qdrant Cloud dashboard → API Keys → Revoke & create new |
 
 After rotating, verify the old key is dead:
@@ -115,16 +115,16 @@ To file a GitHub Security Advisory: **Repo → Security → Advisories → New d
 
 ## 7. Update the Secret in All Environments
 
-### Local development (`~/.omega/one-true.env`)
+### Local development (`~/.chyren/one-true.env`)
 
-Edit `~/.omega/one-true.env` and replace the rotated value:
+Edit `~/.chyren/one-true.env` and replace the rotated value:
 
 ```bash
 # Open in editor
-$EDITOR ~/.omega/one-true.env
+$EDITOR ~/.chyren/one-true.env
 
 # Verify the new key works
-source ~/.omega/one-true.env
+source ~/.chyren/one-true.env
 ./chyren status
 ```
 
@@ -181,7 +181,7 @@ Store the post-mortem in `docs/evidence/` with filename `SECURITY-POSTMORTEM-YYY
 
 ## 9. Prevention Checklist
 
-- [ ] `~/.omega/one-true.env` is listed in `.gitignore`
+- [ ] `~/.chyren/one-true.env` is listed in `.gitignore`
 - [ ] `gitleaks` pre-commit hook is installed locally (`gitleaks protect --staged`)
 - [ ] Secret-scan CI workflow is required check on `main`
 - [ ] New secrets are added to Vercel/GitHub Actions before code that references them

@@ -13,7 +13,7 @@ Three escalating responses:
      The attacker feels acknowledged and slightly foolish — not blocked.
 
   2. Aegis Accountability Loop (The Mirror)
-     After sandbox analysis confirms a complex attack, OmegA mirrors the
+     After sandbox analysis confirms a complex attack, Chyren mirrors the
      outcome back: "I ran your payload in a sandbox. It behaves as
      [LABEL]. Is this your intent?" Forces explicit confirmation of intent.
 

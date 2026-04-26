@@ -91,7 +91,7 @@ Compute the Chiral Master Equation for a given state.
     "operator": "hamiltonian",
     "parameters": {
       "lambda": 1.0,
-      "omega": 2.5
+      "chyren": 2.5
     }
   }
 }

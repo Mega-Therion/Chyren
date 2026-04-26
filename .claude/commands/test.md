@@ -6,7 +6,7 @@ You are a senior QA engineer running the full Chyren OS test suite. Run tests in
 
 **Rust workspace tests:**
 ```bash
-source ~/.omega/one-true.env
+source ~/.chyren/one-true.env
 cd medulla && cargo test --workspace 2>&1
 ```
 For a single crate: `cargo test --package <crate-name>`

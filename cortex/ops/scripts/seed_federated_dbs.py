@@ -3,17 +3,17 @@ seed_federated_dbs.py — Full 3-year data ingestion across Neon + Supabase
 
 Distribution strategy:
   Supabase  → family_profiles, public_knowledge, memories (web-facing context)
-  Neon      → omega_memory_entries (dense memory store), omega_library_catalog (both)
+  Neon      → chyren_memory_entries (dense memory store), chyren_library_catalog (both)
   Catalog   → unified library index written to BOTH platforms
 
 Sources:
   - FAMILY_CANONICAL_DOSSIER.md        → family_profiles
   - aRYse_Full_Biography_2026.md       → public_knowledge (biography)
   - RY_CANONICAL_DOSSIER_vNext.md      → public_knowledge (creator/concept)
-  - OMEGA_DATA_CONSOLIDATED/*.md       → memories (456 ChatGPT convos, 3 yrs)
-  - RY_Sovereign_Biography/            → public_knowledge + omega_memory_entries
-  - RYography/                         → public_knowledge + omega_memory_entries
-  - SafaData/                          → omega_memory_entries
+  - CHYREN_DATA_CONSOLIDATED/*.md       → memories (456 ChatGPT convos, 3 yrs)
+  - RY_Sovereign_Biography/            → public_knowledge + chyren_memory_entries
+  - RYography/                         → public_knowledge + chyren_memory_entries
+  - SafaData/                          → chyren_memory_entries
 
 Run from repo root:
   python cortex/ops/scripts/seed_federated_dbs.py
@@ -34,10 +34,10 @@ SUPA_REF     = "eletftuboucrsrnapqoq"
 SUPA_BASE    = f"https://{SUPA_REF}.supabase.co/rest/v1"
 SUPA_KEY     = next(p["service_key"] for p in POOL["pool"] if p["id"] == "supabase_sovereign")
 
-BRAIN        = Path("/home/mega/Work/Chyren/archives/OMEGA_WORKSPACE/BRAIN")
-CONSOLIDATED = BRAIN / "raw/OMEGA_DATA_CONSOLIDATED"
+BRAIN        = Path("/home/mega/Work/Chyren/archives/CHYREN_WORKSPACE/BRAIN")
+CONSOLIDATED = BRAIN / "raw/CHYREN_DATA_CONSOLIDATED"
 BIOGRAPHY    = BRAIN / "biography"
-DOCS         = Path("/home/mega/Chyren/archives/OMEGA_WORKSPACE/DOCS")
+DOCS         = Path("/home/mega/Chyren/archives/CHYREN_WORKSPACE/DOCS")
 
 # ── Supabase REST helpers ──────────────────────────────────────────────────────
 
@@ -89,7 +89,7 @@ def neon_upsert_family(rows: list[dict]) -> int:
     conn = neon_conn()
     cur = conn.cursor()
     cols = ["id","name","last_name","relationship","location","birthday","deceased",
-            "occupation","partner","children","ry_notes","notes_for_omega","how_to_greet","fun_facts"]
+            "occupation","partner","children","ry_notes","notes_for_chyren","how_to_greet","fun_facts"]
     vals = [[r.get(c) for c in cols] for r in rows]
     sql = f"""
         INSERT INTO family_profiles ({','.join(cols)})
@@ -100,7 +100,7 @@ def neon_upsert_family(rows: list[dict]) -> int:
             birthday=EXCLUDED.birthday, deceased=EXCLUDED.deceased,
             occupation=EXCLUDED.occupation, partner=EXCLUDED.partner,
             children=EXCLUDED.children, ry_notes=EXCLUDED.ry_notes,
-            notes_for_omega=EXCLUDED.notes_for_omega, how_to_greet=EXCLUDED.how_to_greet,
+            notes_for_chyren=EXCLUDED.notes_for_chyren, how_to_greet=EXCLUDED.how_to_greet,
             fun_facts=EXCLUDED.fun_facts, updated_at=CURRENT_TIMESTAMP
     """
     execute_values(cur, sql, vals)
@@ -113,7 +113,7 @@ def neon_upsert_memories(rows: list[dict]) -> int:
     conn = neon_conn()
     cur = conn.cursor()
     sql = """
-        INSERT INTO omega_memory_entries (id,content,source,importance,namespace,confidence,domain,version,created_at)
+        INSERT INTO chyren_memory_entries (id,content,source,importance,namespace,confidence,domain,version,created_at)
         VALUES %s
         ON CONFLICT (id) DO NOTHING
     """
@@ -130,7 +130,7 @@ def neon_upsert_catalog(rows: list[dict]) -> int:
     conn = neon_conn()
     cur = conn.cursor()
     sql = """
-        INSERT INTO omega_library_catalog
+        INSERT INTO chyren_library_catalog
             (card_id,shard_id,shelf_table,subject_domain,semantic_summary,keywords,time_start,time_end)
         VALUES %s
         ON CONFLICT (card_id) DO NOTHING
@@ -188,8 +188,8 @@ def parse_family_dossier(path: Path) -> list[dict]:
         birthday_raw = fields.get("Birthday", "")
         bday = parse_date(birthday_raw)
 
-        # Extract omega note as how_to_greet + notes_for_omega
-        omega_note = fields.get("Omega Note", "")
+        # Extract chyren note as how_to_greet + notes_for_chyren
+        chyren_note = fields.get("Chyren Note", "")
 
         fun_facts = []
         for line in lines[1:]:
@@ -214,8 +214,8 @@ def parse_family_dossier(path: Path) -> list[dict]:
             "partner": fields.get("Husband") or fields.get("Wife") or fields.get("Partner") or None,
             "children": json.dumps(children),
             "ry_notes": fields.get("Context", "") or None,
-            "notes_for_omega": omega_note or None,
-            "how_to_greet": omega_note.split(".")[0] if omega_note else None,
+            "notes_for_chyren": chyren_note or None,
+            "how_to_greet": chyren_note.split(".")[0] if chyren_note else None,
             "fun_facts": json.dumps(fun_facts),
         }
         rows.append(row)
@@ -246,7 +246,7 @@ def parse_biography_to_knowledge(path: Path, category: str, title_prefix: str = 
     return rows
 
 def parse_conversation_file(path: Path) -> dict | None:
-    """Parse a single OMEGA_DATA_CONSOLIDATED .md conversation file (text or voice)."""
+    """Parse a single CHYREN_DATA_CONSOLIDATED .md conversation file (text or voice)."""
     text = path.read_text(errors="replace")
     title = re.sub(r"^\d+_", "", path.stem).replace("_", " ")
 
@@ -334,7 +334,7 @@ def run():
             shard_id="family_profiles_primary",
             shelf_table="family_profiles",
             domain="family",
-            summary=f"Family profiles for {len(family_rows)} members of RY's family. Includes relationships, birthdays, Omega interaction notes.",
+            summary=f"Family profiles for {len(family_rows)} members of RY's family. Includes relationships, birthdays, Chyren interaction notes.",
             keywords=["family","profiles","Teresa","Jada","Uncle Bob","Ruby","RY","Montgomery County","Story Arkansas"],
             time_start="1944-01-01", time_end=datetime.now().date().isoformat(),
         ))
@@ -378,7 +378,7 @@ def run():
         shelf_table="public_knowledge",
         domain="biography",
         summary="Full biography, psychographic profile, and canonical dossier of RY (Ryan Wayne Felps Yett). Covers 1990s-2026.",
-        keywords=["RY","biography","creator","Engineer-Mystic","OmegA","Mount Ida","Arkansas","patent","sovereignty"],
+        keywords=["RY","biography","creator","Engineer-Mystic","Chyren","Mount Ida","Arkansas","patent","sovereignty"],
         time_start="1990-01-01", time_end="2026-04-11",
     ))
 
@@ -411,14 +411,14 @@ def run():
             shelf_table="memories",
             domain="conversations",
             summary=f"ChatGPT conversation history: {len(memory_rows)} conversations spanning ~3 years. Covers creative projects, philosophy, tech architecture, family, personal growth.",
-            keywords=["conversations","ChatGPT","memory","history","3 years","creative","philosophy","OmegA","ONE"],
+            keywords=["conversations","ChatGPT","memory","history","3 years","creative","philosophy","Chyren","ONE"],
             time_start=min(dates) if dates else "2023-04-01",
             time_end=max(dates) if dates else "2026-04-11",
         ))
 
-    # ── 4. OMEGA MEMORY ENTRIES — Dense memory from DOCS + sovereign bio ─────
-    print("\n[4/5] Omega Memory Entries (distributed to Neon + Supabase)")
-    omega_rows: list[dict] = []
+    # ── 4. CHYREN MEMORY ENTRIES — Dense memory from DOCS + sovereign bio ─────
+    print("\n[4/5] Chyren Memory Entries (distributed to Neon + Supabase)")
+    chyren_rows: list[dict] = []
 
     def chunk_file(path: Path, source_label: str, namespace: str, domain: str,
                    importance: float, created_at: str, chunk_size: int = 900):
@@ -431,8 +431,8 @@ def run():
             for j, chunk in enumerate(chunks):
                 if len(chunk.strip()) < 80:
                     continue
-                omega_rows.append({
-                    "id": str(uuid.uuid5(uuid.NAMESPACE_DNS, f"omega.{source_label}.{path.stem}.{j}")),
+                chyren_rows.append({
+                    "id": str(uuid.uuid5(uuid.NAMESPACE_DNS, f"chyren.{source_label}.{path.stem}.{j}")),
                     "content": chunk.strip(),
                     "source": source_label,
                     "importance": importance,
@@ -449,7 +449,7 @@ def run():
     if sovereign_bio.exists():
         for md in sovereign_bio.rglob("*.md"):
             chunk_file(md, f"sovereign_bio/{md.stem}", "biography", "identity", 0.9, "2026-03-28")
-    print(f"  Sovereign bio: {len(omega_rows)} entries so far")
+    print(f"  Sovereign bio: {len(chyren_rows)} entries so far")
 
     # DOCS canonical docs (whitepapers, phase proposals, telos, mission)
     key_docs = [
@@ -474,35 +474,35 @@ def run():
         for f in sorted(k5_dir.rglob("*.md"))[:10]:
             chunk_file(f, f"k5/{f.stem}", "conversations", "identity", 0.8, "2026-03-01")
 
-    # DOCS/chatgpt-harvest-2026 (same source as OMEGA_DATA_CONSOLIDATED — extra context)
+    # DOCS/chatgpt-harvest-2026 (same source as CHYREN_DATA_CONSOLIDATED — extra context)
     harvest = DOCS / "chatgpt-harvest-2026"
     if harvest.exists():
         for md in sorted(harvest.glob("*.md"))[:50]:
             chunk_file(md, f"chatgpt_harvest/{md.stem}", "conversations", "history", 0.7, "2026-03-26")
 
-    count_before = len(omega_rows)
-    print(f"  DOCS + corpus: {len(omega_rows)} total entries")
+    count_before = len(chyren_rows)
+    print(f"  DOCS + corpus: {len(chyren_rows)} total entries")
 
-    print(f"  Total omega entries: {len(omega_rows)}")
+    print(f"  Total chyren entries: {len(chyren_rows)}")
 
     # Distribute: write to Neon
     total_neon = 0
-    for i in range(0, len(omega_rows), 200):
-        total_neon += neon_upsert_memories(omega_rows[i:i+200])
+    for i in range(0, len(chyren_rows), 200):
+        total_neon += neon_upsert_memories(chyren_rows[i:i+200])
     print(f"  → Neon: {total_neon} rows")
 
     # Also write to Supabase for redundancy
     total_supa = 0
-    for i in range(0, min(len(omega_rows), 500), 100):  # cap at 500 for Supabase
-        total_supa += supa_upsert("omega_memory_entries", omega_rows[i:i+100])
+    for i in range(0, min(len(chyren_rows), 500), 100):  # cap at 500 for Supabase
+        total_supa += supa_upsert("chyren_memory_entries", chyren_rows[i:i+100])
     print(f"  → Supabase (top 500): {total_supa} rows")
 
-    if omega_rows:
+    if chyren_rows:
         catalog_cards.append(make_catalog_card(
-            shard_id="omega_memory_entries_corpus",
-            shelf_table="omega_memory_entries",
+            shard_id="chyren_memory_entries_corpus",
+            shelf_table="chyren_memory_entries",
             domain="episodic",
-            summary=f"Dense episodic memory corpus from RYography, SafaData, and raw archives. {len(omega_rows)} entries covering identity, relationships, and general knowledge.",
+            summary=f"Dense episodic memory corpus from RYography, SafaData, and raw archives. {len(chyren_rows)} entries covering identity, relationships, and general knowledge.",
             keywords=["episodic","memory","RYography","Safa","archive","identity","relationships"],
             time_start="2023-01-01", time_end="2026-04-11",
         ))
@@ -526,7 +526,7 @@ def run():
         "time_start": c.get("time_start"),
         "time_end": c.get("time_end"),
     } for c in catalog_cards]
-    n = supa_upsert("omega_library_catalog", supa_catalog)
+    n = supa_upsert("chyren_library_catalog", supa_catalog)
     print(f"  → Supabase: {n} cards")
 
     print("\n" + "=" * 60)
@@ -534,7 +534,7 @@ def run():
     print(f"  Family profiles    → Neon + Supabase")
     print(f"  Public knowledge   → Supabase ({len(knowledge_rows)} chunks)")
     print(f"  Memories           → Supabase ({len(memory_rows)} conversations)")
-    print(f"  Omega memory       → Neon + Supabase ({len(omega_rows)} entries)")
+    print(f"  Chyren memory       → Neon + Supabase ({len(chyren_rows)} entries)")
     print(f"  Library catalog    → Neon + Supabase ({len(catalog_cards)} cards)")
     print("=" * 60)
 

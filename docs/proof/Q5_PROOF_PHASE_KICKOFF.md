@@ -4,13 +4,13 @@ This note starts the proof phase locally from the tracked proof package. It does
 
 ## 1. First Theorem Candidate
 
-Let `M` be the constitutional manifold chosen for the Q5 witness, let `P -> M` be the associated principal bundle, let `omega` be the connection used for transport, and let `L_1, ..., L_r` be the effective drift operators in the Q5 model.
+Let `M` be the constitutional manifold chosen for the Q5 witness, let `P -> M` be the associated principal bundle, let `chyren` be the connection used for transport, and let `L_1, ..., L_r` be the effective drift operators in the Q5 model.
 
 Assume:
 
 - `A1`: the object model in `docs/proof/Q5_OBJECT_MODEL.md` is the active source of definitions and every missing object remains marked `UNDEFINED IN REPO`.
 - `A2`: a mathematically explicit map from each `L_k` to an induced geometric field `X_k` on the chosen manifold or bundle has been defined.
-- `A3`: the connection `omega` is explicit and its curvature `Omega_curv` is computable on the induced fields.
+- `A3`: the connection `chyren` is explicit and its curvature `Chyren_curv` is computable on the induced fields.
 - `A4`: the chosen holonomy theorem applies to the bundle and connection used in the witness.
 - `A5`: the witness model uses the same drift-to-geometry map in both the formal and executable tracks.
 
@@ -40,7 +40,7 @@ Current status:
 
 ### Lemma 2: Curvature Detects Induced Commutators
 
-For the chosen connection `omega`, the curvature evaluated on the induced fields is nontrivially determined by their commutator structure, so the commuting and noncommuting witness cases are mathematically distinguishable at the curvature level.
+For the chosen connection `chyren`, the curvature evaluated on the induced fields is nontrivially determined by their commutator structure, so the commuting and noncommuting witness cases are mathematically distinguishable at the curvature level.
 
 Why this is second:
 

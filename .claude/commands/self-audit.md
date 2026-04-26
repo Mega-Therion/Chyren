@@ -9,7 +9,7 @@ $ARGUMENTS (defaults to full system)
 
 ### 1. Code Correctness
 ```bash
-source ~/.omega/one-true.env
+source ~/.chyren/one-true.env
 cd medulla && cargo test --workspace 2>&1 | grep -E "FAILED|passed|failed"
 PYTHONPATH=cortex pytest tests/ -q 2>&1 | tail -5
 ```
@@ -23,10 +23,10 @@ cd web && npm run typecheck 2>&1 | grep "error TS" | wc -l
 ### 3. Security Posture
 ```bash
 # unwrap() in prod code
-grep -rn "\.unwrap()\|\.expect(" medulla/omega-*/src/*.rs 2>/dev/null | grep -v "#\[cfg(test)\]" | wc -l
+grep -rn "\.unwrap()\|\.expect(" medulla/chyren-*/src/*.rs 2>/dev/null | grep -v "#\[cfg(test)\]" | wc -l
 
 # direct logging
-grep -rn "println!\|eprintln!" medulla/omega-*/src/*.rs 2>/dev/null | grep -v test | wc -l
+grep -rn "println!\|eprintln!" medulla/chyren-*/src/*.rs 2>/dev/null | grep -v test | wc -l
 
 # dependency vulnerabilities
 cd medulla && cargo audit 2>&1 | grep "Crate\|Warning\|error"
@@ -35,21 +35,21 @@ cd medulla && cargo audit 2>&1 | grep "Crate\|Warning\|error"
 ### 4. Architecture Invariants
 ```bash
 # ADCCL threshold
-grep -n "0\.7\|threshold" medulla/omega-adccl/src/lib.rs 2>/dev/null | head -5
+grep -n "0\.7\|threshold" medulla/chyren-adccl/src/lib.rs 2>/dev/null | head -5
 
 # Telemetry routing
-grep -rn "println!\|log::" medulla/omega-*/src/ 2>/dev/null | grep -v test | head -10
+grep -rn "println!\|log::" medulla/chyren-*/src/ 2>/dev/null | grep -v test | head -10
 ```
 
 ### 5. Data Layer
 ```bash
-psql "$OMEGA_DB_URL" -c "SELECT COUNT(*), MAX(created_at) FROM ledger;" 2>&1
+psql "$CHYREN_DB_URL" -c "SELECT COUNT(*), MAX(created_at) FROM ledger;" 2>&1
 curl -s "${QDRANT_URL}/health" 2>&1
 ```
 
 ### 6. Coverage Gaps
 ```bash
-for f in medulla/omega-*/src/lib.rs; do
+for f in medulla/chyren-*/src/lib.rs; do
   crate=$(dirname $f | xargs dirname | xargs basename)
   has_tests=$(grep -l "#\[cfg(test)\]" medulla/$crate/src/*.rs 2>/dev/null | wc -l)
   echo "$crate: $has_tests test files"

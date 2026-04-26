@@ -2,7 +2,7 @@
 name: task
 description: Create a task in the ORYAN task queue — routes to the appropriate agent (claude, , codex, aider) based on task type
 argument-hint: [task description]
-allowed-tools: Bash(~/NEXUS/OmegA/OmegA-SI/tools/ORYAN/oryan *), Bash(oryan *), Read
+allowed-tools: Bash(~/NEXUS/Chyren/Chyren-SI/tools/ORYAN/oryan *), Bash(oryan *), Read
 ---
 
 ## Create ORYAN Task
@@ -24,7 +24,7 @@ Analyze the task and choose:
 
 ```bash
 # From ORYAN directory
-cd ~/NEXUS/OmegA/OmegA-SI/tools/ORYAN
+cd ~/NEXUS/Chyren/Chyren-SI/tools/ORYAN
 ./oryan task create --agent <agent> --prompt "$ARGUMENTS"
 
 # Verify it was created
@@ -42,9 +42,9 @@ Created ORYAN task → [agent]: [task summary]
 
 If ORYAN is not available, suggest using:
 ```bash
-omega chat  # Interactive multi-agent chat
+chyren chat  # Interactive multi-agent chat
 # or
-omega ask-<agent> "$ARGUMENTS"
+chyren ask-<agent> "$ARGUMENTS"
 ```
 
 If $ARGUMENTS is ambiguous, ask what the task is before routing.

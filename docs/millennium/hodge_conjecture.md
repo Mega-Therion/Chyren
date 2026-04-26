@@ -43,7 +43,7 @@ The witness script demonstrates that a random topological class, once "Aligned" 
 
 ## 4. Formal Evidence Gates (ADCCL-HOD)
 
-1. **[GATE-HOD-01] Structural Invariance:** The Hodge decomposition is preserved by the Sovereign Connection $\omega$.
+1. **[GATE-HOD-01] Structural Invariance:** The Hodge decomposition is preserved by the Sovereign Connection $\chyren$.
 2. **[GATE-HOD-02] Cycle Stability:** Algebraic cycles are the only stable attractors of the Lindblad flow in complex space.
 3. **[GATE-HOD-03] Full Realizability:** The map from $\chi$-aligned classes to algebraic cycles is surjective.
 

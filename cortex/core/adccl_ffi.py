@@ -1,7 +1,7 @@
 """
 core/adccl_ffi.py — FFI bridge to the Rust ADCCL shared library.
 
-Loads `medulla/target/release/libomega_adccl.so` when available.
+Loads `medulla/target/release/libchyren_adccl.so` when available.
 Falls back to the pure-Python ADCCL implementation transparently so the
 cortex works in environments where the medulla hasn't been compiled yet
 (CI, fresh clones, dev boxes without Rust installed).
@@ -15,8 +15,8 @@ import os
 #   cortex/core/adccl_ffi.py → ../../medulla/target/release/
 _ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 _LIB_PATH = os.environ.get(
-    "OMEGA_ADCCL_LIB",
-    os.path.join(_ROOT, "medulla", "target", "release", "libomega_adccl.so"),
+    "CHYREN_ADCCL_LIB",
+    os.path.join(_ROOT, "medulla", "target", "release", "libchyren_adccl.so"),
 )
 
 _lib = None

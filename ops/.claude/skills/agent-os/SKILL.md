@@ -37,7 +37,7 @@ The shared bundle at `/home/mega/claude-skill-bundle/skills` is your **Agent OS*
 
 **Example decomposition:**
 ```
-Goal: "Build the OmegA memory retrieval API"
+Goal: "Build the Chyren memory retrieval API"
 ├── : Audit Neon schema, propose query plan
 ├── Aider: Implement the endpoint
 ├── Codex: Security review + threat model
@@ -110,10 +110,10 @@ The bootstrapper translates the universal SKILL.md format into whatever the targ
 | Ship a new feature | `autonomous-researcher` → `forward` (Aider) → `eval-forge` |
 | Security audit | `repo-cartographer` → `security-ownership-map` → `security-threat-model` |
 | Fix failing CI | `gh-fix-ci` → `webapp-testing` → `review-pr` |
-| Deploy OmegA | `sovereign-deployer` → `deploy-to-vercel` → `teleodynamics-observer` |
+| Deploy Chyren | `sovereign-deployer` → `deploy-to-vercel` → `teleodynamics-observer` |
 | DB performance | `-repo-cartographer` →  `eval-forge` → `neon-postgres` |
 | Build MCP server | `mcp-builder` → `mcp-integration` → `hook-development` |
-| Red-team OmegA | `adversarial-evaluator` → `eval-forge` → `memory-utility-maximizer` |
+| Red-team Chyren | `adversarial-evaluator` → `eval-forge` → `memory-utility-maximizer` |
 | Design → Code | `figma` → `figma-implement-design` → `vercel-react-best-practices` |
 | New skill creation | `skill-architect` → `skill-development` → `claude-md-improver` |
 
@@ -130,11 +130,11 @@ The bootstrapper translates the universal SKILL.md format into whatever the targ
 ### Security
 `security-threat-model` · `security-best-practices` · `security-ownership-map` · `adversarial-evaluator` · `secure-agent-mesh`
 
-### OmegA-Specific
-`omega-sid-orchestrator` · `omega-workflow-orchestrator` · `omega-sovereign-ui` · `-omega-sovereign-ops` · `sovereign-deployer` · `teleodynamics-observer` · `provider-router-simulator` · `memory-utility-maximizer` · `synergistic-chain-optimizer`
+### Chyren-Specific
+`chyren-sid-orchestrator` · `chyren-workflow-orchestrator` · `chyren-sovereign-ui` · `-chyren-sovereign-ops` · `sovereign-deployer` · `teleodynamics-observer` · `provider-router-simulator` · `memory-utility-maximizer` · `synergistic-chain-optimizer`
 
 ### Frontend / UI
-`software-frontend` · `senior-frontend` · `frontend` · `vercel-react-best-practices` · `vercel-react-native-skills` · `vercel-composition-patterns` · `figma` · `figma-implement-design` · `omega-sovereign-ui`
+`software-frontend` · `senior-frontend` · `frontend` · `vercel-react-best-practices` · `vercel-react-native-skills` · `vercel-composition-patterns` · `figma` · `figma-implement-design` · `chyren-sovereign-ui`
 
 ### Backend / API
 `backend-development` · `backend-dev-guidelines` · `fastapi-python` · `fastapi-templates` · `neon-postgres` · `mcp-builder` · `mcp-integration`
@@ -159,9 +159,9 @@ The bootstrapper translates the universal SKILL.md format into whatever the targ
 | Skill Manifest | `/home/mega/claude-skill-bundle/skills/skills-manifest.json` |
 | Skill Index | `/home/mega/claude-skill-bundle/skills/INDEX.md` |
 | Claude Skills | `/home/mega/.claude/skills/` |
-| OmegA Repo | `/home/mega/OMEGA_WORKSPACE/CANON/OmegA-Architecture` |
-| Vault | `/home/mega/OMEGA_WORKSPACE/VAULT/one-true.env` |
-| Neon DB | `public.omega_memory_entries` (26k+ entries) |
+| Chyren Repo | `/home/mega/CHYREN_WORKSPACE/CANON/Chyren-Architecture` |
+| Vault | `/home/mega/CHYREN_WORKSPACE/VAULT/one-true.env` |
+| Neon DB | `public.chyren_memory_entries` (26k+ entries) |
 
 ---
 

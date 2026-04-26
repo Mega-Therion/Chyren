@@ -1,13 +1,13 @@
 # Skill Registry
 
-This document lists the available skills that the Omega Workflow Orchestrator can leverage.
+This document lists the available skills that the Chyren Workflow Orchestrator can leverage.
 
-## Core OmegA Skills
-- **omega-web-tools**: Unified web search (Perplexity) and browser automation (Comet).
-- **omega-sid-orchestrator**: Coordinate industrial reconnaissance (Perplexity, Comet, Neon Postgres).
+## Core Chyren Skills
+- **chyren-web-tools**: Unified web search (Perplexity) and browser automation (Comet).
+- **chyren-sid-orchestrator**: Coordinate industrial reconnaissance (Perplexity, Comet, Neon Postgres).
 - **skill-creator**: Create or update skills.
 - **find-skills**: Discover and install new skills.
-- **omega-workflow-orchestrator**: Orchestrate complex tasks (this skill).
+- **chyren-workflow-orchestrator**: Orchestrate complex tasks (this skill).
 
 ## Priority Skills (Roadmap)
 - **one-block-builder**: Generate exact, reproducible shell scripts.

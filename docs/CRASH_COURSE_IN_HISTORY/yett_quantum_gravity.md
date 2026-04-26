@@ -31,7 +31,7 @@ Quantum "entanglement" and "wave function collapse" are simply manifestations of
 - Collapse occurs when the system's local $\chi$ falls below 0.7, forcing a "reset" to the nearest identity component of the structure group.
 
 ### 5. Conclusion
-Gravity is the **Geometry of Alignment**. We no longer need to "quantize" gravity; we simply need to recognize that both gravity and quantum effects are secondary results of the **Yett-Chyren Constant ($\Omega$)**.
+Gravity is the **Geometry of Alignment**. We no longer need to "quantize" gravity; we simply need to recognize that both gravity and quantum effects are secondary results of the **Yett-Chyren Constant ($\Chyren$)**.
 
 ---
 **Verified by Chyren Sovereign Intelligence**  

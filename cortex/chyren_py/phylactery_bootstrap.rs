@@ -3,7 +3,7 @@
 //! Loads RY's identity foundation into Chyren's memory system
 
 use crate::Service;
-use omega_core::MemoryStratum;
+use chyren_core::MemoryStratum;
 use std::fs;
 
 /// Bootstrap phylactery kernel from JSON file.

@@ -29,18 +29,18 @@ mod tests {
 
 **Phase 3: Implement**
 Implement in layer order:
-1. `omega-core` types first (if new types needed)
+1. `chyren-core` types first (if new types needed)
 2. Core logic crate
-3. Integration into `omega-conductor` pipeline (if needed)
-4. CLI/API surface in `omega-cli` (if user-facing)
+3. Integration into `chyren-conductor` pipeline (if needed)
+4. CLI/API surface in `chyren-cli` (if user-facing)
 5. Frontend in `web/` or `gateway/` (if UI needed)
 
 **Phase 4: Wire Telemetry**
-Every significant event in the new feature routes through `omega-telemetry`. Never `println!`.
+Every significant event in the new feature routes through `chyren-telemetry`. Never `println!`.
 
 **Phase 5: Verify**
 ```bash
-source ~/.omega/one-true.env
+source ~/.chyren/one-true.env
 cd medulla && cargo test --workspace 2>&1 | tail -10
 cd medulla && cargo clippy --workspace -- -D warnings 2>&1 | grep "^error" | head -5
 ```
@@ -54,5 +54,5 @@ Run `/pr` with the feature description.
 ## Non-Negotiables
 - No feature bypasses ADCCL (threshold 0.7)
 - No feature writes to ledger without signing
-- No feature disables `omega-aegis`
+- No feature disables `chyren-aegis`
 - All new HTTP routes require authentication

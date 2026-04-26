@@ -40,13 +40,13 @@ Chyren uses a layered test taxonomy across four stacks. Each layer has a clear s
 | Python | `cortex/tests/test_integration.py` |
 
 **What integration tests own:**
-- Provider routing and fallback sequencing through `omega-conductor`
+- Provider routing and fallback sequencing through `chyren-conductor`
 - Ledger append + hash-chain verification with a real (or SQLite-backed) store
 - ADCCL gate wiring: raw provider output → score → accept/reject decision
 
 **What integration tests must NOT do:**
 - Call live external APIs (use recorded fixtures or mocks)
-- Depend on secrets from `~/.omega/one-true.env`
+- Depend on secrets from `~/.chyren/one-true.env`
 
 ---
 
@@ -56,7 +56,7 @@ Chyren uses a layered test taxonomy across four stacks. Each layer has a clear s
 
 | Scope | What to verify |
 |---|---|
-| Provider spokes (`omega-spokes`) | Each adapter satisfies `ProviderBase` trait: returns `ProviderResponse` with `text`, `model`, `tokens_used` fields |
+| Provider spokes (`chyren-spokes`) | Each adapter satisfies `ProviderBase` trait: returns `ProviderResponse` with `text`, `model`, `tokens_used` fields |
 | Fallback policy | When primary provider returns HTTP 429/500, routing falls through to next in the registry |
 | ADCCL threshold contract | Score below 0.7 → `passed: false`; stub markers → always `passed: false` regardless of score |
 | Ledger contract | Every committed entry has `previous_state_hash` linking to prior entry |
@@ -83,7 +83,7 @@ Smoke tests live in `tests/` at the repo root and are excluded from the standard
 
 | Stack | Minimum Line Coverage | Priority Areas |
 |---|---|---|
-| Rust (Medulla) | **60%** | `omega-adccl`, `omega-aegis`, `omega-conductor` |
+| Rust (Medulla) | **60%** | `chyren-adccl`, `chyren-aegis`, `chyren-conductor` |
 | Python (Cortex) | **70%** | `core/ledger.py`, `core/adccl.py`, `core/integrity.py` |
 | Web (Next.js) | **Critical paths only** | API route handlers, provider error handling, streaming logic |
 
@@ -93,7 +93,7 @@ Coverage is enforced by `cargo tarpaulin` (Rust) and `pytest --cov` (Python) whe
 
 ## Provider Routing / Fallback Contract Tests
 
-The following scenarios must have explicit test coverage in `omega-conductor` or `omega-spokes`:
+The following scenarios must have explicit test coverage in `chyren-conductor` or `chyren-spokes`:
 
 1. **Primary available** — task routes to first registered provider, response passes ADCCL gate, committed to ledger.
 2. **Primary 429 / rate-limited** — routing falls to secondary provider within the same session.

@@ -2,7 +2,7 @@
 """
 Q2 Witness v1: Constitutional Boundary Resonance
 
-This script demonstrates the second term of the Sovereignty Score (Omega).
+This script demonstrates the second term of the Sovereignty Score (Chyren).
 It simulates the interaction of a provider council at the constitutional boundary.
 
 Mathematical Claims:

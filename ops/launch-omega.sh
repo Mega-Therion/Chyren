@@ -1,2 +1,2 @@
 #!/bin/bash
-./omega_workspace/workspace/OmegA-Next/target/debug/chyren run "$@"
+./chyren_workspace/workspace/Chyren-Next/target/debug/chyren run "$@"

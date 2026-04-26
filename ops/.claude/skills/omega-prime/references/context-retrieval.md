@@ -6,7 +6,7 @@
 2. `~/NEXUS/ERGON.md`
 3. `~/NEXUS/STATUS.md`
 4. Active project `log.md`
-5. Canonical repo docs under `CANON/OmegA-Architecture`
+5. Canonical repo docs under `CANON/Chyren-Architecture`
 
 ## What to Extract
 

@@ -1,6 +1,6 @@
 ---
 name: Context Architecture Concept — RY's Hot Thought
-description: RY's original idea for a self-reinforcing layered context/meaning system for OmegA
+description: RY's original idea for a self-reinforcing layered context/meaning system for Chyren
 type: project
 ---
 

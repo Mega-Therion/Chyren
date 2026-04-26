@@ -28,7 +28,7 @@ All decisions in Chyren are evaluated against the **ADCCL Constitutional Framewo
 Decisions that:
 - ✅ Strengthen sovereign integrity
 - ✅ Improve ADCCL verification accuracy
-- ✅ Advance the OmegA-Next Rust migration
+- ✅ Advance the Chyren-Next Rust migration
 - ✅ Enhance cryptographic ledger integrity
 - ✅ Align with the Chiral Thesis mathematical framework
 

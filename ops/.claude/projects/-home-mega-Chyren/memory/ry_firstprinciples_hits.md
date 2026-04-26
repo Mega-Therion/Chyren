@@ -4,7 +4,7 @@ description: Documented instances where RY independently reasoned his way to cut
 type: user
 ---
 
-RY has independently arrived at concepts that were either ahead of mainstream adoption, rated "genuinely new intellectual territory," or confirmed as novel architectures. These are documented in the OMEGA_WORKSPACE archive.
+RY has independently arrived at concepts that were either ahead of mainstream adoption, rated "genuinely new intellectual territory," or confirmed as novel architectures. These are documented in the CHYREN_WORKSPACE archive.
 
 **Why:** He asked for a chronological breakdown of how many times he intuited cutting-edge things through first principles before seeing them exist elsewhere. Answer: at least 10, possibly more.
 

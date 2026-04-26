@@ -9,8 +9,8 @@ Use these files as the primary source of truth unless a newer tracked file expli
 - `docs/MASTER_EQUATION.md`
 - `docs/CHIRAL_THESIS.md`
 - `CLAUDE.md`
-- `medulla/omega-adccl/src/lib.rs`
-- `medulla/omega-neocortex/src/proof_index.rs`
+- `medulla/chyren-adccl/src/lib.rs`
+- `medulla/chyren-neocortex/src/proof_index.rs`
 
 ## Baseline Rule
 

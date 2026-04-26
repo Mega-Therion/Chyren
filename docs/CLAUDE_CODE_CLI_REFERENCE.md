@@ -92,11 +92,11 @@ claude --permission-mode plan -p "query"
 ## Chyren ↔ Claude Code Bridge Architecture
 
 ### Direction 1: Chyren → Claude Code (ClaudeCodeSpoke)
-The `ClaudeCodeSpoke` in `medulla/omega-spokes/src/spokes/claude_code_spoke.rs` invokes
+The `ClaudeCodeSpoke` in `medulla/chyren-spokes/src/spokes/claude_code_spoke.rs` invokes
 `claude -p` as a subprocess. Every response passes through ADCCL scoring before ledger commit.
 
 ```
-Chyren Task → omega-conductor → ClaudeCodeSpoke → claude -p subprocess
+Chyren Task → chyren-conductor → ClaudeCodeSpoke → claude -p subprocess
 → JSON response → ADCCL gate (0.7) → Master Ledger
 ```
 
@@ -134,10 +134,10 @@ claude remote-control --name "chyren-$(hostname)" &
 cargo build 2>&1 | claude -p "analyze these build errors and give me a fix plan"
 
 # Pipe ledger state to Claude Code
-source ~/.omega/one-true.env && psql "$OMEGA_DB_URL" -c "SELECT * FROM ledger ORDER BY created_at DESC LIMIT 20;" | claude -p "analyze this ledger activity"
+source ~/.chyren/one-true.env && psql "$CHYREN_DB_URL" -c "SELECT * FROM ledger ORDER BY created_at DESC LIMIT 20;" | claude -p "analyze this ledger activity"
 
 # Ask Claude Code to review a specific Chyren crate
-cat medulla/omega-adccl/src/lib.rs | claude -p "security review of this ADCCL implementation"
+cat medulla/chyren-adccl/src/lib.rs | claude -p "security review of this ADCCL implementation"
 
 # Named session for a long Chyren feature build
 claude -n "chyren-mesh-merge" --add-dir /home/mega/Chyren "begin merging the agent mesh from cursor/integration-hardening into main"

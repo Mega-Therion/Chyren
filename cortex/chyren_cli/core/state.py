@@ -13,7 +13,7 @@ Role = Literal["user", "assistant", "system"]
 
 def _default_db_path() -> Path:
     home = Path(os.path.expanduser("~"))
-    root = home / ".omega" / "chyren_cli"
+    root = home / ".chyren" / "chyren_cli"
     root.mkdir(parents=True, exist_ok=True)
     return root / "history.sqlite3"
 

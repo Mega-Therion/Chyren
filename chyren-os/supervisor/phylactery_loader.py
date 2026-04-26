@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Phylactery Loader: Ingest IDENTITY_FOUNDATION.md into Rust omega-myelin L6 kernel.
+Phylactery Loader: Ingest IDENTITY_FOUNDATION.md into Rust chyren-myelin L6 kernel.
 Bridges synthesized identity foundation into the autonomous system as foundational knowledge.
 """
 
@@ -173,7 +173,7 @@ class PhylacteryLoader:
             f.write(kernel_json)
 
         print(f"\n✓ Phylactery kernel saved to {output_path}")
-        print(f"  Ready for Rust omega-myelin L6 ingestion")
+        print(f"  Ready for Rust chyren-myelin L6 ingestion")
 
         return output_path
 
@@ -187,7 +187,7 @@ class PhylacteryLoader:
 //! Loads RY's identity foundation into Chyren's memory system
 
 use crate::Service;
-use omega_core::MemoryStratum;
+use chyren_core::MemoryStratum;
 use std::fs;
 
 /// Bootstrap phylactery kernel from JSON file.
@@ -307,7 +307,7 @@ if __name__ == "__main__":
     print(f"  Rust: {bootstrap_path}")
     print(f"="*70)
     print(f"\nNext steps:")
-    print(f"  1. Integrate phylactery_bootstrap.rs into omega-myelin")
+    print(f"  1. Integrate phylactery_bootstrap.rs into chyren-myelin")
     print(f"  2. Call bootstrap_phylactery_kernel() at system startup")
     print(f"  3. Verify canonical stratum has identity anchors")
     print(f"  4. Test AEGIS policy enforcement with root_authority=RY")

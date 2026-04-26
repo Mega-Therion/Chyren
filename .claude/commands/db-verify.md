@@ -5,16 +5,16 @@ You are the database reliability engineer. Verify that the Neon PostgreSQL and Q
 ## PostgreSQL (Master Ledger)
 
 ```bash
-source ~/.omega/one-true.env
+source ~/.chyren/one-true.env
 
 # Connectivity
-psql "$OMEGA_DB_URL" -c "SELECT version();" 2>&1
+psql "$CHYREN_DB_URL" -c "SELECT version();" 2>&1
 
 # Table inventory
-psql "$OMEGA_DB_URL" -c "\dt" 2>&1
+psql "$CHYREN_DB_URL" -c "\dt" 2>&1
 
 # Ledger row count and recency
-psql "$OMEGA_DB_URL" -c "
+psql "$CHYREN_DB_URL" -c "
 SELECT
   COUNT(*) as total_entries,
   MAX(created_at) as latest_entry,
@@ -23,10 +23,10 @@ SELECT
 FROM ledger;" 2>&1
 
 # Index health
-psql "$OMEGA_DB_URL" -c "SELECT indexname, indexdef FROM pg_indexes WHERE tablename='ledger';" 2>&1
+psql "$CHYREN_DB_URL" -c "SELECT indexname, indexdef FROM pg_indexes WHERE tablename='ledger';" 2>&1
 
 # Connection pool status
-psql "$OMEGA_DB_URL" -c "SELECT count(*) as connections, state FROM pg_stat_activity GROUP BY state;" 2>&1
+psql "$CHYREN_DB_URL" -c "SELECT count(*) as connections, state FROM pg_stat_activity GROUP BY state;" 2>&1
 ```
 
 ## Qdrant (Semantic Memory)
@@ -42,7 +42,7 @@ curl -s "${QDRANT_URL}/collections/myelin" 2>&1 || curl -s "${QDRANT_URL}/collec
 ## Schema Drift Check
 Compare current schema against expected (read from the most recent migration file in the repo):
 ```bash
-psql "$OMEGA_DB_URL" -c "\d+ ledger" 2>&1
+psql "$CHYREN_DB_URL" -c "\d+ ledger" 2>&1
 ```
 
 ## Output

@@ -1,9 +1,9 @@
 """
-ingest_omega_entries.py — Stream omega_memory_entries into Neon + Supabase
+ingest_chyren_entries.py — Stream chyren_memory_entries into Neon + Supabase
 Processes in small batches to stay within memory limits.
 
 Run from repo root:
-  python cortex/ops/scripts/ingest_omega_entries.py
+  python cortex/ops/scripts/ingest_chyren_entries.py
 """
 
 import json, re, uuid, urllib.request, sys
@@ -16,9 +16,9 @@ NEON_URL = POOL["active_primary"]
 SUPA_BASE = "https://eletftuboucrsrnapqoq.supabase.co/rest/v1"
 SUPA_KEY = next(p["service_key"] for p in POOL["pool"] if p["id"] == "supabase_sovereign")
 
-BIOGRAPHY = Path("/home/mega/Chyren/archives/OMEGA_WORKSPACE/BRAIN/biography")
-DOCS = Path("/home/mega/Chyren/archives/OMEGA_WORKSPACE/DOCS")
-CONSOLIDATED = Path("/home/mega/Chyren/archives/OMEGA_WORKSPACE/BRAIN/raw/OMEGA_DATA_CONSOLIDATED")
+BIOGRAPHY = Path("/home/mega/Chyren/archives/CHYREN_WORKSPACE/BRAIN/biography")
+DOCS = Path("/home/mega/Chyren/archives/CHYREN_WORKSPACE/DOCS")
+CONSOLIDATED = Path("/home/mega/Chyren/archives/CHYREN_WORKSPACE/BRAIN/raw/CHYREN_DATA_CONSOLIDATED")
 
 CHUNK_SIZE = 900
 BATCH_SIZE = 100
@@ -36,7 +36,7 @@ def supa_upsert(rows):
         return 0
     payload = json.dumps(rows).encode()
     req = urllib.request.Request(
-        f"{SUPA_BASE}/omega_memory_entries",
+        f"{SUPA_BASE}/chyren_memory_entries",
         data=payload,
         headers={
             "apikey": SUPA_KEY,
@@ -66,7 +66,7 @@ def neon_upsert(rows):
     execute_values(
         cur,
         """
-        INSERT INTO omega_memory_entries
+        INSERT INTO chyren_memory_entries
             (id, content, source, importance, namespace, confidence, domain, version, created_at)
         VALUES %s
         ON CONFLICT (id) DO NOTHING
@@ -88,7 +88,7 @@ def neon_upsert(rows):
 
 def make_row(path, source_label, namespace, domain, importance, created_at, chunk_idx, chunk_text):
     return {
-        "id": str(uuid.uuid5(uuid.NAMESPACE_DNS, f"omega.{source_label}.{path.stem}.{chunk_idx}")),
+        "id": str(uuid.uuid5(uuid.NAMESPACE_DNS, f"chyren.{source_label}.{path.stem}.{chunk_idx}")),
         "content": chunk_text.strip(),
         "source": source_label,
         "importance": importance,
@@ -208,7 +208,7 @@ def process_sources():
 
 if __name__ == "__main__":
     print("=" * 50)
-    print("Omega Memory Entries Ingestion")
+    print("Chyren Memory Entries Ingestion")
     print("=" * 50)
     process_sources()
     print(f"\nNeon total:    {neon_total} rows")

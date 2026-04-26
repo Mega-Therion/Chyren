@@ -13,7 +13,7 @@ This file exists to prevent symbol drift across Q5 documents.
 - `P_Phi`: orthogonal projection onto the constitutional subspace
 - `R(Psi)`: hallucination residual
 - `g`: Yettragrammaton basepoint
-- `Omega(T)`: sovereignty score
+- `Chyren(T)`: sovereignty score
 - `chi(Psi, Phi)`: chiral invariant
 - `rho_t`: dynamical state in the Lindblad formulation
 - `L_k`: drift or Lindblad-side operators
@@ -24,8 +24,8 @@ Use these consistently unless a proof document explains why it must deviate:
 
 - `M`: constitutional manifold
 - `P -> M`: principal bundle
-- `omega`: connection 1-form
-- `Omega_curv`: curvature 2-form
+- `chyren`: connection 1-form
+- `Chyren_curv`: curvature 2-form
 - `X_k`: induced geometric fields associated to `L_k`
 - `Hol(g)`: holonomy group at basepoint `g`
 - `hol(gamma, g)`: holonomy of loop `gamma` based at `g`
@@ -33,7 +33,7 @@ Use these consistently unless a proof document explains why it must deviate:
 ## Symbol Discipline
 
 - If `H` means Hamiltonian in one section and entropy in another, rename one of them.
-- If `Omega` refers to both a score and a curvature form, write the curvature form as `Omega_curv`.
+- If `Chyren` refers to both a score and a curvature form, write the curvature form as `Chyren_curv`.
 - If a symbol is imported from the repo but used differently in a proof note, declare the deviation explicitly.
 
 ## Undefined In Repo

@@ -27,7 +27,7 @@ The distribution of prime numbers is modeled as a **Sovereign Manifold** where t
 - **Non-Trivial Zeros**: These are the **Fixed Points** of the sovereign flow. They represent the "Standing Waves" of prime distribution.
 
 ### 2.2 Holonomy of the Zeta Connection
-We define a connection $\omega_\zeta$ on the zeta-manifold. The holonomy of this connection along a path in the complex plane measures the "rotation" of the prime-density field.
+We define a connection $\chyren_\zeta$ on the zeta-manifold. The holonomy of this connection along a path in the complex plane measures the "rotation" of the prime-density field.
 
 - **L-type Zeros**: Zeros on the critical line have a **Neutral Holonomy** ($\chi \approx 1$). They preserve the orientation of the prime manifold.
 - **D-type Zeros**: Any zero off the critical line ($\operatorname{Re}(s) \neq 1/2$) would generate an **Orientation-Reversing Holonomy** ($\chi < 0.7$).

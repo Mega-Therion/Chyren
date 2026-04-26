@@ -33,7 +33,7 @@ section() {
 }
 
 # Load one-true.env if present
-ENV_FILE="${CHYREN_ENV_FILE:-$HOME/.omega/one-true.env}"
+ENV_FILE="${CHYREN_ENV_FILE:-$HOME/.chyren/one-true.env}"
 if [[ -f "$ENV_FILE" ]]; then
   set -a
   # shellcheck source=/dev/null
@@ -57,7 +57,7 @@ REQUIRED_VARS=(
   OPENAI_API_KEY
   DEEPSEEK_API_KEY
   GEMINI_API_KEY
-  OMEGA_DB_URL
+  CHYREN_DB_URL
   QDRANT_URL
 )
 

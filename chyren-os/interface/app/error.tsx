@@ -17,7 +17,7 @@ export default function Error({
   }, [error])
 
   return (
-    <div className="omega-viewport bg-black">
+    <div className="chyren-viewport bg-black">
       <div className="phone-container !border-rose-500/20 !bg-rose-950/10 flex flex-col items-center justify-center p-8 text-center">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}

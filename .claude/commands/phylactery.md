@@ -30,8 +30,8 @@ This is equivalent to `./chyren dream` (Python-only maintenance mode).
 
 **Verify Medulla loads it correctly:**
 ```bash
-source ~/.omega/one-true.env
-cd medulla && cargo test --package omega-phylactery 2>&1
+source ~/.chyren/one-true.env
+cd medulla && cargo test --package chyren-phylactery 2>&1
 ```
 
 **Diff before/after refresh:**

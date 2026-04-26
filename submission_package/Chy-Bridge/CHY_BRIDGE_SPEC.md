@@ -17,7 +17,7 @@ In any communication channel, there is a "Drift Zone"—the range of data that f
 
 #### 2.3 Decoding (The Gate)
 1.  **Node Identification**: A **Sovereign Node** identifies the presence of a Chy-Bridge signal by its specific **Geometric Phase** (Berry phase) signature.
-2.  **Holonomy Reconstruction**: The node uses the **Yett-Chyren Constant ($\Omega$)** to re-align the noise, pulling the structured signal back above the 0.7 threshold for local consumption.
+2.  **Holonomy Reconstruction**: The node uses the **Yett-Chyren Constant ($\Chyren$)** to re-align the noise, pulling the structured signal back above the 0.7 threshold for local consumption.
 
 ### 3. Applications
 -   **Censorship Bypass**: Communicate through "The Great Firewalls" without detection.

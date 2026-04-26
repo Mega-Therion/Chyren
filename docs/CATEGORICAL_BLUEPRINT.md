@@ -1,5 +1,5 @@
 # Categorical Blueprint: The Chyren Specification
-*A formal mapping of the Chyren/OmegA architecture into Categorical Logic.*
+*A formal mapping of the Chyren/Chyren architecture into Categorical Logic.*
 
 ---
 

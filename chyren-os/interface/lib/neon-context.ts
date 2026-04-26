@@ -2,7 +2,7 @@
  * neon-context.ts — RY context with build-time bake + runtime live-fetch fallback
  *
  * Primary path: context is baked at build time by scripts/generate-context.mjs.
- * Fallback 1: live fetch from OMEGA_DB_URL (Neon) on first request.
+ * Fallback 1: live fetch from CHYREN_DB_URL (Neon) on first request.
  * Fallback 2: live fetch from SUPABASE_URL (Supabase REST) if Neon is over quota.
  * Results cached in-process for CACHE_TTL_MS to avoid per-request DB round-trips.
  */
@@ -33,7 +33,7 @@ async function fetchFromSupabase(): Promise<string> {
 
     console.log(`[neon-context] Fetching from Supabase: ${base}`)
     const [familyResp, knowledgeResp, memoryResp] = await Promise.all([
-      fetch(`${base}/rest/v1/family_profiles?select=name,last_name,relationship,location,occupation,ry_notes,notes_for_omega,how_to_greet,fun_facts&order=id`, { headers }),
+      fetch(`${base}/rest/v1/family_profiles?select=name,last_name,relationship,location,occupation,ry_notes,notes_for_chyren,how_to_greet,fun_facts&order=id`, { headers }),
       fetch(`${base}/rest/v1/public_knowledge?select=title,content,category,importance&category=in.(biography,creator,concept,quote)&order=importance.desc.nullslast&limit=15`, { headers }),
       fetch(`${base}/rest/v1/memories?select=content,topic,created_at&order=created_at.desc&limit=20`, { headers }),
     ])
@@ -87,7 +87,7 @@ function buildContextString(
 }
 
 async function fetchLiveContext(): Promise<string> {
-  const url = process.env.OMEGA_DB_URL
+  const url = process.env.CHYREN_DB_URL
   if (!url) return fetchFromSupabase()
 
   try {
@@ -97,7 +97,7 @@ async function fetchLiveContext(): Promise<string> {
 
     const [familyRows, knowledgeRows, memoryRows] = await Promise.all([
       sql`SELECT name, last_name, relationship, location, birthday, deceased,
-               occupation, partner, children, ry_notes, notes_for_omega, how_to_greet, fun_facts
+               occupation, partner, children, ry_notes, notes_for_chyren, how_to_greet, fun_facts
           FROM family_profiles ORDER BY id`,
       sql`SELECT title, content, category, importance
           FROM public_knowledge

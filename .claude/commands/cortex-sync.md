@@ -10,7 +10,7 @@ You are the cross-layer synchronization engineer. Cortex (Python) is the legacy/
 ls cortex/providers/*.py 2>/dev/null | xargs -I{} basename {} .py | sort
 
 # Rust spokes
-ls medulla/omega-spokes/src/spokes/*.rs 2>/dev/null | xargs -I{} basename {} .rs | sort
+ls medulla/chyren-spokes/src/spokes/*.rs 2>/dev/null | xargs -I{} basename {} .rs | sort
 ```
 Flag any provider in Cortex that has no Rust spoke equivalent — that's a migration gap.
 
@@ -20,7 +20,7 @@ Flag any provider in Cortex that has no Rust spoke equivalent — that's a migra
 grep -rn "adccl\|drift\|hallucination\|threshold" cortex/ 2>/dev/null | head -20
 
 # Rust ADCCL
-grep -rn "threshold\|0\.7\|DriftScore" medulla/omega-adccl/src/ 2>/dev/null | head -20
+grep -rn "threshold\|0\.7\|DriftScore" medulla/chyren-adccl/src/ 2>/dev/null | head -20
 ```
 Verify both use the same threshold and flag set.
 
@@ -30,7 +30,7 @@ Verify both use the same threshold and flag set.
 grep -rn "class.*Response\|return.*{" cortex/core/ cortex/providers/ 2>/dev/null | head -20
 
 # Rust response types
-grep -rn "struct.*Response\|pub.*response" medulla/omega-core/src/ 2>/dev/null | head -20
+grep -rn "struct.*Response\|pub.*response" medulla/chyren-core/src/ 2>/dev/null | head -20
 ```
 
 **4. Legacy bridge status:**

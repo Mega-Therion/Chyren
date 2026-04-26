@@ -1,46 +1,46 @@
 ---
 name: Chyren Implementation Status
-description: Complete 13-module OmegA-Next sovereign hub with full orchestration and policy enforcement
+description: Complete 13-module Chyren-Next sovereign hub with full orchestration and policy enforcement
 type: project
 ---
 
-## OmegA-Next Expansion: COMPLETE ✓ (2026-04-04)
+## Chyren-Next Expansion: COMPLETE ✓ (2026-04-04)
 
 ### Implementation Milestone
-Extended base OmegA-Next with orchestration layer and policy enforcement. Phase 2 (Task Orchestration) and Phase 3 (AEGIS Policy Integration) complete. System now supports end-to-end task decomposition, planning, policy validation, and execution with identity-aware constraints.
+Extended base Chyren-Next with orchestration layer and policy enforcement. Phase 2 (Task Orchestration) and Phase 3 (AEGIS Policy Integration) complete. System now supports end-to-end task decomposition, planning, policy validation, and execution with identity-aware constraints.
 
 ### Core Four Layers ✅ FULLY IMPLEMENTED
 
 | Crate | Module | Status | Description |
 |-------|--------|--------|-------------|
-| omega-aegis | Policy Gate | ✓ Complete | Risk assessment, policy enforcement, response compilation |
-| omega-aeon | Cognitive OS | ✓ Complete | Task state reasoning, lifecycle management, adaptive planning |
-| omega-adccl | Verification | ✓ Complete | Anti-drift control, hallucination/incoherence detection |
-| omega-myelin | Memory Layer | ✓ Complete | 4-stratum persistent graph with 30-day decay, keyword retrieval |
+| chyren-aegis | Policy Gate | ✓ Complete | Risk assessment, policy enforcement, response compilation |
+| chyren-aeon | Cognitive OS | ✓ Complete | Task state reasoning, lifecycle management, adaptive planning |
+| chyren-adccl | Verification | ✓ Complete | Anti-drift control, hallucination/incoherence detection |
+| chyren-myelin | Memory Layer | ✓ Complete | 4-stratum persistent graph with 30-day decay, keyword retrieval |
 
 ### Five Research Implementations ✅ FULLY IMPLEMENTED
 
 | Crate | Module | Status | Description |
 |-------|--------|--------|-------------|
-| omega-dream | Dream-to-Waking | ✓ Complete | Failure pattern tracking, lesson derivation, feedback loops |
-| omega-metacog | Meta-Cognition | ✓ Complete | Self-doubt scoring, confidence assessment, adjustments |
-| omega-worldmodel | World State | ✓ Complete | Timestamped snapshots, state deltas, constraint checking |
-| omega-integration | gAIng Hub | ✓ Complete | System coordination, message queue, health monitoring |
-| omega-telemetry | Unified Logging | ✓ Complete | Tracing integration, event schema, async runtime |
+| chyren-dream | Dream-to-Waking | ✓ Complete | Failure pattern tracking, lesson derivation, feedback loops |
+| chyren-metacog | Meta-Cognition | ✓ Complete | Self-doubt scoring, confidence assessment, adjustments |
+| chyren-worldmodel | World State | ✓ Complete | Timestamped snapshots, state deltas, constraint checking |
+| chyren-integration | gAIng Hub | ✓ Complete | System coordination, message queue, health monitoring |
+| chyren-telemetry | Unified Logging | ✓ Complete | Tracing integration, event schema, async runtime |
 
 ### New: Orchestration & Policy Layer ✅ COMPLETE
 
 | Crate | Module | Status | Description |
 |-------|--------|--------|-------------|
-| omega-spokes | Provider Abstraction | ✓ Complete | Trait-based spoke system with Anthropic, Neon, Search providers |
-| omega-conductor | Task Orchestration | ✓ Complete | TaskPlanner (decomposition), TaskExecutor (execution), PolicyGatekeeper (enforcement) |
+| chyren-spokes | Provider Abstraction | ✓ Complete | Trait-based spoke system with Anthropic, Neon, Search providers |
+| chyren-conductor | Task Orchestration | ✓ Complete | TaskPlanner (decomposition), TaskExecutor (execution), PolicyGatekeeper (enforcement) |
 
 ### Foundation & CLI ✅ COMPLETE
 
 | Crate | Purpose | Status |
 |-------|---------|--------|
-| omega-core | Type system & contracts | ✓ Complete |
-| omega-cli | Command interface | ✓ Complete (with full orchestration integration) |
+| chyren-core | Type system & contracts | ✓ Complete |
+| chyren-cli | Command interface | ✓ Complete (with full orchestration integration) |
 
 ### Architecture Achievements
 
@@ -72,7 +72,7 @@ Extended base OmegA-Next with orchestration layer and policy enforcement. Phase 
 - **Passing**: 100%
 - **Critical fixes applied**:
   - Punctuation-aware word parsing in ADCCL (fixes test_benign_response)
-  - Type-correct pattern sorting in omega-dream
+  - Type-correct pattern sorting in chyren-dream
   - ClaimBudget field inclusion in GoalContract initializers
   - Proper TaskStage enum usage throughout lifecycle
 
@@ -114,7 +114,7 @@ Extended base OmegA-Next with orchestration layer and policy enforcement. Phase 
 
 ### Completed Phases
 **Phase 1**: Core protocol stack (11 crates: AEGIS, AEON, ADCCL, MYELIN, DREAM, METACOG, WORLDMODEL, INTEGRATION, TELEMETRY, CORE, CLI)  
-**Phase 2**: Orchestration layer - Task planning and execution (omega-spokes, omega-conductor Task planning/execution)  
+**Phase 2**: Orchestration layer - Task planning and execution (chyren-spokes, chyren-conductor Task planning/execution)  
 **Phase 3**: AEGIS policy enforcement - Identity-aware validation with phylactery anchors  
 
 ### Next Phase (Ready to Implement)
@@ -126,26 +126,26 @@ Extended base OmegA-Next with orchestration layer and policy enforcement. Phase 
 
 ### Repository Structure
 ```
-omega_workspace/
+chyren_workspace/
   workspace/
-    OmegA-Next/
+    Chyren-Next/
       Cargo.toml (workspace root, resolver=2)
-      omega-core/          (11 types, 0 dependencies)
-      omega-aegis/         (policy gates, compilation)
-      omega-aeon/          (cognitive OS)
-      omega-adccl/         (verification gate)
-      omega-myelin/        (memory graph)
-      omega-dream/         (failure learning)
-      omega-metacog/       (self-monitoring)
-      omega-worldmodel/    (state tracking)
-      omega-integration/   (system coordination)
-      omega-telemetry/     (logging/tracing)
-      omega-cli/           (CLI scaffolding)
+      chyren-core/          (11 types, 0 dependencies)
+      chyren-aegis/         (policy gates, compilation)
+      chyren-aeon/          (cognitive OS)
+      chyren-adccl/         (verification gate)
+      chyren-myelin/        (memory graph)
+      chyren-dream/         (failure learning)
+      chyren-metacog/       (self-monitoring)
+      chyren-worldmodel/    (state tracking)
+      chyren-integration/   (system coordination)
+      chyren-telemetry/     (logging/tracing)
+      chyren-cli/           (CLI scaffolding)
 ```
 
 ### Critical Success Factors Met
 ✓ Eliminated Python-Rust translation impedance  
-✓ Type system matches OmegA protocol specification  
+✓ Type system matches Chyren protocol specification  
 ✓ Evidence accumulation through all 7 stages  
 ✓ Memory with adaptive decay mechanisms  
 ✓ Feedback loops from verification to learning  
@@ -166,6 +166,6 @@ All unit tests: ~5 seconds total
 
 ---
 
-**Migration Status**: OmegA Python → Chyren Rust: COMPLETE  
+**Migration Status**: Chyren Python → Chyren Rust: COMPLETE  
 **Pipeline Integration**: Ready for end-to-end testing  
 **Production Readiness**: Core implementation complete, deployment TBD

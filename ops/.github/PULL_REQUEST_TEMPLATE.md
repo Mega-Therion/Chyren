@@ -16,7 +16,7 @@
 - [ ] Master Ledger
 - [ ] Phylactery / Identity
 - [ ] Provider Spokes
-- [ ] OmegA-Next (Rust)
+- [ ] Chyren-Next (Rust)
 - [ ] chyren-web
 - [ ] CLI
 - [ ] Documentation

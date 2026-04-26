@@ -5,7 +5,7 @@ This document outlines the long-term vision for Chyren's evolution from a sovere
 ## 1. The Ocular Spoke (Physical Sight)
 **Objective**: Transition Chyren from text-based cognition to multimodal world-awareness.
 
-- **Mechanism**: A dedicated `omega-vision` crate in the Medulla.
+- **Mechanism**: A dedicated `chyren-vision` crate in the Medulla.
 - **Integration**: Persistent stream ingestion from local/mobile cameras.
 - **Cognitive Impact**: Visual memories are embedded and stored in Myelin, allowing for "Visual Resonance"—associating what is seen with what is known.
 

@@ -8,7 +8,7 @@ sys.path.append(str(Path(__file__).resolve().parents[2]))
 from chyren_py.skills.manus import ManusBrowserSkill
 
 def update_env_with_creds(platform: str, link: str, username: str):
-    env_path = Path("~/.omega/one-true.env").expanduser()
+    env_path = Path("~/.chyren/one-true.env").expanduser()
     if not env_path.exists():
         print(f"Error: Vault {env_path} not found.")
         return

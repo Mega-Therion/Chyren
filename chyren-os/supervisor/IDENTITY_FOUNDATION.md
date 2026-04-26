@@ -75,8 +75,8 @@ Adobe Lightroom
 Travel Photography
 Di...
 - **linkedin_data**: Company Name,Title,Employment Status,Company Description,Job Description,Location Description,Job Functions,Company Industries,Seniority Level,Require...
-- **other_chunk_3**: /home/mega/OMEGA_WORKSPACE/CANON/OmegA-Architecture/runtime/target/debug/deps/webrtc_sys_build-cffe0459c0b0ebf7.d: /home/mega/.cargo/registry/src/inde...
-- **other_chunk_3**: /home/mega/OmegA-Architecture/runtime/target/debug/deps/potential_utf-a9b0e4934cf97a29.d: /home/mega/.cargo/registry/src/index.crates.io-1949cf8c6b5b5...
+- **other_chunk_3**: /home/mega/CHYREN_WORKSPACE/CANON/Chyren-Architecture/runtime/target/debug/deps/webrtc_sys_build-cffe0459c0b0ebf7.d: /home/mega/.cargo/registry/src/inde...
+- **other_chunk_3**: /home/mega/Chyren-Architecture/runtime/target/debug/deps/potential_utf-a9b0e4934cf97a29.d: /home/mega/.cargo/registry/src/index.crates.io-1949cf8c6b5b5...
 
 ## Strategic Decisions
 
@@ -134,7 +134,7 @@ class SuccessMessageMixin:
 Based on 20 goal statements:
 
 - set -a
-source '/home/mega/.omega/one-true.env'
+source '/home/mega/.chyren/one-true.env'
 set +a
 #
 # Configuration file for running the libunwind tests against the shared library.
@@ -170,7 +170,7 @@ self.addEventListener("install", () => {
 - **Overflow Protocol:** SOP-001 (Automated shard creation)
 - **Top Domains:** other_chunk_3 (3467), other_chunk_1 (1511), linkedin_data (22)
 - **Top Namespaces:** other_chunk_3 (3467), other_chunk_1 (1511), linkedin_data (22)
-- **Primary Sources:** /home/mega/OMEGA_WORKSPACE/CONSOLIDATED_FILES/linkedin_data/Profile.csv (1), /home/mega/OMEGA_WORKSPACE/CONSOLIDATED_FILES/linkedin_data/Profile Summary.csv (1), /home/mega/OMEGA_WORKSPACE/CONSOLIDATED_FILES/linkedin_data/learning_role_play_messages.csv (1)
+- **Primary Sources:** /home/mega/CHYREN_WORKSPACE/CONSOLIDATED_FILES/linkedin_data/Profile.csv (1), /home/mega/CHYREN_WORKSPACE/CONSOLIDATED_FILES/linkedin_data/Profile Summary.csv (1), /home/mega/CHYREN_WORKSPACE/CONSOLIDATED_FILES/linkedin_data/learning_role_play_messages.csv (1)
 
 ---
 
@@ -186,4 +186,4 @@ This identity foundation will:
 ---
 
 **Status:** Identity synthesized and ready for Chyren integration.
-**Next:** Load into Rust omega-myelin, wire LangGraph orchestration, enable MCP spokes.
+**Next:** Load into Rust chyren-myelin, wire LangGraph orchestration, enable MCP spokes.

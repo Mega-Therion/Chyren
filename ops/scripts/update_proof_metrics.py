@@ -73,13 +73,13 @@ def utc_now_iso() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def count_omega_crates(repo_root: Path) -> int:
+def count_chyren_crates(repo_root: Path) -> int:
     cargo = repo_root / "medulla" / "Cargo.toml"
     if not cargo.exists():
         return 0
     data = tomllib.loads(cargo.read_text(encoding="utf-8"))
     members = data.get("workspace", {}).get("members", [])
-    return len([m for m in members if isinstance(m, str) and m.startswith("omega-")])
+    return len([m for m in members if isinstance(m, str) and m.startswith("chyren-")])
 
 
 def main() -> None:
@@ -140,9 +140,9 @@ def main() -> None:
         {
             "metric_name": "rust_workspace_crates",
             "category": "architecture",
-            "value": str(count_omega_crates(repo_root)),
+            "value": str(count_chyren_crates(repo_root)),
             "unit": "count",
-            "source_command": "count omega-* entries in medulla/Cargo.toml",
+            "source_command": "count chyren-* entries in medulla/Cargo.toml",
             "run_id": status_rows[0].run_id if status_rows else "unknown",
             "captured_at_utc": timestamp,
         },

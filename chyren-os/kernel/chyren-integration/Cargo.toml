@@ -1,0 +1,22 @@
+[package]
+name = "chyren-integration"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[lib]
+
+[dependencies]
+chyren-core = { path = "../chyren-core" }
+chyren-spokes = { path = "../chyren-spokes" }
+chyren-telemetry = { path = "../chyren-telemetry" }
+serde = { version = "1", features = ["derive"] }
+tracing = "0.1"
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+thiserror = "1"
+uuid = { version = "1", features = ["v4", "serde"] }
+
+[features]
+draft = []

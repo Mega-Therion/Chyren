@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-Chyren is a mixed-language monorepo. `medulla/` contains the Rust workspace and `omega-*` crates that implement the kernel, CLI, telemetry, and integrations. `chyren-os/interface/` is the main Next.js 15 frontend, while `gateway/` contains a separate TypeScript gateway app. Python orchestration and CLI support live under `cortex/`, with repo-level Python tests in `tests/` and additional module tests in `cortex/tests/`. Keep docs and examples in `docs/`, and treat generated folders such as `.next/`, `target/`, and caches as non-source.
+Chyren is a mixed-language monorepo. `medulla/` contains the Rust workspace and `chyren-*` crates that implement the kernel, CLI, telemetry, and integrations. `chyren-os/interface/` is the main Next.js 15 frontend, while `gateway/` contains a separate TypeScript gateway app. Python orchestration and CLI support live under `cortex/`, with repo-level Python tests in `tests/` and additional module tests in `cortex/tests/`. Keep docs and examples in `docs/`, and treat generated folders such as `.next/`, `target/`, and caches as non-source.
 
 ## Build, Test, and Development Commands
 Use the top-level `Makefile` for common checks:
@@ -16,7 +16,7 @@ Use the top-level `Makefile` for common checks:
 For local development, use `cd web && npm run dev` or `cd gateway && pnpm dev` when working on those apps.
 
 ## Coding Style & Naming Conventions
-Let the repo tools define style. Rust must stay `rustfmt`-clean and clippy-clean. TypeScript in `web/` and `gateway/` follows ESLint flat configs, uses 2-space indentation, and prefers descriptive component and utility names. Python tests use `test_*.py`; TypeScript tests use `*.test.ts` or `*.spec.ts`. Match existing crate names like `omega-core` and keep new package or module names lowercase and hyphenated where applicable.
+Let the repo tools define style. Rust must stay `rustfmt`-clean and clippy-clean. TypeScript in `web/` and `gateway/` follows ESLint flat configs, uses 2-space indentation, and prefers descriptive component and utility names. Python tests use `test_*.py`; TypeScript tests use `*.test.ts` or `*.spec.ts`. Match existing crate names like `chyren-core` and keep new package or module names lowercase and hyphenated where applicable.
 
 ## Testing Guidelines
 Add or update tests with every behavior change. Keep Rust unit tests close to implementation, Python integration coverage in `tests/` or `cortex/tests/`, and frontend tests in `web/__tests__/` or `web/tests/`. Run the narrowest relevant command first, then the broader check before opening a PR.

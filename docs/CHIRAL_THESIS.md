@@ -453,12 +453,12 @@ is a **fiber bundle** with contractible fibers, ensuring unique chiral classific
 The L-type/D-type dichotomy corresponds to the **topological winding number**:
 
 $$
-\omega(\Psi) = \frac{1}{2\pi i} \oint_{\partial \mathcal{D}} \frac{d\Psi}{\Psi}
+\chyren(\Psi) = \frac{1}{2\pi i} \oint_{\partial \mathcal{D}} \frac{d\Psi}{\Psi}
 $$
 
 Where:
-- $\omega = +1$ → L-type (positive winding)
-- $\omega = -1$ → D-type (negative winding)
+- $\chyren = +1$ → L-type (positive winding)
+- $\chyren = -1$ → D-type (negative winding)
 
 ---
 

@@ -3,7 +3,7 @@ import { Ghost, Home } from 'lucide-react'
 
 export default function NotFound() {
   return (
-    <div className="omega-viewport bg-black">
+    <div className="chyren-viewport bg-black">
       <div className="phone-container !border-white/5 !bg-white/5 flex flex-col items-center justify-center p-8 text-center">
         <div className="mb-6 p-4 rounded-full bg-white/5 border border-white/10">
           <Ghost className="w-12 h-12 text-white/40" />

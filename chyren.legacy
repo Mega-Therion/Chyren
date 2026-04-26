@@ -37,7 +37,7 @@ VERSION = "1.0.0"
 
 REPO_DIR = Path(__file__).resolve().parent
 CORTEX_DIR = REPO_DIR / "cortex"
-MEDULLA_DIR = REPO_DIR / "medulla"
+MEDULLA_DIR = REPO_DIR / "chyren-os" / "kernel"
 STATE_DIR = REPO_DIR / "state"
 EVENTS_LOG = STATE_DIR / "cli_events.jsonl"
 DREAM_LOCK = STATE_DIR / ".dream.lock"
@@ -56,9 +56,9 @@ SESSION_ID = uuid.uuid4().hex[:12]
 def load_env() -> None:
     """Load secrets from well-known env files (highest priority first)."""
     candidates = [
-        Path("~/.omega_keys.env").expanduser(),
-        Path("~/.omega/one-true.env").expanduser(),
-        Path("~/OMEGA_WORKSPACE/VAULT/one-true.env").expanduser(),
+        Path("~/.chyren_keys.env").expanduser(),
+        Path("~/.chyren/one-true.env").expanduser(),
+        Path("~/CHYREN_WORKSPACE/VAULT/one-true.env").expanduser(),
     ]
     for path in candidates:
         if not path.is_file():
@@ -149,10 +149,10 @@ def medulla_bin(name: str = "chyren") -> Path:
     """Resolve a Medulla binary path, optionally auto-building it."""
     if name == "chyren":
         env_key = "CHYREN_MEDULLA_BIN"
-        pkg = "omega-cli"
+        pkg = "chyren-cli"
     else:
         env_key = f"CHYREN_{name.upper().replace('-', '_')}_BIN"
-        pkg = f"omega-{name.split('-')[0]}"
+        pkg = f"chyren-{name.split('-')[0]}"
 
     default = MEDULLA_DIR / "target" / "release" / name
     path = Path(os.getenv(env_key, str(default)))
@@ -282,7 +282,7 @@ def cmd_sovereign(args: argparse.Namespace) -> int:
 
     print("─── CHYREN SOVEREIGN WORKSPACE ───")
     # Ensure secrets directory exists for mounting
-    secrets_dir = Path("~/.omega").expanduser()
+    secrets_dir = Path("~/.chyren").expanduser()
     if not secrets_dir.exists():
         print(f"Warning: {secrets_dir} not found. Some functionality may be limited.")
     
@@ -472,10 +472,10 @@ def cmd_dream(args: argparse.Namespace) -> int:
             run_subprocess([py, str(script_dir / "hf_queue_manager.py"), "--replenish"])
             cmd = [py, str(script_dir / "hf_pipeline_worker.py")]
         
-        # Ensure we have OMEGA_CATALOG_DB_URL
+        # Ensure we have CHYREN_CATALOG_DB_URL
         env = os.environ.copy()
-        if "OMEGA_CATALOG_DB_URL" not in env:
-            env["OMEGA_CATALOG_DB_URL"] = env.get("NEON_URL", "") # fallback if needed
+        if "CHYREN_CATALOG_DB_URL" not in env:
+            env["CHYREN_CATALOG_DB_URL"] = env.get("NEON_URL", "") # fallback if needed
             
         return subprocess.run(cmd, cwd=REPO_DIR, env=env).returncode
 
@@ -684,9 +684,9 @@ def main(argv: Optional[list[str]] = None) -> int:
     emit_event("cli.start", argv=raw_argv, version=VERSION)
     # Phase 0: Sovereign Environment Sanity Check
     if not os.getenv("CHYREN_BYPASS_HARDENING"):
-        if not Path("~/.omega/one-true.env").expanduser().exists():
+        if not Path("~/.chyren/one-true.env").expanduser().exists():
             # Soft warning instead of hard exit to maintain usability
-            LOG.warning("UNPROTECTED ENVIRONMENT: Sovereign Vault (~/.omega/one-true.env) not found.")
+            LOG.warning("UNPROTECTED ENVIRONMENT: Sovereign Vault (~/.chyren/one-true.env) not found.")
         
         # Verify Yettragrammaton Integrity
         ledger_path = STATE_DIR / "master_ledger.json"

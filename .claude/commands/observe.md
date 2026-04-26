@@ -15,8 +15,8 @@ curl -s http://localhost:8080/metrics 2>&1 | head -30
 
 **Recent ledger activity:**
 ```bash
-source ~/.omega/one-true.env
-psql "$OMEGA_DB_URL" -c "
+source ~/.chyren/one-true.env
+psql "$CHYREN_DB_URL" -c "
 SELECT
   created_at,
   task_type,
@@ -29,7 +29,7 @@ LIMIT 20;" 2>&1
 
 **ADCCL rejection rate (last hour):**
 ```bash
-psql "$OMEGA_DB_URL" -c "
+psql "$CHYREN_DB_URL" -c "
 SELECT
   COUNT(*) FILTER (WHERE adccl_score >= 0.7) as passed,
   COUNT(*) FILTER (WHERE adccl_score < 0.7) as rejected,
@@ -45,7 +45,7 @@ docker stats --no-stream 2>/dev/null || echo "Docker not running"
 
 **System resources:**
 ```bash
-ps aux | grep -E "chyren|omega|qdrant|postgres" | grep -v grep
+ps aux | grep -E "chyren|chyren|qdrant|postgres" | grep -v grep
 free -h
 df -h / 2>/dev/null | tail -1
 ```
@@ -61,7 +61,7 @@ Flag automatically:
 - ADCCL rejection rate > 30% → threshold may be miscalibrated
 - API response time > 5s → provider timeout or DB latency issue
 - Ledger gap detected → integrity alert
-- Memory > 80% → potential leak in omega-myelin or Qdrant
+- Memory > 80% → potential leak in chyren-myelin or Qdrant
 
 ## Output
 Dashboard-style snapshot with status per subsystem. Anomalies highlighted. Recommended action for each anomaly.

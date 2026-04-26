@@ -3,7 +3,7 @@ import requests
 from dotenv import load_dotenv
 
 def test_telegram_outbound():
-    load_dotenv(os.path.expanduser("~/.omega/one-true.env"))
+    load_dotenv(os.path.expanduser("~/.chyren/one-true.env"))
     token = os.getenv("TELEGRAM_BOT_TOKEN")
     chat_id = os.getenv("TELEGRAM_TARGET_CHAT_ID")
     

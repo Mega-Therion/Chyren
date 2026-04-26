@@ -69,7 +69,7 @@ The Master Ledger is append-only. Any attempt to modify or delete entries will b
 ADCCL-rejected responses are permanently discarded. They are never retried or modified — they are logged to the Threat Fabric and forgotten.
 
 ### API Keys
-All API keys must be stored in `~/.omega/one-true.env` — never committed to the repository. The `.gitignore` enforces this.
+All API keys must be stored in `~/.chyren/one-true.env` — never committed to the repository. The `.gitignore` enforces this.
 
 ---
 

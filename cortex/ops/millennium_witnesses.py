@@ -109,11 +109,11 @@ class NavierStokes_Witness:
         kx, ky = np.meshgrid(k, k, indexing='ij')
         return kx, ky
 
-    def _vorticity_to_velocity(self, omega_hat, kx, ky):
+    def _vorticity_to_velocity(self, chyren_hat, kx, ky):
         """Biot-Savart in Fourier space: ψ = -ω/k², u = ∂ψ/∂y, v = -∂ψ/∂x."""
         k2 = kx**2 + ky**2
         k2[0, 0] = 1.0  # avoid division by zero
-        psi_hat = -omega_hat / k2
+        psi_hat = -chyren_hat / k2
         psi_hat[0, 0] = 0.0
         u_hat = 1j * ky * psi_hat
         v_hat = -1j * kx * psi_hat
@@ -126,7 +126,7 @@ class NavierStokes_Witness:
         x = np.linspace(0, 2 * np.pi, N, endpoint=False)
         X, Y = np.meshgrid(x, x, indexing='ij')
         delta = 0.05
-        omega0 = (
+        chyren0 = (
             np.where(Y <= np.pi, np.cosh((Y - np.pi / 2) / delta) ** -2, 0.0)
             + np.where(Y > np.pi, -np.cosh((Y - 3 * np.pi / 2) / delta) ** -2, 0.0)
             + delta * np.sin(X)  # small perturbation
@@ -136,7 +136,7 @@ class NavierStokes_Witness:
         k2 = kx**2 + ky**2
         k2[0, 0] = 1.0
 
-        omega_hat = np.fft.fft2(omega0)
+        chyren_hat = np.fft.fft2(chyren0)
 
         energies = []
         max_vorticities = []
@@ -144,15 +144,15 @@ class NavierStokes_Witness:
 
         for step in range(steps):
             # Velocity from vorticity (Biot-Savart)
-            u_hat, v_hat = self._vorticity_to_velocity(omega_hat, kx, ky)
+            u_hat, v_hat = self._vorticity_to_velocity(chyren_hat, kx, ky)
             u = np.real(np.fft.ifft2(u_hat))
             v = np.real(np.fft.ifft2(v_hat))
-            omega = np.real(np.fft.ifft2(omega_hat))
+            chyren = np.real(np.fft.ifft2(chyren_hat))
 
             # Energy = 0.5 * ∫|u|² dA / (2π)²
             energy = 0.5 * np.mean(u**2 + v**2)
             energies.append(float(energy))
-            max_vorticities.append(float(np.max(np.abs(omega))))
+            max_vorticities.append(float(np.max(np.abs(chyren))))
 
             # Incompressibility check: div(u) via spectral derivatives
             div_u_hat = 1j * kx * u_hat + 1j * ky * v_hat
@@ -160,13 +160,13 @@ class NavierStokes_Witness:
             div_errors.append(float(np.max(np.abs(div_u))))
 
             # Advection term: (u·∇)ω in spectral space
-            domega_dx = np.real(np.fft.ifft2(1j * kx * omega_hat))
-            domega_dy = np.real(np.fft.ifft2(1j * ky * omega_hat))
-            advect = u * domega_dx + v * domega_dy
+            dchyren_dx = np.real(np.fft.ifft2(1j * kx * chyren_hat))
+            dchyren_dy = np.real(np.fft.ifft2(1j * ky * chyren_hat))
+            advect = u * dchyren_dx + v * dchyren_dy
 
             # Time integration: explicit Euler for nonlinear, exact for diffusion
-            omega_hat_new = (omega_hat - dt * np.fft.fft2(advect)) * np.exp(-nu * k2 * dt)
-            omega_hat = omega_hat_new
+            chyren_hat_new = (chyren_hat - dt * np.fft.fft2(advect)) * np.exp(-nu * k2 * dt)
+            chyren_hat = chyren_hat_new
 
         # Verify energy dissipation: E must be non-increasing (allowing for float noise)
         energy_dissipated = energies[0] - energies[-1]
@@ -530,7 +530,7 @@ class PvsNP_Witness:
         return {
             "n_bits": n,
             "gates_constructed": gates_used,
-            "lower_bound_Omega_n": lower_bound,
+            "lower_bound_Chyren_n": lower_bound,
             "bound_tight": gates_used == lower_bound,
             "circuit_depth": math.ceil(math.log2(n)) if n > 1 else 0,
         }

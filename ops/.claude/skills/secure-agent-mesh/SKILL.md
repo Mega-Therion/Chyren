@@ -6,7 +6,7 @@ description: Manage trust boundaries, authentication, registration, and security
 # Secure Agent Mesh
 
 ## Purpose
-This skill governs the security perimeter of OmegA's distributed agent mesh. It ensures that agents can only communicate with authorized peers and access allowed resources, preventing lateral movement and unauthorized state changes.
+This skill governs the security perimeter of Chyren's distributed agent mesh. It ensures that agents can only communicate with authorized peers and access allowed resources, preventing lateral movement and unauthorized state changes.
 
 ## Core Capabilities
 1.  **Identity Management**: Issue and rotate mTLS certificates for agent communication.
@@ -21,7 +21,7 @@ This skill governs the security perimeter of OmegA's distributed agent mesh. It 
 
 1.  **Authentication**: Validate request credentials.
 2.  **Token Generation**: Create unique mesh identity token.
-3.  **Config Propagation**: Update mesh state JSON (`.omega_network_nodes.json`).
+3.  **Config Propagation**: Update mesh state JSON (`.chyren_network_nodes.json`).
 4.  **Security Policy**: Inject node-specific policy (allow/deny rules).
 
 ### 2. Mesh Security Audit

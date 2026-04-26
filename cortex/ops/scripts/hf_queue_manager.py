@@ -9,9 +9,9 @@ from datetime import datetime
 MANIFEST_PATH = os.path.join(os.path.dirname(__file__), "../DATASET_MANIFEST.yaml")
 
 def get_db_conn():
-    db_url = os.environ.get("OMEGA_CATALOG_DB_URL")
+    db_url = os.environ.get("CHYREN_CATALOG_DB_URL")
     if not db_url:
-        raise ValueError("OMEGA_CATALOG_DB_URL not set")
+        raise ValueError("CHYREN_CATALOG_DB_URL not set")
     return psycopg2.connect(db_url)
 
 def compute_hash(repo, subset):

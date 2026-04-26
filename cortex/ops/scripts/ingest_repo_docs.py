@@ -6,7 +6,7 @@ from pathlib import Path
 from datetime import datetime
 
 REPO_ROOT = Path(__file__).parents[3]
-DB_URL = os.getenv("OMEGA_DB_URL")
+DB_URL = os.getenv("CHYREN_DB_URL")
 
 DOCS_TO_INGEST = [
     REPO_ROOT / "AGENTS.md",
@@ -15,7 +15,7 @@ DOCS_TO_INGEST = [
 
 def ingest_docs():
     if not DB_URL:
-        print("✗ OMEGA_DB_URL not set")
+        print("✗ CHYREN_DB_URL not set")
         return
 
     conn = psycopg2.connect(DB_URL)
@@ -32,9 +32,9 @@ def ingest_docs():
         run_id = f"run-{uuid.uuid4().hex[:8]}"
         node_id = f"node-{uuid.uuid4().hex[:8]}"
 
-        # 1. Insert into omega_memory_entries (for Identity Synthesis)
+        # 1. Insert into chyren_memory_entries (for Identity Synthesis)
         cur.execute("""
-            INSERT INTO omega_memory_entries 
+            INSERT INTO chyren_memory_entries 
             (run_id, task, response, adccl_score, source, created_at)
             VALUES (%s, %s, %s, %s, %s, %s)
         """, (

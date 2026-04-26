@@ -29,7 +29,7 @@ def serialize_matrix(m):
 
 def compute_chiral_invariant(score, flags):
     """
-    Simulates the Q5 bridge implemented in ADCCL (medulla/omega-adccl/src/adccl_logic.rs).
+    Simulates the Q5 bridge implemented in ADCCL (medulla/chyren-adccl/src/adccl_logic.rs).
     """
     alignment = score
     holonomy_sign = 1.0

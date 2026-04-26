@@ -6,7 +6,7 @@ description: Compare architecture papers, README claims, canonical docs, and run
 # Spec-to-Code Auditor
 
 ## Purpose
-This skill ensures OmegA's implementation matches its architectural vision. It compares "what we said we built" (Specs, Papers, READMEs) with "what actually runs" (Code, Configs).
+This skill ensures Chyren's implementation matches its architectural vision. It compares "what we said we built" (Specs, Papers, READMEs) with "what actually runs" (Code, Configs).
 
 ## Core Capabilities
 1.  **Claim Extraction**: Identify verifiable claims in documentation (e.g., "Uses Redis for caching", "Implements OAuth 2.0").
@@ -35,7 +35,7 @@ This skill ensures OmegA's implementation matches its architectural vision. It c
 ### 2. Full Compliance Check
 **Trigger**: "Run full audit", "Check architecture compliance"
 
-1.  **Identify Canon**: Locate `OmegA-Architecture/papers/` and `.md`.
+1.  **Identify Canon**: Locate `Chyren-Architecture/papers/` and `.md`.
 2.  **Scan Codebase**: Use `repo-cartographer` (if available) or `list_directory` to map the reality.
 3.  **Cross-Reference**:
     - Does every major module in the code have a corresponding section in the docs?

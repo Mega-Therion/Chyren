@@ -16,7 +16,7 @@ If any REAL SECRET is found in the diff, halt and alert the user. Do not create 
 
 ## PR Structure
 
-**Title format:** `<type>: <imperative description>` (e.g. `feat: add Mistral spoke to omega-spokes`)
+**Title format:** `<type>: <imperative description>` (e.g. `feat: add Mistral spoke to chyren-spokes`)
 Types: `feat`, `fix`, `refactor`, `style`, `test`, `docs`, `chore`, `security`
 
 **Body:**
