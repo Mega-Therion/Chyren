@@ -136,7 +136,7 @@ Every provider response is scored before ledger commit:
 All provider spokes receive: system prompt with sovereign identity + Yettragrammaton integrity hash + current ledger state as context.
 
 ### Sovereign Provider Router (`omega-conductor/src/router.rs`)
-Two-tier routing: **Local** (Ollama — sensitive tasks: identity, ledger, secrets) and **Cloud** (OpenRouter — everything else, cascades through deepseek → gemini → groq → anthropic → openai → perplexity on failure). Set `OPENROUTER_ESCALATION_MODEL` in `one-true.env` to override the upshift model.
+Two-tier routing: **Local** (Ollama — sensitive tasks: identity, ledger, secrets) and **Cloud** (OpenRouter — everything else, cascades through deepseek → groq → anthropic → openai → perplexity on failure). Set `OPENROUTER_ESCALATION_MODEL` in `one-true.env` to override the upshift model.
 
 ### Agent Mesh (in-progress, not merged to main — `cursor/integration-hardening` branch)
 An MQTT-based agent orchestration layer being added to `omega-conductor`:
@@ -154,7 +154,6 @@ All secrets come from `~/.omega/one-true.env` (not in git):
 ANTHROPIC_API_KEY
 OPENAI_API_KEY
 DEEPSEEK_API_KEY
-GEMINI_API_KEY
 OMEGA_DB_URL          # Neon PostgreSQL connection string
 QDRANT_URL            # Qdrant vector store
 ```
