@@ -82,7 +82,8 @@ Chyren is rooted in rigorous academic research. Our methodology is archived and 
 
 - **Framework V2 (Complete Model)**: [10.5281/zenodo.19693512](https://doi.org/10.5281/zenodo.19693512)
 - **Initial Correspondence (V1)**: [10.5281/zenodo.19691908](https://doi.org/10.5281/zenodo.19691908)
-
+- **Yett-Chyren Correspondence (Millennium Prize Problems)**: [10.5281/zenodo.19646172](https://doi.org/10.5281/zenodo.19646172)
+- **OmegA Architecture**: [10.5281/zenodo.19111653](https://doi.org/10.5281/zenodo.19111653)
 ---
 
 ## 🔗 Social Resonance
