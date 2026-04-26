@@ -9,6 +9,7 @@
     "deploy": "npx --yes vercel --prod"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "ask-sdk-core": "^2.14.0",
     "ask-sdk-model": "^1.85.0"
   }
