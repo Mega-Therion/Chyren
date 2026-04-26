@@ -1,21 +1,13 @@
-mod app;
-mod api;
-mod event;
-mod input;
-mod proc;
-mod router;
-mod theme;
-mod ui;
-
-use app::{AppMode, AppState, MessageRole, Tab};
-use api::{ChatClient, TelemetrySocket};
+use omega_tui::app::{AppMode, AppState, MessageRole, Tab};
+use omega_tui::api;
+use omega_tui::event::{Event, SystemEvent};
+use omega_tui::proc::ProcessManager;
+use omega_tui::router::{RouteOutcome, Router};
+use omega_tui::ui;
 use crossterm::event::{self as ct_event, DisableMouseCapture, EnableMouseCapture, Event as CrosstermEvent, KeyCode, KeyEvent, KeyModifiers};
 use crossterm::{execute, terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen}};
-use event::Event;
-use proc::ProcessManager;
 use ratatui::backend::CrosstermBackend;
 use ratatui::Terminal;
-use router::{RouteOutcome, Router};
 use std::error::Error;
 use std::io;
 use tokio::sync::mpsc;
