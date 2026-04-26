@@ -1,3 +1,4 @@
+// Triggering fresh build after root vercel.json removal and dashboard root directory fix.
 'use client'
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
