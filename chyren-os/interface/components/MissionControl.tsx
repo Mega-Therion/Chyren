@@ -42,13 +42,13 @@ export function MissionControl({ brainState, sessionId }: MissionControlProps) {
     <div className="fixed top-1/2 left-1/2 -translate-y-1/2 pointer-events-none z-10 flex items-center justify-center w-[600px] h-[600px]" style={{ left: 'calc(50% + 140px)' }}>
       {/* Neural Pulse Perimeter */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <motion.div 
+        <motion.div
           className="absolute w-[480px] h-[480px] border border-dashed rounded-full"
           style={{ borderColor: `${getColor()}33`, boxShadow: `0 0 40px ${getColor()}22` }}
           animate={{ rotate: 360 }}
           transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
         />
-        <motion.div 
+        <motion.div
           className="absolute w-[440px] h-[440px] border-2 rounded-full border-y-transparent"
           style={{ borderColor: `${getColor()}1A` }}
           animate={{ rotate: -360, opacity: [0.2, 0.4, 0.2] }}
@@ -58,31 +58,31 @@ export function MissionControl({ brainState, sessionId }: MissionControlProps) {
 
       {/* Stats Bento Grid */}
       <div className="absolute bottom-10 -right-16 pointer-events-auto grid grid-cols-2 gap-3 w-72">
-        <StatCard 
-          icon={<Cpu size={14} />} 
-          label="NEURAL LOAD" 
-          value={`${metrics.cpu}%`} 
+        <StatCard
+          icon={<Cpu size={14} />}
+          label="NEURAL LOAD"
+          value={`${metrics.cpu}%`}
           color={getColor()}
           progress={metrics.cpu}
         />
-        <StatCard 
-          icon={<Activity size={14} />} 
-          label="LATENCY" 
-          value={`${metrics.latency}ms`} 
+        <StatCard
+          icon={<Activity size={14} />}
+          label="LATENCY"
+          value={`${metrics.latency}ms`}
           color={getColor()}
           progress={(metrics.latency / 300) * 100}
         />
-        <StatCard 
-          icon={<Database size={14} />} 
-          label="MEMORY" 
-          value={`${metrics.mem}GB`} 
+        <StatCard
+          icon={<Database size={14} />}
+          label="MEMORY"
+          value={`${metrics.mem}GB`}
           color={getColor()}
           progress={metrics.mem}
         />
-        <StatCard 
-          icon={<ShieldCheck size={14} />} 
-          label="INTEGRITY" 
-          value={`${metrics.integrity.toFixed(2)}%`} 
+        <StatCard
+          icon={<ShieldCheck size={14} />}
+          label="INTEGRITY"
+          value={`${metrics.integrity.toFixed(2)}%`}
           color={getColor()}
           progress={metrics.integrity}
         />
@@ -104,8 +104,8 @@ export function MissionControl({ brainState, sessionId }: MissionControlProps) {
           className="relative z-20"
           style={{ color: getColor(), filter: `drop-shadow(0 0 20px ${getColor()})` }}
         >
-          {brainState === 'thinking' ? 
-            <Zap className="animate-pulse" /> : 
+          {brainState === 'thinking' ?
+            <Zap className="animate-pulse" /> :
             <Brain className="animate-pulse" style={{ animationDuration: '3s' }} />
           }
         </motion.div>
@@ -123,7 +123,7 @@ function StatCard({ icon, label, value, color, progress }: any) {
       </div>
       <div className="font-mono text-base font-semibold text-white">{value}</div>
       <div className="h-0.5 bg-white/5 rounded-full overflow-hidden mt-1">
-        <motion.div 
+        <motion.div
           className="h-full"
           style={{ backgroundColor: color }}
           animate={{ width: `${Math.min(progress, 100)}%` }}
