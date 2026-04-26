@@ -1,15 +1,15 @@
 [Unit]
-Description=Chyren Workflows (Autonomous Logic)
-After=chyren-brain.service
+Description=Chyren Telegram Gateway
+After=network.target
 
 [Service]
 Type=simple
 User=mega
 WorkingDirectory=/home/mega/Chyren
 EnvironmentFile=-/home/mega/Chyren/state/vault/one-true.env
-ExecStart=/home/mega/Chyren/chyren.legacy action
+ExecStart=/home/mega/Chyren/chyren telegram
 Restart=on-failure
-RestartSec=10
+RestartSec=5
 
 [Install]
 WantedBy=multi-user.target

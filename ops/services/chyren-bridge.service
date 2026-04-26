@@ -1,5 +1,5 @@
 [Unit]
-Description=OmegA Bridge (Canonical Sovereign)
+Description=chyren Bridge (Canonical Sovereign)
 After=network-online.target
 Wants=network-online.target
 
@@ -7,10 +7,10 @@ Wants=network-online.target
 Type=simple
 User=mega
 Group=mega
-WorkingDirectory=/home/mega/OmegA-Sovereign/packages/bridge
-EnvironmentFile=-/home/mega/.omega/one-true.env
+WorkingDirectory=/home/mega/Chyren
+EnvironmentFile=-/home/mega/Chyren/state/vault/one-true.env
 Environment=PYTHONUNBUFFERED=1
-ExecStart=/home/mega/OmegA-Sovereign/packages/bridge/.venv/bin/python -m uvicorn api:app --host 127.0.0.1 --port 8000
+ExecStart=/home/mega/Chyren/packages/bridge/.venv/bin/python -m uvicorn api:app --host 127.0.0.1 --port 8000
 StandardOutput=journal
 StandardError=journal
 Restart=on-failure

@@ -1,14 +1,13 @@
 [Unit]
-Description=OMEGA Revenue Router — closed-loop income orchestration engine
-After=network.target omega-gateway.service omega-brain.service
+Description=Chyren Revenue Router (Closed-Loop Orchestration)
+After=chyren-brain.service
 
 [Service]
 Type=simple
 User=mega
-WorkingDirectory=/home/mega/OmegA-Sovereign/gAIng-brAin
-EnvironmentFile=-/home/mega/OmegA-Sovereign/gAIng-brAin/.env
-Environment=REVENUE_ROUTER_PORT=9091
-ExecStart=/home/mega/.nvm/versions/node/v22.22.0/bin/node /home/mega/OmegA-Sovereign/gAIng-brAin/revenue-router.js
+WorkingDirectory=/home/mega/Chyren
+EnvironmentFile=-/home/mega/Chyren/state/vault/one-true.env
+ExecStart=/home/mega/Chyren/chyren.legacy flex
 Restart=on-failure
 RestartSec=10
 

@@ -1,5 +1,5 @@
 [Unit]
-Description=OmegA Brain (Canonical Sovereign)
+Description=Chyren Brain (Canonical Sovereign API)
 After=network-online.target
 Wants=network-online.target
 
@@ -7,13 +7,9 @@ Wants=network-online.target
 Type=simple
 User=mega
 Group=mega
-WorkingDirectory=/home/mega/OmegA-Sovereign/packages/brain
-EnvironmentFile=-/home/mega/.omega/one-true.env
-Environment=NODE_ENV=production
-Environment=HOST=127.0.0.1
-Environment=PORT=8080
-Environment=PATH=/home/mega/.nvm/versions/node/v22.22.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
-ExecStart=/home/mega/.nvm/versions/node/v22.22.0/bin/node index.js
+WorkingDirectory=/home/mega/Chyren
+EnvironmentFile=-/home/mega/Chyren/state/vault/one-true.env
+ExecStart=/home/mega/Chyren/core/chyren-os/kernel/target/release/chyren_api
 StandardOutput=journal
 StandardError=journal
 Restart=on-failure

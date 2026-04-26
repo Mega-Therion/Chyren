@@ -34,5 +34,5 @@ Update the local `.env.local` to point to the latest pool member if it is consid
 - **Audit:** Every project creation event MUST be logged in the `chyren_memory_entries` of the *new* project with the source `infra_scalability_reflex`.
 
 ---
-*Created by: Antigravity-RY*
+*Created by: RY*
 *Status: ACTIVE*

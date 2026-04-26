@@ -1,25 +1,17 @@
 [Unit]
-Description=OmegA Rust Gateway (LLM Proxy)
-After=network.target
+Description=Chyren Gateway (Web Interface)
+After=network.target chyren-brain.service
+Requires=chyren-brain.service
 
 [Service]
 Type=simple
 User=mega
-WorkingDirectory=/var/lib/omega
-
-EnvironmentFile=/etc/omega/omega-gateway.env
-ExecStart=/usr/local/bin/omega-gateway
-
+WorkingDirectory=/home/mega/Chyren
+EnvironmentFile=-/home/mega/Chyren/state/vault/one-true.env
+ExecStart=/home/mega/Chyren/chyren.legacy web
 Restart=on-failure
 RestartSec=5
 TimeoutStopSec=30
 
-NoNewPrivileges=true
-PrivateTmp=true
-ProtectSystem=strict
-ProtectHome=true
-ReadWritePaths=/var/lib/omega
-
 [Install]
 WantedBy=multi-user.target
-

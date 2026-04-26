@@ -17,7 +17,7 @@ def append_to_ledger(file_path, task, response_text):
     new_entry = {
         "run_id": str(uuid.uuid4()),
         "task": task,
-        "provider": "antigravity",
+        "provider": "chyren",
         "model": "chyren-sovereign-v1",
         "status": "success",
         "response_text": response_text,

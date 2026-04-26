@@ -1,11 +1,11 @@
 [Unit]
-Description=OmegA Heartbeat — feeds ERGON.md and task-queue into gateway memory
-After=omega-gateway.service
+Description=chyren Heartbeat — feeds ERGON.md and task-queue into gateway memory
+After=chyren-gateway.service
 
 [Service]
 Type=oneshot
 User=mega
-EnvironmentFile=-/home/mega/.omega/one-true.env
-ExecStart=/bin/bash /home/mega/bin/omega-heartbeat.sh
+EnvironmentFile=-/home/mega/Chyren/state/vault/one-true.env
+ExecStart=/bin/bash /home/mega/bin/chyren-heartbeat.sh
 StandardOutput=journal
 StandardError=journal

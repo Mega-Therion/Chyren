@@ -23,5 +23,5 @@ Each entry in the `chyren_library_catalog` acts as a physical index card:
 - **Retrieve**: Fetch the specific record.
 
 ---
-*Created by: Antigravity-RY*
+*Created by: RY*
 *Inspired by: The Library Index Card Method (Caveman Era)*

@@ -1,21 +1,21 @@
 [Unit]
-Description=OmegA HUD (Next.js Dashboard) [PROD]
-After=network.target omega-brain.service
-Wants=omega-brain.service
+Description=chyren HUD (Next.js Dashboard) [PROD]
+After=network.target chyren-brain.service
+Wants=chyren-brain.service
 
 [Service]
 Type=simple
 User=mega
-WorkingDirectory=/home/mega/OmegA-Sovereign/packages/hud
-EnvironmentFile=/home/mega/.omega/one-true.env
+WorkingDirectory=/home/mega/Chyren
+EnvironmentFile=/home/mega/Chyren/state/vault/one-true.env
 Environment=PORT=3000
 Environment=NODE_ENV=production
 
 # Build standalone output if missing (first boot / after code updates).
-ExecStartPre=/usr/bin/env bash -lc 'cd /home/mega/OmegA-Sovereign/packages/hud && test -f .next/standalone/packages/hud/server.js || pnpm build'
+ExecStartPre=/usr/bin/env bash -lc 'cd /home/mega/Chyren/packages/hud && test -f .next/standalone/packages/hud/server.js || pnpm build'
 
 # Run Next.js standalone server (matches next.config.js output: "standalone").
-ExecStart=/usr/bin/env bash -lc 'cd /home/mega/OmegA-Sovereign/packages/hud && PORT=${PORT} node .next/standalone/packages/hud/server.js'
+ExecStart=/usr/bin/env bash -lc 'cd /home/mega/Chyren/packages/hud && PORT=${PORT} node .next/standalone/packages/hud/server.js'
 
 StandardOutput=journal
 StandardError=journal

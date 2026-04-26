@@ -150,9 +150,12 @@ def medulla_bin(name: str = "chyren") -> Path:
     if name == "chyren":
         env_key = "CHYREN_MEDULLA_BIN"
         pkg = "chyren-cli"
+    elif name == "chyren-telegram":
+        env_key = "CHYREN_TELEGRAM_BIN"
+        pkg = "chyren-telegram-gateway"
     else:
         env_key = f"CHYREN_{name.upper().replace('-', '_')}_BIN"
-        pkg = f"chyren-{name.split('-')[0]}"
+        pkg = f"chyren-{name.split('-')[-1]}"
 
     default = MEDULLA_DIR / "target" / "release" / name
     path = Path(os.getenv(env_key, str(default)))
@@ -399,10 +402,30 @@ def cmd_telegram(remainder: list[str]) -> int:
     return run_medulla(remainder, bin_name="chyren-telegram").returncode
 
 
-def cmd_live(remainder: list[str]) -> int:
+def cmd_web(remainder: list[str]) -> int:
+    LOG.info("Starting Chyren Web Interface (Next.js)...")
+    require_tool("npm")
+    try:
+        web_proc = subprocess.Popen(
+            ["npm", "run", "dev"],
+            cwd=str(REPO_DIR / "core" / "chyren-os" / "interface"),
+        )
+        web_proc.wait()
+        return web_proc.returncode
+    except KeyboardInterrupt:
+        return 0
+
+def cmd_live(remainder: list[str], headless: bool = False) -> int:
     LOG.info("Bootstrapping Live Hub (Next.js + Medulla API)...")
     require_tool("npm")
-    binary = medulla_bin()
+    
+    # If headless, we use the pure API binary instead of the TUI-enabled 'server' command
+    if headless:
+        binary = medulla_bin("chyren_api")
+        medulla_args = remainder
+    else:
+        binary = medulla_bin()
+        medulla_args = ["server"] + remainder
 
     medulla_proc: Optional[subprocess.Popen] = None
     web_proc: Optional[subprocess.Popen] = None
@@ -426,7 +449,7 @@ def cmd_live(remainder: list[str]) -> int:
         medulla_proc = subprocess.Popen([str(binary), "server", *remainder])
         web_proc = subprocess.Popen(
             ["npm", "run", "dev"],
-            cwd=str(REPO_DIR / "web"),
+            cwd=str(REPO_DIR / "core" / "chyren-os" / "interface"),
         )
         # Wait for whichever exits first.
         while True:
@@ -573,7 +596,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_telegram.add_argument("args", nargs=argparse.REMAINDER)
 
     p_live = sub.add_parser("live", help="Boot Medulla API + Next.js dev server.")
+    p_live.add_argument("--headless", action="store_true", help="Run without the Medulla TUI (for background services).")
     p_live.add_argument("args", nargs=argparse.REMAINDER)
+
+    p_web = sub.add_parser("web", help="Start the Next.js dev server only.")
+    p_web.add_argument("args", nargs=argparse.REMAINDER)
 
     p_dream = sub.add_parser("dream", help="Maintenance mode: identity synthesis + catalog indexing.")
     p_dream.add_argument("--micro", action="store_true", help="Run a high-speed 'micro' synthesis cycle (recency bias).")
@@ -620,7 +647,9 @@ def dispatch(args: argparse.Namespace, raw_argv: list[str]) -> int:
     if cmd == "telegram":
         return cmd_telegram(remainder)
     if cmd == "live":
-        return cmd_live(remainder)
+        return cmd_live(remainder, headless=getattr(args, "headless", False))
+    if cmd == "web":
+        return cmd_web(remainder)
     if cmd == "dream":
         return cmd_dream(args)
     if cmd == "sovereign":
@@ -657,7 +686,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     # Legacy fallback: if first positional isn't a known command, assume it's a 'thought' task.
     # This allows `./chyren "hello"` to be treated as `./chyren thought "hello"`.
     known_subcommands = set(MEDULLA_PASSTHROUGH) | {
-        "status", "reset", "telegram", "live", "dream", "sovereign", "server", "completions", "man", "shell", "ask", "recon"
+        "status", "reset", "telegram", "live", "web", "dream", "sovereign", "server", "completions", "man", "shell", "ask", "recon"
     }
     
     cursor = 0
