@@ -47,7 +47,7 @@ tokio-stream = { version = "0.1", features = ["sync"] }
 futures = "0.3"
 clap = { version = "4", features = ["derive"] }
 clap_complete = "4"
-clap_mangen = "0.2"
+clap_mangen = "0.3"
 actix-web = "4.13.0"
 uuid = "1.23.0"
 thiserror = "2.0.18"
