@@ -1,10 +1,12 @@
 'use client'
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { AlertCircle } from 'lucide-react'
 import { ChatMessage } from '@/components/ChatMessage'
 import { ChatInput } from '@/components/ChatInput'
+import { Sidebar } from '@/components/Sidebar'
+import { StatusBar } from '@/components/StatusBar'
 import { startHeartbeat, stopHeartbeat } from '@/lib/haptics-ry'
 import { clearDraft } from '@/lib/draft-ry'
 import { createTtsEngine, type TtsEngine, playLatencyChime } from '@/lib/tts-ry'
@@ -62,6 +64,13 @@ function consumeSseBuffer(buffer: string): {
   return { events, remaining }
 }
 
+const WELCOME_SUGGESTIONS = [
+  'What is the Yettragrammaton?',
+  'Run a system status check',
+  'Explain the Sovereign Society',
+  'Show me the Master Ledger',
+]
+
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isStreaming, setIsStreaming] = useState(false)
@@ -72,12 +81,12 @@ export default function ChatPage() {
   const [audioLevel, setAudioLevel] = useState(0)
   const [quotedText, setQuotedText] = useState<string | undefined>()
   const [isListening, setIsListening] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatWindowRef = useRef<HTMLDivElement>(null)
   const ttsRef = useRef<TtsEngine | null>(null)
 
-  // Determine the overall state for colors
   const brainState: BrainState = isStreaming 
     ? (streamingId ? 'speaking' : 'thinking')
     : (isListening ? 'listening' : 'idle');
@@ -87,6 +96,15 @@ export default function ChatPage() {
     return () => {
       ttsRef.current?.halt()
     }
+  }, [])
+
+  // Responsive: collapse sidebar on mobile
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)')
+    if (mq.matches) setSidebarOpen(false)
+    const handler = (e: MediaQueryListEvent) => setSidebarOpen(!e.matches ? true : false)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
   }, [])
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
@@ -113,6 +131,11 @@ export default function ChatPage() {
 
   const handleQuote = useCallback((content: string) => {
     setQuotedText(content)
+  }, [])
+
+  const handleNewChat = useCallback(() => {
+    setMessages([])
+    setError(null)
   }, [])
 
   const sendMessage = useCallback(async (text: string) => {
@@ -189,72 +212,156 @@ export default function ChatPage() {
     }
   }, [isStreaming, messages, scrollToBottom, sessionId, ttsEnabled])
 
-  // Get color for OmegA based on state
   const getSigilColor = (s: BrainState) => {
     switch (s) {
-      case 'speaking': return '#00f2ff'; // Cyan
-      case 'thinking': return '#ff2d75'; // Rose
-      case 'listening': return '#bc13fe'; // Violet
-      default: return '#f59e0b'; // Amber
+      case 'speaking': return '#00f2ff'
+      case 'thinking': return '#ff2d75'
+      case 'listening': return '#bc13fe'
+      default: return '#f59e0b'
     }
-  };
+  }
 
   return (
-    <div className="omega-viewport bg-black">
-      <div className="omega-bg-fx" style={{ pointerEvents: 'none' }}>
+    <div className="sovereign-viewport">
+      {/* 3D Cosmos Background */}
+      <div className="cosmos-layer" style={{ pointerEvents: 'none' }}>
         <ChyrenCosmos state={brainState} audioLevel={audioLevel} />
       </div>
 
-      <main className="phone-container !bg-black/40 !border-white/5 !shadow-2xl">
-        <header className="phone-chrome !border-b-0 !bg-transparent pt-12">
-          <h1 className="phone-title !text-white opacity-80 !tracking-[0.5em]">CHYREN</h1>
+      {/* Sidebar */}
+      <Sidebar
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen(o => !o)}
+        brainState={brainState}
+        sessionId={sessionId}
+        onNewChat={handleNewChat}
+      />
+
+      {/* Main Content Area */}
+      <main
+        className="sovereign-main"
+        style={{ marginLeft: sidebarOpen ? '280px' : '0' }}
+      >
+        {/* Header */}
+        <header className="sovereign-header">
+          <div className="sovereign-header-left">
+            {!sidebarOpen && (
+              <button
+                className="sovereign-menu-btn"
+                onClick={() => setSidebarOpen(true)}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+            )}
+            <motion.h1
+              className="sovereign-title"
+              animate={{
+                color: getSigilColor(brainState),
+                textShadow: `0 0 30px ${getSigilColor(brainState)}60`,
+              }}
+              transition={{ duration: 0.6 }}
+            >
+              CHYREN
+            </motion.h1>
+            <span className="sovereign-seal">R.W.Ϝ.Y.</span>
+          </div>
+          <div className="sovereign-header-right">
+            <span className="sovereign-header-badge">
+              <motion.span
+                className="sovereign-header-dot"
+                animate={{
+                  backgroundColor: getSigilColor(brainState),
+                  scale: isStreaming ? [1, 1.4, 1] : 1,
+                }}
+                transition={{ repeat: isStreaming ? Infinity : 0, duration: 0.8 }}
+              />
+              ARI ONLINE
+            </span>
+          </div>
         </header>
 
+        {/* Chat Area */}
         <section
           ref={chatWindowRef}
-          className="chat-window"
+          className="sovereign-chat"
           aria-label="Chat transcript"
         >
           {messages.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-state-inner">
-                <motion.div 
-                  animate={{ 
-                    scale: brainState === 'idle' ? 1 : [1, 1.1, 1],
+            <div className="sovereign-welcome">
+              <div className="sovereign-welcome-inner">
+                <motion.div
+                  animate={{
+                    scale: brainState === 'idle' ? 1 : [1, 1.08, 1],
                     color: getSigilColor(brainState),
-                    textShadow: `0 0 40px ${getSigilColor(brainState)}`
+                    textShadow: `0 0 60px ${getSigilColor(brainState)}80`,
                   }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                  className="empty-state-sigil"
-                  style={{ color: getSigilColor(brainState) }}
-                >Ω</motion.div>
+                  transition={{ repeat: Infinity, duration: 2.5 }}
+                  className="sovereign-welcome-sigil"
+                >
+                  Ω
+                </motion.div>
+                <h2 className="sovereign-welcome-title">SOVEREIGN INTELLIGENCE</h2>
+                <p className="sovereign-welcome-subtitle">
+                  Verified task routing with integrity gates.<br />
+                  Ask anything. Command everything.
+                </p>
+                <div className="sovereign-suggestions">
+                  {WELCOME_SUGGESTIONS.map((suggestion) => (
+                    <button
+                      key={suggestion}
+                      className="sovereign-suggestion-chip"
+                      onClick={() => void sendMessage(suggestion)}
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           ) : (
-            messages.map(msg => (
-              <ChatMessage
-                key={msg.id}
-                id={msg.id}
-                role={msg.role}
-                content={msg.content}
-                timestamp={msg.timestamp}
-                isStreaming={msg.id === streamingId}
-                model={msg.model}
-                audit={msg.audit}
-                onQuote={handleQuote}
-              />
-            ))
+            <AnimatePresence>
+              {messages.map(msg => (
+                <motion.div
+                  key={msg.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, ease: 'easeOut' }}
+                >
+                  <ChatMessage
+                    id={msg.id}
+                    role={msg.role}
+                    content={msg.content}
+                    timestamp={msg.timestamp}
+                    isStreaming={msg.id === streamingId}
+                    model={msg.model}
+                    audit={msg.audit}
+                    onQuote={handleQuote}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
           )}
-          <div ref={messagesEndRef} className="h-0.5" />
+          <div ref={messagesEndRef} className="h-1" />
         </section>
 
-        {error && (
-          <div className="px-6 py-2 bg-rose-500/10 border-t border-rose-500/20 text-rose-400 text-xs flex items-center gap-2">
-            <AlertCircle size={12} /> {error}
-          </div>
-        )}
+        {/* Error Banner */}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              className="sovereign-error"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+            >
+              <AlertCircle size={14} /> {error}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        <footer className="input-dock !bg-transparent">
+        {/* Input Dock */}
+        <div className="sovereign-input-dock">
           <ChatInput
             onSend={(t) => { void sendMessage(t) }}
             onBargeIn={handleBargeIn}
@@ -266,7 +373,15 @@ export default function ChatPage() {
             isLoading={isStreaming}
             sessionId={sessionId}
           />
-        </footer>
+        </div>
+
+        {/* Status Bar */}
+        <StatusBar
+          brainState={brainState}
+          sessionId={sessionId}
+          messageCount={messages.length}
+          isStreaming={isStreaming}
+        />
       </main>
     </div>
   )
