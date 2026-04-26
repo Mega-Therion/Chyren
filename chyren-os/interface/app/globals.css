@@ -3,52 +3,35 @@
 @tailwind utilities;
 
 :root {
-  /* Chyren Sovereign Palette */
-  --bg: #0a0a0a;
-  --surface: rgba(10, 10, 10, 0.85);
-  --glass: rgba(18, 16, 12, 0.55);
-  --line: rgba(245, 158, 11, 0.12);
+  /* Chyren Minimalist Dark Palette */
+  --bg: #050505;
+  --surface: rgba(10, 10, 10, 0.4);
+  --glass: rgba(255, 255, 255, 0.03);
+  --line: rgba(255, 255, 255, 0.05);
 
-  /* Sovereign Gold / Amber -- primary accent */
-  --gold: #f59e0b;
-  --gold-dim: rgba(245, 158, 11, 0.55);
-  --gold-glow: rgba(245, 158, 11, 0.18);
-
-  /* Supporting neon accents */
+  /* Subtle Neon Backlit Accents */
   --neon-cyan: #00f2ff;
-  --neon-rose: #ff2d75;
   --neon-violet: #bc13fe;
-  --neon-yellow: #ffdf00;
-  --neon-green: #39ff14;
-
-  --text-primary: #f8f5ee;
-  --text-secondary: #a09070;
+  --neon-blue: #0070f3;
+  --neon-pink: #ff0080;
+  
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.5);
+  --border-glow: rgba(0, 242, 255, 0.15);
 }
 
 @keyframes neon-border-flow {
-  0% {
-    border-color: var(--gold);
-    box-shadow:
-      0 0 15px rgba(245, 158, 11, 0.2),
-      inset 0 0 10px rgba(245, 158, 11, 0.08);
+  0%, 100% {
+    border-color: rgba(0, 242, 255, 0.3);
+    box-shadow: 0 0 10px rgba(0, 242, 255, 0.1);
   }
   33% {
-    border-color: var(--neon-violet);
-    box-shadow:
-      0 0 15px rgba(188, 19, 254, 0.18),
-      inset 0 0 10px rgba(188, 19, 254, 0.08);
+    border-color: rgba(188, 19, 254, 0.3);
+    box-shadow: 0 0 10px rgba(188, 19, 254, 0.1);
   }
   66% {
-    border-color: var(--neon-cyan);
-    box-shadow:
-      0 0 15px rgba(0, 242, 255, 0.15),
-      inset 0 0 10px rgba(0, 242, 255, 0.07);
-  }
-  100% {
-    border-color: var(--gold);
-    box-shadow:
-      0 0 15px rgba(245, 158, 11, 0.2),
-      inset 0 0 10px rgba(245, 158, 11, 0.08);
+    border-color: rgba(0, 112, 243, 0.3);
+    box-shadow: 0 0 10px rgba(0, 112, 243, 0.1);
   }
 }
 
@@ -97,54 +80,31 @@ textarea {
 }
 
 /* Base Layout Container */
-.omega-viewport {
+.sovereign-viewport {
   position: relative;
   height: 100dvh;
   width: 100vw;
+  background: #000;
+  color: #fff;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background: #050508;
+  overflow: hidden;
 }
 
-/* Atmospheric Background */
-.omega-bg-fx {
+/* Dynamic Immersive Background */
+.cosmos-layer {
   position: fixed;
   inset: 0;
   z-index: 0;
-  pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, #080808 0%, #000000 100%);
 }
 
-.omega-bg-fx::before {
+.cosmos-layer::after {
   content: '';
   position: absolute;
   inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  opacity: 0.03;
-  mix-blend-mode: overlay;
-}
-
-/* High-Fidelity Phone Frame — deep glass over 3D cosmos */
-.phone-container {
-  width: 100%;
-  max-width: 420px;
-  height: 100%;
-  max-height: 880px;
-  background: rgba(5, 5, 8, 0.38);
-  -webkit-backdrop-filter: blur(28px) saturate(160%) brightness(0.9);
-  backdrop-filter: blur(28px) saturate(160%) brightness(0.9);
-  border-radius: 54px;
-  border: 1px solid rgba(245, 158, 11, 0.14);
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,0.04) inset,
-    0 25px 60px -12px rgba(0, 0, 0, 0.9),
-    0 0 120px rgba(245, 158, 11, 0.04);
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  overflow: hidden;
-  z-index: 10;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.02;
+  pointer-events: none;
 }
 
 @media (min-width: 900px) {
@@ -326,25 +286,23 @@ textarea {
 
 .msg-bubble {
   padding: 16px 20px;
-  border-radius: 24px;
+  border-radius: 12px;
   background: var(--glass);
-  border: 2px solid transparent;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
   font-size: 0.95rem;
   line-height: 1.6;
   position: relative;
-  transition: transform 0.18s ease, background 0.18s ease;
+  transition: all 0.2s ease;
 }
 
 .msg-assistant .msg-bubble {
-  border-bottom-left-radius: 4px;
-  animation: neon-border-flow 12s linear infinite;
+  animation: neon-border-flow 8s linear infinite;
 }
 
 .msg-user .msg-bubble {
-  border-bottom-right-radius: 4px;
-  border-color: rgba(245, 158, 11, 0.3);
-  background: rgba(30, 22, 5, 0.5);
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 @media (hover: hover) {
