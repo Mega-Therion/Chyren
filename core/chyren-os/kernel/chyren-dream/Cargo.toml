@@ -1,0 +1,22 @@
+[package]
+name = "chyren-dream"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[lib]
+
+[dependencies]
+chyren-core = { path = "../chyren-core" }
+chyren-telemetry = { path = "../chyren-telemetry" }
+chyren-neocortex = { path = "../chyren-neocortex" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+thiserror = { workspace = true }
+sqlx = { workspace = true }
+chrono = { workspace = true }
+regex = { workspace = true }
+reqwest = { workspace = true }
+tracing = { workspace = true }

@@ -1,0 +1,19 @@
+[package]
+name = "chyren-telegram-gateway"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "chyren-telegram"
+path = "src/main.rs"
+
+[dependencies]
+chyren-cli = { path = "../chyren-cli" }
+chyren-core = { path = "../chyren-core" }
+serde.workspace = true
+serde_json.workspace = true
+teloxide = "0.17.0"
+tokio.workspace = true
+anyhow = "1"

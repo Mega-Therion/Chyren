@@ -1,0 +1,14 @@
+[Unit]
+Description=OmegA Native Workflow Engine
+After=network.target omega-brain.service omega-gateway.service
+
+[Service]
+Type=simple
+WorkingDirectory=/home/mega/OmegA-Sovereign/gAIng-brAin
+EnvironmentFile=-/home/mega/OmegA-Sovereign/gAIng-brAin/.env
+ExecStart=/home/mega/.nvm/versions/node/v22.22.0/bin/node /home/mega/OmegA-Sovereign/gAIng-brAin/omega-workflows.js
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

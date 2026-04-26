@@ -10,7 +10,7 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MEDULLA_DIR="$REPO_DIR/chyren-os/kernel"
+MEDULLA_DIR="$REPO_DIR/core/chyren-os/kernel"
 TUI_RELEASE="$MEDULLA_DIR/target/release/chyren-tui"
 TUI_DEBUG="$MEDULLA_DIR/target/debug/chyren-tui"
 

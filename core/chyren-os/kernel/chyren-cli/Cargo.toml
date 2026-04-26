@@ -1,0 +1,66 @@
+[package]
+name = "chyren-cli"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "chyren"
+path = "src/main.rs"
+
+[[bin]]
+name = "chyren_api"
+path = "src/bin/chyren_api.rs"
+
+[[bin]]
+name = "ingestion_test"
+path = "src/bin/ingestion_test.rs"
+
+[[bin]]
+name = "ingest_all"
+path = "src/bin/ingest_all.rs"
+
+[[bin]]
+name = "eval_runner"
+path = "src/bin/eval_runner.rs"
+
+[dependencies]
+chyren-core = { path = "../chyren-core" }
+chyren-aegis = { path = "../chyren-aegis" }
+chyren-adccl = { path = "../chyren-adccl" }
+chyren-myelin = { path = "../chyren-myelin" }
+chyren-aeon = { path = "../chyren-aeon" }
+chyren-integration = { path = "../chyren-integration" }
+chyren-spokes = { path = "../chyren-spokes" }
+chyren-phylactery = { path = "../chyren-phylactery" }
+chyren-conductor = { path = "../chyren-conductor" }
+chyren-neocortex = { path = "../chyren-neocortex" }
+chyren-telemetry = { path = "../chyren-telemetry" }
+chyren-eval = { path = "../chyren-eval" }
+chyren-dream = { path = "../chyren-dream" }
+chyren-metacog = { path = "../chyren-metacog" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+tokio-stream = { version = "0.1", features = ["sync"] }
+futures = "0.3"
+clap = { version = "4", features = ["derive"] }
+clap_complete = "4"
+clap_mangen = "0.2"
+actix-web = "4.13.0"
+uuid = "1.23.0"
+thiserror = "2.0.18"
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
+anyhow = "1"
+rustyline = "14"
+rand = "0.8"
+ratatui = "0.26"
+crossterm = "0.27"
+termimad = "0.31"
+
+[dev-dependencies]
+async-trait = "0.1"
+assert_cmd = "2"
+predicates = "3"

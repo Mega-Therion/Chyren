@@ -1,0 +1,24 @@
+[Unit]
+Description=OmegA Brain (Canonical Sovereign)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=mega
+Group=mega
+WorkingDirectory=/home/mega/OmegA-Sovereign/packages/brain
+EnvironmentFile=-/home/mega/.omega/one-true.env
+Environment=NODE_ENV=production
+Environment=HOST=127.0.0.1
+Environment=PORT=8080
+Environment=PATH=/home/mega/.nvm/versions/node/v22.22.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+ExecStart=/home/mega/.nvm/versions/node/v22.22.0/bin/node index.js
+StandardOutput=journal
+StandardError=journal
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=60
+
+[Install]
+WantedBy=multi-user.target

@@ -17,20 +17,20 @@ test: medulla-test
 ci: medulla-fmt medulla-lint medulla-test
 
 medulla-fmt:
-	cd chyren-os/kernel && cargo fmt --all
+	cd core/chyren-os/kernel && cargo fmt --all
 
 medulla-lint:
-	cd chyren-os/kernel && cargo clippy --workspace --all-targets --all-features -- -D warnings
+	cd core/chyren-os/kernel && cargo clippy --workspace --all-targets --all-features -- -D warnings
 
 medulla-test:
-	cd chyren-os/kernel && cargo test --workspace
+	cd core/chyren-os/kernel && cargo test --workspace
 
 cortex-test:
-	PYTHONPATH=cortex pytest tests/
+	PYTHONPATH=core/cortex pytest core/tests/
 
 web-ci:
-	cd chyren-os/interface && npm ci && npm run typecheck && npm run lint && npm run build
+	cd core/chyren-os/interface && npm ci && npm run typecheck && npm run lint && npm run build
 
 gateway-ci:
-	cd gateway && pnpm install && npx tsc --noEmit && pnpm lint && pnpm build
+	cd core/gateway && pnpm install && npx tsc --noEmit && pnpm lint && pnpm build
 

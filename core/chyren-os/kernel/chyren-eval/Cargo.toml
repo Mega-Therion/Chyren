@@ -1,0 +1,19 @@
+[package]
+name = "chyren-eval"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[lib]
+
+[dependencies]
+chyren-core = { path = "../chyren-core" }
+chyren-aegis = { path = "../chyren-aegis" }
+chyren-adccl = { path = "../chyren-adccl" }
+chyren-telemetry = { path = "../chyren-telemetry" }
+chyren-myelin = { path = "../chyren-myelin" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "1"
+tokio = { version = "1", features = ["full"] }

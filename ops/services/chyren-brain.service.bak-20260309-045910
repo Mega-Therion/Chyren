@@ -1,0 +1,21 @@
+[Unit]
+Description=OMEGA Brain (Node)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/mega/NEXUS/OmegA/OmegA-SI/services/trinity/packages/brain
+EnvironmentFile=/home/mega/.omega_master.env
+Environment=HOST=127.0.0.1
+Environment=PORT=8080
+Environment=AGENT_NAME=brain
+Environment=AGENT_LOG=/var/log/omega/brain.log
+ExecStartPre=/usr/bin/env mkdir -p /var/log/omega
+ExecStart=/usr/bin/env npm start
+StandardOutput=append:/var/log/omega/brain.log
+StandardError=append:/var/log/omega/brain.log
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

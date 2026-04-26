@@ -36,8 +36,8 @@ from typing import Iterator, Optional, Sequence
 VERSION = "1.0.0"
 
 REPO_DIR = Path(__file__).resolve().parent
-CORTEX_DIR = REPO_DIR / "cortex"
-MEDULLA_DIR = REPO_DIR / "chyren-os" / "kernel"
+CORTEX_DIR = REPO_DIR / "core" / "cortex"
+MEDULLA_DIR = REPO_DIR / "core" / "chyren-os" / "kernel"
 STATE_DIR = REPO_DIR / "state"
 EVENTS_LOG = STATE_DIR / "cli_events.jsonl"
 DREAM_LOCK = STATE_DIR / ".dream.lock"
@@ -129,7 +129,7 @@ def emit_event(event: str, **fields: object) -> None:
 
 def get_python_exe() -> str:
     """Prefer the cortex venv interpreter if it exists."""
-    venv_py = REPO_DIR / "cortex" / "venv" / "bin" / "python3"
+    venv_py = REPO_DIR / "core" / "cortex" / "venv" / "bin" / "python3"
     if venv_py.is_file():
         return str(venv_py)
     return sys.executable

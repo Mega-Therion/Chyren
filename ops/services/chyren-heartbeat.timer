@@ -1,0 +1,11 @@
+[Unit]
+Description=OmegA Heartbeat Timer — every 30 minutes
+Requires=omega-heartbeat.service
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=30min
+Unit=omega-heartbeat.service
+
+[Install]
+WantedBy=timers.target
