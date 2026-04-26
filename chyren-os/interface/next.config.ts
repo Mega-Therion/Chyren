@@ -83,7 +83,7 @@ const nextConfig: NextConfig = {
   },
   webpack: (config, { dev }) => {
     if (!dev) {
-      config.parallelism = 1;
+      // Parallelism managed by system
     }
     return config;
   },

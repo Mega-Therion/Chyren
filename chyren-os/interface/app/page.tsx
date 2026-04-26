@@ -7,6 +7,7 @@ import { ChatMessage } from '@/components/ChatMessage'
 import { ChatInput } from '@/components/ChatInput'
 import { Sidebar } from '@/components/Sidebar'
 import { StatusBar } from '@/components/StatusBar'
+import { MissionControl } from '@/components/MissionControl'
 import { startHeartbeat, stopHeartbeat } from '@/lib/haptics-ry'
 import { clearDraft } from '@/lib/draft-ry'
 import { createTtsEngine, type TtsEngine, playLatencyChime } from '@/lib/tts-ry'
@@ -281,6 +282,9 @@ export default function ChatPage() {
             </span>
           </div>
         </header>
+
+        {/* Mission Control HUD */}
+        <MissionControl brainState={brainState} sessionId={sessionId} />
 
         {/* Chat Area */}
         <section
