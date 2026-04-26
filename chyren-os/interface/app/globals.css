@@ -132,8 +132,8 @@ textarea {
   height: 100%;
   max-height: 880px;
   background: rgba(5, 5, 8, 0.38);
-  backdrop-filter: blur(28px) saturate(160%) brightness(0.9);
   -webkit-backdrop-filter: blur(28px) saturate(160%) brightness(0.9);
+  backdrop-filter: blur(28px) saturate(160%) brightness(0.9);
   border-radius: 54px;
   border: 1px solid rgba(245, 158, 11, 0.14);
   box-shadow:
@@ -260,6 +260,7 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 5%, black 95%, transparent);
   mask-image: linear-gradient(to bottom, transparent, black 5%, black 95%, transparent);
   scrollbar-gutter: stable;
 }
@@ -800,6 +801,7 @@ textarea {
   inset: 0;
   z-index: 200;
   background: rgba(0, 0, 0, 0.55);
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: flex-end;
@@ -965,8 +967,8 @@ textarea {
   justify-content: space-between;
   padding: 16px 28px;
   background: rgba(5, 5, 8, 0.6);
-  backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(245, 158, 11, 0.08);
   z-index: 20;
   flex-shrink: 0;
@@ -1052,6 +1054,7 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 3%, black 97%, transparent 100%);
   mask-image: linear-gradient(to bottom, transparent 0%, black 3%, black 97%, transparent 100%);
   scrollbar-gutter: stable;
 }
@@ -1157,8 +1160,8 @@ textarea {
 .sovereign-input-dock {
   padding: 12px 28px 8px;
   background: linear-gradient(to top, rgba(5, 5, 8, 0.85), rgba(5, 5, 8, 0.4));
-  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   border-top: 1px solid rgba(255, 255, 255, 0.04);
   flex-shrink: 0;
 }
@@ -1194,8 +1197,8 @@ textarea {
   width: 280px;
   height: 100dvh;
   background: rgba(8, 8, 12, 0.92);
-  backdrop-filter: blur(24px) saturate(140%);
   -webkit-backdrop-filter: blur(24px) saturate(140%);
+  backdrop-filter: blur(24px) saturate(140%);
   border-right: 1px solid rgba(245, 158, 11, 0.08);
   z-index: 50;
   display: flex;
