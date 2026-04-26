@@ -2,9 +2,8 @@
 
 import { useRef, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { EffectComposer, Bloom, Vignette, ChromaticAberration } from '@react-three/postprocessing';
-import { BlendFunction } from 'postprocessing';
-import * as THREE from 'three';
+import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
+import type * as THREE from 'three';
 import { SovereignSphere } from './SovereignSphere';
 import { ParticleCosmos } from './ParticleCosmos';
 import type { BrainState } from './NeuralBrain';

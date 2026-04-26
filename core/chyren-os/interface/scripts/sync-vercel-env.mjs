@@ -31,7 +31,7 @@ for (const line of lines) {
         // Try to remove first
         try {
           execSync(`vercel env rm ${key} production -y`, { stdio: 'ignore' });
-        } catch (e) {}
+        } catch { }
         
         // Add fresh
         execSync(`echo "${value}" | vercel env add ${key} production`, { stdio: 'inherit' });

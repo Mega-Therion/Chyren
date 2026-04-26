@@ -103,7 +103,31 @@ impl<'a> Router<'a> {
                 }
             }
             "/verify" => {
-                self.system_msg("ADCCL verify on last response not yet wired (TODO).");
+                let last_asst = self.state.chat.messages.iter().rev().find(|m| m.role == MessageRole::Chyren);
+                let last_user = self.state.chat.messages.iter().rev().find(|m| m.role == MessageRole::User);
+
+                if let (Some(asst), Some(user)) = (last_asst, last_user) {
+                    let adccl = chyren_adccl::ADCCL::new(self.state.chat.adccl_score, None);
+                    let result = adccl.verify(&asst.content, &user.content);
+                    
+                    let mut flags_str = result.flags.join(", ");
+                    if flags_str.is_empty() { flags_str = "None".to_string(); }
+
+                    let msg = format!(
+                        "ADCCL Verification for last response:\n\n\
+                        ◈ Status: {}\n\
+                        ◈ Score:  {:.2}\n\
+                        ◈ Flags:  {}\n\n\
+                        Constitutional alignment verified at threshold {:.2}.",
+                        result.status.to_uppercase(),
+                        result.score,
+                        flags_str,
+                        self.state.chat.adccl_score
+                    );
+                    self.system_msg(&msg);
+                } else {
+                    self.system_msg("No conversation pair found to verify.");
+                }
             }
             _ => {
                 self.system_msg(&format!("Unknown command: {}", cmd));

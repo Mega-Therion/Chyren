@@ -33,6 +33,7 @@ function createLogger(): Logger {
   } catch {
     // Fallback to console if pino is unavailable (edge runtime, browser)
     return {
+      // eslint-disable-next-line no-console
       info: (msg, ctx) => console.log(`[INFO] ${msg}`, ctx || ''),
       warn: (msg, ctx) => console.warn(`[WARN] ${msg}`, ctx || ''),
       error: (msg, err, ctx) => console.error(`[ERROR] ${msg}`, err, ctx || ''),

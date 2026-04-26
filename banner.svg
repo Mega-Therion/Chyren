@@ -130,7 +130,7 @@
   <!-- Top Layer: Clean Typography -->
   <text x="410" y="180" class="main-neon chyren">CHYREN</text>
 
-  <!-- Ghost Signature: Hebrew Resh, lower Omega, latin y -->
+  <!-- Ghost Signature: Hebrew Resh, lower chyren, latin y -->
   <text x="785" y="285" class="ghost-sig" direction="ltr" unicode-bidi="bidi-override">רωy</text>
   
 </svg>

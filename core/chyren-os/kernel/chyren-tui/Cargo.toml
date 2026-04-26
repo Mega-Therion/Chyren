@@ -24,5 +24,6 @@ chrono = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 hex = { workspace = true }
+chyren-adccl = { path = "../chyren-adccl" }
 
 [dev-dependencies]

@@ -333,7 +333,7 @@ def cmd_status(args: argparse.Namespace, remainder: list[str]) -> int:
         # Calculate Holonomy Pulse metrics
         ledger_path = STATE_DIR / "master_ledger.json"
         chi_avg = 1.0
-        omega_score = 0.0
+        chyren_score = 0.0
         if ledger_path.exists():
             try:
                 with open(ledger_path, "r") as f:
@@ -343,9 +343,9 @@ def cmd_status(args: argparse.Namespace, remainder: list[str]) -> int:
                         # Last 10 entries for moving average
                         window = entries[-10:]
                         chi_avg = sum(e.get("chiral_invariant", 1.0) for e in window) / len(window)
-                        # Omega is approximated as (Delta H / Delta T) + Resonance
+                        # chyren is approximated as (Delta H / Delta T) + Resonance
                         # Here we use the alignment growth as a proxy
-                        omega_score = (chi_avg * len(entries)) / 100.0 # Normalized score
+                        chyren_score = (chi_avg * len(entries)) / 100.0 # Normalized score
                 
                 # Render Geometric Pulse
                 from chyren_cli.ui.render import get_holonomy_pulse
@@ -363,7 +363,7 @@ def cmd_status(args: argparse.Namespace, remainder: list[str]) -> int:
                     f"[{status_color}]{chi_avg:.4f}[/]",
                     get_holonomy_pulse(chi_avg)
                 )
-                pulse_table.add_row("SOVEREIGNTY SCORE (Ω)", f"[white]{omega_score:.4f}[/]", "")
+                pulse_table.add_row("SOVEREIGNTY SCORE (Ω)", f"[white]{chyren_score:.4f}[/]", "")
                 pulse_table.add_row("HOLONOMY CLASS", f"[{status_color}]{status_text}[/]", "")
                 
                 console.print(Panel(pulse_table, title="[bold white]HOLONOMY PULSE (Ω·χ)[/]", border_style="neon.cyan"))
