@@ -17,7 +17,7 @@ use tokio::sync::Mutex;
 /// [`TaskContract`] to that agent's dedicated MQTT topic.
 pub struct Dispatcher {
     mqtt_client: AsyncClient,
-    registry: Arc<Mutex<AgentRegistry>>,
+    pub registry: Arc<Mutex<AgentRegistry>>,
 }
 
 impl Dispatcher {

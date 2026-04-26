@@ -11,6 +11,11 @@ use chyren_core::{now, MatrixProgram, MemoryStratum, RunEnvelope, RunStatus, Ver
 use chyren_dream::Service as DreamEngine;
 use chyren_metacog::MetacogAgent;
 use chyren_myelin::MemoryGraph;
+use chyren_conductor::agents::{
+    ingestor::IngestorAgent, math_spoke::MathSpoke, mcts_solver::MctsSolverAgent,
+    millennium_solver::MillenniumSolverAgent, worker::MeshWorker, PersistentAgent,
+};
+use chyren_neocortex::{cold_store::ColdStore, proof_index::ProofConstraintIndex, Neocortex};
 use chyren_phylactery;
 use chyren_spokes::{SpokeRegistry, SpokeRequest, SpokeResponse, ToolInvocation};
 use std::collections::HashSet;
@@ -308,6 +313,89 @@ impl Conductor {
             }
             None => Ok(false),
         }
+    }
+
+    /// Spawn internal agents (Math, Ingestor, solvers).
+    pub async fn spawn_agents(&self) -> Result<(), String> {
+        let dispatcher = self.dispatcher.as_ref().ok_or("No dispatcher set")?;
+        let registry = &dispatcher.registry;
+
+        // 1. MathSpoke (4 workers)
+        for i in 1..=4 {
+            let math_spoke = Arc::new(MathSpoke);
+            let worker_id = format!("{}-{}", math_spoke.name(), i);
+            {
+                let mut reg = registry.lock().await;
+                reg.register(chyren_core::mesh::AgentRegistryEntry {
+                    id: worker_id.clone(),
+                    capabilities: vec![chyren_core::mesh::AgentCapability {
+                        category: "formal_verification".to_string(),
+                        tools: vec![],
+                    }],
+                    status: chyren_core::mesh::AgentStatus::Idle,
+                    last_heartbeat: now() as u64,
+                });
+            }
+            let _ = MeshWorker::new(math_spoke).await;
+        }
+
+        // 2. Ingestor (2 workers)
+        for i in 1..=2 {
+            let ingestor = Arc::new(IngestorAgent::new(
+                self.memory_service.clone(),
+                Arc::new(Neocortex::new()),
+                Arc::new(
+                    ColdStore::default_store()
+                        .unwrap_or_else(|_| ColdStore::new("/tmp/chyren_cold").expect("cold store")),
+                ),
+                Arc::new(Mutex::new(ProofConstraintIndex::new())),
+            ));
+            let worker_id = format!("{}-{}", ingestor.name(), i);
+            {
+                let mut reg = registry.lock().await;
+                reg.register(chyren_core::mesh::AgentRegistryEntry {
+                    id: worker_id.clone(),
+                    capabilities: vec![chyren_core::mesh::AgentCapability {
+                        category: "content_ingestion".to_string(),
+                        tools: vec![],
+                    }],
+                    status: chyren_core::mesh::AgentStatus::Idle,
+                    last_heartbeat: now() as u64,
+                });
+            }
+            let _ = MeshWorker::new(ingestor).await;
+        }
+
+        // 3. MillenniumSolver
+        let solver = Arc::new(MillenniumSolverAgent::new(dispatcher.clone()));
+        {
+            let mut reg = registry.lock().await;
+            reg.register(chyren_core::mesh::AgentRegistryEntry {
+                id: solver.name().to_string(),
+                capabilities: vec![chyren_core::mesh::AgentCapability {
+                    category: "research".to_string(),
+                    tools: vec![],
+                }],
+                status: chyren_core::mesh::AgentStatus::Idle,
+                last_heartbeat: now() as u64,
+            });
+        }
+        let _ = MeshWorker::new(solver).await;
+
+        // 4. MctsSolver
+        let mcts_solver = Arc::new(MctsSolverAgent::new(dispatcher.clone()));
+        {
+            let mut reg = registry.lock().await;
+            reg.register(chyren_core::mesh::AgentRegistryEntry {
+                id: mcts_solver.name().to_string(),
+                capabilities: mcts_solver.capabilities(),
+                status: chyren_core::mesh::AgentStatus::Idle,
+                last_heartbeat: now() as u64,
+            });
+        }
+        let _ = MeshWorker::new(mcts_solver).await;
+
+        Ok(())
     }
 
     // ── Private escalation helpers ────────────────────────────────────────────
