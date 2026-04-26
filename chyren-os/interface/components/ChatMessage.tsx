@@ -296,61 +296,67 @@ export function ChatMessage({
         onTouchEnd={onTouchEnd}
         onTouchCancel={cancelLong}
       >
-        {/* Header row */}
-        <div className="flex items-center gap-3 mb-1.5">
-          <span
-            className="font-mono text-xs font-medium tracking-wider"
-            style={{ color: isUser ? '#818cf8' : '#10b981' }}
-          >
-            {isUser ? '▸ USER' : 'Ω CHYREN'}
-          </span>
-          {time && (
-            <span className="font-mono text-xs text-slate-600">{time}</span>
-          )}
-          {isStreaming && (
-            <span className="badge badge-amber">STREAMING</span>
-          )}
-          {audit && (
-            <AuditBadge audit={audit} />
-          )}
-        </div>
-
-        {/* Content */}
-        <div
-          className="msg-content text-sm leading-relaxed text-slate-200 pl-3"
-          style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
-        >
-          {role === 'assistant' ? (
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              components={{
-                // Syntax-highlighted code blocks with Copy button
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                code({ inline, className, children, ...props }: any) {
-                  if (inline) {
-                    return <code className={className} {...props}>{children}</code>
-                  }
-                  return <CodeBlock className={className}>{children}</CodeBlock>
-                },
-              }}
-            >
-              {content}
-            </ReactMarkdown>
-          ) : (
-            <span>{content}</span>
-          )}
-          {isStreaming && (
+        <div className="msg-bubble">
+          {/* Header row */}
+          <div className="flex items-center gap-3 mb-2">
             <span
-              className="cursor inline-block ml-0.5 w-1.5 h-3.5 align-middle"
-              style={{ background: '#10b981' }}
-            />
+              className="font-mono text-[10px] font-bold tracking-[0.2em] uppercase opacity-40"
+              style={{ color: isUser ? 'var(--neon-blue)' : 'var(--neon-cyan)' }}
+            >
+              {isUser ? 'USER' : 'CHYREN'}
+            </span>
+            {time && (
+              <span className="font-mono text-[9px] opacity-20">{time}</span>
+            )}
+            {isStreaming && (
+              <span className="text-[9px] font-bold tracking-widest text-cyan-400/50 animate-pulse">STREAMING</span>
+            )}
+          </div>
+
+          {/* Content */}
+          <div
+            className="msg-content text-sm leading-relaxed text-white/90"
+            style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+          >
+            {role === 'assistant' ? (
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  // Syntax-highlighted code blocks with Copy button
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  code({ inline, className, children, ...props }: any) {
+                    if (inline) {
+                      return <code className={className} {...props}>{children}</code>
+                    }
+                    return <CodeBlock className={className}>{children}</CodeBlock>
+                  },
+                }}
+              >
+                {content}
+              </ReactMarkdown>
+            ) : (
+              <span>{content}</span>
+            )}
+            {isStreaming && (
+              <span
+                className="cursor inline-block ml-0.5 w-1.5 h-3.5 align-middle"
+                style={{ background: 'var(--neon-cyan)' }}
+              />
+            )}
+          </div>
+
+          {/* Provenance trace (assistant messages only, once streaming done) */}
+          {role === 'assistant' && !isStreaming && content.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-white/5">
+              <div className="flex items-center justify-between">
+                <ProvenanceTrace messageId={id} model={model} />
+                {audit && (
+                  <AuditBadge audit={audit} />
+                )}
+              </div>
+            </div>
           )}
         </div>
-
-        {/* Provenance trace (assistant messages only, once streaming done) */}
-        {role === 'assistant' && !isStreaming && content.length > 0 && (
-          <ProvenanceTrace messageId={id} model={model} />
-        )}
       </div>
     </>
   )
