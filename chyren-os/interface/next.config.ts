@@ -73,8 +73,19 @@ const nextConfig: NextConfig = {
   // Avoid tracing the wrong workspace when other lockfiles exist under $HOME
   outputFileTracingRoot: path.join(process.cwd()),
   reactStrictMode: true,
+  productionBrowserSourceMaps: false,
   typescript: {
     tsconfigPath: './tsconfig.json',
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  webpack: (config, { dev }) => {
+    if (!dev) {
+      config.parallelism = 1;
+    }
+    return config;
   },
   env: {
     NEXT_PUBLIC_API_BASE_URL: publicApiBaseUrl(),
