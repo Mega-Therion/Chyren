@@ -156,7 +156,6 @@ impl SpokeRegistry {
             ("ollama", 20),     // Local: free if models installed
             // Paid — higher numbers = used as fallback only
             ("deepseek", 40),
-            ("perplexity", 45),
             ("anthropic", 50),
             ("openai", 60),
             // Infrastructure — not inference providers
@@ -189,7 +188,6 @@ impl SpokeRegistry {
                 "openai" => Some(Arc::new(spokes::OpenAISpoke::new(config))),
                 "gemini" => Some(Arc::new(spokes::GeminiSpoke::new(config))),
                 "deepseek" => Some(Arc::new(spokes::DeepSeekSpoke::new(config))),
-                "perplexity" => Some(Arc::new(spokes::PerplexitySpoke::new(config))),
                 "ollama" => Some(Arc::new(spokes::OllamaSpoke::new(config))),
                 "search" => Some(Arc::new(spokes::SearchSpoke::new(config))),
                 "neon" => Some(Arc::new(spokes::NeonSpoke::new(config))),
@@ -259,7 +257,6 @@ impl SpokeRegistry {
             "deepseek".into(),   // Paid but cheapest cloud option
             "anthropic".into(),  // Paid premium
             "openai".into(),     // Paid premium
-            "perplexity".into(), // Paid
         ];
 
         reg
