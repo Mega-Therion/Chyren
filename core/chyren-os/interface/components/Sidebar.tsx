@@ -29,14 +29,14 @@ export function Sidebar({ isOpen, onToggle, brainState, sessionId, onNewChat }: 
   const [activeNav, setActiveNav] = useState('chat')
 
   const stateColors: Record<string, string> = {
-    idle: 'rgba(255, 255, 255, 0.4)',
-    listening: 'var(--neon-violet)',
-    thinking: 'var(--neon-pink)',
-    speaking: 'var(--neon-cyan)',
+    idle: 'rgba(255, 255, 255, 0.2)',
+    listening: 'var(--chyren-violet)',
+    thinking: 'var(--chyren-gold)',
+    speaking: 'var(--chyren-blue)',
   }
 
   const stateLabels: Record<string, string> = {
-    idle: 'STANDBY',
+    idle: 'IDLE',
     listening: 'LISTENING',
     thinking: 'REASONING',
     speaking: 'TRANSMITTING',
@@ -44,117 +44,105 @@ export function Sidebar({ isOpen, onToggle, brainState, sessionId, onNewChat }: 
 
   return (
     <>
-      {/* Collapsed toggle button */}
-      <button
-        onClick={onToggle}
-        className="sidebar-toggle"
-        aria-label="Toggle sidebar"
-        style={{ left: isOpen ? '280px' : '0' }}
-      >
-        <motion.span
-          animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.2 }}
-          style={{ display: 'inline-block', fontSize: '0.75rem', color: '#f59e0b' }}
-        >
-          {isOpen ? '◂' : '▸'}
-        </motion.span>
-      </button>
-
       <AnimatePresence>
         {isOpen && (
           <motion.aside
-            className="sidebar"
-            initial={{ x: -280, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: -280, opacity: 0 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed left-0 top-0 bottom-0 w-[280px] bg-black border-r border-white/5 z-50 flex flex-col"
+            initial={{ x: -280 }}
+            animate={{ x: 0 }}
+            exit={{ x: -280 }}
+            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
           >
-            {/* Identity Badge */}
-            <div className="sidebar-identity">
-              <div className="sidebar-avatar">
-                <motion.div
-                  className="sidebar-avatar-ring"
-                  animate={{
-                    boxShadow: `0 0 ${brainState === 'idle' ? '12' : '24'}px ${stateColors[brainState] || '#f59e0b'}40`,
-                    borderColor: stateColors[brainState] || '#f59e0b',
-                  }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <span className="sidebar-avatar-sigil">Ω</span>
-                </motion.div>
-              </div>
-              <div className="sidebar-identity-text">
-                <h2 className="sidebar-identity-name">CHYREN</h2>
-                <div className="sidebar-identity-status">
-                  <motion.span
-                    className="sidebar-status-dot"
-                    animate={{
-                      backgroundColor: stateColors[brainState] || '#f59e0b',
-                      scale: brainState === 'idle' ? [1, 1.2, 1] : [1, 1.4, 1],
-                    }}
-                    transition={{ repeat: Infinity, duration: brainState === 'idle' ? 3 : 1.2 }}
-                  />
-                  <span style={{ color: stateColors[brainState] || '#f59e0b' }}>
-                    {stateLabels[brainState] || 'STANDBY'}
-                  </span>
+            {/* Minimal Identity */}
+            <div className="p-10 pb-6 flex flex-col gap-6">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-lg font-thin border border-white/10">
+                  Ω
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] tracking-[0.4em] font-bold text-white/80 uppercase">Chyren</span>
+                  <div className="flex items-center gap-2 mt-1">
+                    <motion.div 
+                      className="w-1 h-1 rounded-full"
+                      animate={{ backgroundColor: stateColors[brainState], scale: [1, 1.5, 1] }}
+                      transition={{ repeat: Infinity, duration: 2 }}
+                    />
+                    <span className="text-[8px] tracking-[0.2em] font-mono text-white/30 uppercase">{stateLabels[brainState]}</span>
+                  </div>
                 </div>
               </div>
+              
+              <button 
+                className="w-full py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all text-left flex items-center justify-between group"
+                onClick={onNewChat}
+              >
+                <span className="text-[10px] tracking-[0.2em] font-medium text-white/60 group-hover:text-white uppercase">New Session</span>
+                <span className="text-white/20 group-hover:text-white/60">+</span>
+              </button>
             </div>
 
-            {/* New Chat Button */}
-            <button className="sidebar-new-chat" onClick={onNewChat}>
-              <span style={{ fontSize: '0.85rem' }}>⊕</span>
-              <span>New Session</span>
-            </button>
-
             {/* Navigation */}
-            <nav className="sidebar-nav">
+            <nav className="flex-1 px-6 space-y-2">
               {NAV_ITEMS.map(item => (
                 <button
                   key={item.id}
-                  className={`sidebar-nav-item ${activeNav === item.id ? 'sidebar-nav-item--active' : ''}`}
+                  className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all group ${activeNav === item.id ? 'bg-white/5 text-white' : 'text-white/40 hover:text-white/60'}`}
                   onClick={() => setActiveNav(item.id)}
                 >
-                  <span className="sidebar-nav-icon">{item.icon}</span>
-                  <span className="sidebar-nav-label">{item.label}</span>
-                  <span className="sidebar-nav-shortcut">{item.shortcut}</span>
+                  <span className="text-sm opacity-60 group-hover:opacity-100">{item.icon}</span>
+                  <span className="text-[11px] tracking-[0.1em] font-medium uppercase">{item.label}</span>
                 </button>
               ))}
             </nav>
 
-            {/* Quick Actions */}
-            <div className="sidebar-section-title">QUICK ACTIONS</div>
-            <div className="sidebar-actions">
+            {/* Quick Actions Tray */}
+            <div className="p-6 grid grid-cols-4 gap-2">
               {QUICK_ACTIONS.map(action => (
                 <button
                   key={action.id}
-                  className="sidebar-action-btn"
+                  className="aspect-square rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center transition-all group"
                   title={action.label}
                 >
-                  <span style={{ color: action.color, fontSize: '1rem' }}>{action.icon}</span>
-                  <span className="sidebar-action-label">{action.label}</span>
+                  <span className="text-sm opacity-40 group-hover:opacity-100" style={{ color: action.color }}>{action.icon}</span>
                 </button>
               ))}
             </div>
 
-            {/* Session Info */}
-            <div className="sidebar-footer">
-              <div className="sidebar-session-info">
-                <span className="sidebar-session-label">SESSION</span>
-                <span className="sidebar-session-id">{sessionId.slice(0, 8)}</span>
-              </div>
-              <div className="sidebar-session-info">
-                <span className="sidebar-session-label">ADCCL</span>
-                <span className="sidebar-session-id" style={{ color: '#39ff14' }}>0.950</span>
-              </div>
-              <div className="sidebar-session-info">
-                <span className="sidebar-session-label">INTEGRITY</span>
-                <span className="sidebar-session-id" style={{ color: '#39ff14' }}>VERIFIED</span>
+            {/* Subtle Footer */}
+            <div className="p-8 space-y-4">
+              <div className="flex flex-col gap-2">
+                <div className="flex justify-between items-center text-[8px] tracking-[0.3em] font-mono">
+                  <span className="text-white/20 uppercase">Session ID</span>
+                  <span className="text-white/40 uppercase">{sessionId.slice(0, 8)}</span>
+                </div>
+                <div className="flex justify-between items-center text-[8px] tracking-[0.3em] font-mono">
+                  <span className="text-white/20 uppercase">ADCCL Score</span>
+                  <span className="text-cyan-400/60 uppercase">0.9928</span>
+                </div>
               </div>
             </div>
           </motion.aside>
         )}
       </AnimatePresence>
+
+      {/* Collapse Trigger (Floating) */}
+      {!isOpen && (
+        <button
+          onClick={onToggle}
+          className="fixed left-6 top-1/2 -translate-y-1/2 w-8 h-12 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full flex items-center justify-center transition-all z-50 group"
+        >
+          <span className="text-white/20 group-hover:text-white/60">›</span>
+        </button>
+      )}
+      
+      {isOpen && (
+        <button
+          onClick={onToggle}
+          className="fixed left-[280px] top-1/2 -translate-y-1/2 w-8 h-12 bg-black border border-white/5 border-l-0 rounded-r-full flex items-center justify-center transition-all z-50 group"
+        >
+          <span className="text-white/20 group-hover:text-white/60">‹</span>
+        </button>
+      )}
     </>
   )
 }

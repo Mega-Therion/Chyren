@@ -11,18 +11,18 @@ interface MissionControlProps {
 export function MissionControl({ brainState, sessionId }: MissionControlProps) {
   const getColor = () => {
     switch (brainState) {
-      case 'thinking': return '#ff0080' // Neon Pink
-      case 'speaking': return '#00f2ff' // Neon Cyan
-      case 'listening': return '#bc13fe' // Neon Violet
-      default: return '#ffffff'
+      case 'thinking': return 'var(--chyren-gold)'
+      case 'speaking': return 'var(--chyren-blue)'
+      case 'listening': return 'var(--chyren-violet)'
+      default: return 'rgba(255,255,255,0.2)'
     }
   }
 
   return (
-    <div className="fixed top-8 right-8 z-50 flex flex-col items-end gap-2 pointer-events-none">
-      <div className="flex items-center gap-3">
-        <span className="text-[10px] font-mono text-white/30 tracking-[0.3em] uppercase">
-          SI::PROVENANCE::{sessionId.slice(0, 8)}
+    <div className="fixed top-8 right-10 z-50 flex flex-col items-end gap-3 pointer-events-none">
+      <div className="flex items-center gap-4">
+        <span className="text-[8px] font-mono text-white/10 tracking-[0.4em] uppercase">
+          PROVENANCE::{sessionId.slice(0, 8)}
         </span>
         <div className="relative w-2 h-2">
           <AnimatePresence mode="wait">

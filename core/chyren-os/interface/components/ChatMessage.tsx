@@ -288,7 +288,7 @@ export function ChatMessage({
       )}
 
       <div
-        className={`fade-up px-5 py-3 ${isUser ? 'msg-user' : 'msg-assistant'}`}
+        className={`fade-up px-0 py-1 ${isUser ? 'msg-user' : 'msg-assistant'}`}
         onMouseDown={startLong}
         onMouseUp={cancelLong}
         onMouseLeave={cancelLong}
@@ -296,37 +296,27 @@ export function ChatMessage({
         onTouchEnd={onTouchEnd}
         onTouchCancel={cancelLong}
       >
-        <div className="msg-bubble">
-          {/* Header row */}
-          <div className="flex items-center gap-3 mb-2">
-            <span
-              className="font-mono text-[10px] font-bold tracking-[0.2em] uppercase opacity-40"
-              style={{ color: isUser ? 'var(--neon-blue)' : 'var(--neon-cyan)' }}
-            >
-              {isUser ? 'USER' : 'CHYREN'}
-            </span>
+        <div className="msg-bubble !bg-transparent !border-none !backdrop-filter-none !p-0">
+          {/* Subtle Role Indicator */}
+          <div className={`flex items-center gap-3 mb-3 ${isUser ? 'justify-end' : 'justify-start'}`}>
+            <span className={`w-1 h-1 rounded-full ${isUser ? 'bg-white/20' : 'bg-cyan-400'}`} />
             {time && (
-              <span className="font-mono text-[9px] opacity-20">{time}</span>
-            )}
-            {isStreaming && (
-              <span className="text-[9px] font-bold tracking-widest text-cyan-400/50 animate-pulse">STREAMING</span>
+              <span className="font-mono text-[8px] opacity-10 tracking-widest">{time}</span>
             )}
           </div>
 
           {/* Content */}
           <div
-            className="msg-content text-sm leading-relaxed text-white/90"
+            className={`msg-content text-[15px] leading-relaxed ${isUser ? 'text-white/60 text-right italic' : 'text-white/90'}`}
             style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
           >
             {role === 'assistant' ? (
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
-                  // Syntax-highlighted code blocks with Copy button
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   code({ inline, className, children, ...props }: any) {
                     if (inline) {
-                      return <code className={className} {...props}>{children}</code>
+                      return <code className="bg-white/5 px-1 rounded text-[0.9em]" {...props}>{children}</code>
                     }
                     return <CodeBlock className={className}>{children}</CodeBlock>
                   },
@@ -338,22 +328,21 @@ export function ChatMessage({
               <span>{content}</span>
             )}
             {isStreaming && (
-              <span
-                className="cursor inline-block ml-0.5 w-1.5 h-3.5 align-middle"
-                style={{ background: 'var(--neon-cyan)' }}
+              <motion.span
+                animate={{ opacity: [0, 1, 0] }}
+                transition={{ repeat: Infinity, duration: 0.8 }}
+                className="inline-block ml-2 w-1 h-4 align-middle bg-cyan-400 shadow-[0_0_10px_#00e5ff]"
               />
             )}
           </div>
 
-          {/* Provenance trace (assistant messages only, once streaming done) */}
+          {/* Footer - Trace & Audit */}
           {role === 'assistant' && !isStreaming && content.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-white/5">
-              <div className="flex items-center justify-between">
-                <ProvenanceTrace messageId={id} model={model} />
-                {audit && (
-                  <AuditBadge audit={audit} />
-                )}
-              </div>
+            <div className="mt-6 flex items-center gap-4 opacity-40 hover:opacity-100 transition-opacity">
+              <ProvenanceTrace messageId={id} model={model} />
+              {audit && (
+                <AuditBadge audit={audit} />
+              )}
             </div>
           )}
         </div>
