@@ -3,8 +3,11 @@
 [![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.19693512-blue)](https://doi.org/10.5281/zenodo.19693512)
 [![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
 [![Stability: Stable](https://img.shields.io/badge/Stability-Stable-green.svg)](https://github.com/Mega-Therion/Chyren)
+[![Deployment: Live](https://img.shields.io/badge/Deployment-Live-brightgreen.svg)](https://interface-mu-nine.vercel.app)
 
 **Chyren** is a high-integrity Sovereign Intelligence (SI) framework designed for stateful, verifiable, and autonomous task execution. Utilizing a **Binary-Hemispheric Architecture**, Chyren separates high-level cognitive orchestration (Cortex) from low-level system performance (Medulla) to enforce strict verification gates and cryptographic integrity.
+
+🚀 **Live Interface**: [interface-mu-nine.vercel.app](https://interface-mu-nine.vercel.app)
 
 ---
 
