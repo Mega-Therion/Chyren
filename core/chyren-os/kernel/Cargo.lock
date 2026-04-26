@@ -924,12 +924,12 @@ dependencies = [
 name = "chyren-metacog"
 version = "0.1.0"
 dependencies = [
- "chyren-aegis",
  "chyren-core",
  "chyren-myelin",
+ "chyren-telemetry",
  "serde",
  "serde_json",
- "thiserror 1.0.69",
+ "uuid",
 ]
 
 [[package]]
@@ -980,6 +980,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "chyren-rsil"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "tokio",
+]
+
+[[package]]
 name = "chyren-spokes"
 version = "0.1.0"
 dependencies = [
@@ -994,6 +1002,13 @@ dependencies = [
  "tokio",
  "tracing",
  "urlencoding",
+]
+
+[[package]]
+name = "chyren-symbolic"
+version = "0.1.0"
+dependencies = [
+ "chyren-core",
 ]
 
 [[package]]

@@ -150,11 +150,12 @@ pub fn extract_command(text: &str) -> Option<String> {
     if !trimmed.starts_with('/') {
         return None;
     }
-    let cmd = trimmed
-        .split_whitespace()
-        .next()
-        .unwrap_or("")
-        .to_lowercase();
+    let raw = trimmed.split_whitespace().next().unwrap_or("").to_lowercase();
+    // Strip "@botname" suffix that Telegram appends in groups (e.g. "/status@chyrensovereignbot").
+    let cmd = match raw.split_once('@') {
+        Some((c, _)) => c.to_string(),
+        None => raw,
+    };
     if cmd.is_empty() {
         None
     } else {
@@ -199,9 +200,12 @@ pub async fn run_bridge(token: String) -> Result<(), Box<dyn std::error::Error +
         let conductor = conductor.clone();
         let sessions = sessions.clone();
         async move {
+            let chat_id = msg.chat.id;
             let Some(text) = msg.text() else {
+                eprintln!("[TG] non-text message in chat {} — ignoring", chat_id.0);
                 return respond(());
             };
+            eprintln!("[TG] in chat={} text={:?}", chat_id.0, text);
 
             // Resolve user ID (fall back to chat ID for group-less scenarios).
             let user_id: u64 = msg
@@ -210,14 +214,62 @@ pub async fn run_bridge(token: String) -> Result<(), Box<dyn std::error::Error +
                 .map(|u| u.id.0)
                 .unwrap_or(msg.chat.id.0.unsigned_abs());
 
+            // Helper: send a reply, chunking on Telegram's 4096-char limit.
+            // Splits at paragraph or line boundaries when possible to keep prose readable.
+            let send = |body: String| {
+                let bot = bot.clone();
+                async move {
+                    const LIMIT: usize = 4000; // 96-char safety margin under Telegram's 4096
+                    let chunks: Vec<String> = if body.chars().count() <= LIMIT {
+                        vec![body]
+                    } else {
+                        let mut out = Vec::new();
+                        let mut buf = String::new();
+                        for line in body.split_inclusive('\n') {
+                            if buf.chars().count() + line.chars().count() > LIMIT {
+                                if !buf.is_empty() {
+                                    out.push(std::mem::take(&mut buf));
+                                }
+                                // Long single line — hard-split by char.
+                                if line.chars().count() > LIMIT {
+                                    let mut tmp = String::new();
+                                    for c in line.chars() {
+                                        tmp.push(c);
+                                        if tmp.chars().count() >= LIMIT {
+                                            out.push(std::mem::take(&mut tmp));
+                                        }
+                                    }
+                                    if !tmp.is_empty() { buf = tmp; }
+                                } else {
+                                    buf.push_str(line);
+                                }
+                            } else {
+                                buf.push_str(line);
+                            }
+                        }
+                        if !buf.is_empty() { out.push(buf); }
+                        out
+                    };
+                    let total = chunks.len();
+                    for (i, chunk) in chunks.iter().enumerate() {
+                        let prefix = if total > 1 { format!("[{}/{}]\n", i + 1, total) } else { String::new() };
+                        let msg = format!("{prefix}{chunk}");
+                        if let Err(e) = bot.send_message(chat_id, &msg).await {
+                            eprintln!("[TG-ERR] send_message chunk {}/{} failed: {e}", i + 1, total);
+                        } else {
+                            eprintln!("[TG] sent chunk {}/{} ({} bytes) to chat={}", i + 1, total, msg.len(), chat_id.0);
+                        }
+                    }
+                }
+            };
+
             // 1. Rate limiting.
             {
                 let mut store = sessions.lock().await;
                 let ctx = store.entry(user_id).or_insert_with(SessionContext::new);
                 if !check_rate_limit(ctx) {
-                    bot.send_message(msg.chat.id, rate_limit_message())
-                        .await
-                        .ok();
+                    eprintln!("[TG] rate-limited user={user_id}");
+                    send(rate_limit_message().to_string()).await;
                     return respond(());
                 }
                 ctx.message_count += 1;
@@ -226,18 +278,15 @@ pub async fn run_bridge(token: String) -> Result<(), Box<dyn std::error::Error +
             // 2. AEGIS gate.
             let aegis_result = check_message(text);
             if !aegis_result.passed {
-                bot.send_message(
-                    msg.chat.id,
-                    format_aegis_rejection(&aegis_result.threat_level, &aegis_result.note),
-                )
-                .await
-                .ok();
+                eprintln!("[TG] AEGIS rejected: {:?} {}", aegis_result.threat_level, aegis_result.note);
+                send(format_aegis_rejection(&aegis_result.threat_level, &aegis_result.note)).await;
                 return respond(());
             }
 
             // 3. Command routing.
             if is_bot_command(text) {
                 let cmd = extract_command(text).unwrap_or_default();
+                eprintln!("[TG] command path: {cmd}");
                 let reply = match cmd.as_str() {
                     "/start" => start_response(),
                     "/help" => help_response(),
@@ -281,17 +330,20 @@ pub async fn run_bridge(token: String) -> Result<(), Box<dyn std::error::Error +
                         cmd
                     ),
                 };
-                bot.send_message(msg.chat.id, reply).await.ok();
+                send(reply).await;
                 return respond(());
             }
 
             // 4. Full conductor pipeline for non-command messages.
+            eprintln!("[TG] entering conductor.plan_task");
             let plan = match conductor.plan_task(text).await {
-                Ok(p) => p,
+                Ok(p) => {
+                    eprintln!("[TG] plan_task ok");
+                    p
+                }
                 Err(e) => {
-                    bot.send_message(msg.chat.id, format_pipeline_error(&e.to_string()))
-                        .await
-                        .ok();
+                    eprintln!("[TG-ERR] plan_task failed: {e}");
+                    send(format_pipeline_error(&e.to_string())).await;
                     return respond(());
                 }
             };
@@ -308,18 +360,19 @@ pub async fn run_bridge(token: String) -> Result<(), Box<dyn std::error::Error +
                 evidence_packet: EvidencePacket::default(),
             };
 
+            eprintln!("[TG] entering conductor.execute_plan");
             match conductor.execute_plan(plan, &mut envelope).await {
                 Ok(result) => {
+                    eprintln!("[TG] execute_plan ok ({} bytes)", result.response_text.len());
                     let reply = compose_reply(
                         &result.response_text,
                         result.verification.map(|v| v.score as f64),
                     );
-                    bot.send_message(msg.chat.id, reply).await.ok();
+                    send(reply).await;
                 }
                 Err(e) => {
-                    bot.send_message(msg.chat.id, format_pipeline_error(&e.to_string()))
-                        .await
-                        .ok();
+                    eprintln!("[TG-ERR] execute_plan failed: {e}");
+                    send(format_pipeline_error(&e.to_string())).await;
                 }
             }
 

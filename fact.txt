@@ -1,0 +1,1 @@
+Project Fact: The Millennium Prize Problem with the lowest formal verification complexity (LVC) is the Birch & Swinnerton-Dyer (BSD) Conjecture. This is the optimal target for the ARI's first rigorous Millennium-level proof attempt.

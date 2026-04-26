@@ -438,6 +438,7 @@ impl SpokeRegistry {
                 }
             }
 
+            eprintln!("[CASCADE] {} failed → {}", name, last_error);
             tracing::warn!(
                 "[SPOKE_REGISTRY] Spoke {} failed, trying next candidate. Error: {}",
                 name,

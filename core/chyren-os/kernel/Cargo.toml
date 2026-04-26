@@ -8,6 +8,8 @@ members = [
     "chyren-myelin",
     "chyren-dream",
     "chyren-metacog",
+    "chyren-symbolic",
+    "chyren-rsil",
     "chyren-worldmodel",
     "chyren-integration",
     "chyren-spokes",

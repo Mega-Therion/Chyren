@@ -107,7 +107,7 @@ impl<'a> Router<'a> {
                 let last_user = self.state.chat.messages.iter().rev().find(|m| m.role == MessageRole::User);
 
                 if let (Some(asst), Some(user)) = (last_asst, last_user) {
-                    let adccl = chyren_adccl::ADCCL::new(self.state.chat.adccl_score, None);
+                    let adccl = chyren_adccl::ADCCL::new(self.state.chat.adccl_score as f32, None);
                     let result = adccl.verify(&asst.content, &user.content);
                     
                     let mut flags_str = result.flags.join(", ");

@@ -9,7 +9,15 @@ use chyren_aeon::AeonRuntime;
 use chyren_conductor::router::ProviderRouter;
 use chyren_core::{now, MatrixProgram, MemoryStratum, RunEnvelope, RunStatus, VerificationReport};
 use chyren_dream::Service as DreamEngine;
-use chyren_metacog::MetacogAgent;
+// chyren_metacog::MetacogAgent is referenced by conductor reflection logic but
+// is not exposed by the metacog crate's lib.rs. Provide a local stub so the
+// reflection path is a no-op until the upstream crate ships the real type.
+struct MetacogAgent;
+impl MetacogAgent {
+    fn new() -> Self { Self }
+    fn reflect(&mut self, _graph: &chyren_myelin::MemoryGraph) -> Vec<Epiphany> { Vec::new() }
+}
+struct Epiphany { insight: String }
 use chyren_myelin::MemoryGraph;
 use chyren_conductor::agents::{
     ingestor::IngestorAgent, math_spoke::MathSpoke, mcts_solver::MctsSolverAgent,
@@ -476,6 +484,82 @@ impl Conductor {
                             "<tool_error>Tool {} not found</tool_error>",
                             invocation.tool
                         );
+
+                        // ── Subagent spectrum (intercept before spoke dispatch) ──
+                        if invocation.tool == "spawn_subagent" {
+                            let expert_name = invocation
+                                .input
+                                .get("expert")
+                                .and_then(|v| v.as_str())
+                                .unwrap_or("");
+                            let sub_prompt = invocation
+                                .input
+                                .get("prompt")
+                                .and_then(|v| v.as_str())
+                                .unwrap_or("");
+                            match chyren_conductor::experts::find_expert(expert_name) {
+                                Some(expert) => {
+                                    eprintln!(
+                                        "[SUBAGENT] {} {} ← {}",
+                                        expert.emoji,
+                                        expert.name,
+                                        sub_prompt.chars().take(80).collect::<String>()
+                                    );
+                                    let sub_req = chyren_spokes::SpokeRequest {
+                                        prompt: sub_prompt.to_string(),
+                                        system: expert.system_prompt.to_string(),
+                                        max_tokens: 1024,
+                                        temperature: 0.4,
+                                    };
+                                    match self.spokes.route_with_model(&sub_req, None, None).await {
+                                        Ok(sub_resp) => {
+                                            eprintln!(
+                                                "[SUBAGENT] {} {} → {} bytes via {}",
+                                                expert.emoji,
+                                                expert.name,
+                                                sub_resp.text.len(),
+                                                sub_resp.provider
+                                            );
+                                            let payload = serde_json::json!({
+                                                "expert": expert.name,
+                                                "emoji": expert.emoji,
+                                                "provider": sub_resp.provider,
+                                                "response": sub_resp.text,
+                                            });
+                                            tool_result_text = format!(
+                                                "<tool_result>{}</tool_result>",
+                                                serde_json::to_string(&payload).unwrap_or_default()
+                                            );
+                                        }
+                                        Err(e) => {
+                                            eprintln!(
+                                                "[SUBAGENT-ERR] {} failed: {}",
+                                                expert.name, e
+                                            );
+                                            tool_result_text = format!(
+                                                "<tool_error>Subagent {} failed: {}</tool_error>",
+                                                expert.name, e
+                                            );
+                                        }
+                                    }
+                                }
+                                None => {
+                                    let known: Vec<&str> = chyren_conductor::experts::EXPERTS
+                                        .iter()
+                                        .map(|e| e.name)
+                                        .collect();
+                                    tool_result_text = format!(
+                                        "<tool_error>Unknown expert '{}'. Available: {}</tool_error>",
+                                        expert_name,
+                                        known.join(", ")
+                                    );
+                                }
+                            }
+                            current_prompt
+                                .push_str(&format!("\n\n{}\n\n{}\n", res.text, tool_result_text));
+                            continue;
+                        }
+
                         for spoke in self
                             .spokes
                             .spokes_with_capability(chyren_spokes::SpokeCapability::Tools)
@@ -585,6 +669,7 @@ impl Conductor {
                 report.severity.as_str(),
                 false,
                 "conductor",
+                None,
             );
             return Err(ConductorError::Deflected(deflection.response_text));
         }
@@ -726,6 +811,8 @@ impl Conductor {
             }
             tool_system_prompt.push_str("\nTo invoke a tool, respond with exactly: <tool_call>{\"tool\": \"name\", \"input\": { ... }}</tool_call>\n");
         }
+        tool_system_prompt.push_str("\n");
+        tool_system_prompt.push_str(&chyren_conductor::experts::roster_for_prompt());
 
         let base_prompt = format!("{}{}", envelope.task, context_text);
 
