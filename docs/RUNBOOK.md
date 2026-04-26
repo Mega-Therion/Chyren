@@ -39,3 +39,8 @@ curl -i -X POST https://chyren-web.vercel.app/api/cron/warm-context \\
 ## Rollback (Vercel)
 - Use the Vercel dashboard to promote the previous healthy production deployment.\n- After rollback, rerun the smoke checks above.
 
+## Performance & Alignment
+- **Baseline Medulla Latency**: < 50ms (atomic operations), < 200ms (cross-plane synchronization).
+- **ADCCL Alignment Target**: $\geq 0.7$ (calculated per trajectory).
+- **Monitoring**: All performance metrics are logged to the Master Ledger via the Cortex cron cycle.
+
