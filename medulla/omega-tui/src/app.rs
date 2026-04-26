@@ -55,7 +55,7 @@ pub struct Message {
     pub provider: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MessageRole {
     User,
     Chyren,

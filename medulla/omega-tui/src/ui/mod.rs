@@ -4,14 +4,13 @@ pub mod tabs;
 pub mod widgets;
 
 use crate::app::{AppState, Tab};
-use header::draw_header;
-use footer::draw_footer;
-use ratatui::backend::Backend;
+use ratatui::backend::CrosstermBackend;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::Frame;
+use std::io::Stdout;
 
-pub fn draw<B: Backend>(frame: &mut Frame<B>, state: &AppState) {
-    let size = frame.size();
+pub fn draw(frame: &mut Frame, state: &AppState) {
+    let size = frame.area();
 
     if size.height < 3 {
         return;
@@ -26,7 +25,7 @@ pub fn draw<B: Backend>(frame: &mut Frame<B>, state: &AppState) {
         ])
         .split(size);
 
-    draw_header(frame, chunks[0], state);
+    header::draw_header(frame, chunks[0], state);
 
     match state.active_tab {
         Tab::Chat => tabs::chat::draw(frame, chunks[1], state),
@@ -35,7 +34,7 @@ pub fn draw<B: Backend>(frame: &mut Frame<B>, state: &AppState) {
         Tab::Dream => tabs::dream::draw(frame, chunks[1], state),
     }
 
-    draw_footer(frame, chunks[2], state);
+    footer::draw_footer(frame, chunks[2], state);
 
     if state.show_help {
         draw_help_overlay(frame, state);
@@ -46,12 +45,11 @@ pub fn draw<B: Backend>(frame: &mut Frame<B>, state: &AppState) {
     }
 }
 
-fn draw_help_overlay<B: Backend>(frame: &mut Frame<B>, _state: &AppState) {
+fn draw_help_overlay(frame: &mut Frame, _state: &AppState) {
     use ratatui::widgets::{Block, Borders, Paragraph};
-    use ratatui::style::Style;
     use crate::theme::Theme;
 
-    let size = frame.size();
+    let size = frame.area();
     let width = 60.min(size.width - 4);
     let height = 20.min(size.height - 4);
     let x = (size.width.saturating_sub(width)) / 2;
@@ -100,11 +98,11 @@ fn draw_help_overlay<B: Backend>(frame: &mut Frame<B>, _state: &AppState) {
     frame.render_widget(para, help_rect);
 }
 
-fn draw_command_palette<B: Backend>(frame: &mut Frame<B>, _state: &AppState) {
+fn draw_command_palette(frame: &mut Frame, _state: &AppState) {
     use ratatui::widgets::{Block, Borders, Paragraph};
     use crate::theme::Theme;
 
-    let size = frame.size();
+    let size = frame.area();
     let width = 50.min(size.width - 4);
     let height = 15.min(size.height - 4);
     let x = (size.width.saturating_sub(width)) / 2;

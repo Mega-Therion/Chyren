@@ -1,5 +1,5 @@
 use crate::event::{Event, EventSender, SystemEvent};
-use futures_util::{SinkExt, StreamExt};
+use futures::StreamExt;
 use std::time::Duration;
 use tokio::time::sleep;
 use tokio_tungstenite::connect_async;
@@ -18,7 +18,8 @@ impl TelemetrySocket {
                     backoff = Duration::from_secs(2);
                 }
                 Err(e) => {
-                    let _ = tx.send(Event::ApiError(format!("WS error: {}", e)));
+                    let error_msg = format!("WS error: {}", e);
+                    let _ = tx.send(Event::ApiError(error_msg));
                     sleep(backoff).await;
                     backoff = backoff.mul_f32(1.5).min(max_backoff);
                 }
@@ -26,9 +27,9 @@ impl TelemetrySocket {
         }
     }
 
-    async fn try_connect(url: &str, tx: EventSender) -> Result<(), Box<dyn std::error::Error>> {
-        let (ws_stream, _) = connect_async(url).await?;
-        let (mut write, mut read) = ws_stream.split();
+    async fn try_connect(url: &str, tx: EventSender) -> Result<(), String> {
+        let (ws_stream, _) = connect_async(url).await.map_err(|e| e.to_string())?;
+        let (_, mut read) = ws_stream.split();
 
         while let Some(msg) = read.next().await {
             match msg {
@@ -44,7 +45,7 @@ impl TelemetrySocket {
                     return Ok(());
                 }
                 Err(e) => {
-                    return Err(e.into());
+                    return Err(e.to_string());
                 }
                 _ => {}
             }

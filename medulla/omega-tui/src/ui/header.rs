@@ -1,13 +1,12 @@
 use crate::app::{AppState, Tab};
 use crate::theme::Theme;
-use ratatui::backend::Backend;
+use ratatui::backend::CrosstermBackend;
 use ratatui::layout::Rect;
 use ratatui::widgets::{Block, Borders, Paragraph};
 use ratatui::Frame;
-use chrono::Local;
+use std::io::Stdout;
 
-pub fn draw_header<B: Backend>(frame: &mut Frame<B>, area: Rect, state: &AppState) {
-    let time = Local::now().format("%H:%M").to_string();
+pub fn draw_header(frame: &mut Frame, area: Rect, state: &AppState) {
     let status_dot = if state.status.connected { "●" } else { "○" };
 
     let header_text = format!(
