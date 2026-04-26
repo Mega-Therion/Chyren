@@ -2,18 +2,22 @@ mod app;
 mod api;
 mod event;
 mod input;
+mod proc;
+mod router;
 mod theme;
 mod ui;
 
-use app::{AppMode, AppState, Tab};
+use app::{AppMode, AppState, MessageRole, Tab};
 use api::{ChatClient, TelemetrySocket};
-use crossterm::event::{self as ct_event, DisableMouseCapture, EnableMouseCapture, Event as CrosstermEvent, KeyCode, KeyModifiers};
+use crossterm::event::{self as ct_event, DisableMouseCapture, EnableMouseCapture, Event as CrosstermEvent, KeyCode, KeyEvent, KeyModifiers};
 use crossterm::{execute, terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen}};
+use event::Event;
+use proc::ProcessManager;
 use ratatui::backend::CrosstermBackend;
 use ratatui::Terminal;
+use router::{RouteOutcome, Router};
 use std::error::Error;
 use std::io;
-use std::sync::Arc;
 use tokio::sync::mpsc;
 use tokio::time::{interval, Duration};
 
@@ -23,19 +27,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let api_port: u16 = std::env::var("CHYREN_API_PORT")
         .unwrap_or_else(|_| "8080".to_string())
         .parse()?;
-    let telemetry_host = std::env::var("CHYREN_TELEMETRY_HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
+    let telemetry_host = std::env::var("CHYREN_TELEMETRY_HOST").unwrap_or_else(|_| api_host.clone());
     let telemetry_port: u16 = std::env::var("CHYREN_TELEMETRY_PORT")
         .unwrap_or_else(|_| "9090".to_string())
         .parse()?;
+    let repo_dir = std::env::var("CHYREN_REPO_DIR").unwrap_or_else(|_| "/home/mega/Chyren".to_string());
+    let chyren_bin = std::env::var("CHYREN_BIN").unwrap_or_else(|_| format!("{}/chyren", repo_dir));
 
     setup_terminal()?;
-    let res = run(&api_host, api_port, &telemetry_host, telemetry_port).await;
+    let res = run(&api_host, api_port, &telemetry_host, telemetry_port, &repo_dir, &chyren_bin).await;
     restore_terminal()?;
 
     if let Err(err) = res {
-        println!("Error: {}", err);
+        eprintln!("Error: {}", err);
     }
-
     Ok(())
 }
 
@@ -44,105 +49,161 @@ async fn run(
     api_port: u16,
     telemetry_host: &str,
     telemetry_port: u16,
+    repo_dir: &str,
+    chyren_bin: &str,
 ) -> Result<(), Box<dyn Error>> {
     let backend = CrosstermBackend::new(io::stdout());
     let mut terminal = Terminal::new(backend)?;
 
-    let (tx, mut rx) = mpsc::unbounded_channel();
+    let (tx, mut rx) = mpsc::unbounded_channel::<Event>();
     let mut state = AppState::new();
+    let pm = ProcessManager::new();
 
     spawn_terminal_reader(tx.clone());
     spawn_tick_timer(tx.clone());
 
-    let chat_client = ChatClient::new(api_host, api_port);
     let telemetry_url = format!("ws://{}:{}/ws", telemetry_host, telemetry_port);
     spawn_telemetry_listener(telemetry_url, tx.clone());
+
+    api::spawn_status_poller(api_host.to_string(), api_port, tx.clone());
+    api::spawn_mesh_poller(api_host.to_string(), api_port, tx.clone());
 
     loop {
         terminal.draw(|f| ui::draw(f, &state))?;
 
-        if let Some(app_evt) = rx.recv().await {
-            match app_evt {
-                event::Event::Key(key) => {
-                    let chat_client_clone = ChatClient::new(api_host, api_port);
-                    handle_key(&mut state, key, &chat_client_clone, tx.clone());
+        let Some(evt) = rx.recv().await else { break; };
+
+        match evt {
+            Event::Key(key) => {
+                handle_key(&mut state, key, &pm, tx.clone(), api_host, api_port, repo_dir, chyren_bin);
+                if state.should_quit {
+                    break;
                 }
-                event::Event::Resize(_, _) => {
-                    // Terminal handles this automatically
+            }
+            Event::Resize(_, _) => {}
+            Event::SseChunk(chunk) => state.chat.add_stream_chunk(chunk),
+            Event::SseComplete(resp) => {
+                state.chat.adccl_score = resp.adccl_score;
+                state.chat.finish_streaming();
+            }
+            Event::TelemetryWs(e) => state.telemetry.add_event(e),
+            Event::ApiError(err) => {
+                state.chat.add_message(MessageRole::Chyren, format!("⚠ {}", err));
+            }
+            Event::Connected => state.status.connected = true,
+            Event::Disconnected => state.status.connected = false,
+            Event::Tick => {}
+            Event::ProcStarted { id, label } => {
+                state.proc.upsert_started(&id, &label);
+                if state.proc.order.len() == 1 {
+                    state.proc.selected = 0;
                 }
-                event::Event::SseChunk(chunk) => {
-                    state.chat.add_stream_chunk(chunk);
-                }
-                event::Event::SseComplete(resp) => {
-                    state.chat.adccl_score = resp.adccl_score;
-                    state.chat.finish_streaming();
-                }
-                event::Event::TelemetryWs(evt) => {
-                    state.telemetry.add_event(evt);
-                }
-                event::Event::ApiError(err) => {
-                    state.chat.add_message(app::MessageRole::Chyren, format!("⚠ Error: {}", err));
-                }
-                event::Event::Connected => {
-                    state.status.connected = true;
-                }
-                event::Event::Disconnected => {
-                    state.status.connected = false;
-                }
-                event::Event::Tick => {
-                    // Render happens in main loop
+            }
+            Event::ProcLine { id, line, is_err } => {
+                state.proc.append_line(&id, line, is_err);
+            }
+            Event::ProcExited { id, code } => {
+                state.proc.mark_exited(&id, code);
+                let label = state
+                    .proc
+                    .entries
+                    .get(&id)
+                    .map(|e| e.label.clone())
+                    .unwrap_or_else(|| id.clone());
+                state.chat.add_message(
+                    MessageRole::Chyren,
+                    format!("◈ Process '{}' exited (code: {:?})", label, code),
+                );
+            }
+            Event::StatusRefresh(snap) => state.apply_status(snap),
+            Event::MeshRefresh(agents) => {
+                if !agents.is_empty() {
+                    state.mesh.replace_from_api(agents);
                 }
             }
         }
     }
+
+    pm.kill_all().await;
+    Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 fn handle_key(
     state: &mut AppState,
-    key: crossterm::event::KeyEvent,
-    chat_client: &ChatClient,
-    tx: mpsc::UnboundedSender<event::Event>,
+    key: KeyEvent,
+    pm: &ProcessManager,
+    tx: mpsc::UnboundedSender<Event>,
+    api_host: &str,
+    api_port: u16,
+    repo_dir: &str,
+    chyren_bin: &str,
 ) {
+    if state.show_command_palette {
+        handle_palette_key(state, key, pm, tx, api_host, api_port, repo_dir, chyren_bin);
+        return;
+    }
+    if state.active_tab == Tab::Telemetry && state.telemetry.filter_mode {
+        handle_filter_key(state, key);
+        return;
+    }
+    if state.show_help {
+        match key.code {
+            KeyCode::F(1) | KeyCode::Char('?') | KeyCode::Esc => state.show_help = false,
+            _ => {}
+        }
+        return;
+    }
+
     match state.mode {
-        AppMode::Normal => handle_normal_mode(state, key, tx),
-        AppMode::Insert => handle_insert_mode(state, key, chat_client, tx),
+        AppMode::Normal => handle_normal_mode(state, key),
+        AppMode::Insert => handle_insert_mode(state, key, pm, tx, api_host, api_port, repo_dir, chyren_bin),
     }
 }
 
-fn handle_normal_mode(
-    state: &mut AppState,
-    key: crossterm::event::KeyEvent,
-    _tx: mpsc::UnboundedSender<event::Event>,
-) {
+fn handle_normal_mode(state: &mut AppState, key: KeyEvent) {
     match key.code {
-        KeyCode::Char('q') => std::process::exit(0),
+        KeyCode::Char('q') => state.should_quit = true,
         KeyCode::Char('i') => state.set_mode(AppMode::Insert),
         KeyCode::Char('1') => state.switch_tab(Tab::Chat),
         KeyCode::Char('2') => state.switch_tab(Tab::Mesh),
         KeyCode::Char('3') => state.switch_tab(Tab::Telemetry),
         KeyCode::Char('4') => state.switch_tab(Tab::Dream),
+        KeyCode::Char('5') => state.switch_tab(Tab::System),
         KeyCode::Tab => state.next_tab(),
-        KeyCode::Char('p') if key.modifiers == KeyModifiers::CONTROL => {
-            state.show_command_palette = !state.show_command_palette;
+        KeyCode::Char('p') if key.modifiers.contains(KeyModifiers::CONTROL) => {
+            open_palette(state);
         }
-        KeyCode::F(1) => state.show_help = !state.show_help,
-        KeyCode::Char('?') => state.show_help = !state.show_help,
-        KeyCode::Char('l') if key.modifiers == KeyModifiers::CONTROL => {
+        KeyCode::F(1) | KeyCode::Char('?') => state.show_help = !state.show_help,
+        KeyCode::Char('l') if key.modifiers.contains(KeyModifiers::CONTROL) => {
             state.chat.clear();
         }
+        KeyCode::Char('/') if state.active_tab == Tab::Telemetry => {
+            state.telemetry.filter_mode = true;
+            state.telemetry.filter.clear();
+        }
+        KeyCode::Char('j') if state.active_tab == Tab::System => state.proc.select_next(),
+        KeyCode::Char('k') if state.active_tab == Tab::System => state.proc.select_prev(),
+        KeyCode::Down if state.active_tab == Tab::System => state.proc.select_next(),
+        KeyCode::Up if state.active_tab == Tab::System => state.proc.select_prev(),
         _ => {}
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn handle_insert_mode(
     state: &mut AppState,
-    key: crossterm::event::KeyEvent,
-    chat_client: &ChatClient,
-    tx: mpsc::UnboundedSender<event::Event>,
+    key: KeyEvent,
+    pm: &ProcessManager,
+    tx: mpsc::UnboundedSender<Event>,
+    api_host: &str,
+    api_port: u16,
+    repo_dir: &str,
+    chyren_bin: &str,
 ) {
     match key.code {
         KeyCode::Esc => state.set_mode(AppMode::Normal),
-        KeyCode::Char(c) => {
+        KeyCode::Char(c) if !key.modifiers.contains(KeyModifiers::CONTROL) => {
             state.input.insert_char(c);
         }
         KeyCode::Backspace => state.input.backspace(),
@@ -153,62 +214,173 @@ fn handle_insert_mode(
         KeyCode::End => state.input.move_end(),
         KeyCode::Up => state.input.prev_history(),
         KeyCode::Down => state.input.next_history(),
-        KeyCode::Enter => {
-            if key.modifiers == KeyModifiers::SHIFT {
-                state.input.insert_char('\n');
-            } else {
-                let msg = state.input.submit();
-                if !msg.is_empty() {
-                    state.chat.add_message(app::MessageRole::User, msg.clone());
-                    state.chat.start_streaming();
-
-                    let client_host = "127.0.0.1".to_string();
-                    let client_port = 8080u16;
-                    let tx_clone = tx.clone();
-                    let msg_clone = msg.clone();
-                    tokio::spawn(async move {
-                        let chat_client = ChatClient::new(&client_host, client_port);
-                        let _ = chat_client.stream(&msg_clone, None, tx_clone).await;
-                    });
-                }
-                state.set_mode(AppMode::Normal);
-            }
+        KeyCode::Char('a') if key.modifiers.contains(KeyModifiers::CONTROL) => state.input.move_home(),
+        KeyCode::Char('e') if key.modifiers.contains(KeyModifiers::CONTROL) => state.input.move_end(),
+        KeyCode::Char('p') if key.modifiers.contains(KeyModifiers::CONTROL) => {
+            state.set_mode(AppMode::Normal);
+            open_palette(state);
         }
-        KeyCode::Char('a') if key.modifiers == KeyModifiers::CONTROL => state.input.move_home(),
-        KeyCode::Char('e') if key.modifiers == KeyModifiers::CONTROL => state.input.move_end(),
+        KeyCode::Enter => {
+            let raw = state.input.submit();
+            if !raw.is_empty() {
+                let outcome = {
+                    let mut router = Router {
+                        state,
+                        tx: tx.clone(),
+                        pm: pm.clone(),
+                        repo_dir: repo_dir.to_string(),
+                        chyren_bin: chyren_bin.to_string(),
+                    };
+                    router.dispatch(&raw)
+                };
+                match outcome {
+                    RouteOutcome::Quit => state.should_quit = true,
+                    RouteOutcome::SendToChat(msg) => {
+                        send_chat(state, msg, tx.clone(), api_host, api_port);
+                    }
+                    RouteOutcome::Handled => {}
+                }
+            }
+            state.set_mode(AppMode::Normal);
+        }
         _ => {}
     }
 }
 
-fn spawn_terminal_reader(tx: mpsc::UnboundedSender<event::Event>) {
+fn handle_filter_key(state: &mut AppState, key: KeyEvent) {
+    match key.code {
+        KeyCode::Esc => {
+            state.telemetry.filter_mode = false;
+            state.telemetry.filter.clear();
+        }
+        KeyCode::Enter => {
+            state.telemetry.filter_mode = false;
+        }
+        KeyCode::Backspace => {
+            state.telemetry.filter.pop();
+        }
+        KeyCode::Char(c) => {
+            state.telemetry.filter.push(c);
+        }
+        _ => {}
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn handle_palette_key(
+    state: &mut AppState,
+    key: KeyEvent,
+    pm: &ProcessManager,
+    tx: mpsc::UnboundedSender<Event>,
+    api_host: &str,
+    api_port: u16,
+    repo_dir: &str,
+    chyren_bin: &str,
+) {
+    match key.code {
+        KeyCode::Esc => {
+            state.show_command_palette = false;
+            state.palette = Default::default();
+        }
+        KeyCode::Backspace => {
+            state.palette.query.pop();
+            state.palette.selected = 0;
+        }
+        KeyCode::Up => {
+            if state.palette.selected > 0 {
+                state.palette.selected -= 1;
+            }
+        }
+        KeyCode::Down => {
+            state.palette.selected += 1;
+        }
+        KeyCode::Enter => {
+            let matches = ui::filter_commands(&state.palette.query);
+            let total = matches.len();
+            if total > 0 {
+                let idx = state.palette.selected.min(total - 1);
+                let cmd_name = matches[idx].0.name.to_string();
+                state.show_command_palette = false;
+                state.palette = Default::default();
+                let outcome = {
+                    let mut router = Router {
+                        state,
+                        tx: tx.clone(),
+                        pm: pm.clone(),
+                        repo_dir: repo_dir.to_string(),
+                        chyren_bin: chyren_bin.to_string(),
+                    };
+                    router.dispatch(&cmd_name)
+                };
+                match outcome {
+                    RouteOutcome::Quit => state.should_quit = true,
+                    RouteOutcome::SendToChat(msg) => send_chat(state, msg, tx.clone(), api_host, api_port),
+                    RouteOutcome::Handled => {}
+                }
+            }
+        }
+        KeyCode::Char(c) => {
+            state.palette.query.push(c);
+            state.palette.selected = 0;
+        }
+        _ => {}
+    }
+}
+
+fn open_palette(state: &mut AppState) {
+    state.show_command_palette = true;
+    state.palette = Default::default();
+}
+
+fn send_chat(
+    state: &mut AppState,
+    msg: String,
+    tx: mpsc::UnboundedSender<Event>,
+    api_host: &str,
+    api_port: u16,
+) {
+    state.chat.add_message(MessageRole::User, msg.clone());
+    state.chat.start_streaming();
+
+    let host = api_host.to_string();
+    let port = api_port;
+    tokio::spawn(async move {
+        let client = ChatClient::new(&host, port);
+        let _ = client.stream(&msg, None, tx).await;
+    });
+}
+
+fn spawn_terminal_reader(tx: mpsc::UnboundedSender<Event>) {
     tokio::spawn(async move {
         use futures::StreamExt;
         let mut reader = ct_event::EventStream::new();
-
         while let Some(evt) = reader.next().await {
-            if let Ok(CrosstermEvent::Key(key)) = evt {
-                let _ = tx.send(event::Event::Key(key));
-            } else if let Ok(CrosstermEvent::Resize(w, h)) = evt {
-                let _ = tx.send(event::Event::Resize(w, h));
+            match evt {
+                Ok(CrosstermEvent::Key(key)) => {
+                    let _ = tx.send(Event::Key(key));
+                }
+                Ok(CrosstermEvent::Resize(w, h)) => {
+                    let _ = tx.send(Event::Resize(w, h));
+                }
+                _ => {}
             }
         }
     });
 }
 
-fn spawn_tick_timer(tx: mpsc::UnboundedSender<event::Event>) {
+fn spawn_tick_timer(tx: mpsc::UnboundedSender<Event>) {
     tokio::spawn(async move {
-        let mut interval = interval(Duration::from_millis(16)); // ~60 fps
-
+        let mut iv = interval(Duration::from_millis(250));
         loop {
-            interval.tick().await;
-            let _ = tx.send(event::Event::Tick);
+            iv.tick().await;
+            let _ = tx.send(Event::Tick);
         }
     });
 }
 
-fn spawn_telemetry_listener(url: String, tx: mpsc::UnboundedSender<event::Event>) {
+fn spawn_telemetry_listener(url: String, tx: mpsc::UnboundedSender<Event>) {
     tokio::spawn(async move {
-        let _ = TelemetrySocket::connect_and_listen(&url, tx).await;
+        TelemetrySocket::connect_and_listen(&url, tx).await;
     });
 }
 

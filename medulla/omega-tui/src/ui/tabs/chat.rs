@@ -1,11 +1,9 @@
 use crate::app::{AppState, MessageRole};
 use crate::theme::Theme;
-use ratatui::backend::CrosstermBackend;
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
 use ratatui::Frame;
 use ratatui::text::{Line, Span};
-use std::io::Stdout;
 
 pub fn draw(frame: &mut Frame, area: Rect, state: &AppState) {
     let chunks = Layout::default()
