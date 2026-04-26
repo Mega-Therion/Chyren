@@ -13,4 +13,4 @@ omega-myelin = { path = "../omega-myelin" }
 omega-aegis = { path = "../omega-aegis" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-thiserror = "1"
+thiserror = "2"
