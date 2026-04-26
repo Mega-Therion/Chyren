@@ -1,6 +1,6 @@
 use omega_tui::app::{AppMode, AppState, MessageRole, Tab};
 use omega_tui::api;
-use omega_tui::event::{Event, SystemEvent};
+use omega_tui::event::Event;
 use omega_tui::proc::ProcessManager;
 use omega_tui::router::{RouteOutcome, Router};
 use omega_tui::ui;
@@ -337,7 +337,7 @@ fn send_chat(
     let host = api_host.to_string();
     let port = api_port;
     tokio::spawn(async move {
-        let client = ChatClient::new(&host, port);
+        let client = api::ChatClient::new(&host, port);
         let _ = client.stream(&msg, None, tx).await;
     });
 }
@@ -372,7 +372,7 @@ fn spawn_tick_timer(tx: mpsc::UnboundedSender<Event>) {
 
 fn spawn_telemetry_listener(url: String, tx: mpsc::UnboundedSender<Event>) {
     tokio::spawn(async move {
-        TelemetrySocket::connect_and_listen(&url, tx).await;
+        api::TelemetrySocket::connect_and_listen(&url, tx).await;
     });
 }
 
