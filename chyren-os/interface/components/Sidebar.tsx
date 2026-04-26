@@ -29,10 +29,10 @@ export function Sidebar({ isOpen, onToggle, brainState, sessionId, onNewChat }: 
   const [activeNav, setActiveNav] = useState('chat')
 
   const stateColors: Record<string, string> = {
-    idle: '#f59e0b',
-    listening: '#bc13fe',
-    thinking: '#ff2d75',
-    speaking: '#00f2ff',
+    idle: 'rgba(255, 255, 255, 0.4)',
+    listening: 'var(--neon-violet)',
+    thinking: 'var(--neon-pink)',
+    speaking: 'var(--neon-cyan)',
   }
 
   const stateLabels: Record<string, string> = {

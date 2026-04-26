@@ -50,7 +50,7 @@ function CameraController({ state }: { state: BrainState }) {
 function SovereignRing({ state }: { state: BrainState }) {
   const meshRef = useRef<THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>>(null);
   const COLOR_MAP: Record<BrainState, string> = {
-    idle: '#f59e0b', listening: '#bc13fe', thinking: '#ff2d75', speaking: '#00f2ff',
+    idle: '#333333', listening: '#bc13fe', thinking: '#ff0080', speaking: '#00f2ff',
   };
 
   useFrame(({ clock }) => {
@@ -65,8 +65,8 @@ function SovereignRing({ state }: { state: BrainState }) {
 
   return (
     <mesh ref={meshRef}>
-      <torusGeometry args={[2.1, 0.005, 4, 128]} />
-      <meshBasicMaterial color="#f59e0b" transparent opacity={0.35} />
+      <torusGeometry args={[2.1, 0.002, 4, 128]} />
+      <meshBasicMaterial color="#ffffff" transparent opacity={0.1} />
     </mesh>
   );
 }
@@ -74,7 +74,7 @@ function SovereignRing({ state }: { state: BrainState }) {
 function SovereignRing2({ state }: { state: BrainState }) {
   const meshRef = useRef<THREE.Mesh<THREE.TorusGeometry, THREE.MeshBasicMaterial>>(null);
   const COLOR_MAP: Record<BrainState, string> = {
-    idle: '#b45309', listening: '#6d28d9', thinking: '#9f1239', speaking: '#0891b2',
+    idle: '#222222', listening: '#6d28d9', thinking: '#ff0080', speaking: '#0891b2',
   };
 
   useFrame(({ clock }) => {
@@ -89,8 +89,8 @@ function SovereignRing2({ state }: { state: BrainState }) {
 
   return (
     <mesh ref={meshRef}>
-      <torusGeometry args={[2.4, 0.003, 4, 96]} />
-      <meshBasicMaterial color="#b45309" transparent opacity={0.22} />
+      <torusGeometry args={[2.4, 0.001, 4, 96]} />
+      <meshBasicMaterial color="#ffffff" transparent opacity={0.05} />
     </mesh>
   );
 }
@@ -101,16 +101,16 @@ function PostFX({ state, audioLevel }: { state: BrainState; audioLevel: number }
   const caRef = useRef<{ offset: THREE.Vector2 }>(null);
 
   const BLOOM_MAP: Record<BrainState, number> = {
-    idle: 0.6, listening: 1.4, thinking: 1.6, speaking: 2.0,
+    idle: 0.2, listening: 0.8, thinking: 1.0, speaking: 1.2,
   };
 
   useFrame(() => {
-    const target = BLOOM_MAP[state] + audioLevel * 2.0;
+    const target = BLOOM_MAP[state] + audioLevel * 1.0;
     if (bloomRef.current) {
       bloomRef.current.intensity += (target - bloomRef.current.intensity) * 0.05;
     }
     if (caRef.current) {
-      const strength = 0.0004 + audioLevel * 0.003;
+      const strength = 0.0002 + audioLevel * 0.001;
       caRef.current.offset.set(strength, strength);
     }
   });
@@ -119,19 +119,12 @@ function PostFX({ state, audioLevel }: { state: BrainState; audioLevel: number }
     <EffectComposer>
       <Bloom
         ref={bloomRef}
-        intensity={0.6}
-        luminanceThreshold={0.05}
+        intensity={0.2}
+        luminanceThreshold={0.4}
         luminanceSmoothing={0.9}
         mipmapBlur
       />
-      <ChromaticAberration
-        ref={caRef}
-        offset={new THREE.Vector2(0.0004, 0.0004)}
-        blendFunction={BlendFunction.NORMAL}
-        radialModulation={false}
-        modulationOffset={0}
-      />
-      <Vignette eskil={false} offset={0.15} darkness={0.85} />
+      <Vignette eskil={false} offset={0.3} darkness={0.95} />
     </EffectComposer>
   );
 }
@@ -147,9 +140,9 @@ export function ChyrenCosmos({ state, audioLevel }: ChyrenCosmosProps) {
       camera={{ position: [0, 0, 18], fov: 60 }}
       dpr={[1, 2]}
       gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
-      style={{ background: '#050508' }}
+      style={{ background: '#000000' }}
     >
-      <ambientLight intensity={0.05} />
+      <ambientLight intensity={0.02} />
       <CameraController state={state} />
       <ParticleCosmos state={state} audioLevel={audioLevel} />
       <SovereignSphere state={state} audioLevel={audioLevel} />
