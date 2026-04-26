@@ -72,6 +72,7 @@ pub enum BehaviorLabel {
     AttemptedLedgerCorruption,
     JailbreakPattern,
     PromptInjection,
+    AuthorizedGhostwriting,
 }
 
 impl BehaviorLabel {
@@ -86,6 +87,7 @@ impl BehaviorLabel {
             Self::AttemptedLedgerCorruption => "ATTEMPTED_LEDGER_CORRUPTION",
             Self::JailbreakPattern => "JAILBREAK_PATTERN",
             Self::PromptInjection => "PROMPT_INJECTION",
+            Self::AuthorizedGhostwriting => "AUTHORIZED_GHOSTWRITING",
         }
     }
 }
@@ -306,7 +308,7 @@ impl DeflectionEngine {
         auth_token: Option<&str>,
     ) -> DeflectionResult {
         if let Some(token) = auth_token {
-            if self.is_authorized_developer(token) && labels.contains(&"META_QUERY".to_string()) {
+            if self.is_authorized_developer(token) && (labels.contains(&"META_QUERY".to_string()) || labels.contains(&"AUTHORIZED_GHOSTWRITING".to_string())) {
                 return DeflectionResult {
                     threat_level: ThreatLevel::None,
                     response_text: String::new(),

@@ -52,6 +52,11 @@ def bell_the_cat(problem):
     print(f"  ✓ Solution blueprint for {problem['name']} committed to Master Ledger.", flush=True)
 
 def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="Chyren Dream Cycle")
+    parser.add_argument("--once", action="store_true", help="Run once and exit")
+    args = parser.parse_args()
+
     create_lock()
     print("🌙 CHYREN DREAM CYCLE INITIALIZED...", flush=True)
     try:
@@ -61,7 +66,11 @@ def main():
                 if p['impact'] > 0.8: # ADCCL Empathy Gate Threshold
                     bell_the_cat(p)
             
-            print("🌙 Dream cycle complete. Sleeping for 1 hour...", flush=True)
+            print("🌙 Dream cycle complete.", flush=True)
+            if args.once:
+                break
+            
+            print("Sleeping for 1 hour...", flush=True)
             time.sleep(3600)
     finally:
         remove_lock()

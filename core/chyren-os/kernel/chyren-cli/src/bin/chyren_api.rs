@@ -18,7 +18,8 @@ async fn main() -> std::io::Result<()> {
 
     // Initialize Dispatcher
     let registry = Arc::new(Mutex::new(chyren_core::mesh::AgentRegistry::new()));
-    let dispatcher = Arc::new(chyren_conductor::dispatcher::Dispatcher::new(registry).await);
+    let bus = chyren_rsil::bus::EventBus::new(100);
+    let dispatcher = Arc::new(chyren_conductor::dispatcher::Dispatcher::new(bus, registry));
     conductor.set_dispatcher(dispatcher);
     eprintln!("[API] Dispatcher initialized.");
 

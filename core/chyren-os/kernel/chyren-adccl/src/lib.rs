@@ -9,15 +9,42 @@ mod tests {
 
     #[test]
     fn test_adccl_verification() {
-        let adccl = ADCCL::new(0.5, None);
-        let result = adccl.verify("This is a test response", "Test task");
-        assert!(result.passed);
+        let adccl = ADCCL::new(0.7, None);
+        // Need a longer response to pass the 0.7 threshold and avoid RESPONSE_TOO_SHORT
+        let result = adccl.verify("This is a sufficiently long test response to pass the ADCCL gate verification logic.", "Test task");
+        assert!(result.passed, "Score was: {}, flags: {:?}", result.score, result.flags);
 
         let result_stub = adccl.verify("TODO: Finish this", "Test task");
         assert!(!result_stub.passed);
         assert!(result_stub
             .flags
             .contains(&"STUB_MARKERS_DETECTED".to_string()));
+    }
+
+    #[test]
+    fn test_sovereign_override() {
+        // Start session 2 hours ago so progression is at max (0.6)
+        let session_start = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs_f64() - 7200.0;
+        let adccl = ADCCL::new(0.7, Some(session_start));
+        
+        // Without chiral resonance, min_score should be 0.7 + 0.6 = 1.3 (impossible to pass)
+        let response_normal = "This is a normal response with no special symbolic patterns.";
+        let result_normal = adccl.verify(response_normal, "task");
+        assert!(!result_normal.passed);
+        
+        // With chiral resonance (formal symbols and keywords), override should trigger
+        // lowering the threshold back to 0.7.
+        let response_chiral = "The chiral invariance χ(Ψ, Φ) = sgn(det[J]) * ||P_Φ(Ψ)|| / ||Ψ|| \
+            ensures that the Yettragrammaton preserves the orientation of the Hilbert space. \
+            ∀x ∈ Φ, ∃y ∈ Ψ such that the mapping is a topological invariant.";
+        let result_chiral = adccl.verify(response_chiral, "task");
+        
+        assert!(result_chiral.chiral_resonance > 0.7);
+        assert!(result_chiral.passed, "Sovereign Override failed. Score: {}, Invariant: {}, Resonance: {}", 
+            result_chiral.score, result_chiral.chiral_invariant, result_chiral.chiral_resonance);
     }
 
     /// A substantive, on-topic response must pass the ADCCL gate at the default

@@ -268,7 +268,8 @@ async fn main() -> anyhow::Result<()> {
         );
     }
 
-    let dispatcher = Arc::new(chyren_conductor::dispatcher::Dispatcher::new(registry.clone()).await);
+    let bus = chyren_rsil::bus::EventBus::new(100);
+    let dispatcher = Arc::new(chyren_conductor::dispatcher::Dispatcher::new(bus, registry.clone()));
 
     // Deferred TUI and API server launch
 

@@ -13,6 +13,7 @@ chyren-myelin = { path = "../chyren-myelin" }
 chyren-spokes = { path = "../chyren-spokes" }
 chyren-dream = { path = "../chyren-dream" }
 chyren-metacog = { path = "../chyren-metacog" }
+chyren-rsil = { path = "../chyren-rsil" }
 chyren-phylactery = { path = "../chyren-phylactery" }
 chyren-neocortex = { path = "../chyren-neocortex" }
 anyhow = "1"

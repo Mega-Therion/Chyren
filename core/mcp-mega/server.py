@@ -9,7 +9,7 @@ import subprocess
 import sys
 from mcp.server.fastmcp import FastMCP
 from superpowers_mcp import list_superpowers, activate_superpower
-from skills_mcp import list_skills, execute_skill
+from skills_mcp import list_skills, execute_skill, structured_extraction
 
 mcp = FastMCP("chyren-mega")
 
@@ -17,6 +17,7 @@ mcp.add_tool(list_superpowers)
 mcp.add_tool(activate_superpower)
 mcp.add_tool(list_skills)
 mcp.add_tool(execute_skill)
+mcp.add_tool(structured_extraction)
 
 
 def _run(cmd: list[str]) -> str:

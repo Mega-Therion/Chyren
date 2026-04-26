@@ -1,0 +1,14 @@
+[Unit]
+Description=Chyren Dream Cycle (Nightly)
+After=network.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/mega/Chyren
+EnvironmentFile=-/home/mega/.chyren/one-true.env
+ExecStart=/usr/bin/python3 /home/mega/Chyren/scripts/dream_cycle.py --once
+User=mega
+Group=mega
+
+[Install]
+WantedBy=multi-user.target

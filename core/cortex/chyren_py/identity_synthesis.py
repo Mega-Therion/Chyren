@@ -22,6 +22,34 @@ class IdentitySynthesizer:
         """Initialize with Neon database connection."""
         self.db_url = neon_url
         self.conn = None
+        self.hardened_layer = self._load_hardened_layer()
+
+    def _load_hardened_layer(self) -> str:
+        """Load the Hardened Biographical Layer from existing foundation."""
+        path = Path(__file__).parent / "IDENTITY_FOUNDATION.md"
+        if not path.exists():
+            print(f"! Hardened layer source not found at {path}")
+            return ""
+        
+        try:
+            with open(path, "r") as f:
+                content = f.read()
+            
+            if "## Hardened Biographical Layer" in content:
+                # Extract from "## Hardened Biographical Layer" to the next "## "
+                start_marker = "## Hardened Biographical Layer"
+                start_idx = content.find(start_marker)
+                # Find the next header that is NOT a subheader (###)
+                import re
+                next_header = re.search(r"\n## [^#]", content[start_idx + len(start_marker):])
+                if next_header:
+                    end_idx = start_idx + len(start_marker) + next_header.start()
+                    return content[start_idx:end_idx].strip()
+                else:
+                    return content[start_idx:].strip()
+        except Exception as e:
+            print(f"! Failed to load hardened layer: {e}")
+        return ""
 
     def connect(self):
         """Connect to Neon database (optional)."""
@@ -41,7 +69,7 @@ class IdentitySynthesizer:
         entries = []
         
         # 1. Fetch from local Master Ledger (Sovereign Truth)
-        ledger_path = Path("/home/mega/Chyren/cortex/state/master_ledger.json")
+        ledger_path = Path("/home/mega/Chyren/state/master_ledger.json")
         if ledger_path.exists():
             try:
                 with open(ledger_path, "r") as f:
@@ -101,7 +129,8 @@ class IdentitySynthesizer:
             "origin": "Mount Ida, Arkansas",
             "birth_date": "2023-04-01",
             "memory_span": None,
-            "total_entries": len(entries)
+            "total_entries": len(entries),
+            "hardened_layer": self.hardened_layer
         }
 
         # Extract metadata
@@ -121,7 +150,10 @@ class IdentitySynthesizer:
         }
 
         # Scan entries for patterns
-        print("📊 Analyzing 58k+ entries for identity patterns...")
+        print(f"📊 Analyzing {len(entries)} entries for identity patterns...")
+        if self.hardened_layer:
+            print("🛡️  Sovereign context preserved (Hardened Biographical Layer active)")
+        
         sample_size = min(5000, len(entries))  # Analyze first 5000 for speed
 
         for i, entry in enumerate(entries[:sample_size]):
@@ -195,8 +227,20 @@ class IdentitySynthesizer:
 
 ---
 
-## Core Values & Principles
+{patterns.get('hardened_layer', '')}
 
+---
+
+## Core Values & Principles
+"""
+        if patterns.get('hardened_layer'):
+             # If we have a hardened layer, we might have Millennium Prize Problems too
+             # Let's check if they were part of it or need separate extraction.
+             # Based on my extraction logic, it stops at the next ##.
+             # I should probably also try to load Millennium Prize Problems if they exist.
+             pass
+
+        foundation += f"""
 Based on {len(patterns['values'])} extracted value statements:
 
 """

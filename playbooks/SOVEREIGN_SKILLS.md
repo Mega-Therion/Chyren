@@ -46,3 +46,12 @@ This playbook defines the "Skills" and "Superpowers" available to the Chyren Sov
 2. Extract semantic descriptions and grounding labels.
 3. Bind these labels to the current "Thought" context in the `ChiralState`.
 4. Ensure the resulting response reflects both the "Seen" and "Known" worlds.
+
+## 6. Skill: Structured Extraction (Ingestion)
+**ID**: `SKILL-DATA-001`
+**Description**: Parses unstructured text into a typed JSON schema.
+**Recipe**:
+1. Identify the target schema for the extraction.
+2. Invoke the `structured_extraction` tool with the text and schema.
+3. Validate the resulting JSON against the schema.
+4. Normalize the data (dates to ISO 8601, numeric currency) before final commitment.

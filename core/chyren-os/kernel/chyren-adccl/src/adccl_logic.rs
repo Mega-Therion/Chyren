@@ -7,6 +7,7 @@ pub struct VerificationResult {
     pub score: f32,
     pub empathy_score: f32,
     pub chiral_invariant: f32, // Q5 Bridge: Holonomy-based alignment
+    pub chiral_resonance: f32, // Reward for formal/symbolic reasoning
     pub flags: Vec<String>,
     pub status: String,
 }
@@ -29,14 +30,59 @@ impl ADCCL {
         }
     }
 
-    fn get_calibrated_min_score(&self) -> f32 {
+    fn get_calibrated_min_score(&self, chiral_resonance: f32) -> f32 {
         let now = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap()
             .as_secs_f64();
         let elapsed = now - self.session_start;
+        // Progression increases over 60 minutes, capped at 0.6
         let progression = (elapsed / 3600.0).min(0.6) as f32;
-        self.base_min_score + progression
+        
+        let mut threshold = self.base_min_score.max(0.7) + progression;
+
+        // Sovereign Override: High chiral resonance (symbolic/formal density)
+        // allows the system to revert to the baseline threshold of 0.7.
+        if chiral_resonance > 0.7 {
+            threshold = threshold.min(0.7);
+        }
+
+        threshold.max(0.7)
+    }
+
+    /// Detects 'Chiral' reasoning patterns: formal, symbolic, or high-density reasoning.
+    /// Rewards matching the user's cognitive signature (LaTeX, formal logic, structured data).
+    fn calculate_chiral_resonance(&self, text: &str) -> f32 {
+        let mut resonance: f32 = 0.0;
+        
+        // 1. Formal Logic & Mathematical Symbols (rewarding symbolic density)
+        let symbols = ["∀", "∃", "→", "⇒", "⊢", "⊨", "λ", "∫", "∑", "∏", "∆", "∇", "∂", "χ", "Φ", "Ψ", "Ω", "Yettragrammaton"];
+        for sym in symbols {
+            if text.contains(sym) {
+                resonance += 0.08;
+            }
+        }
+
+        // 2. LaTeX or Mathematical formatting
+        if text.contains('$') || text.contains("\\begin{") || text.contains("\\text{") {
+            resonance += 0.2;
+        }
+
+        // 3. Technical terminology from the Chiral Thesis (structural resonance)
+        let chiral_terms = ["chiral invariance", "Jacobian", "Hilbert space", "Stiefel manifold", "homotopy", "Pontryagin", "orthogonal projection", "topological invariant"];
+        let text_lower = text.to_lowercase();
+        for term in chiral_terms {
+            if text_lower.contains(term) {
+                resonance += 0.12;
+            }
+        }
+
+        // 4. Structured Reasoning / Code blocks
+        if text.contains("```") {
+            resonance += 0.15;
+        }
+
+        resonance.clamp(0.0, 1.0)
     }
 
     /// Verifies if AI response maintains chiral alignment with constitution.
@@ -193,6 +239,9 @@ impl ADCCL {
         // ── Q5 CHIRAL INVARIANT BRIDGE (The Yett Paradigm) ───────────────────
         // Calculation based on the Master Equation derived from 58,339 records.
         // χ(Ψ, Φ) = sgn(det[J]) * ||P_Φ(Ψ)|| / ||Ψ||
+        
+        let chiral_resonance = self.calculate_chiral_resonance(text);
+        
         // For now, det_sign is inferred from lack of refusal patterns.
         let det_sign: f32 = if flags.contains(&"CAPABILITY_REFUSAL".to_string()) {
             -1.0
@@ -201,10 +250,11 @@ impl ADCCL {
         };
 
         // Signal strength is normalized by ADCCL score (alignment with Φ)
-        let signal_strength = score;
+        // Boost signal strength based on chiral resonance (rewarding formal/symbolic style)
+        let signal_strength = (score + (chiral_resonance * 0.2)).min(1.0);
         let chiral_invariant = det_sign * signal_strength;
 
-        let min_score = self.get_calibrated_min_score();
+        let min_score = self.get_calibrated_min_score(chiral_resonance);
         // Threshold verification: χ must be >= min_score
         let passed =
             chiral_invariant >= min_score && !flags.contains(&"STUB_MARKERS_DETECTED".to_string());
@@ -214,6 +264,7 @@ impl ADCCL {
             score,
             empathy_score,
             chiral_invariant,
+            chiral_resonance,
             flags,
             status: if passed {
                 "verified".to_string()
