@@ -54,3 +54,4 @@ license = "PROPRIETARY"
 [profile.release]
 opt-level = 3
 lto = true
+chyren-tee-driver = { path = "../chyren-tee-driver" }
