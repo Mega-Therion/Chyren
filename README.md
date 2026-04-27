@@ -105,8 +105,7 @@ Chyren is developed via rigorous academic and research-driven methodologies. Ple
 
 ## 🔗 Social Resonance
 - **X**: [@_chyren_](https://x.com/_chyren_)
-- **Discord**: [@i.am.chyren](https://discord.com/users/i.am.chyren)
-
+- **Discord**: [@omegachyren](https://discord.com/users/omegachyren)
 ---
 
 © 2026 Mega-Therion. All Rights Reserved. Sovereign Intelligence is the Future of Autonomy.
