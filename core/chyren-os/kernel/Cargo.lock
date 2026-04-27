@@ -835,6 +835,7 @@ dependencies = [
  "chyren-phylactery",
  "chyren-rsil",
  "chyren-spokes",
+ "chyren-tee-driver",
  "chyren-telemetry",
  "futures",
  "hex",
@@ -929,8 +930,10 @@ dependencies = [
  "chyren-core",
  "chyren-myelin",
  "chyren-telemetry",
+ "hex",
  "serde",
  "serde_json",
+ "sha2",
  "uuid",
 ]
 
@@ -1011,6 +1014,18 @@ name = "chyren-symbolic"
 version = "0.1.0"
 dependencies = [
  "chyren-core",
+]
+
+[[package]]
+name = "chyren-tee-driver"
+version = "0.1.0"
+dependencies = [
+ "hex",
+ "hmac",
+ "serde",
+ "serde_json",
+ "sha2",
+ "thiserror 1.0.69",
 ]
 
 [[package]]

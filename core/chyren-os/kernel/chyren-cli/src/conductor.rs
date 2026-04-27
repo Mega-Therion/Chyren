@@ -1272,6 +1272,7 @@ impl Conductor {
             score: avg_score,
             empathy_score: 1.0,
             chiral_invariant: avg_score,
+            chiral_resonance: avg_score,
             flags: all_flags.into_iter().collect(),
             status: if consensus_passed {
                 "verified (consensus)".to_string()

@@ -24,6 +24,7 @@ members = [
     "chyren-neocortex", "chyren-vision",
     "chyren-mega",
     "chyren-tui",
+    "chyren-tee-driver",
 ]
 
 [workspace.dependencies]
@@ -54,4 +55,3 @@ license = "PROPRIETARY"
 [profile.release]
 opt-level = 3
 lto = true
-chyren-tee-driver = { path = "../chyren-tee-driver" }

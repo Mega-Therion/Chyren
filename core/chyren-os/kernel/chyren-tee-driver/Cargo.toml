@@ -1,0 +1,23 @@
+[package]
+name = "chyren-tee-driver"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+sha2 = { workspace = true }
+hex = { workspace = true }
+hmac = { workspace = true }
+thiserror = { workspace = true }
+
+[features]
+default = ["software_fallback"]
+# Real Intel SGX / AMD SEV-SNP backends are wired behind these features.
+# When neither is enabled, `software_fallback` provides a deterministic
+# in-process emulator suitable for CI and unit tests.
+sgx = []
+sev_snp = []
+software_fallback = []

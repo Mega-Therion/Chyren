@@ -16,6 +16,7 @@ chyren-metacog = { path = "../chyren-metacog" }
 chyren-rsil = { path = "../chyren-rsil" }
 chyren-phylactery = { path = "../chyren-phylactery" }
 chyren-neocortex = { path = "../chyren-neocortex" }
+chyren-tee-driver = { path = "../chyren-tee-driver" }
 anyhow = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
