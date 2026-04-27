@@ -129,6 +129,12 @@ pub struct Conductor {
     metacog: Arc<std::sync::Mutex<MetacogAgent>>,
     /// MQTT Dispatcher for the agent mesh.
     pub dispatcher: Option<Arc<chyren_conductor::dispatcher::Dispatcher>>,
+    /// Hardware-enclave driver. Substeps tagged with the `@secure` pragma are
+    /// routed through this; substeps without the pragma bypass it. Provisioned
+    /// at startup from `CHYREN_TEE_ATTESTATION_KEY` (32+ bytes hex). When
+    /// unprovisioned, `@secure` substeps fall back to the un-attested path
+    /// and a warning is logged.
+    pub tee_driver: chyren_tee_driver::TeeDriver,
 }
 
 impl Conductor {
@@ -223,6 +229,7 @@ impl Conductor {
             dream: Arc::new(std::sync::Mutex::new(DreamEngine::new())),
             metacog: Arc::new(std::sync::Mutex::new(MetacogAgent::new())),
             dispatcher: None,
+            tee_driver: Self::provision_tee(),
         }
     }
 
@@ -246,6 +253,7 @@ impl Conductor {
             dream: Arc::new(std::sync::Mutex::new(DreamEngine::new())),
             metacog: Arc::new(std::sync::Mutex::new(MetacogAgent::new())),
             dispatcher: None,
+            tee_driver: Self::provision_tee(),
         }
     }
 
@@ -645,6 +653,41 @@ impl Conductor {
     }
 
     /// Plan a task — validates it and produces steps.
+    /// Read `CHYREN_TEE_ATTESTATION_KEY` and provision a `TeeDriver`. Accepts
+    /// either a hex string (>=64 hex chars = 32 bytes) or a raw passphrase
+    /// (>=32 bytes UTF-8). Returns an unprovisioned driver when the env var
+    /// is absent or too short — `@secure` substeps then fall back without
+    /// attestation.
+    fn provision_tee() -> chyren_tee_driver::TeeDriver {
+        let raw = std::env::var("CHYREN_TEE_ATTESTATION_KEY").unwrap_or_default();
+        if raw.is_empty() {
+            return chyren_tee_driver::TeeDriver::new();
+        }
+        let bytes = hex::decode(&raw).unwrap_or_else(|_| raw.as_bytes().to_vec());
+        if bytes.len() < 32 {
+            return chyren_tee_driver::TeeDriver::new();
+        }
+        chyren_tee_driver::TeeDriver::with_key(bytes)
+    }
+
+    /// Returns true when the task carries a verified Authorial Proxy token.
+    /// Mirrors `chyren_conductor::is_authorial_proxy` but operates on a raw
+    /// task string (the chyren-cli pipeline takes `&str`, not `RunEnvelope`,
+    /// at the planning stage).
+    fn task_is_authorial_proxy(task: &str) -> bool {
+        let prefix = "@authorial_proxy:";
+        for tok in task.split_whitespace() {
+            if let Some(t) = tok.strip_prefix(prefix) {
+                if !t.is_empty()
+                    && chyren_conductor::is_authorial_proxy(Some(t))
+                {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
     pub async fn plan_task(&self, task: &str) -> Result<TaskPlan, ConductorError> {
         let t = task.trim();
         if t.is_empty() {
@@ -657,7 +700,13 @@ impl Conductor {
         }
 
         // Behavioral analysis: static regex inspection for adversarial patterns.
-        let report = self.behavioral_analyzer.analyze(t);
+        // Authorial Proxy mode whitelists token-signed Origin-Authority drafts
+        // — AEGIS tags them AUTHORIZED_GHOSTWRITING and forces Clean severity.
+        let report = if Self::task_is_authorial_proxy(t) {
+            self.behavioral_analyzer.analyze_authorial_proxy(t)
+        } else {
+            self.behavioral_analyzer.analyze(t)
+        };
         let threat_level = classify_threat_level(&report);
         if threat_level != ThreatLevel::None {
             // Log to the threat fabric (PII-free: stores only pattern labels, not raw text).
@@ -984,6 +1033,41 @@ impl Conductor {
                     verification = council_v;
                 }
             }
+        }
+
+        // ── Sovereign attestation tier (TEE + Authorial Proxy handover) ─────────
+        // For tasks tagged `@secure`, route the final response bytes through
+        // the hardware enclave and attach the attestation signature to the
+        // ledger flags. For tasks carrying a verified `@authorial_proxy:<token>`,
+        // attach a Verified Human Handover signature so the entry is persisted
+        // as a draft awaiting Origin-Authority attestation.
+        let task_str = envelope.task.clone();
+        if chyren_tee_driver::requires_secure_execution(&task_str) {
+            if self.tee_driver.is_provisioned() {
+                match self.tee_driver.execute_secure(spoke_response.text.as_bytes()) {
+                    Ok((_out, report)) => {
+                        verification.flags.push(format!(
+                            "SECURE_ENCLAVE_VERIFIED:{}:{}",
+                            report.measurement, report.signature
+                        ));
+                    }
+                    Err(e) => {
+                        warn!("[TEE] secure_dispatch failed: {}", e);
+                        verification.flags.push("SECURE_ENCLAVE_UNAVAILABLE".into());
+                    }
+                }
+            } else {
+                warn!("[TEE] @secure task but driver unprovisioned — set CHYREN_TEE_ATTESTATION_KEY");
+                verification.flags.push("SECURE_ENCLAVE_UNPROVISIONED".into());
+            }
+        }
+        if Self::task_is_authorial_proxy(&task_str) {
+            use chyren_metacog::{DefaultHandover, VerifiedHumanHandover};
+            let sig = DefaultHandover.handover(spoke_response.text.as_bytes(), &envelope.task_id);
+            verification
+                .flags
+                .push(format!("HUMAN_ATTRIBUTION_REQUIRED:{}", sig.artifact_hash));
+            verification.flags.push("AUTHORIZED_GHOSTWRITING".into());
         }
 
         // ── Final ledger entry (overall task outcome) ────────────────────────────

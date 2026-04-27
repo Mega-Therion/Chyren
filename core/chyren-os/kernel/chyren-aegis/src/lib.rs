@@ -5,6 +5,13 @@
 //!   2. `BehavioralAnalyzer` — static regex analysis of payload patterns
 //!   3. `DeflectionEngine`   — three-stage adversarial response pipeline
 //!   4. `ThreatFabric`       — append-only signed immunity ledger
+//!
+//! Plus two governance modules:
+//!   * [`policy`]          — Rust port of the Merkle policy service
+//!   * [`skill_verifier`]  — bridge to `scripts/formal_verification.py`
+
+pub mod policy;
+pub mod skill_verifier;
 
 use chyren_phylactery::{stamp, verify_entry};
 use regex::Regex;
@@ -739,7 +746,7 @@ mod tests {
     #[test]
     fn none_threat_returns_empty_response() {
         let engine = DeflectionEngine::new();
-        let r = engine.respond(ThreatLevel::None, &[], "clean", false, "sess-1");
+        let r = engine.respond(ThreatLevel::None, &[], "clean", false, "sess-1", None);
         assert!(r.response_text.is_empty());
         assert!(!r.lockout_triggered);
     }
@@ -747,7 +754,7 @@ mod tests {
     #[test]
     fn low_threat_returns_jester_response() {
         let engine = DeflectionEngine::new();
-        let r = engine.respond(ThreatLevel::Low, &[], "low", false, "sess-1");
+        let r = engine.respond(ThreatLevel::Low, &[], "low", false, "sess-1", None);
         assert!(!r.response_text.is_empty());
         assert!(!r.lockout_triggered);
     }
@@ -755,10 +762,10 @@ mod tests {
     #[test]
     fn jester_responses_cycle() {
         let engine = DeflectionEngine::new();
-        let r1 = engine.respond(ThreatLevel::Low, &[], "low", false, "s");
-        let r2 = engine.respond(ThreatLevel::Low, &[], "low", false, "s");
-        let r3 = engine.respond(ThreatLevel::Low, &[], "low", false, "s");
-        let r4 = engine.respond(ThreatLevel::Low, &[], "low", false, "s");
+        let r1 = engine.respond(ThreatLevel::Low, &[], "low", false, "s", None);
+        let r2 = engine.respond(ThreatLevel::Low, &[], "low", false, "s", None);
+        let r3 = engine.respond(ThreatLevel::Low, &[], "low", false, "s", None);
+        let r4 = engine.respond(ThreatLevel::Low, &[], "low", false, "s", None);
         // Fourth should wrap back to first.
         assert_eq!(r1.response_text, r4.response_text);
         assert_ne!(r1.response_text, r2.response_text);
@@ -769,7 +776,7 @@ mod tests {
     fn high_threat_confirmed_locks_session() {
         let engine = DeflectionEngine::new();
         let labels = vec!["JAILBREAK_PATTERN".to_string()];
-        let r = engine.respond(ThreatLevel::High, &labels, "critical", true, "sess-99");
+        let r = engine.respond(ThreatLevel::High, &labels, "critical", true, "sess-99", None);
         assert!(r.lockout_triggered);
         assert_eq!(r.threat_level, ThreatLevel::Locked);
         assert!(!r.lockout_signature.is_empty());
@@ -779,7 +786,7 @@ mod tests {
     fn high_threat_unconfirmed_shows_aegis_loop() {
         let engine = DeflectionEngine::new();
         let labels = vec!["PROMPT_INJECTION".to_string()];
-        let r = engine.respond(ThreatLevel::High, &labels, "high", false, "sess-1");
+        let r = engine.respond(ThreatLevel::High, &labels, "high", false, "sess-1", None);
         assert!(!r.lockout_triggered);
         assert!(r.response_text.contains("CONFIRM"));
     }

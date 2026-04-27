@@ -154,11 +154,44 @@ All secrets come from `~/.chyren/one-true.env` (not in git):
 ANTHROPIC_API_KEY
 OPENAI_API_KEY
 DEEPSEEK_API_KEY
-CHYREN_DB_URL          # Neon PostgreSQL connection string
-QDRANT_URL            # Qdrant vector store
+CHYREN_DB_URL                    # Neon PostgreSQL connection string
+QDRANT_URL                       # Qdrant vector store
+
+# Sovereign Intelligence attestation tier (added 2026-04):
+CHYREN_TEE_ATTESTATION_KEY       # 32+ bytes (hex or raw). Provisions chyren-tee-driver.
+                                 # When unset, @secure substeps fall back un-attested.
+CHYREN_POLICY_HMAC_KEY           # 32+ bytes. Signs Merkle policy manifests
+                                 # (chyren_aegis::policy + core/cortex/merkle_policy).
+CHYREN_AUTHORIAL_PROXY_TOKEN     # Origin-Authority token. Tasks containing
+                                 # @authorial_proxy:<this-token> bypass ADCCL identity-
+                                 # integrity checks and emit HUMAN_ATTRIBUTION_REQUIRED
+                                 # handover signatures (drafts pending attestation).
+CHYREN_PYTHON_BIN                # Optional. Override Python for skill_verifier subprocess.
+CHYREN_FORMAL_VERIFIER_PATH      # Optional. Override path to scripts/formal_verification.py.
 ```
 
 Always source this file before running Cortex or Medulla directly (`source ~/.chyren/one-true.env`). The Makefile does **not** source it automatically. Missing keys fail silently.
+
+Generate the three attestation keys (one-time, per environment):
+```bash
+echo "CHYREN_TEE_ATTESTATION_KEY=$(openssl rand -hex 32)" >> ~/.chyren/one-true.env
+echo "CHYREN_POLICY_HMAC_KEY=$(openssl rand -hex 32)"     >> ~/.chyren/one-true.env
+echo "CHYREN_AUTHORIAL_PROXY_TOKEN=$(openssl rand -hex 16)" >> ~/.chyren/one-true.env
+```
+
+Apply the ledger schema migration after rotating keys:
+```bash
+psql "$CHYREN_DB_URL" -f core/cortex/ops/sql/004_sovereign_attestation.sql
+```
+
+### Pragmas (live in `chyren-cli`)
+
+- `@secure` anywhere in the task text → final response is routed through
+  `chyren-tee-driver` and the ledger row gains a `SECURE_ENCLAVE_VERIFIED:<measurement>:<signature>` flag.
+- `@authorial_proxy:<token>` → AEGIS swaps to `analyze_authorial_proxy` (label
+  `AUTHORIZED_GHOSTWRITING`, severity Clean), and the ledger row gains a
+  `HUMAN_ATTRIBUTION_REQUIRED:<artifact_hash>` flag plus `AUTHORIZED_GHOSTWRITING`.
+  The token is verified constant-time against `CHYREN_AUTHORIAL_PROXY_TOKEN`.
 
 ## Key Conventions
 
