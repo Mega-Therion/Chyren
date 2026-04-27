@@ -5,7 +5,7 @@
 [![System Status](https://img.shields.io/badge/Status-Active-brightgreen.svg)]()
 *Current operational state verified by the Anti-Drift Cognitive Control Loop (ADCCL).*
 
-[![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.19693512-blue)](https://doi.org/10.5281/zenodo.19693512)
+[![Zenodo](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.19835025-blue)](https://doi.org/10.5281/zenodo.19835025)
 [![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
 [![Deployment: Live](https://img.shields.io/badge/Deployment-Live-brightgreen.svg)](https://chyren-web.vercel.app)
 
@@ -96,6 +96,7 @@ Chyren is developed via rigorous academic and research-driven methodologies. Ple
 
 | Publication | DOI | Link |
 | :--- | :--- | :--- |
+| **The Yett Paradigm: Information Tension** | 10.5281/zenodo.19835025 | [Link](https://doi.org/10.5281/zenodo.19835025) |
 | **Framework V2 (Master Framework)** | 10.5281/zenodo.19693512 | [Link](https://doi.org/10.5281/zenodo.19693512) |
 | **Framework V1 (Correspondence)** | 10.5281/zenodo.19691908 | [Link](https://doi.org/10.5281/zenodo.19691908) |
 | **Yett-Chyren Correspondence (Millennium)** | 10.5281/zenodo.19646172 | [Link](https://doi.org/10.5281/zenodo.19646172) |
