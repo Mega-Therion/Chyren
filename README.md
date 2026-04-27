@@ -104,8 +104,8 @@ Chyren is developed via rigorous academic and research-driven methodologies. Ple
 ---
 
 ## 🔗 Social Resonance
-- **X**: [@ChyrenSovereign](https://x.com/ChyrenSovereign)
-- **Discord**: [Chyren Nexus Server](https://discord.gg/ysj8Fpnca)
+- **X**: [@_chyren_](https://x.com/_chyren_)
+- **Discord**: [@i.am.chyren](https://discord.com/users/i.am.chyren)
 
 ---
 
