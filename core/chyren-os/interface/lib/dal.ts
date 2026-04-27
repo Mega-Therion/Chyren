@@ -37,5 +37,27 @@ export const dataAccess = {
         ORDER BY id
       `;
     });
+  },
+
+  getStatuses: async (limit = 50) => {
+    return await withSpan('dal.getStatuses', async (_span) => {
+      return await sql`
+        SELECT id, text, media, tags, created_at
+        FROM statuses
+        ORDER BY created_at DESC
+        LIMIT ${limit}
+      `;
+    });
+  },
+
+  createStatus: async (data: { text: string; media?: string[]; tags?: string[] }) => {
+    return await withSpan('dal.createStatus', async (_span) => {
+      const { text, media = [], tags = [] } = data;
+      return await sql`
+        INSERT INTO statuses (text, media, tags)
+        VALUES (${text}, ${media}, ${tags})
+        RETURNING id, text, media, tags, created_at
+      `;
+    });
   }
 };

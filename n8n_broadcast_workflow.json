@@ -1,0 +1,116 @@
+{
+  "name": "Chyren Broadcast Bus",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chyren-status",
+        "options": {}
+      },
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ],
+      "webhookId": "chyren-status-webhook"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "={{$json[\"body\"][\"text\"]}}",
+        "additionalFields": {}
+      },
+      "name": "Telegram Fan-out",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        400,
+        100
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_TELEGRAM_CREDENTIALS_ID"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "YOUR_DISCORD_WEBHOOK_URL",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "={{$json[\"body\"][\"text\"]}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Discord Fan-out",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        400,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR-CHYREN-DOMAIN.vercel.app/api/status",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{$json[\"body\"][\"text\"]}}"
+            },
+            {
+              "name": "media",
+              "value": "={{$json[\"body\"][\"media\"] || []}}"
+            },
+            {
+              "name": "tags",
+              "value": "={{$json[\"body\"][\"tags\"] || []}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Chyren-Web Ledger",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        400,
+        500
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Telegram Fan-out",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Discord Fan-out",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Chyren-Web Ledger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
