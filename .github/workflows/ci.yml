@@ -21,23 +21,41 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: "medulla -> target"
+          workspaces: "core/chyren-os/kernel -> target"
 
       - name: cargo check
         run: cargo check --workspace
-        working-directory: medulla
+        working-directory: core/chyren-os/kernel
 
       - name: cargo test
         run: cargo test --workspace
-        working-directory: medulla
+        working-directory: core/chyren-os/kernel
 
       - name: cargo clippy
         run: cargo clippy --workspace -- -D warnings
-        working-directory: medulla
+        working-directory: core/chyren-os/kernel
 
       - name: cargo fmt
         run: cargo fmt --all -- --check
-        working-directory: medulla
+        working-directory: core/chyren-os/kernel
+
+  # ── Cargo audit (security) ──────────────────────────────────────────────────
+  cargo-audit:
+    name: "cargo audit"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cargo-audit
+        run: cargo install --locked cargo-audit
+
+      # Fails CI on any unpatched advisory. Permanent ignores belong in
+      # core/chyren-os/kernel/.cargo/audit.toml with a comment justifying each.
+      - name: cargo audit
+        run: cargo audit --deny warnings
+        working-directory: core/chyren-os/kernel
 
   # ── Web (Next.js) ───────────────────────────────────────────────────────────
   web:
@@ -50,27 +68,31 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: web/package-lock.json
+          cache-dependency-path: core/chyren-os/interface/package-lock.json
 
       - name: Install dependencies
         run: npm ci
-        working-directory: web
+        working-directory: core/chyren-os/interface
+
+      - name: npm audit (high+)
+        run: npm audit --audit-level=high
+        working-directory: core/chyren-os/interface
 
       - name: Type check
         run: npm run typecheck
-        working-directory: web
+        working-directory: core/chyren-os/interface
 
       - name: Lint
         run: npm run lint
-        working-directory: web
+        working-directory: core/chyren-os/interface
 
       - name: Run unit tests
         run: npm test
-        working-directory: web
+        working-directory: core/chyren-os/interface
 
       - name: Build
         run: npm run build
-        working-directory: web
+        working-directory: core/chyren-os/interface
         env:
           # generate-context.mjs skips gracefully when OMEGA_DB_URL is unset
           NEXT_PUBLIC_API_BASE_URL: https://placeholder.local
@@ -90,23 +112,27 @@ jobs:
         with:
           node-version: "22"
           cache: pnpm
-          cache-dependency-path: gateway/pnpm-lock.yaml
+          cache-dependency-path: core/gateway/pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install
-        working-directory: gateway
+        working-directory: core/gateway
+
+      - name: pnpm audit (high+)
+        run: pnpm audit --audit-level high
+        working-directory: core/gateway
 
       - name: Type check
         run: npx tsc --noEmit
-        working-directory: gateway
+        working-directory: core/gateway
 
       - name: Lint
         run: pnpm lint
-        working-directory: gateway
+        working-directory: core/gateway
 
       - name: Build
         run: pnpm build
-        working-directory: gateway
+        working-directory: core/gateway
 
   # ── Cortex (Python) ─────────────────────────────────────────────────────────
   cortex:
@@ -122,14 +148,24 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r cortex/requirements.txt
+          pip install -r core/cortex/requirements.txt
 
       - name: Syntax check dream-mode scripts
         run: |
-          python -m py_compile cortex/chyren_py/identity_synthesis.py
-          python -m py_compile cortex/ops/scripts/catalog_registrar.py
-          python -m py_compile cortex/ops/scripts/ingest_all_sources.py
+          python -m py_compile core/cortex/chyren_py/identity_synthesis.py
+          python -m py_compile core/cortex/ops/scripts/catalog_registrar.py
+          python -m py_compile core/cortex/ops/scripts/ingest_all_sources.py
 
       - name: Run pytest (unit + smoke)
         run: pytest --tb=short
-        # pytest.ini at repo root sets pythonpath=cortex and testpaths=tests
+        # pytest.ini at repo root sets pythonpath and testpaths
+
+      - name: Merkle policy + skill verifier smoke
+        run: |
+          python -c "from core.cortex.merkle_policy.merkle_service import MerklePolicyService, merkle_root, inclusion_proof, verify_inclusion; \
+                     import os; os.environ['CHYREN_POLICY_HMAC_KEY']='x'*32; \
+                     s=MerklePolicyService(); m=s.generate_manifest(['a','b','c']); \
+                     assert s.verify_manifest(m); \
+                     p=inclusion_proof(['a','b','c'],1); \
+                     assert verify_inclusion('b',p,m.root); \
+                     print('merkle ok')"

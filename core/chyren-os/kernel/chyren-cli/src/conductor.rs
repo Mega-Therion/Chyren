@@ -1272,7 +1272,7 @@ impl Conductor {
         let prompt = format!("USER TASK: {}\n\nAI RESPONSE: {}", task, response_text);
 
         // Prepare requests for the Council (OpenAI, Anthropic, Gemini, Ollama)
-        let providers = vec!["openai", "anthropic", "gemini", "ollama"];
+        let providers = vec!["groq", "openrouter", "gemini", "ollama"];
         let mut votes = Vec::new();
 
         let mut futures = Vec::new();
