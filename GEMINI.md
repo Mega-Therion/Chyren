@@ -10,10 +10,11 @@ Chyren is a high-integrity **Sovereign Intelligence (SI) Orchestrator**. It util
 
 ## Key Systems
 
-- **ADCCL (Anti-Drift Cognitive Control Loop):** A non-bypassable verification gate that scores AI responses against an alignment threshold ($\ge 0.7$).
+- **ADCCL (Anti-Drift Cognitive Control Loop):** A non-bypassable verification gate that scores AI responses against the **Sovereign Boundary ($\chi_s \ge 0.9539$)**.
 - **Myelin:** Persistent semantic memory powered by a Qdrant vector store.
 - **Master Ledger:** An append-only, cryptographically signed PostgreSQL record of all verified system state.
-- **Phylactery Kernel:** A core JSON identity set (~58k entries) loaded by Medulla at startup.
+- **Phylactery Kernel:** A core JSON identity set (~58k entries) derived from the vacuum energy minimization $E_{vac}(m)$.
+- **Non-Markovian Master Equation:** Cognitive regularization via the **Schott Energy Derivative** to prevent logical singularities.
 
 ## Development & Operations
 
