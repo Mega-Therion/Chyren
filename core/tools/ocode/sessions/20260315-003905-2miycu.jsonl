@@ -1,0 +1,4 @@
+{"event": "session_start", "ts": "2026-03-15T05:39:05.083085Z", "session_id": "20260315-003905-2miycu", "task": "what time is it?", "config": {"model": "claude-opus-4-5", "provider": "groq", "mode": "trust", "workspace": "/home/mega/OmegA-Sovereign/services/gateway"}}
+{"event": "agent_turn", "ts": "2026-03-15T05:39:05.085171Z", "session_id": "20260315-003905-2miycu", "turn": 0, "role": "user", "content_preview": "what time is it?", "content_len": 16}
+{"event": "error", "ts": "2026-03-15T05:39:05.712330Z", "session_id": "20260315-003905-2miycu", "error": "Groq API error: Failed to call a function. Please adjust your prompt. See 'failed_generation' for more details.", "context": "backend.chat"}
+{"event": "session_end", "ts": "2026-03-15T05:39:05.712483Z", "session_id": "20260315-003905-2miycu", "turns": 1, "files_changed": [], "tool_calls_count": 0, "errors_count": 1, "tokens_used": 0, "duration_s": 0.63, "summary": ""}

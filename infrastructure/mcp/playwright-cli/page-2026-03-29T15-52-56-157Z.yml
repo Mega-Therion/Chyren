@@ -1,0 +1,129 @@
+- generic [ref=e2]:
+  - link "‹ Return to Current Obituaries" [ref=e5] [cursor=pointer]:
+    - /url: https://www.thorntonfh.com/obituaries
+  - generic [ref=e6]:
+    - img "Cover for Ruby Yett's Obituary" [ref=e8]
+    - generic [ref=e13] [cursor=pointer]:
+      - img [ref=e14]
+      - generic [ref=e16]: Share
+  - generic [ref=e17]:
+    - link "Thornton Funeral Home Logo" [ref=e21] [cursor=pointer]:
+      - /url: https://www.thorntonfh.com/
+      - img "Thornton Funeral Home Logo" [ref=e22]
+    - generic [ref=e23]:
+      - img "Ruby Yett Profile Photo" [ref=e26]
+      - generic [ref=e29]:
+        - heading "Ruby Yett" [level=1] [ref=e30]
+        - heading "March 9, 1944 — July 16, 2021" [level=2] [ref=e31]
+    - generic [ref=e33]:
+      - generic [ref=e35]:
+        - link "Send Flowers Send Flowers Hand delivered by a local florist" [ref=e37] [cursor=pointer]:
+          - /url: https://websites.tukios.com/orders/v2/flowers/9451da3b-4a73-4cc8-aa61-892e6b817b30?ttm_origin=obituary&ttm_template=traditional&ttm_cta=f_main
+          - img "Send Flowers" [ref=e38]
+          - generic [ref=e40]:
+            - paragraph [ref=e41]: Send Flowers
+            - paragraph [ref=e42]: Hand delivered by a local florist
+        - link "Plant Memorial Trees Plant Memorial Trees" [ref=e44] [cursor=pointer]:
+          - /url: https://websites.tukios.com/o/v2/trees/9451da3b-4a73-4cc8-aa61-892e6b817b30?ttm_origin=obituary&ttm_template=traditional&ttm_cta=t_main
+          - img "Plant Memorial Trees" [ref=e45]
+          - paragraph [ref=e47]: Plant Memorial Trees
+        - link "Send a Gift Send a Gift" [ref=e48] [cursor=pointer]:
+          - /url: https://websites.tukios.com/orders/v2/gifts/9451da3b-4a73-4cc8-aa61-892e6b817b30?ttm_origin=obituary&ttm_template=traditional&ttm_cta=g_main
+          - img "Send a Gift" [ref=e49]
+          - paragraph [ref=e51]: Send a Gift
+        - generic [ref=e52]:
+          - heading "Past Services" [level=2] [ref=e53]
+          - generic [ref=e54]:
+            - heading "Memorial" [level=3] [ref=e55]
+            - generic [ref=e56]:
+              - generic [ref=e57]: Killian Cemetery
+              - paragraph [ref=e58]: Saturday, July 24, 2021
+              - paragraph [ref=e59]: Starts at 10:00 am (Eastern time)
+              - link "View Details" [ref=e61] [cursor=pointer]:
+                - /url: "#"
+      - generic [ref=e63]:
+        - navigation [ref=e64]:
+          - link "Obituary" [ref=e65] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=e66]
+            - generic [ref=e77]: Obituary
+          - link "Service Schedule" [ref=e78] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=e79]
+            - generic [ref=e84]: Service Schedule
+        - generic [ref=e85]:
+          - heading "Ruby Yett" [level=2] [ref=e88]
+          - generic [ref=e89]:
+            - paragraph [ref=e92]:
+              - text: Ruby Yett, 77, of Story, Arkansas, passed away Friday, July 16, 2021 in Hot Springs, Arkansas. Ruby was born March 9, 1944 in Chula, Arkansas, to Rosco and Rutha (Qualls) Potter. She is preceded in death by her parents, her husband; Bob Yett and a sister; Judy (Carlos) Booth of
+              - text: Centerville and son-in-law; Robert Hamilton of Story.
+              - text: Ruby is survived by her 3 children; Bobby Yett, Teresa Yett, and Trenda Yett (all of Story), grandchildren; Ryan Yett of Story, Jada (Travis) Beechy of Mount Ida, and Kendra (Adam Goodner) Fryar of Story, 1 special great-grandchild; Rylan Yett of Sims, siblings; Rita (Harold) Godwin of Mountain Pine, Rebecca Caldwell of Aly, Carl (Diane) Potter of Carter Cove, Carol (Mike) Blees of Hot Springs, and a host of family to many to mention.
+              - text: There will be a graveside memorial service Saturday, July 24, 2021, 10:00am at Killian Cemetery in Aly, Arkansas. Arrangements were made under the direction of Thornton Funeral Home of Mount Ida, AR. Guest register at www.thorntonfh.com
+            - generic [ref=e94]:
+              - text: To order
+              - link "memorial trees" [ref=e95] [cursor=pointer]:
+                - /url: https://websites.tukios.com/o/v2/trees/9451da3b-4a73-4cc8-aa61-892e6b817b30?ttm_origin=obituary&ttm_template=traditional&ttm_cta=t_inline
+              - text: or send flowers to the family in memory of Ruby Yett, please visit our
+              - link "flower store" [ref=e96] [cursor=pointer]:
+                - /url: https://websites.tukios.com/orders/v2/flowers/9451da3b-4a73-4cc8-aa61-892e6b817b30?ttm_origin=obituary&ttm_template=traditional&ttm_cta=f_inline
+              - text: .
+  - generic [ref=e97]:
+    - generic [ref=e100]:
+      - generic [ref=e106]:
+        - iframe [ref=e108]:
+          - generic [ref=f2e5]:
+            - paragraph [ref=f2e9]: — In Loving Memory —
+            - paragraph [ref=f2e10]: Ruby Yett
+            - paragraph [ref=f2e11]: March 9, 1944 — July 16, 2021
+        - generic:
+          - img
+          - img
+      - generic [ref=e109]:
+        - generic [ref=e110]:
+          - generic [ref=e111]:
+            - generic [ref=e112]: Celebrating The Life Of
+            - generic [ref=e113]: Ruby Yett
+          - generic [ref=e114]:
+            - button "View Book" [ref=e115] [cursor=pointer]
+            - link "Buy Book" [ref=e116] [cursor=pointer]:
+              - /url: https://websites.tukios.com/orders/v2/book/9451da3b-4a73-4cc8-aa61-892e6b817b30?ttm_origin=obituary&ttm_template=traditional&ttm_cta=b_main
+        - paragraph [ref=e117]: A beautifully bound keepsake book filled with memories and condolences from family and friends.
+        - generic [ref=e118]:
+          - generic [ref=e119]:
+            - heading "Share Your Memory" [level=3] [ref=e120]
+            - paragraph [ref=e121]: Contribute your memory to the online guestbook to be featured in this unique keepsake book.
+          - button "Share Your Memory" [ref=e123] [cursor=pointer]
+    - heading "Guestbook" [level=2] [ref=e124]
+    - generic [ref=e125]:
+      - generic [ref=e127]:
+        - generic [ref=e132]:
+          - img [ref=e133]
+          - textbox "Your name" [ref=e137]
+        - generic [ref=e138]:
+          - generic [ref=e139]:
+            - button "Add Photos" [ref=e140] [cursor=pointer]:
+              - img [ref=e141]
+              - generic [ref=e143]: Add Photos
+            - button "Light Candle" [ref=e144] [cursor=pointer]:
+              - img [ref=e145]
+              - generic [ref=e147]: Light Candle
+          - button "Submit Post" [ref=e149] [cursor=pointer]
+      - generic [ref=e151]:
+        - generic [ref=e152]: ‌
+        - generic [ref=e153]: ‌
+        - generic [ref=e154]: ‌
+    - paragraph [ref=e156]: "Visits: 12"
+    - paragraph [ref=e157]:
+      - text: This site is protected by reCAPTCHA and the
+      - text: Google
+      - link "Privacy Policy" [ref=e158] [cursor=pointer]:
+        - /url: https://policies.google.com/privacy
+      - text: and
+      - link "Terms of Service" [ref=e159] [cursor=pointer]:
+        - /url: https://policies.google.com/terms
+      - text: apply.
+    - paragraph [ref=e160]:
+      - text: Service map data ©
+      - link "OpenStreetMap" [ref=e161] [cursor=pointer]:
+        - /url: https://www.openstreetmap.org/copyright
+      - text: contributors

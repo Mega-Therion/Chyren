@@ -1,0 +1,44 @@
+{
+  "name": "updates_an_existing_remote_file",
+  "description": "Updates metadata or content details for an existing remote file in slack; this action cannot upload new files or change the fundamental file type.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file": {
+        "type": "string",
+        "description": "Slack's unique identifier for the remote file (e.g., `F12345678`). Used to identify the file if `external_id` is not provided. One of `file` or `external_id` is required to specify the file to update.\nExamples:\n  \"F0123ABC456\"\n  \"F7890XYZ123\""
+      },
+      "title": {
+        "type": "string",
+        "description": "New title for the remote file. If omitted, the current title remains unchanged.\nExamples:\n  \"Updated Project Proposal Q3\"\n  \"Final Presentation Draft\""
+      },
+      "token": {
+        "type": "string",
+        "description": "Authentication token for authorizing the API request to Slack."
+      },
+      "filetype": {
+        "type": "string",
+        "description": "New filetype for the remote file. This typically describes the kind of file, e.g., `pdf`, `gdoc`, `image`, `text`. See Slack API documentation for specific supported `filetype` values. Providing an inaccurate filetype might affect how the file is handled or displayed.\nExamples:\n  \"pdf\"\n  \"jpg\"\n  \"gdoc\"\n  \"sketch\"\n  \"txt\"\n  \"mp4\"\n  \"zip\""
+      },
+      "external_id": {
+        "type": "string",
+        "description": "Creator-defined Globally Unique Identifier (GUID) for the remote file. Used to identify the file if `file` ID is not provided. One of `file` or `external_id` is required to specify the file to update.\nExamples:\n  \"item_12345_report_2024\"\n  \"guid-doc-xyz-final\""
+      },
+      "external_url": {
+        "type": "string",
+        "description": "New publicly accessible URL for the remote file. If provided, this updates the link associated with the file in Slack.\nExamples:\n  \"https://example.com/updated_document.pdf\"\n  \"https://docs.google.com/spreadsheets/d/new_sheet_id_v2\""
+      },
+      "preview_image": {
+        "type": "string",
+        "description": "A string that references the new preview image for the document. The referenced image data will be sent as `multipart/form-data`. This could be a local file path (if supported by the client), a public URL, or base64 encoded image data. Max 1MB. Updates the file's preview in Slack."
+      },
+      "indexable_file_contents": {
+        "type": "string",
+        "description": "Plain text content extracted from the remote file, used by Slack to improve searchability. This can be a summary or the full text. Maximum 1MB. If provided, updates the searchable content."
+      }
+    },
+    "additionalProperties": false,
+    "description": "Defines the parameters for updating an existing remote file in Slack. At least `file` or `external_id` must be provided to identify the file, along with at least one attribute to modify.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

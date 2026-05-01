@@ -1,0 +1,21 @@
+{
+  "name": "troubleshoot_common_issues",
+  "description": "Help identify and resolve common Vercel deployment and configuration issues. Use this when you're experiencing problems with your deployment, build failures, or configuration issues. This tool will guide you through systematic troubleshooting and provide specific solutions.",
+  "arguments": [
+    {
+      "name": "issue",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "includeSolutions",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "checkLogs",
+      "description": "",
+      "required": false
+    }
+  ]
+}

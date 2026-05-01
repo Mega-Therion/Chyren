@@ -1,0 +1,29 @@
+{
+  "name": "ollama_copy",
+  "description": "Copy a model. Creates a duplicate of an existing model with a new name.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "source": {
+        "type": "string",
+        "description": "Name of the source model"
+      },
+      "destination": {
+        "type": "string",
+        "description": "Name for the copied model"
+      },
+      "format": {
+        "type": "string",
+        "enum": [
+          "json",
+          "markdown"
+        ],
+        "default": "json"
+      }
+    },
+    "required": [
+      "source",
+      "destination"
+    ]
+  }
+}

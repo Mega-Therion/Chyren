@@ -1,0 +1,19 @@
+{
+  "name": "lists_pinned_items_in_a_channel",
+  "description": "Retrieves all messages and files pinned to a specified channel; the caller must have access to this channel.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "channel": {
+        "type": "string",
+        "description": "The ID of the channel to retrieve pinned items from. This can be a public channel ID, private group ID, or direct message channel ID.\nExamples:\n  \"C1234567890\"\n  \"G0123456789\"\n  \"D0123456789\""
+      }
+    },
+    "required": [
+      "channel"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `ListsPinnedItemsInAChannel`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

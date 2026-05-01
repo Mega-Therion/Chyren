@@ -1,0 +1,21 @@
+{
+  "name": "firebase_update_environment",
+  "description": "Use this to update environment config for the Firebase CLI and Firebase MCP server, such as project directory, active project, active user account, accept terms of service, and more. Use `firebase_get_environment` to see the currently configured environment.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "project_dir": {
+        "type": "string",
+        "description": "Change the current project directory - this should be a directory that has a `firebase.json` file (or will have one)."
+      },
+      "active_project": {
+        "type": "string",
+        "description": "Change the active project for the current project directory. Should be a Firebase project ID or configured project alias."
+      },
+      "active_user_account": {
+        "type": "string",
+        "description": "The email address of the signed-in user to authenticate as when interacting with the current project directory."
+      }
+    }
+  }
+}

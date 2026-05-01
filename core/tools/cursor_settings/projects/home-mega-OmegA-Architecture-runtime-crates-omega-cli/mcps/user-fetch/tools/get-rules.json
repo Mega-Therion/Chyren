@@ -1,0 +1,31 @@
+{
+  "name": "get-rules",
+  "description": "Get use cases and best practices for using the tools in this MCP server",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "rules": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "quickStart",
+            "commonErrors",
+            "interactions",
+            "tools",
+            "workflow",
+            "performanceOptimization",
+            "gamingTips",
+            "debuggingWithPuppeteer"
+          ]
+        },
+        "description": "The documentation sections to retrieve"
+      }
+    },
+    "required": [
+      "rules"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

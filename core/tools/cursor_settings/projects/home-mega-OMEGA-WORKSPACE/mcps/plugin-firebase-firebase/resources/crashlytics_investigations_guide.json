@@ -1,0 +1,5 @@
+{
+  "uri": "firebase://guides/crashlytics/investigations",
+  "name": "crashlytics_investigations_guide",
+  "description": "Guides the coding agent when investigating bugs reported in Crashlytics issues, including procedures for diagnosing and fixing crashes."
+}

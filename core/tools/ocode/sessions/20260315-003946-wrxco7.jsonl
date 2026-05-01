@@ -1,0 +1,4 @@
+{"event": "session_start", "ts": "2026-03-15T05:39:46.331851Z", "session_id": "20260315-003946-wrxco7", "task": "what time is it?", "config": {"model": "claude-opus-4-5", "provider": "groq", "mode": "trust", "workspace": "/home/mega/OmegA-Sovereign/services/gateway"}}
+{"event": "agent_turn", "ts": "2026-03-15T05:39:46.333889Z", "session_id": "20260315-003946-wrxco7", "turn": 0, "role": "user", "content_preview": "what time is it?", "content_len": 16}
+{"event": "agent_turn", "ts": "2026-03-15T05:39:46.888274Z", "session_id": "20260315-003946-wrxco7", "turn": 1, "role": "assistant", "content_preview": "The current time is 2026-03-15 05:39 UTC.", "content_len": 41}
+{"event": "session_end", "ts": "2026-03-15T05:39:46.888395Z", "session_id": "20260315-003946-wrxco7", "turns": 1, "files_changed": [], "tool_calls_count": 0, "errors_count": 0, "tokens_used": 2662, "duration_s": 0.56, "summary": "The current time is 2026-03-15 05:39 UTC."}

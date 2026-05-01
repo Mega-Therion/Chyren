@@ -1,0 +1,16 @@
+{
+  "name": "get_user_presence_info",
+  "description": "Retrieves a slack user's current real-time presence (e.g., 'active', 'away') to determine their availability, noting this action does not provide historical data or status reasons.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "user": {
+        "type": "string",
+        "description": "The ID of the user to query for presence information. This is a string identifier, typically starting with 'U' or 'W' (e.g., 'U123ABC456'). If not provided, presence information for the authenticated user will be returned.\nExamples:\n  \"U012A3CDE\"\n  \"W012A3CDE\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `GetUserPresenceInfo`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

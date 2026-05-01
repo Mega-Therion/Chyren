@@ -1,0 +1,16 @@
+{
+  "name": "aws___retrieve_agent_sop",
+  "description": "Get the complete execution plan for a specific AWS workflow after selecting it from SOP suggestions returned by the search_documentation tool. Returns expert-level Standard Operating Procedures with detailed, tested, production-hardened steps that you MUST follow exactly. SOPs include security best practices and error handling. Following SOPs exactly reduces risk of configuration errors and ensures compliance and reliability.\n\n## CRITICAL PREREQUISITE — DO NOT SKIP\n\nYou MUST call search_documentation BEFORE calling this tool. NEVER call this tool first. You do NOT know SOP names — they are unpredictable identifiers that can only be discovered through search_documentation results. Guessing or fabricating an sop_name WILL fail.\n\n## REQUIRED WORKFLOW (no exceptions)\n\n1. FIRST: Call search_documentation with the user's requirements\n2. THEN: Find the result entry that has a sop_name field\n3. FINALLY: Call this tool with the EXACT sop_name value from that result — copy it verbatim\n\n## PARAMETER REQUIREMENTS\n\nsop_name: str (Required)\n- MUST be copied exactly from the sop_name field in search_documentation results\n- Do NOT guess, fabricate, paraphrase, or modify the name in any way\n- Do NOT use the result title — use only the sop_name field value\n- You cannot predict it\n\n## IF SOP NOT FOUND\n\nIf you get an error, you likely guessed the name. Call search_documentation first to discover it.\n\n## Returns\n\nComplete SOP with step-by-step instructions, constraints, and troubleshooting guidance.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "sop_name": {
+        "description": "Exact SOP name from the title of search_documentation results (no modifications)",
+        "type": "string"
+      }
+    },
+    "required": [
+      "sop_name"
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "debug_deployment_issues",
+  "description": "Comprehensive debugging of deployment issues with detailed analysis. Use this when you're experiencing mysterious deployment problems, intermittent failures, or need deep technical analysis of what's going wrong. This tool will perform thorough investigation and provide detailed solutions.",
+  "arguments": [
+    {
+      "name": "deploymentId",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "includeEnvironment",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "includeDependencies",
+      "description": "",
+      "required": false
+    }
+  ]
+}

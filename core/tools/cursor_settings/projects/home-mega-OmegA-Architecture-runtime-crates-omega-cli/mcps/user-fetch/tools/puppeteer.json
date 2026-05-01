@@ -1,0 +1,196 @@
+{
+  "name": "puppeteer",
+  "description": "Control browsers and pages with Puppeteer - launch/close browsers, open/close pages, execute JavaScript, take screenshots, and more",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "action": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "list-browsers"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "launch-browser"
+              },
+              "headless": {
+                "type": "boolean",
+                "default": false,
+                "description": "Whether to run browser in headless mode. Defaults to false"
+              },
+              "width": {
+                "type": "number",
+                "default": 1280,
+                "description": "Browser window width in pixels. Defaults to 1280"
+              },
+              "height": {
+                "type": "number",
+                "default": 720,
+                "description": "Browser window height in pixels. Defaults to 720"
+              },
+              "url": {
+                "type": "string",
+                "description": "Optional URL to navigate to after launching the browser"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "close-browser"
+              },
+              "browserId": {
+                "type": "string",
+                "description": "The ID of the browser instance to close"
+              }
+            },
+            "required": [
+              "type",
+              "browserId"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "list-pages"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "open-page"
+              },
+              "browserId": {
+                "type": "string",
+                "description": "The ID of the browser instance to create a page in"
+              },
+              "url": {
+                "type": "string",
+                "description": "Optional URL to navigate to after creating the page"
+              }
+            },
+            "required": [
+              "type",
+              "browserId"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "close-page"
+              },
+              "pageId": {
+                "type": "string",
+                "description": "The ID of the page to close"
+              }
+            },
+            "required": [
+              "type",
+              "pageId"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "exec-page"
+              },
+              "pageId": {
+                "type": "string",
+                "description": "The ID of the page to execute code on"
+              },
+              "source": {
+                "type": "string",
+                "description": "JavaScript code to execute. Will be executed outside of the page context. You can run commands like await page.goto('https://example.com') or await page.evaluate(() => { ... }). The code you write should return a string value that will serve as the result of the tool call."
+              }
+            },
+            "required": [
+              "type",
+              "pageId",
+              "source"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "take-screenshot"
+              },
+              "pageId": {
+                "type": "string",
+                "description": "The ID of the page to take a screenshot of"
+              },
+              "fullPage": {
+                "type": "boolean",
+                "default": false,
+                "description": "Whether to take a screenshot of the full scrollable page. Defaults to false"
+              },
+              "format": {
+                "type": "string",
+                "enum": [
+                  "png",
+                  "jpeg"
+                ],
+                "default": "png",
+                "description": "Image format for the screenshot. Defaults to png"
+              },
+              "quality": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Quality of the screenshot, only applicable for jpeg format (0-100)"
+              }
+            },
+            "required": [
+              "type",
+              "pageId"
+            ],
+            "additionalProperties": false
+          }
+        ],
+        "description": "The action to perform with Puppeteer"
+      }
+    },
+    "required": [
+      "action"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

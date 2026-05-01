@@ -1,0 +1,70 @@
+{
+  "name": "google_sheets_get_many_spreadsheet_rows_advanced",
+  "description": "Return up to 1,500 rows as a single JSON value or as line items.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "drive": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Drive"
+      },
+      "range": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Columns"
+      },
+      "first_row": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "First row"
+      },
+      "row_count": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Row count"
+      },
+      "worksheet": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Worksheet"
+      },
+      "spreadsheet": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Spreadsheet"
+      },
+      "output_format": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Output format"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

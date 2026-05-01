@@ -1,0 +1,13 @@
+[package]
+name = "chyren-adaptive"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
+chyren-core = { path = "../chyren-core" }
+chyren-adccl = { path = "../chyren-adccl" }
+chyren-worldmodel = { path = "../chyren-worldmodel" }
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true

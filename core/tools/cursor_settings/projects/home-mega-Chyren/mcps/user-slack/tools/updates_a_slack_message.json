@@ -1,0 +1,52 @@
+{
+  "name": "updates_a_slack_message",
+  "description": "Updates a slack message, identified by `channel` id and `ts` timestamp, by modifying its `text`, `attachments`, or `blocks`; provide at least one content field, noting `attachments`/`blocks` are replaced if included (`[]` clears them).",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "ts": {
+        "type": "string",
+        "description": "Timestamp of the message to update (string, Unix time with microseconds, e.g., `'1234567890.123456'`).\nExample: \"1625247600.000200\""
+      },
+      "text": {
+        "type": "string",
+        "description": "This sends raw text only, use markdown_text field for formatting. New message text (plain or mrkdwn). Not required if `blocks` or `attachments` are provided. See Slack formatting rules.\nExamples:\n  \"Hello world, this is an *updated* message.\"\n  \"Check out this link: <https://example.com>\""
+      },
+      "parse": {
+        "type": "string",
+        "description": "Parse mode for `text`: `'full'` (mrkdwn) or `'none'` (literal). If not provided, defaults to `'client'` behavior, overriding original message's `parse` setting.\nExamples:\n  \"full\"\n  \"none\"\n  \"client\""
+      },
+      "blocks": {
+        "type": "string",
+        "description": "**DEPRECATED**: Use `markdown_text` field instead. URL-encoded JSON array of layout blocks. Replaces existing blocks if field is provided; use `[]` (empty array string) to clear. Omit field to leave blocks untouched. Required if `text` and `attachments` are absent. See Slack API for format.\nExamples:\n  \"[{\\\"type\\\": \\\"section\\\", \\\"text\\\": {\\\"type\\\": \\\"mrkdwn\\\", \\\"text\\\": \\\"This is an updated section block.\\\"}}]\"\n  \"[]\""
+      },
+      "as_user": {
+        "type": "string",
+        "description": "Set to `'true'` to update as the authenticated user (bots are considered such). Defaults to app/bot identity.\nExample: \"true\""
+      },
+      "channel": {
+        "type": "string",
+        "description": "The ID of the channel containing the message to be updated.\nExamples:\n  \"C1234567890\"\n  \"G0abcdefh\""
+      },
+      "link_names": {
+        "type": "string",
+        "description": "Set to `'true'` to link channel/user names in `text`. If not provided, Slack's default update behavior may override original message's linking settings.\nExample: \"true\""
+      },
+      "attachments": {
+        "type": "string",
+        "description": "URL-encoded JSON array of attachments. Replaces existing attachments if field is provided; use `[]` (empty array string) to clear. Omit field to leave attachments untouched. Required if `text` and `blocks` are absent. See Slack API for format.\nExamples:\n  \"[{\\\"fallback\\\": \\\"Plain-text summary of attachment.\\\", \\\"color\\\": \\\"#2eb886\\\", \\\"text\\\": \\\"Optional text that appears within the attachment\\\"}]\"\n  \"[]\""
+      },
+      "markdown_text": {
+        "type": "string",
+        "description": "**PREFERRED**: Write your updated message in markdown for nicely formatted display. Supports headers (#), bold (**text**), italic (*text*), strikethrough (~~text~~), code (```), links ([text](url)), quotes (>), and dividers (---). Your message will be posted with beautiful formatting.\nExamples:\n  \"# Updated Status\\n\\nThe issue has been **resolved** and systems are *fully operational*.\\n\\n```bash\\n# All services running\\nkubectl get services\\n```\"\n  \"## Progress Update\\n\\n- **Phase 1**: ✅ Complete\\n- *Phase 2*: In progress (80%)\\n- ~~Phase 3~~: **Started early**\\n\\n---\\n\\n**ETA**: Tomorrow\""
+      }
+    },
+    "required": [
+      "ts",
+      "channel"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `UpdatesASlackMessage` action.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

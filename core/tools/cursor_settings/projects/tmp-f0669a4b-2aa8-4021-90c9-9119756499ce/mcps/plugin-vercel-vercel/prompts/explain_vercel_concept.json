@@ -1,0 +1,11 @@
+{
+  "name": "explain_vercel_concept",
+  "description": "Answer user questions using search results from Vercel documentation. Use this when you need authoritative information about Vercel features, configuration options, best practices, or troubleshooting guidance. This tool will search the official Vercel documentation and provide accurate, up-to-date information with examples and references.",
+  "arguments": [
+    {
+      "name": "question",
+      "description": "",
+      "required": true
+    }
+  ]
+}

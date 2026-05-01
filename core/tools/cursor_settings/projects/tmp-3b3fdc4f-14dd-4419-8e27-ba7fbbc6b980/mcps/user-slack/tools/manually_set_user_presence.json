@@ -1,0 +1,19 @@
+{
+  "name": "manually_set_user_presence",
+  "description": "Manually sets a user's slack presence, overriding automatic detection; this setting persists across connections but can be overridden by user actions or slack's auto-away (e.g., after 10 mins of inactivity).",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "presence": {
+        "type": "string",
+        "description": "The presence state to set for the user. Valid values are 'auto' (Slack determines presence based on activity) or 'away' (sets presence to away).\nExamples:\n  \"auto\"\n  \"away\""
+      }
+    },
+    "required": [
+      "presence"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for ManuallySetUserPresence, allowing manual setting of a user's presence.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

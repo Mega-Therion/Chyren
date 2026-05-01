@@ -1,0 +1,23 @@
+{
+  "name": "enable_a_specified_user_group",
+  "description": "Enables a disabled user group in slack using its id, reactivating it for mentions and permissions; this action only changes the enabled status and cannot create new groups or modify other properties.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "usergroup": {
+        "type": "string",
+        "description": "The unique encoded ID of the User Group to enable. This ID typically starts with 'S'.\nExample: \"S0604QSJC\""
+      },
+      "include_count": {
+        "type": "boolean",
+        "description": "If true, includes the count of users in the User Group in the response.\nExamples:\n  \"true\"\n  \"false\""
+      }
+    },
+    "required": [
+      "usergroup"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `EnableASpecifiedUserGroup`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

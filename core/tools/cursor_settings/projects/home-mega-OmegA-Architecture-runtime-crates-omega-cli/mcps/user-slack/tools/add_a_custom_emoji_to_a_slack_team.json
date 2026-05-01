@@ -1,0 +1,29 @@
+{
+  "name": "add_a_custom_emoji_to_a_slack_team",
+  "description": "Deprecated: adds a custom emoji to a slack workspace given a unique name and an image url. use `add emoji` instead.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "url": {
+        "type": "string",
+        "description": "The URL of the image file to be used as the custom emoji. The image should be accessible via HTTP/HTTPS and meet Slack's emoji requirements (e.g., size, format). Supported formats typically include PNG, GIF, and JPEG.\nExamples:\n  \"https://example.com/emoji/partyparrot.gif\"\n  \"https://cdn.example.com/images/approved_stamp.png\""
+      },
+      "name": {
+        "type": "string",
+        "description": "The desired name for the new custom emoji. This name will be used to invoke the emoji (e.g., if name is 'partyparrot', it's used as ':partyparrot:'). Colons around the name are not required when providing this field.\nExamples:\n  \"partyparrot\"\n  \"approved_stamp\"\n  \"team_logo_small\""
+      },
+      "token": {
+        "type": "string",
+        "description": "Authentication token used to authorize the request to add a custom emoji to the Slack workspace."
+      }
+    },
+    "required": [
+      "url",
+      "name",
+      "token"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `AddEmoji`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

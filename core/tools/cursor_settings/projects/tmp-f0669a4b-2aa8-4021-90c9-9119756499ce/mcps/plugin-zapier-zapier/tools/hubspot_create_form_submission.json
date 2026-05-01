@@ -1,0 +1,91 @@
+{
+  "name": "hubspot_create_form_submission",
+  "description": "Creates a new submission for a selected form.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "form": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Form"
+      },
+      "hutk": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "HubSpot usertoken"
+      },
+      "pageId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Page ID"
+      },
+      "pageUri": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Page URI"
+      },
+      "pageName": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Page name"
+      },
+      "ipAddress": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "IP address"
+      },
+      "submittedAt": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Submission timestamp"
+      },
+      "sfdcCampaignId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "SFDC campaign ID"
+      },
+      "skipValidation": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Skip validation"
+      },
+      "goToWebinarWebinarKey": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "GoToWebinar key/ID"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

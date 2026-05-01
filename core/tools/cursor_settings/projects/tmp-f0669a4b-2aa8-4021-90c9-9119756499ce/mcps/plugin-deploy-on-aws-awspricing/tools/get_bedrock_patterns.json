@@ -1,0 +1,21 @@
+{
+  "name": "get_bedrock_patterns",
+  "description": "Get architecture patterns for Amazon Bedrock applications, including component relationships and cost considerations",
+  "arguments": {
+    "type": "object",
+    "properties": {}
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "title": "Result",
+        "type": "string"
+      }
+    },
+    "required": [
+      "result"
+    ],
+    "title": "get_bedrock_patternsOutput"
+  }
+}

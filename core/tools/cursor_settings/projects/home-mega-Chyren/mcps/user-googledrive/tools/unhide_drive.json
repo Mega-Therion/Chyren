@@ -1,0 +1,19 @@
+{
+  "name": "unhide_drive",
+  "description": "Tool to unhide a shared drive. use when you need to restore a shared drive to the default view.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "driveId": {
+        "type": "string",
+        "description": "The ID of the shared drive.\nExample: \"0AEMV2k3MjA19Uk9PVA\""
+      }
+    },
+    "required": [
+      "driveId"
+    ],
+    "additionalProperties": false,
+    "description": "UnhideDriveRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

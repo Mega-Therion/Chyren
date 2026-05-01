@@ -1,0 +1,24 @@
+{
+  "name": "list_user_groups_for_team_with_options",
+  "description": "Lists user groups in a slack workspace, including user-created and default groups; results for large workspaces may be paginated.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "include_count": {
+        "type": "boolean",
+        "description": "Include the number of users in each user group. Defaults to false.\nExamples:\n  \"true\"\n  \"false\""
+      },
+      "include_users": {
+        "type": "boolean",
+        "description": "Include the list of user IDs for each user group. Defaults to false.\nExamples:\n  \"true\"\n  \"false\""
+      },
+      "include_disabled": {
+        "type": "boolean",
+        "description": "Include disabled user groups in the results. Defaults to false.\nExamples:\n  \"true\"\n  \"false\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request model for listing user groups in a Slack team, providing options to customize the retrieved information.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

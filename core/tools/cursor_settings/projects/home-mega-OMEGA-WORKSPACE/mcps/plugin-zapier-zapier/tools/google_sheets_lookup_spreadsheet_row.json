@@ -1,0 +1,84 @@
+{
+  "name": "google_sheets_lookup_spreadsheet_row",
+  "description": "Find a specific spreadsheet row based on a column and value. If found, it returns the entire row.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "drive": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Drive"
+      },
+      "bottom_up": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Search from last row"
+      },
+      "row_count": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Row count"
+      },
+      "worksheet": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Worksheet"
+      },
+      "lookup_key": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Lookup column"
+      },
+      "spreadsheet": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Spreadsheet"
+      },
+      "lookup_value": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Lookup value"
+      },
+      "lookup_key_support": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Supporting lookup column"
+      },
+      "lookup_value_support": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Supporting lookup value"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

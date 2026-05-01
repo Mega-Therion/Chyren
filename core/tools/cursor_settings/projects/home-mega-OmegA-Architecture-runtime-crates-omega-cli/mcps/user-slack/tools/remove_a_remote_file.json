@@ -1,0 +1,24 @@
+{
+  "name": "remove_a_remote_file",
+  "description": "Removes the slack reference to an external file (which must have been previously added via the remote files api), specified by either its `external id` or `file` id (one of which is required), without deleting the actual external file.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file": {
+        "type": "string",
+        "description": "Slack-specific file ID.\nExamples:\n  \"F0123ABCDEF\"\n  \"F9876ZYXWVU\""
+      },
+      "token": {
+        "type": "string",
+        "description": "Authentication token."
+      },
+      "external_id": {
+        "type": "string",
+        "description": "Creator-defined, globally unique ID (GUID) for the file.\nExamples:\n  \"my-unique-file-guid-12345\"\n  \"doc-abc-external-id\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `RemoveARemoteFile`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

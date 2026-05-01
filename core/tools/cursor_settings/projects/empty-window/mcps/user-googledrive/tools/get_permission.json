@@ -1,0 +1,40 @@
+{
+  "name": "get_permission",
+  "description": "Gets a permission by id. use this tool to retrieve a specific permission for a file or shared drive.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file_id": {
+        "type": "string",
+        "description": "The ID of the file.\nExample: \"1a2b3c4d5e6f7g8h9i0j\""
+      },
+      "permission_id": {
+        "type": "string",
+        "description": "The ID of the permission.\nExample: \"1234567890\""
+      },
+      "supports_all_drives": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether the requesting application supports both My Drives and shared drives."
+      },
+      "use_domain_admin_access": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Issue the request as a domain administrator; if set to true, then the requester will be granted access if the file ID parameter refers to a shared drive and the requester is an administrator of the domain to which the shared drive belongs."
+      }
+    },
+    "required": [
+      "file_id",
+      "permission_id"
+    ],
+    "additionalProperties": false,
+    "description": "GetPermissionRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

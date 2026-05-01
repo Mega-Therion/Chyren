@@ -1,0 +1,52 @@
+{
+  "name": "download_file",
+  "description": "Downloads a file from google drive by its id. for google workspace documents (docs, sheets, slides), optionally exports to a specified `mime type`. for other file types, downloads in their native format regardless of mime type.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file_id": {
+        "type": "string",
+        "description": "The unique identifier of the file to be downloaded from Google Drive. This ID can typically be found in the file's URL in Google Drive or obtained from API calls that list files.\nExample: \"1aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789\""
+      },
+      "mime_type": {
+        "anyOf": [
+          {
+            "type": "string",
+            "enum": [
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+              "application/vnd.oasis.opendocument.text",
+              "application/rtf",
+              "application/pdf",
+              "text/plain",
+              "application/zip",
+              "application/epub+zip",
+              "text/markdown",
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+              "application/x-vnd.oasis.opendocument.spreadsheet",
+              "text/csv",
+              "text/tab-separated-values",
+              "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+              "application/vnd.oasis.opendocument.presentation",
+              "image/jpeg",
+              "image/png",
+              "image/svg+xml",
+              "application/vnd.google-apps.script+json",
+              "application/vnd.google-apps.vid"
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Target MIME type for exporting Google Workspace documents (e.g., Google Doc, Sheet, Slide). Supported export formats vary by file type; e.g., text/plain is only supported for Google Docs, not Sheets or Slides. This parameter is automatically ignored for non-Google Workspace files, which are downloaded in their native format. Only specify this when you want to export a Google Workspace document to a different format (e.g., export Google Doc to PDF).\nExamples:\n  \"application/pdf\"\n  \"application/vnd.openxmlformats-officedocument.wordprocessingml.document\"\n  \"text/csv\"\n  \"text/plain\""
+      }
+    },
+    "required": [
+      "file_id"
+    ],
+    "additionalProperties": false,
+    "description": "DownloadFileRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

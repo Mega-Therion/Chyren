@@ -1,9 +1,0 @@
-{
-  "id": "1",
-  "subject": "Read Python OmegA stack (AEGIS/AEON/ADCCL/MYELIN)",
-  "description": "Read the core Python implementations to understand the exact logic that needs to be ported to TypeScript for the web app",
-  "activeForm": "Reading Python OmegA stack",
-  "status": "completed",
-  "blocks": [],
-  "blockedBy": []
-}

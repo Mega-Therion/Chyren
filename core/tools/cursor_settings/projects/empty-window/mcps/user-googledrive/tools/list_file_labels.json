@@ -1,0 +1,41 @@
+{
+  "name": "list_file_labels",
+  "description": "Tool to list the labels on a file. use when you need to retrieve all labels associated with a specific file in google drive.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file_id": {
+        "type": "string",
+        "description": "The ID of the file.\nExample: \"1aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789\""
+      },
+      "page_token": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Token to retrieve a specific page of results."
+      },
+      "max_results": {
+        "anyOf": [
+          {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "The maximum number of labels to return per page. Default is 100."
+      }
+    },
+    "required": [
+      "file_id"
+    ],
+    "additionalProperties": false,
+    "description": "ListFileLabelsRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

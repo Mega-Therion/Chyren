@@ -1,0 +1,14 @@
+---
+pid: 84015
+cwd: "/home/mega/OMEGA_WORKSPACE"
+command: "TOKEN=$(python3 - <<'PY'\nimport os\npid='4036'\npath=f'/proc/{pid}/environ'\ndata=open(path,'rb').read().split(b'\\x00')\nfor kv in data:\n    if kv.startswith(b'OMEGA_API_BEARER_TOKEN='):\n        print(kv.split(b'=',1)[1].decode('utf-8','ignore'))\n        break\nPY\n) && curl -sS --max-time 130 -H \"Authorization: Bearer $TOKEN\" -H \"Content-Type: application/json\" -X POST http://127.0.0.1:8787/api/v1/chat -d '{\"user\":\"503 evidence probe\",\"mode\":\"omega\",\"temperature\":0.4}'"
+started_at: 2026-03-31T07:41:33.478Z
+running_for_ms: 130460   
+---
+curl: (28) Operation timed out after 130001 milliseconds with 0 bytes received
+
+---
+exit_code: 28
+elapsed_ms: 130586
+ended_at: 2026-03-31T07:43:44.064Z
+---

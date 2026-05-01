@@ -1,0 +1,49 @@
+{
+  "name": "list_revisions",
+  "description": "Tool to list a file's revisions. use when you need to retrieve the revision history of a specific file in google drive.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "fileId": {
+        "type": "string",
+        "description": "The ID of the file.\nExample: \"1234567890abcdefghijklmnopqrstuvwxyz\""
+      },
+      "pageSize": {
+        "anyOf": [
+          {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "The maximum number of revisions to return per page.\nExample: 100"
+      },
+      "pageToken": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The token for continuing a previous list request on the next page. This should be set to the value of 'nextPageToken' from the previous response.\nExample: \"abcdef123456\""
+      },
+      "supportsAllDrives": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether the requesting application supports both My Drives and shared drives. Defaults to false."
+      }
+    },
+    "required": [
+      "fileId"
+    ],
+    "additionalProperties": false,
+    "description": "ListRevisionsRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

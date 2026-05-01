@@ -1,0 +1,5 @@
+{
+  "uri": "firebase://guides/app_id",
+  "name": "app_id_guide",
+  "description": "guides the coding agent through choosing a Firebase App ID in the current project"
+}

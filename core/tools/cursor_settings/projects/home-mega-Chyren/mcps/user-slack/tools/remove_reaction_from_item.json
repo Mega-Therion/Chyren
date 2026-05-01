@@ -1,0 +1,35 @@
+{
+  "name": "remove_reaction_from_item",
+  "description": "Removes an emoji reaction from a message, file, or file comment in slack.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file": {
+        "type": "string",
+        "description": "ID of the file to remove the reaction from."
+      },
+      "name": {
+        "type": "string",
+        "description": "Name of the emoji reaction to remove (e.g., 'thumbsup'), without colons.\nExamples:\n  \"thumbsup\"\n  \"smile\"\n  \"robot_face\""
+      },
+      "channel": {
+        "type": "string",
+        "description": "Channel ID of the message. Required if `timestamp` is provided."
+      },
+      "timestamp": {
+        "type": "string",
+        "description": "Timestamp of the message. Required if `channel` is provided."
+      },
+      "file_comment": {
+        "type": "string",
+        "description": "ID of the file comment to remove the reaction from."
+      }
+    },
+    "required": [
+      "name"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `RemoveReactionFromItem`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

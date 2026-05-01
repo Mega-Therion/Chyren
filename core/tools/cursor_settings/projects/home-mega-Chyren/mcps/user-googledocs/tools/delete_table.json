@@ -1,0 +1,45 @@
+{
+  "name": "delete_table",
+  "description": "Tool to delete an entire table from a google document. use when you have the document id and the specific start and end index of the table element to be removed. the table's range can be found by inspecting the document's content structure.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "tab_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The ID of the tab containing the table, if the document uses tabs. If omitted, the action applies to the first tab or the only tab.\nExample: \"sheet1\""
+      },
+      "segment_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The ID of the segment (e.g., header, footer) containing the table. If omitted or empty, the table is assumed to be in the main document body.\nExample: \"kix.header.1a2b3c\""
+      },
+      "document_id": {
+        "type": "string",
+        "description": "The ID of the Google Document from which the table will be deleted.\nExample: \"1a2B3c4D5e6F7g8H9i0J\""
+      },
+      "table_end_index": {
+        "type": "integer",
+        "description": "The end index (UTF-16 code unit) of the table's range to be deleted.\nExample: 150"
+      },
+      "table_start_index": {
+        "type": "integer",
+        "description": "The start index (UTF-16 code unit) of the table's range to be deleted.\nExample: 100"
+      }
+    },
+    "required": [
+      "document_id",
+      "table_end_index",
+      "table_start_index"
+    ],
+    "additionalProperties": false,
+    "description": "DeleteTableRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

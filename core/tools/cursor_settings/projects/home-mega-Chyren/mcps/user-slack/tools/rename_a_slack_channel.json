@@ -1,0 +1,24 @@
+{
+  "name": "rename_a_slack_channel",
+  "description": "Renames a public or private slack channel; for enterprise grid workspaces, the user must be a workspace admin or channel manager.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "The new name for the channel. Channel names can be up to 80 characters long and may include lowercase letters, numbers, hyphens, and underscores. They cannot contain spaces or periods.\nExamples:\n  \"project-alpha-bugs\"\n  \"team-marketing-campaign\""
+      },
+      "channel_id": {
+        "type": "string",
+        "description": "The ID of the channel to rename.\nExample: \"C012AB3CD\""
+      }
+    },
+    "required": [
+      "name",
+      "channel_id"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `RenameASlackChannel`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "update_slack_call_information",
+  "description": "Updates the title, join url, or desktop app join url for an existing slack call identified by its id.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "Unique identifier of the call to update, obtained when a call is created (e.g., via `calls.add` Slack API method).\nExamples:\n  \"R0123ABCDEF\"\n  \"R9876ZYXWVU\""
+      },
+      "title": {
+        "type": "string",
+        "description": "New title for the call.\nExamples:\n  \"Project Alpha Review\"\n  \"Q3 Planning Session\""
+      },
+      "join_url": {
+        "type": "string",
+        "description": "New URL for clients to join the call.\nExamples:\n  \"https://example.com/join/meeting/12345\"\n  \"https://another-service.com/call/abc987\""
+      },
+      "desktop_app_join_url": {
+        "type": "string",
+        "description": "URL to directly launch the third-party call application from Slack clients.\nExamples:\n  \"your-app-protocol://join?call_id=12345\"\n  \"slack://call?id=abcdefg\""
+      }
+    },
+    "required": [
+      "id"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `UpdateSlackCallInformation`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

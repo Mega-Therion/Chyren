@@ -1,0 +1,63 @@
+{
+  "name": "slack_update_profile",
+  "description": "Update basic profile fields such as name or title",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "user": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "User"
+      },
+      "email": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Email"
+      },
+      "title": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Title"
+      },
+      "last_name": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Last Name"
+      },
+      "first_name": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "First Name"
+      },
+      "display_name": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Display Name"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

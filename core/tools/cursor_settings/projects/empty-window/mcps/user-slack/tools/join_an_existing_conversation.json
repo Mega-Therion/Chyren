@@ -1,0 +1,16 @@
+{
+  "name": "join_an_existing_conversation",
+  "description": "Joins an existing slack conversation (public channel, private channel, or multi-person direct message) by its id, if the authenticated user has permission.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "channel": {
+        "type": "string",
+        "description": "ID of the Slack conversation (public channel, private channel, or multi-person direct message) to join.\nExamples:\n  \"C1234567890\"\n  \"G0987654321\"\n  \"D123ABCDEF0\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `JoinAnExistingConversation`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

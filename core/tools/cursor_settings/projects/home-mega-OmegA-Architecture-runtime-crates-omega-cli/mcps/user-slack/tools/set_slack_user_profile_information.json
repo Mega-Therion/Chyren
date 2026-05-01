@@ -1,0 +1,44 @@
+{
+  "name": "set_slack_user_profile_information",
+  "description": "Updates a slack user's profile, setting either individual fields or multiple fields via a json object.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Name of a single profile field to set. Use with `value` if `profile` is not provided.\nExamples:\n  \"first_name\"\n  \"status_text\"\n  \"custom_field_id_X123\""
+      },
+      "user": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "ID of the user whose profile will be updated; defaults to authenticated user. Team admins on paid teams can specify another member's ID.\nExample: \"U012A3CDE\""
+      },
+      "value": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Value for the single profile field specified by `name`. Use with `name` if `profile` is not provided.\nExamples:\n  \"John Doe\"\n  \"On a call\"\n  \"New custom value\""
+      },
+      "profile": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "URL-encoded JSON string of key-value pairs for profile fields to update (max 50 fields, 255 chars per field name). If provided, `name` and `value` are ignored.\nExample: \"%7B%22first_name%22%3A%22Alice%22%2C%20%22last_name%22%3A%22Wonderland%22%2C%20%22status_text%22%3A%22Exploring%22%2C%20%22status_emoji%22%3A%22%3Arabbit%3A%22%7D\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for updating a Slack user's profile information.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

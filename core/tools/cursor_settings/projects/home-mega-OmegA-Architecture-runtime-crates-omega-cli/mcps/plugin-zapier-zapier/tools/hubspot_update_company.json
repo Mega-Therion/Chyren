@@ -1,0 +1,532 @@
+{
+  "name": "hubspot_update_company",
+  "description": "Update a Company in HubSpot.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Object ID"
+      },
+      "zip": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Postal Code"
+      },
+      "city": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: City"
+      },
+      "name": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Company name"
+      },
+      "type": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Type"
+      },
+      "phone": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Phone Number"
+      },
+      "state": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: State/Region"
+      },
+      "domain": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Company Domain Name"
+      },
+      "address": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Street Address"
+      },
+      "country": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Country/Region"
+      },
+      "website": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Website URL"
+      },
+      "about_us": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: About Us"
+      },
+      "address2": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Street Address 2"
+      },
+      "industry": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Industry"
+      },
+      "timezone": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Time Zone"
+      },
+      "closedate": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Close Date"
+      },
+      "is_public": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Is Public"
+      },
+      "ownername": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: HubSpot Owner Name"
+      },
+      "owneremail": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: HubSpot Owner Email"
+      },
+      "twitterbio": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Social media information: Twitter Bio"
+      },
+      "description": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Description"
+      },
+      "hs_keywords": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Company information: Company Keywords"
+        }
+      },
+      "hs_logo_url": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Logo URL"
+      },
+      "hs_pipeline": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Pipeline"
+      },
+      "linkedinbio": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Social media information: LinkedIn Bio"
+      },
+      "facebookfans": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Social media information: Facebook Fans"
+      },
+      "founded_year": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Year Founded"
+      },
+      "annualrevenue": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Annual Revenue"
+      },
+      "hs_state_code": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: State/Region Code"
+      },
+      "twitterhandle": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Social media information: Twitter Handle"
+      },
+      "hs_lead_status": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Sales properties: Lead Status"
+      },
+      "lifecyclestage": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Lifecycle Stage"
+      },
+      "googleplus_page": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Social media information: Google Plus Page"
+      },
+      "hs_country_code": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Country/Region Code"
+      },
+      "hs_gps_latitude": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Latitudes"
+      },
+      "hs_owning_teams": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Company information: Owning Teams"
+        }
+      },
+      "hs_csm_sentiment": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: CSM Sentiment"
+      },
+      "hs_gps_longitude": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Longitudes"
+      },
+      "hs_quick_context": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Quick context"
+      },
+      "hs_revenue_range": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Revenue range"
+      },
+      "hubspot_owner_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Sales properties: Company owner"
+      },
+      "twitterfollowers": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Social media information: Twitter Followers"
+      },
+      "web_technologies": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Company information: Web Technologies"
+        }
+      },
+      "hs_employee_range": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Employee range"
+      },
+      "hs_industry_group": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Industry group"
+      },
+      "hs_target_account": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Target Account"
+      },
+      "numberofemployees": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Number of Employees"
+      },
+      "hs_linkedin_handle": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Linkedin handle"
+      },
+      "hs_shared_team_ids": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Company information: Shared teams"
+        }
+      },
+      "hs_shared_user_ids": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Company information: Shared users"
+        }
+      },
+      "total_money_raised": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Total Money Raised"
+      },
+      "hs_analytics_source": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Original Traffic Source"
+      },
+      "hs_is_target_account": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Target accounts information: Target Account"
+      },
+      "facebook_company_page": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Social media information: Facebook Company Page"
+      },
+      "linkedin_company_page": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Social media information: LinkedIn Company Page"
+      },
+      "properties_to_retrieve": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Additional properties to retrieve"
+        }
+      },
+      "hs_pinned_engagement_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Pinned Engagement ID"
+      },
+      "hs_ideal_customer_profile": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Target accounts information: Ideal Customer Profile Tier"
+      },
+      "hs_live_enrichment_deadline": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Live enrichment deadline"
+      },
+      "hs_all_assigned_business_unit_ids": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Company information: Brands"
+        }
+      },
+      "hs_last_metered_enrichment_timestamp": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Last Metered Enrichment Timestamp"
+      },
+      "hs_target_account_recommendation_state": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Target Account Recommendation State"
+      },
+      "hs_target_account_recommendation_snooze_time": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Company information: Target Account Recommendation Snooze Time"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

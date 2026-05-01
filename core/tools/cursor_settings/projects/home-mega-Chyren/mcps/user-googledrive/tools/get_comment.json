@@ -1,0 +1,32 @@
+{
+  "name": "get_comment",
+  "description": "Tool to get a comment by id. use when you need to retrieve a specific comment from a google drive file and have both the file id and comment id.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "fileId": {
+        "type": "string",
+        "description": "The ID of the file.\nExample: \"1a2b3c4d5e6f7g8h9i0j\""
+      },
+      "commentId": {
+        "type": "string",
+        "description": "The ID of the comment.\nExample: \"11a22b33c44d55e66f77g88h99i00j\""
+      },
+      "includeDeleted": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether to return deleted comments. Deleted comments will not include their original content."
+      }
+    },
+    "required": [
+      "fileId",
+      "commentId"
+    ],
+    "additionalProperties": false,
+    "description": "GetCommentRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

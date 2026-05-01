@@ -1,0 +1,33 @@
+[package]
+name = "chyren-repl"
+version = "0.1.0"
+edition = "2021"
+description = "Sovereign REPL — interactive terminal client for the Chyren API"
+
+[[bin]]
+name = "chyren-repl"
+path = "src/main.rs"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+reqwest = { version = "0.12", features = ["json", "stream"] }
+clap = { version = "4", features = ["derive", "env"] }
+crossterm = "0.27"
+ratatui = { version = "0.26", optional = true }
+syntect = "5"
+indicatif = "0.17"
+rustyline = { version = "14", features = ["with-file-history"] }
+toml = "0.8"
+dirs = "5"
+futures-util = "0.3"
+bytes = "1"
+anyhow = "1"
+uuid = { version = "1", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+ctrlc = "3"
+
+[features]
+default = []
+tui = ["ratatui"]

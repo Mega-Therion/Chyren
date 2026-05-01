@@ -1,0 +1,114 @@
+{
+  "name": "insert_table_column",
+  "description": "Tool to insert a new column into a table in a google document. use this tool when you need to add a column to an existing table at a specific location.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "requests": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "insertTableColumn": {
+              "type": "object",
+              "properties": {
+                "insertRight": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ],
+                  "description": "Whether to insert new column to the right of the reference cell location. True: insert to the right. False: insert to the left.",
+                  "default": false
+                },
+                "tableCellLocation": {
+                  "type": "object",
+                  "properties": {
+                    "rowIndex": {
+                      "type": "integer",
+                      "description": "The zero-based row index of the reference cell.\nExample: 0"
+                    },
+                    "columnIndex": {
+                      "type": "integer",
+                      "description": "The zero-based column index of the reference cell.\nExample: 0"
+                    },
+                    "tableStartLocation": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "index": {
+                              "anyOf": [
+                                {
+                                  "type": "integer"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ],
+                              "default": null,
+                              "description": "The zero-based index, in UTF-16 code units, relative to the beginning of the segment."
+                            },
+                            "tabId": {
+                              "type": [
+                                "string",
+                                "null"
+                              ],
+                              "default": null,
+                              "description": "The tab that the location is in. When omitted, the request is applied to the first tab."
+                            },
+                            "segmentId": {
+                              "type": [
+                                "string",
+                                "null"
+                              ],
+                              "default": null,
+                              "description": "The ID of the header, footer or footnote the location is in. An empty segment ID signifies the document's body."
+                            }
+                          },
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "The location where the table starts in the document."
+                    }
+                  },
+                  "required": [
+                    "rowIndex",
+                    "columnIndex"
+                  ],
+                  "additionalProperties": false,
+                  "description": "The reference table cell location from which columns will be inserted."
+                }
+              },
+              "required": [
+                "tableCellLocation"
+              ],
+              "additionalProperties": false,
+              "description": "Insert Table Column"
+            }
+          },
+          "required": [
+            "insertTableColumn"
+          ],
+          "additionalProperties": false,
+          "description": "InsertTableColumnRequestDetails"
+        },
+        "description": "A list of requests to be applied to the document. For this action, it will contain one InsertTableColumnRequest."
+      },
+      "document_id": {
+        "type": "string",
+        "description": "The ID of the document to update.\nExample: \"1aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789\""
+      }
+    },
+    "required": [
+      "requests",
+      "document_id"
+    ],
+    "additionalProperties": false,
+    "description": "InsertTableColumnRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "google_sheets_get_spreadsheet_by_id",
+  "description": "Get a specific Google Spreadsheet by its ID. Returns the raw spreadsheet data from the Google Sheets API.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "spreadsheet": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Spreadsheet ID"
+      },
+      "includeGridData": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Include Grid Data"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

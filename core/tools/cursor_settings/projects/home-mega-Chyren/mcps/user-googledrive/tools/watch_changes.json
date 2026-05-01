@@ -1,0 +1,177 @@
+{
+  "name": "watch_changes",
+  "description": "Tool to subscribe to changes for a user or shared drive in google drive. use when you need to monitor a google drive for modifications and receive notifications at a specified webhook url.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "A unique string that identifies this channel. UUIDs are recommended.\nExample: \"your-unique-channel-id-123\""
+      },
+      "type": {
+        "type": "string",
+        "description": "The type of delivery mechanism for notifications (e.g., 'web_hook').\nExample: \"web_hook\""
+      },
+      "token": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "An arbitrary string that will be delivered with each notification. Can be used for verification.\nExample: \"optional-arbitrary-string-for-verification\""
+      },
+      "params": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "additional_properties": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {},
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "Key-value pairs for additional parameters."
+              }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Optional parameters for the notification channel.\nExample: {\"ttl\": \"3600\"} for a 1-hour time-to-live (actual support depends on Google API)."
+      },
+      "spaces": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "A comma-separated list of spaces to query within the corpora. Supported values are 'drive' and 'appDataFolder'.\nExamples:\n  \"drive\"\n  \"appDataFolder\"\n  \"drive,appDataFolder\"",
+        "default": "drive"
+      },
+      "address": {
+        "type": "string",
+        "format": "uri",
+        "minLength": 1,
+        "maxLength": 2083,
+        "description": "The URL where notifications are to be delivered.\nExample: \"https://example.com/notifications\""
+      },
+      "drive_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The shared drive from which changes will be returned. If specified, change IDs will be specific to the shared drive.\nExample: \"0ABqLz1XZc1Z9Uk9PVA\""
+      },
+      "page_size": {
+        "anyOf": [
+          {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "The maximum number of changes to return per page.",
+        "default": 100
+      },
+      "expiration": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Timestamp in milliseconds since the epoch for when the channel should expire. If not set, channel may not expire or have a default expiration.\nExample: 1678886400000"
+      },
+      "page_token": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The token for continuing a previous list request on the next page. This should be set to the value of 'nextPageToken' from the previous response or to the response from the getStartPageToken method."
+      },
+      "include_labels": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A comma-separated list of IDs of labels to include in the labelInfo part of the response.\nExample: \"labelId1,labelId2\""
+      },
+      "include_removed": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "description": "Whether to include changes indicating that items have been removed from the list of changes (e.g., by deletion or loss of access).",
+        "default": true
+      },
+      "supports_all_drives": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "description": "Whether the requesting application supports both My Drives and shared drives. Recommended to set to true if driveId is used or if interactions with shared drives are expected.",
+        "default": false
+      },
+      "restrict_to_my_drive": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "description": "Whether to restrict the results to changes inside the My Drive hierarchy. This omits changes to files like those in the Application Data folder or shared files not added to My Drive.",
+        "default": false
+      },
+      "include_corpus_removals": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether changes should include the file resource if the file is still accessible by the user at the time of the request, even when a file was removed from the list of changes."
+      },
+      "include_permissions_for_view": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Specifies which additional view's permissions to include in the response. Only 'published' is supported.\nExample: \"published\""
+      },
+      "include_items_from_all_drives": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether both My Drive and shared drive items should be included in results."
+      }
+    },
+    "required": [
+      "id",
+      "type",
+      "address"
+    ],
+    "additionalProperties": false,
+    "description": "WatchChangesRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "name": "hubspot_create_cos_blog_post",
+  "description": "Creates a blog post in your HubSpot COS blog.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "name": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Blog Post Title"
+      },
+      "slug": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Blog Post URL"
+      },
+      "state": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Publish This Post?"
+      },
+      "post_body": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Blog Post Content"
+      },
+      "blog_author_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Blog Author"
+      },
+      "featured_image": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Featured image URL"
+      },
+      "content_group_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Blog URL"
+      },
+      "meta_description": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Meta Description"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

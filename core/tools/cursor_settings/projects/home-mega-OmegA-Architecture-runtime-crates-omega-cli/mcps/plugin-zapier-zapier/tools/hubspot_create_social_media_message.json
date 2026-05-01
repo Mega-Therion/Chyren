@@ -1,0 +1,49 @@
+{
+  "name": "hubspot_create_social_media_message",
+  "description": "Creates and immediately publishes a message on a specified social media channel.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "body": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Message Content"
+      },
+      "channel": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Social Media Channel"
+      },
+      "is_draft": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Save as draft"
+      },
+      "trigger_at": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "When"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

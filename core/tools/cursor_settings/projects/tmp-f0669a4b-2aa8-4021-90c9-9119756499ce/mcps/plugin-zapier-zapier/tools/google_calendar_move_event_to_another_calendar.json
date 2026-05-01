@@ -1,0 +1,49 @@
+{
+  "name": "google_calendar_move_event_to_another_calendar",
+  "description": "Move an event from one calendar to another calendar.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "event_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Event"
+      },
+      "calendarid": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Source Calendar"
+      },
+      "send_notifications": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Send Notifications"
+      },
+      "destination_calendar_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Destination Calendar"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

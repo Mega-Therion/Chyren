@@ -1,0 +1,5 @@
+{"event": "session_start", "ts": "2026-03-15T00:02:22.281729Z", "session_id": "20260314-190222-zgaib7", "task": "use bash to check today's date", "config": {"model": "claude-opus-4-5", "provider": "ollama", "mode": "trust", "workspace": "/home/mega"}}
+{"event": "agent_turn", "ts": "2026-03-15T00:02:22.281998Z", "session_id": "20260314-190222-zgaib7", "turn": 0, "role": "user", "content_preview": "use bash to check today's date", "content_len": 30}
+{"event": "agent_turn", "ts": "2026-03-15T00:05:25.464048Z", "session_id": "20260314-190222-zgaib7", "turn": 1, "role": "assistant", "content_preview": "", "content_len": 0}
+{"event": "tool_call", "ts": "2026-03-15T00:05:25.464469Z", "session_id": "20260314-190222-zgaib7", "call_id": 0, "tool": "bash", "inputs": {"cmd": "date", "timeout": 30, "cwd": "/home/mega"}}
+{"event": "tool_result", "ts": "2026-03-15T00:05:25.469558Z", "session_id": "20260314-190222-zgaib7", "call_id": 0, "tool": "bash", "output_preview": "Sat Mar 14 07:05:25 PM CDT 2026\n", "output_len": 32, "error": null, "exit_code": 0, "duration_ms": 5}

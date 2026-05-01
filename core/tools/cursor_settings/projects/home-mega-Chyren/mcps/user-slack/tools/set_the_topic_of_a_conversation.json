@@ -1,0 +1,20 @@
+{
+  "name": "set_the_topic_of_a_conversation",
+  "description": "Sets or updates the topic for a specified slack conversation.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "topic": {
+        "type": "string",
+        "description": "The new topic for the conversation. It must be a string up to 250 characters long. Text formatting and linkification are not supported.\nExamples:\n  \"Q4 Planning Discussion\"\n  \"Weekly Sync Updates\""
+      },
+      "channel": {
+        "type": "string",
+        "description": "The ID of the public channel, private channel, direct message, or multi-person direct message conversation for which the topic will be set.\nExamples:\n  \"C1234567890\"\n  \"G0123456789\"\n  \"D012345678\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `SetTheTopicOfAConversation`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

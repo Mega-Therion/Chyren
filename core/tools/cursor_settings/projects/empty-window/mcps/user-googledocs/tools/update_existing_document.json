@@ -1,0 +1,29 @@
+{
+  "name": "update_existing_document",
+  "description": "Applies programmatic edits, such as text insertion, deletion, or formatting, to a specified google doc using the `batchupdate` api method.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "editDocs": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": true
+        },
+        "description": "Requests conforming to the Google Docs API `batchUpdate` method, where each item specifies an operation. For full details and more request types, see https://developers.google.com/docs/api/reference/rest/v1/documents/batchUpdate.\nFor example, to insert text at the beginning of the document:\n[\n  {\n    \"insertText\": {\n      \"text\": \"This is a new paragraph.\\n\",\n      \"location\": {\n        \"index\": 1\n      }\n    }\n  }\n]\n\nTo delete a paragraph by its index:\n[{\n  \"deleteContentRange\": {\n    \"range\": {\n      \"startIndex\": 1,\n      \"endIndex\": 20\n    }\n  }\n}]\n\nTo replace all text:\n[{\n  \"replaceAllText\": {\n    \"containsText\": {\n      \"text\": \"old text\"\n    },\n    \"replaceText\": \"new text\"\n  }\n}]"
+      },
+      "document_id": {
+        "type": "string",
+        "description": "The unique identifier of the Google Docs document to be updated.\nExamples:\n  \"12345abcdef\"\n  \"your_document_id_here\""
+      }
+    },
+    "required": [
+      "editDocs",
+      "document_id"
+    ],
+    "additionalProperties": false,
+    "description": "Request model for updating an existing Google Docs document with specified edit operations.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

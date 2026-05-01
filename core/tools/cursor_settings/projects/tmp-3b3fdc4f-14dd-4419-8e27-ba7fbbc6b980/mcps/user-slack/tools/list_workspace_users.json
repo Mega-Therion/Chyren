@@ -1,0 +1,27 @@
+{
+  "name": "list_workspace_users",
+  "description": "Retrieves a paginated list of admin users for a specified slack workspace.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "limit": {
+        "type": "integer",
+        "description": "The maximum number of admin users to retrieve per page. Must be a positive integer. If not specified, a default limit set by Slack will apply.\nExamples:\n  \"20\"\n  \"50\"\n  \"100\""
+      },
+      "cursor": {
+        "type": "string",
+        "description": "Pagination cursor for retrieving the next page of results. Pass the `next_cursor` value returned from a previous request to fetch subsequent items. If omitted, the first page is retrieved.\nExample: \"dXNlcjpVMEc5V0ZYTlo=\""
+      },
+      "team_id": {
+        "type": "string",
+        "description": "The ID of the Slack workspace (e.g., `T123456789`) from which to list admin users.\nExample: \"T123456789\""
+      }
+    },
+    "required": [
+      "team_id"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for listing admin users in a Slack workspace.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "name": "add_a_remote_file_from_a_service",
+  "description": "Adds a reference to an external file (e.g., google drive, dropbox) to slack for discovery and sharing, requiring a unique `external id` and an `external url` accessible by slack.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "title": {
+        "type": "string",
+        "description": "Title of the remote file to be displayed in Slack.\nExamples:\n  \"Project Proposal Q3.docx\"\n  \"Client Onboarding Checklist.pdf\""
+      },
+      "token": {
+        "type": "string",
+        "description": "Slack authentication token, required to authorize adding the remote file.\nExample: \"xoxp-123456789012-123456789012-1234567890123-abcdefghijklmnopqrstuvwxyz123456\""
+      },
+      "filetype": {
+        "type": "string",
+        "description": "File type (e.g., 'pdf', 'docx', 'png') to help Slack display appropriate icons or previews.\nExamples:\n  \"pdf\"\n  \"docx\"\n  \"gdoc\"\n  \"png\"\n  \"txt\"\n  \"gsheet\""
+      },
+      "external_id": {
+        "type": "string",
+        "description": "Unique identifier for the file, defined by the calling application, used for future API references (e.g., updating, deleting).\nExamples:\n  \"file-abc-123-xyz-789\"\n  \"guid-document-42\""
+      },
+      "external_url": {
+        "type": "string",
+        "description": "Publicly accessible or permissioned URL of the remote file, used by Slack to access its content or metadata.\nExamples:\n  \"https://example.com/path/to/your/file.pdf\"\n  \"https://your-service.com/files/unique-id-123\""
+      },
+      "preview_image": {
+        "type": "string",
+        "description": "Base64-encoded image (e.g., PNG, JPEG) used as the file's preview in Slack.\nExamples:\n  \"(base64 encoded PNG data of a chart)\"\n  \"(base64 encoded JPEG data of a document cover)\""
+      },
+      "indexable_file_contents": {
+        "type": "string",
+        "description": "Plain text content of the file, indexed by Slack for search.\nExamples:\n  \"This document contains project plans for Q4, focusing on market expansion and new product development.\"\n  \"Meeting notes from Q1 review: Key discussion points included budget allocation, resource management, and upcoming deadlines.\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for adding a remote file to Slack.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,2 @@
+{"event": "session_start", "ts": "2026-03-15T00:00:13.943959Z", "session_id": "20260314-190013-ivhbwg", "task": "use bash to check today's date", "config": {"model": "claude-opus-4-5", "provider": "ollama", "mode": "trust", "workspace": "/home/mega"}}
+{"event": "agent_turn", "ts": "2026-03-15T00:00:13.944342Z", "session_id": "20260314-190013-ivhbwg", "turn": 0, "role": "user", "content_preview": "use bash to check today's date", "content_len": 30}

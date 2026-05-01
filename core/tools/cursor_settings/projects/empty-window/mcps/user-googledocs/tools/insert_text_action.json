@@ -1,0 +1,29 @@
+{
+  "name": "insert_text_action",
+  "description": "Tool to insert a string of text at a specified location within a google document. use when you need to add new text content to an existing document.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "document_id": {
+        "type": "string",
+        "description": "The ID of the document to insert text into.\nExample: \"195j9e2fm7q-gL2mmx61gh-oXMUrV2Vl45678ZA\""
+      },
+      "text_to_insert": {
+        "type": "string",
+        "description": "The string of text to insert.\nExample: \"This is a new paragraph.\""
+      },
+      "insertion_index": {
+        "type": "integer",
+        "description": "The EOL character of the paragraph will be moved to the end of the inserted text. The index where the text will be inserted. The index is zero-based and refers to the UTF-16 code unit. For example, to insert text at the beginning of the document, use an index of 1 (to account for the first paragraph).\nExamples:\n  1\n  50"
+      }
+    },
+    "required": [
+      "document_id",
+      "text_to_insert",
+      "insertion_index"
+    ],
+    "additionalProperties": false,
+    "description": "InsertTextActionRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

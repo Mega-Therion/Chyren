@@ -1,0 +1,6 @@
+{"event": "session_start", "ts": "2026-03-15T00:19:10.785359Z", "session_id": "20260314-191910-xj1vpm", "task": "run bash: date", "config": {"model": "qwen2.5-coder:1.5b", "provider": "ollama", "mode": "trust", "workspace": "/home/mega"}}
+{"event": "agent_turn", "ts": "2026-03-15T00:19:10.785548Z", "session_id": "20260314-191910-xj1vpm", "turn": 0, "role": "user", "content_preview": "run bash: date", "content_len": 14}
+{"event": "agent_turn", "ts": "2026-03-15T00:19:24.537908Z", "session_id": "20260314-191910-xj1vpm", "turn": 1, "role": "assistant", "content_preview": "", "content_len": 0}
+{"event": "agent_turn", "ts": "2026-03-15T00:19:27.340113Z", "session_id": "20260314-191910-xj1vpm", "turn": 2, "role": "assistant", "content_preview": "", "content_len": 0}
+{"event": "agent_turn", "ts": "2026-03-15T00:19:28.989705Z", "session_id": "20260314-191910-xj1vpm", "turn": 3, "role": "assistant", "content_preview": "<|im_start|>\n", "content_len": 13}
+{"event": "session_end", "ts": "2026-03-15T00:19:28.989911Z", "session_id": "20260314-191910-xj1vpm", "turns": 3, "files_changed": [], "tool_calls_count": 0, "errors_count": 0, "tokens_used": 1243, "duration_s": 18.2, "summary": "<|im_start|>\n"}

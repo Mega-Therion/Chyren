@@ -1,0 +1,8 @@
+{
+  "name": "list_teams",
+  "description": "List the user's teams. Use this to help discover the Team ID of the teams that the user is part of.",
+  "arguments": {
+    "type": "object",
+    "properties": {}
+  }
+}

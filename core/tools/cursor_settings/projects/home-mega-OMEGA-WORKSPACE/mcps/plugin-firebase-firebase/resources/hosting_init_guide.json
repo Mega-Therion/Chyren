@@ -1,0 +1,5 @@
+{
+  "uri": "firebase://guides/init/hosting",
+  "name": "hosting_init_guide",
+  "description": "guides the coding agent through deploying to Firebase Hosting in the current project"
+}

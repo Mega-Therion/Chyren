@@ -1,0 +1,73 @@
+{
+  "name": "clickup_create_new_document_page",
+  "description": "Create new page in the specific document",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "name": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Name"
+      },
+      "doc_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Document"
+      },
+      "content": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Content"
+      },
+      "team_id": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Workspace"
+        }
+      },
+      "markdown": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Markdown Content"
+      },
+      "sub_title": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Subtitle"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

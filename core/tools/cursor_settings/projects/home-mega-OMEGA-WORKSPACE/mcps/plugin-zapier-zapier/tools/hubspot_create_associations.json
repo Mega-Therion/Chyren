@@ -1,0 +1,49 @@
+{
+  "name": "hubspot_create_associations",
+  "description": "Creates associations between objects.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "fromObjectId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "The ID of the object being associated"
+      },
+      "fromObjectType": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "The type of the object being associated"
+      },
+      "haltTaskStrategy": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Task halting strategy"
+      },
+      "numberOfAssociationTypes": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Number of association types that should be created"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

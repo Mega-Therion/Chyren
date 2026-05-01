@@ -1,0 +1,17 @@
+{
+  "name": "ollama_ps",
+  "description": "List running models. Shows which models are currently loaded in memory.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "format": {
+        "type": "string",
+        "enum": [
+          "json",
+          "markdown"
+        ],
+        "default": "json"
+      }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "retrieve_detailed_user_information",
+  "description": "Retrieves comprehensive information for a valid slack user id, excluding message history and channel memberships.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "user": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The ID of the user to retrieve information for.\nExamples:\n  \"U012ABCDEF\"\n  \"W021XYZABC\""
+      },
+      "include_locale": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Set to `true` to include the user's locale (e.g., `en-US`) in the response. Defaults to `false`."
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `RetrieveDetailedUserInformation`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

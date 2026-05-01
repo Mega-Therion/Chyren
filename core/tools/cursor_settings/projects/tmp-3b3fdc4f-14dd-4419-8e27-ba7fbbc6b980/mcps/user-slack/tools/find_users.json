@@ -1,0 +1,44 @@
+{
+  "name": "find_users",
+  "description": "Find users in a slack workspace by any criteria - email, name, display name, or other text. includes optimized email lookup for exact email matches.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "limit": {
+        "type": "integer",
+        "description": "Maximum number of users to return (1 to 200). Defaults to 50.\nExamples:\n  10\n  25\n  100",
+        "default": 50
+      },
+      "exact_match": {
+        "type": "boolean",
+        "description": "Use exact matching instead of partial matching. Defaults to false.\nExamples:\n  true\n  false",
+        "default": false
+      },
+      "include_bots": {
+        "type": "boolean",
+        "description": "Include bot users in search results. Defaults to false.\nExamples:\n  true\n  false",
+        "default": false
+      },
+      "search_query": {
+        "type": "string",
+        "description": "Search query to find users. Searches across name, display name, real name, email address, first name, last name, and status text (case-insensitive partial matching). For exact email matches with exact_match=true, uses Slack's efficient email lookup endpoint.\nExamples:\n  \"john\"\n  \"john.doe@company.com\"\n  \"john doe\"\n  \"smith\"\n  \"@company.com\""
+      },
+      "include_deleted": {
+        "type": "boolean",
+        "description": "Include deleted/deactivated users in search results. Defaults to false.\nExamples:\n  true\n  false",
+        "default": false
+      },
+      "include_restricted": {
+        "type": "boolean",
+        "description": "Include restricted (guest) users in search results. Defaults to true.\nExamples:\n  true\n  false",
+        "default": true
+      }
+    },
+    "required": [
+      "search_query"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for finding Slack users by any criteria (email, name, etc.).",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

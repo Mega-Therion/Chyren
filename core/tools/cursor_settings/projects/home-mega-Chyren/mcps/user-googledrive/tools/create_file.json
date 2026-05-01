@@ -1,0 +1,67 @@
+{
+  "name": "create_file",
+  "description": "Creates a new file or folder with metadata. use to create empty files or folders, or files with content by providing it in the request body (though this action primarily focuses on metadata creation).",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The name of the file."
+      },
+      "fields": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A comma-separated list of fields to include in the response."
+      },
+      "parents": {
+        "anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "The IDs of parent folders."
+      },
+      "starred": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether the user has starred the file."
+      },
+      "mimeType": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The MIME type of the file."
+      },
+      "description": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A short description of the file."
+      }
+    },
+    "additionalProperties": false,
+    "description": "CreateFileRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

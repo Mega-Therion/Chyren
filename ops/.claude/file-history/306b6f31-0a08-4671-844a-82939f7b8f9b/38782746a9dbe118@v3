@@ -1,4 +1,0 @@
-# Chyren Project Memory Index
-
-- [Implementation Status](chyren_implementation_status.md) — Complete 5-module sovereign hub with 7-stage pipeline, all core functionality operational
-- [Phylactery L6 Integration](phylactery_integration_complete.md) — Runtime-loaded identity kernel (58.3k synthesized entries) bootstrapped at CLI startup

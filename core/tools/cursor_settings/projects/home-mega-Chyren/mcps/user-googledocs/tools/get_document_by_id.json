@@ -1,0 +1,19 @@
+{
+  "name": "get_document_by_id",
+  "description": "Retrieves an existing google document by its id; will error if the document is not found.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "The unique identifier for the Google Document to be retrieved. This action specifically fetches an existing document and will not create a new one if the ID is not found.\nExample: \"123abcDeFgHiJkLmNoPqRsTuVwXyZ_0123456789AB\""
+      }
+    },
+    "required": [
+      "id"
+    ],
+    "additionalProperties": false,
+    "description": "FindOrCreateDocumentRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

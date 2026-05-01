@@ -1,0 +1,19 @@
+{
+  "name": "hide_drive",
+  "description": "Tool to hide a shared drive from the default view. use when you want to remove a shared drive from the user's main google drive interface without deleting it.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "drive_id": {
+        "type": "string",
+        "description": "The ID of the shared drive.\nExample: \"0AEMgNk_8MPnAUk9PVA\""
+      }
+    },
+    "required": [
+      "drive_id"
+    ],
+    "additionalProperties": false,
+    "description": "HideDriveRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

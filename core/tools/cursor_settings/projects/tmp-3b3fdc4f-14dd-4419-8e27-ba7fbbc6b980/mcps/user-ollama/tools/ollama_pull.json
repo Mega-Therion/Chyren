@@ -1,0 +1,29 @@
+{
+  "name": "ollama_pull",
+  "description": "Pull a model from the Ollama registry. Downloads the model to make it available locally.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "model": {
+        "type": "string",
+        "description": "Name of the model to pull"
+      },
+      "insecure": {
+        "type": "boolean",
+        "description": "Allow insecure connections",
+        "default": false
+      },
+      "format": {
+        "type": "string",
+        "enum": [
+          "json",
+          "markdown"
+        ],
+        "default": "json"
+      }
+    },
+    "required": [
+      "model"
+    ]
+  }
+}

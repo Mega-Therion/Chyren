@@ -1,0 +1,29 @@
+{
+  "name": "add_reaction_to_an_item",
+  "description": "Adds a specified emoji reaction to an existing message in a slack channel, identified by its timestamp; does not remove or retrieve reactions.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "Name of the emoji to add as a reaction (e.g., 'thumbsup'). This is the emoji name without colons. For emojis with skin tone modifiers, append '::skin-tone-X' where X is a number from 2 to 6 (e.g., 'wave::skin-tone-3').\nExamples:\n  \"thumbsup\"\n  \"grinning\"\n  \"robot_face\"\n  \"wave::skin-tone-3\""
+      },
+      "channel": {
+        "type": "string",
+        "description": "ID of the channel where the message to add the reaction to was posted.\nExamples:\n  \"C1234567890\"\n  \"G0987654321\""
+      },
+      "timestamp": {
+        "type": "string",
+        "description": "Timestamp of the message to which the reaction will be added. This is a unique identifier for the message, typically a string representing a float value like '1234567890.123456'.\nExamples:\n  \"1234567890.123456\"\n  \"1609459200.000200\""
+      }
+    },
+    "required": [
+      "name",
+      "channel",
+      "timestamp"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `AddReactionToAnItem`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

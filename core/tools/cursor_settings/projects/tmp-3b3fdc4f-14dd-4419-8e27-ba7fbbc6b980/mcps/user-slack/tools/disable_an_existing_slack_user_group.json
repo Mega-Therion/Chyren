@@ -1,0 +1,23 @@
+{
+  "name": "disable_an_existing_slack_user_group",
+  "description": "Disables a specified, currently enabled slack user group by its unique id, effectively archiving it by setting its 'date delete' timestamp; the group is not permanently deleted and can be re-enabled.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "usergroup": {
+        "type": "string",
+        "description": "Unique encoded ID of the User Group to disable.\nExamples:\n  \"S0123ABCDEF\"\n  \"S0604QSJC\""
+      },
+      "include_count": {
+        "type": "boolean",
+        "description": "If true, include the number of users in the User Group in the response.\nExamples:\n  \"true\"\n  \"false\""
+      }
+    },
+    "required": [
+      "usergroup"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `DisableAnExistingSlackUserGroup`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

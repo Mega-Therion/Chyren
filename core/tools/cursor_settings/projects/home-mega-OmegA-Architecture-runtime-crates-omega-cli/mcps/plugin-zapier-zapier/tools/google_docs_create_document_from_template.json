@@ -1,0 +1,122 @@
+{
+  "name": "google_docs_create_document_from_template",
+  "description": "Creates a new doc based on an existing one and can replace any placeholder variables found in your template doc, like {{name}}, {{email}}, etc.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "file": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Template Document"
+      },
+      "drive": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Drive"
+      },
+      "image": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Insert Inline Image (Image URL)"
+      },
+      "title": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "New Document Name"
+      },
+      "folder": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Folder for new Document"
+      },
+      "image_index": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Image location (Index)"
+      },
+      "image_tabId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Image location (tabId)"
+      },
+      "export_formats": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Export Formats"
+        }
+      },
+      "template_drive": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Drive containing the template document"
+      },
+      "image_segmentId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Image location (Segment ID)"
+      },
+      "template_folder": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Folder containing the template document"
+      },
+      "sharing_preference": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Sharing Preference"
+      },
+      "empty_fields_preference": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Unused Fields Preference"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "list_all_users_in_a_user_group",
+  "description": "Retrieves a list of all user ids within a specified slack user group, with an option to include users from disabled groups.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "usergroup": {
+        "type": "string",
+        "description": "The encoded ID of the User Group to list users from. This ID is an alphanumeric string.\nExamples:\n  \"S0604QSJC\"\n  \"S123ABC456\""
+      },
+      "include_disabled": {
+        "type": "boolean",
+        "description": "Set to `true` to include users from disabled user groups. If omitted, the default Slack API behavior for handling disabled groups (typically excluding them) will apply."
+      }
+    },
+    "required": [
+      "usergroup"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for listing all users in a Slack user group.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

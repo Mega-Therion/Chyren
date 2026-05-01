@@ -1,0 +1,6 @@
+{"event": "session_start", "ts": "2026-03-15T00:08:14.933448Z", "session_id": "20260314-190814-z3uguj", "task": "use bash to run: date", "config": {"model": "qwen2.5-coder:1.5b", "provider": "ollama", "mode": "trust", "workspace": "/home/mega"}}
+{"event": "agent_turn", "ts": "2026-03-15T00:08:14.933698Z", "session_id": "20260314-190814-z3uguj", "turn": 0, "role": "user", "content_preview": "use bash to run: date", "content_len": 21}
+{"event": "agent_turn", "ts": "2026-03-15T00:11:52.856718Z", "session_id": "20260314-190814-z3uguj", "turn": 1, "role": "assistant", "content_preview": "", "content_len": 0}
+{"event": "agent_turn", "ts": "2026-03-15T00:12:16.091831Z", "session_id": "20260314-190814-z3uguj", "turn": 2, "role": "assistant", "content_preview": "", "content_len": 0}
+{"event": "agent_turn", "ts": "2026-03-15T00:12:17.422829Z", "session_id": "20260314-190814-z3uguj", "turn": 3, "role": "assistant", "content_preview": "", "content_len": 0}
+{"event": "session_end", "ts": "2026-03-15T00:12:17.429813Z", "session_id": "20260314-190814-z3uguj", "turns": 3, "files_changed": [], "tool_calls_count": 0, "errors_count": 0, "tokens_used": 1246, "duration_s": 242.5, "summary": "Task: use bash to run: date\nCompleted in 3 turns, 242.5s\nTool calls: 2\nTokens used: 1,246\nErrors: 2"}

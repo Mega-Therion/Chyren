@@ -1,0 +1,16 @@
+{
+  "name": "fetch_bot_user_information",
+  "description": "Fetches information for a specified, existing slack bot user; will not work for regular user accounts or other integration types.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "bot": {
+        "type": "string",
+        "description": "The ID of the bot user to retrieve information for. This typically starts with 'B'.\nExample: \"B0123456789\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `FetchBotUserInformation`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

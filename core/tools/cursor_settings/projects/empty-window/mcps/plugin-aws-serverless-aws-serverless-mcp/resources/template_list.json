@@ -1,0 +1,6 @@
+{
+  "uri": "template://list",
+  "name": "template_list",
+  "description": "List of SAM deployment templates that can be used with the deploy_webapp_tool.\n                Includes frontend, backend, and fullstack templates. ",
+  "mimeType": "text/plain"
+}

@@ -1,0 +1,19 @@
+{
+  "name": "get_team_dnd_status",
+  "description": "Retrieves a user's current do not disturb status.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "users": {
+        "type": "string",
+        "description": "Comma-separated list of users to fetch Do Not Disturb status for\nExample: \"U1234,U5678\""
+      }
+    },
+    "required": [
+      "users"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `GetTeamDndStatus`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

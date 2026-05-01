@@ -1,0 +1,40 @@
+{
+  "name": "list_scheduled_messages",
+  "description": "Retrieves a list of pending (not yet delivered) messages scheduled in a specific slack channel, or across all accessible channels if no channel id is provided, optionally filtered by time and paginated.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "limit": {
+        "type": "integer",
+        "description": "Maximum messages per page (1-1000). Defaults to 100.\nExamples:\n  \"100\"\n  \"50\""
+      },
+      "cursor": {
+        "type": "string",
+        "description": "Pagination cursor from `response_metadata.next_cursor` of a previous response. Omit for the first page.\nExamples:\n  \"dXNlcjpVMDYxREk0STM=\"\n  \"bmV4dF9wYWdlX2N1cnNvcg==\""
+      },
+      "latest": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Latest UNIX timestamp (exclusive) for messages. Defaults to the current time if omitted.\nExamples:\n  \"1678886400.000000\"\n  \"1678972800.000000\""
+      },
+      "oldest": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Earliest UNIX timestamp (inclusive) for messages. Defaults to 0 if omitted.\nExamples:\n  \"1678800000.000000\"\n  \"1678880000.000000\""
+      },
+      "channel": {
+        "type": "string",
+        "description": "ID or name of the channel (public, private, or DM) to list messages for. If omitted, lists for all accessible channels in the workspace.\nExamples:\n  \"C1234567890\"\n  \"general\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for listing scheduled messages in a channel or workspace.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

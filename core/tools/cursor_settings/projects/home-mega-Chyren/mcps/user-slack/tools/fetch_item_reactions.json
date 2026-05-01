@@ -1,0 +1,32 @@
+{
+  "name": "fetch_item_reactions",
+  "description": "Fetches reactions for a slack message, file, or file comment, requiring one of: channel and timestamp; file id; or file comment id.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file": {
+        "type": "string",
+        "description": "File ID. Use instead of channel/timestamp or file comment ID.\nExamples:\n  \"F1234567890\"\n  \"F2147483002\""
+      },
+      "full": {
+        "type": "boolean",
+        "description": "If true, returns the complete list of users for each reaction."
+      },
+      "channel": {
+        "type": "string",
+        "description": "Channel ID. Required if `timestamp` is provided and no file or file comment ID is given.\nExamples:\n  \"C1234567890\"\n  \"C061F7XAZ\""
+      },
+      "timestamp": {
+        "type": "string",
+        "description": "Message timestamp (e.g., '1234567890.123456'). Required if `channel` is provided and no file or file comment ID is given.\nExamples:\n  \"1234567890.123456\"\n  \"1629876543.000100\""
+      },
+      "file_comment": {
+        "type": "string",
+        "description": "File comment ID. Use instead of channel/timestamp or file ID.\nExamples:\n  \"Fc1234567890\"\n  \"Fc789123456\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `FetchItemReactions` action. It specifies the item (message, file, or file comment) for which to retrieve reactions.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

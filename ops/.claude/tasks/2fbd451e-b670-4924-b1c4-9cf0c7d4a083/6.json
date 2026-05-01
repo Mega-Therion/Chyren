@@ -1,9 +1,0 @@
-{
-  "id": "6",
-  "subject": "Clean deploy to Vercel",
-  "description": "Delete stale projects, redeploy omega-sovereign from latest main with full stack wired in",
-  "activeForm": "Deploying to Vercel",
-  "status": "pending",
-  "blocks": [],
-  "blockedBy": []
-}

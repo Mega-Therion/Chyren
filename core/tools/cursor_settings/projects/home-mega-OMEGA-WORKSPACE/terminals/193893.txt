@@ -1,0 +1,19 @@
+---
+pid: 182406
+cwd: "/home/mega/OMEGA_WORKSPACE"
+command: "cd /home/mega/OMEGA_WORKSPACE/CANON/OmegA-Architecture/runtime && cargo build -p omega-gateway --release"
+started_at: 2026-03-31T08:55:58.455Z
+running_for_ms: 355655   
+---
+   Compiling omega-core v0.1.0 (/home/mega/OMEGA_WORKSPACE/CANON/OmegA-Architecture/runtime/crates/omega-core)
+   Compiling omega-provider v0.1.0 (/home/mega/OMEGA_WORKSPACE/CANON/OmegA-Architecture/runtime/crates/omega-provider)
+   Compiling omega-memory v0.1.0 (/home/mega/OMEGA_WORKSPACE/CANON/OmegA-Architecture/runtime/crates/omega-memory)
+   Compiling omega-consensus v0.1.0 (/home/mega/OMEGA_WORKSPACE/CANON/OmegA-Architecture/runtime/crates/omega-consensus)
+   Compiling omega-gateway v0.1.0 (/home/mega/OMEGA_WORKSPACE/CANON/OmegA-Architecture/runtime/crates/omega-gateway)
+    Finished `release` profile [optimized] target(s) in 5m 58s
+
+---
+exit_code: 0
+elapsed_ms: 360222
+ended_at: 2026-03-31T09:01:58.677Z
+---

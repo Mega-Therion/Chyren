@@ -1,0 +1,15 @@
+[Unit]
+Description=Chyren Sovereign Telegram Agent
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/mega/Chyren/scripts/chyren_telegram_agent.py
+WorkingDirectory=/home/mega/Chyren
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=mega
+EnvironmentFile=/home/mega/.chyren/one-true.env
+
+[Install]
+WantedBy=multi-user.target

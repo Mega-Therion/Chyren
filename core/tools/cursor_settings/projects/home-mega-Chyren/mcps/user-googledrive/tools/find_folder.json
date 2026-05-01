@@ -1,0 +1,68 @@
+{
+  "name": "find_folder",
+  "description": "Tool to find a folder in google drive by its name and optionally a parent folder. use when you need to locate a specific folder to perform further actions like creating files in it or listing its contents.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "starred": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Set to true to search for folders that are starred, or false for those that are not."
+      },
+      "name_exact": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The exact name of the folder to search for. This search is case-sensitive.\nExamples:\n  \"Project Alpha\"\n  \"Q1 Financials\""
+      },
+      "name_contains": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A substring to search for within folder names. This search is case-insensitive.\nExamples:\n  \"report\"\n  \"meeting notes\""
+      },
+      "modified_after": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Search for folders modified after a specific date and time. The timestamp must be in RFC 3339 format (e.g., '2023-01-15T10:00:00Z' or '2023-01-15T10:00:00.000Z').\nExample: \"2023-08-01T00:00:00Z\""
+      },
+      "name_not_contains": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A substring to exclude from folder names. Folders with names containing this substring will not be returned. This search is case-insensitive.\nExamples:\n  \"archive\"\n  \"old\""
+      },
+      "full_text_contains": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A string to search for within the full text content of files within folders (if applicable and supported by Drive for the folder type or its contents). This search is case-insensitive.\nExamples:\n  \"confidential project details\"\n  \"keyword\""
+      },
+      "full_text_not_contains": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A string to exclude from the full text content of files within folders. This search is case-insensitive.\nExamples:\n  \"draft\"\n  \"internal use only\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "FindFolderRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

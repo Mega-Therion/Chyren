@@ -1,0 +1,29 @@
+{
+  "name": "ollama_embed",
+  "description": "Generate embeddings for text input. Returns numerical vector representations.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "model": {
+        "type": "string",
+        "description": "Name of the model to use"
+      },
+      "input": {
+        "type": "string",
+        "description": "Text input. For batch processing, provide a JSON-encoded array of strings, e.g., [\"text1\", \"text2\"]"
+      },
+      "format": {
+        "type": "string",
+        "enum": [
+          "json",
+          "markdown"
+        ],
+        "default": "json"
+      }
+    },
+    "required": [
+      "model",
+      "input"
+    ]
+  }
+}

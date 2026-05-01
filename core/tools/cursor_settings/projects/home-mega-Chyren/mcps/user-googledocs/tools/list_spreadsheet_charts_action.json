@@ -1,0 +1,24 @@
+{
+  "name": "list_spreadsheet_charts_action",
+  "description": "Tool to retrieve a list of charts with their ids and metadata from a google sheets spreadsheet. use to identify charts available for embedding into google docs.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "fields_mask": {
+        "type": "string",
+        "description": "Field mask to specify which parts of the spreadsheet and chart resources to include. Example: '''sheets(properties(sheetId,title),charts(chartId,spec(title,altText)))'''",
+        "default": "sheets(properties(sheetId,title),charts(chartId,spec(title,altText)))"
+      },
+      "spreadsheet_id": {
+        "type": "string",
+        "description": "The ID of the Google Sheets spreadsheet.\nExample: \"1gja9Z3N3w9y0p9xJ0y1z8s7f6e5d4c3b2a1\""
+      }
+    },
+    "required": [
+      "spreadsheet_id"
+    ],
+    "additionalProperties": false,
+    "description": "ListSpreadsheetChartsRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

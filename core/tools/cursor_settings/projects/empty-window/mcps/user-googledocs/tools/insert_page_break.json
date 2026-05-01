@@ -1,0 +1,80 @@
+{
+  "name": "insert_page_break",
+  "description": "Tool to insert a page break into a google document. use when you need to start new content on a fresh page, such as at the end of a chapter or section.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "documentId": {
+        "type": "string",
+        "description": "The ID of the document to update.\nExample: \"1a2B3c4D5e6F7g8H9i0J\""
+      },
+      "insertPageBreak": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "index": {
+                    "type": "integer",
+                    "description": "The zero-based index, in UTF-16 code units. The page break is inserted before this index.\nExample: 100"
+                  },
+                  "segmentId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "default": null,
+                    "description": "The ID of the segment where the page break is to be inserted. For page breaks, this should typically be null or empty, indicating the main document body, as page breaks are not allowed in headers, footers, or footnotes.\nExample: \"\""
+                  }
+                },
+                "required": [
+                  "index"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Specifies the location to insert the page break using a zero-based index. Use this or end_of_segment_location."
+          },
+          "endOfSegmentLocation": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "segmentId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "default": null,
+                    "description": "The ID of the segment where the page break is to be inserted. For page breaks, this must be null or an empty string, indicating the end of the main document body.\nExample: \"\""
+                  }
+                },
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Specifies that the page break should be inserted at the end of a segment (document body). Use this or location."
+          }
+        },
+        "additionalProperties": false,
+        "description": "The details for the insertPageBreak request."
+      }
+    },
+    "required": [
+      "documentId",
+      "insertPageBreak"
+    ],
+    "additionalProperties": false,
+    "description": "InsertPageBreakRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

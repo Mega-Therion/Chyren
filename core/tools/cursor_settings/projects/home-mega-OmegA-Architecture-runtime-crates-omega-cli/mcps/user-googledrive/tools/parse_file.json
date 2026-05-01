@@ -1,0 +1,52 @@
+{
+  "name": "parse_file",
+  "description": "Deprecated: exports google workspace files (max 10mb) to a specified format using `mime type`, or downloads other file types; use `googledrive download file` instead.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file_id": {
+        "type": "string",
+        "description": "The unique ID of the file stored in Google Drive that you want to export or download."
+      },
+      "mime_type": {
+        "anyOf": [
+          {
+            "type": "string",
+            "enum": [
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+              "application/vnd.oasis.opendocument.text",
+              "application/rtf",
+              "application/pdf",
+              "text/plain",
+              "application/zip",
+              "application/epub+zip",
+              "text/markdown",
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+              "application/x-vnd.oasis.opendocument.spreadsheet",
+              "text/csv",
+              "text/tab-separated-values",
+              "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+              "application/vnd.oasis.opendocument.presentation",
+              "image/jpeg",
+              "image/png",
+              "image/svg+xml",
+              "application/vnd.google-apps.script+json",
+              "application/vnd.google-apps.vid"
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Target MIME type for exporting Google Workspace documents (e.g., Docs, Sheets) to a different format (e.g., PDF, DOCX). Omit for direct download of non-Workspace files or if no conversion is needed for Workspace files.\nExamples:\n  \"application/pdf\"\n  \"application/vnd.openxmlformats-officedocument.wordprocessingml.document\"\n  \"text/csv\""
+      }
+    },
+    "required": [
+      "file_id"
+    ],
+    "additionalProperties": false,
+    "description": "ParseFileRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

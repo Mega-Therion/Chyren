@@ -1,0 +1,5 @@
+{
+  "uri": "console://logs",
+  "name": "Browser console logs",
+  "mimeType": "text/plain"
+}

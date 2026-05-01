@@ -1,0 +1,32 @@
+{
+  "name": "list_accessible_conversations_for_a_user",
+  "description": "Deprecated: retrieves conversations accessible to a specified user. use `list conversations` instead.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "user": {
+        "type": "string",
+        "description": "The ID of the user whose conversations will be listed. If not provided, conversations for the authenticated user are returned. Non-public channels are restricted to those where the calling user (authenticating user) shares membership.\nExamples:\n  \"U123ABC456\"\n  \"W012A3BCD\""
+      },
+      "limit": {
+        "type": "integer",
+        "description": "The maximum number of items to return per page. Must be an integer, typically between 1 and 1000 (e.g., 100). If omitted, the API's default limit (often 100) applies. Fewer items than the limit may be returned.\nExamples:\n  \"100\"\n  \"500\"\n  \"1000\""
+      },
+      "types": {
+        "type": "string",
+        "description": "A comma-separated list of conversation types to include. Valid types are `public_channel`, `private_channel`, `mpim` (multi-person direct message), and `im` (direct message). If omitted, all types are included.\nExamples:\n  \"public_channel,private_channel\"\n  \"im,mpim\"\n  \"public_channel\""
+      },
+      "cursor": {
+        "type": "string",
+        "description": "Pagination cursor for retrieving the next set of results. Obtain this from the `next_cursor` field in a previous response's `response_metadata`. If omitted, the first page is fetched.\nExamples:\n  \"dXNlcjpVMDYxREk0Nlc=\"\n  \"bmV4dF90czoxNTEyMDg1ODYxMDAwNTQz\""
+      },
+      "exclude_archived": {
+        "type": "boolean",
+        "description": "Set to `true` to exclude archived channels from the list. If `false` or omitted, archived channels are typically included (the API's default behavior for omission will apply, usually including them).\nExamples:\n  \"true\"\n  \"false\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request model for listing conversations accessible to a user, with options for pagination and filtering.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

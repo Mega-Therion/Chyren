@@ -1,0 +1,70 @@
+{
+  "name": "google_docs_insert_image",
+  "description": "Insert an image at a specific position in a Google Doc.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "index": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Insert position (Index)"
+      },
+      "tabId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Tab ID"
+      },
+      "width": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Width (points)"
+      },
+      "height": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Height (points)"
+      },
+      "imageUri": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Image URL"
+      },
+      "segmentId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Segment ID"
+      },
+      "documentId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Document"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

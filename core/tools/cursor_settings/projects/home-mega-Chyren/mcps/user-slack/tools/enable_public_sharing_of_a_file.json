@@ -1,0 +1,16 @@
+{
+  "name": "enable_public_sharing_of_a_file",
+  "description": "Enables public sharing for an existing slack file by generating a publicly accessible url; this action does not create new files.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file": {
+        "type": "string",
+        "description": "The ID of the file to be shared publicly.\nExample: \"F0123456789\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `EnablePublicSharingOfAFile`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

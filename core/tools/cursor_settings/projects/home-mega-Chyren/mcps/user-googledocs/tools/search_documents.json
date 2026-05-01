@@ -1,0 +1,82 @@
+{
+  "name": "search_documents",
+  "description": "Search for google documents using various filters including name, content, date ranges, and more.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "query": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Search query to filter documents. Can search by name (name contains 'report'), full text content (fullText contains 'important'), or use complex queries with operators like 'and', 'or', 'not'. Leave empty to get all documents.\nExamples:\n  \"name contains 'report'\"\n  \"fullText contains 'important'\"\n  \"name contains 'project' and fullText contains 'status'\""
+      },
+      "order_by": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Order results by field. Common options: 'modifiedTime desc', 'modifiedTime asc', 'name', 'createdTime desc'\nExamples:\n  \"modifiedTime desc\"\n  \"name\"\n  \"createdTime desc\"\n  \"viewedByMeTime desc\"",
+        "default": "modifiedTime desc"
+      },
+      "max_results": {
+        "anyOf": [
+          {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Maximum number of documents to return (1-1000). Defaults to 10.",
+        "default": 10
+      },
+      "starred_only": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "description": "Whether to return only starred documents. Defaults to False.",
+        "default": false
+      },
+      "created_after": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Return documents created after this date. Use RFC 3339 format like '2024-01-01T00:00:00Z'.\nExamples:\n  \"2024-01-01T00:00:00Z\"\n  \"2024-12-01T12:00:00-08:00\""
+      },
+      "modified_after": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Return documents modified after this date. Use RFC 3339 format like '2024-01-01T00:00:00Z'.\nExamples:\n  \"2024-01-01T00:00:00Z\"\n  \"2024-12-01T12:00:00-08:00\""
+      },
+      "shared_with_me": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "description": "Whether to return only documents shared with the current user. Defaults to False.",
+        "default": false
+      },
+      "include_trashed": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "description": "Whether to include documents in trash. Defaults to False.",
+        "default": false
+      }
+    },
+    "additionalProperties": false,
+    "description": "SearchDocumentsRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "retrieve_user_profile_information",
+  "description": "Retrieves profile information for a specified slack user (defaults to the authenticated user if `user` id is omitted); a provided `user` id must be valid.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "user": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "User ID to retrieve profile information for; defaults to the authenticated user.\nExamples:\n  \"U012A3CDE\"\n  \"W1234567890\""
+      },
+      "include_labels": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Include human-readable labels for custom profile fields. API defaults to false.\nExamples:\n  true\n  false"
+      }
+    },
+    "additionalProperties": false,
+    "description": "Specifies the user and options for retrieving their profile.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

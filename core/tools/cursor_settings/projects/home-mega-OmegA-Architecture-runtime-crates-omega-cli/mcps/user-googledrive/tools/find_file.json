@@ -1,0 +1,108 @@
+{
+  "name": "find_file",
+  "description": "Tool to list or search for files and folders in google drive. use when you need to find specific files based on query criteria or list contents of a drive/folder.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "q": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A query for filtering the file results. See Google Drive API documentation for query syntax. Example: \\\"name contains 'report' and mimeType = 'application/pdf'\\\""
+      },
+      "fields": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Selector specifying which fields to include in a partial response. Use '*' for all fields or a comma-separated list, e.g., 'nextPageToken,files(id,name,mimeType)'.",
+        "default": "*"
+      },
+      "spaces": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "A comma-separated list of spaces to query. Supported values are 'drive', 'appDataFolder' and 'photos'.",
+        "default": "drive"
+      },
+      "corpora": {
+        "anyOf": [
+          {
+            "type": "string",
+            "enum": [
+              "user",
+              "drive",
+              "domain",
+              "allDrives"
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Corpora to query. 'user' for user's personal files, 'drive' for files in a specific shared drive (requires 'driveId'), 'domain' for files shared with the domain, 'allDrives' for all drives the user has access to."
+      },
+      "driveId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "ID of the shared drive to search. Required if 'corpora' is 'drive'."
+      },
+      "orderBy": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A comma-separated list of sort keys. Valid keys are 'createdTime', 'folder', 'modifiedByMeTime', 'modifiedTime', 'name', 'name_natural', 'quotaBytesUsed', 'recency', 'sharedWithMeTime', 'starred', and 'viewedByMeTime'. Each key sorts ascending by default, but may be reversed with the 'desc' modifier. Example: 'modifiedTime desc,name'."
+      },
+      "pageSize": {
+        "anyOf": [
+          {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "The maximum number of files to return per page.",
+        "default": 100
+      },
+      "pageToken": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The token for continuing a previous list request on the next page."
+      },
+      "supportsAllDrives": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "description": "Whether the requesting application supports both My Drives and shared drives. If 'includeItemsFromAllDrives' is true, this must also be true.",
+        "default": true
+      },
+      "includeItemsFromAllDrives": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "description": "Whether both My Drive and shared drive items should be included in results. If true, 'supportsAllDrives' should also be true.",
+        "default": false
+      }
+    },
+    "additionalProperties": false,
+    "description": "FindFileRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

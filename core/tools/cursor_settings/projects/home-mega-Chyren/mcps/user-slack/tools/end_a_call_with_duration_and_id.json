@@ -1,0 +1,23 @@
+{
+  "name": "end_a_call_with_duration_and_id",
+  "description": "Ends an ongoing slack call, identified by its id (obtained from `calls.add`), optionally specifying the call's duration.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "Unique identifier of the call to be ended, obtained from the `calls.add` method.\nExample: \"R0123456789\""
+      },
+      "duration": {
+        "type": "integer",
+        "description": "Duration of the call in seconds.\nExamples:\n  \"600\"\n  \"3600\""
+      }
+    },
+    "required": [
+      "id"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `EndACallWithDurationAndId`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

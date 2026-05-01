@@ -1,0 +1,19 @@
+{
+  "name": "unarchive_a_public_or_private_channel",
+  "description": "Unarchives a specified public or private slack channel that is currently archived, using its channel id.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "channel_id": {
+        "type": "string",
+        "description": "The unique identifier of the public or private channel to be unarchived.\nExamples:\n  \"C0123456789\"\n  \"G0987654321\""
+      }
+    },
+    "required": [
+      "channel_id"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for unarchiving a Slack channel.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

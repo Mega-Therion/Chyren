@@ -1,0 +1,20 @@
+{
+  "name": "mark_reminder_as_complete",
+  "description": "Marks a specific slack reminder as complete using its `reminder` id; **deprecated**: this slack api endpoint ('reminders.complete') was deprecated in march 2023 and is not recommended for new applications.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "reminder": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The unique identifier of the Slack reminder to be marked as complete. This ID is typically obtained when a reminder is created or listed.\nExample: \"R0123456789\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request model for marking a specific Slack reminder as complete.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

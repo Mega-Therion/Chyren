@@ -1,0 +1,20 @@
+{
+  "name": "share_a_me_message_in_a_channel",
+  "description": "Sends a 'me message' (e.g., '/me is typing') to a slack channel, where it's displayed as a third-person user action; messages are plain text and the channel must exist and be accessible.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "text": {
+        "type": "string",
+        "description": "Content of the 'me message', displayed as an action performed by the user (e.g., if text is 'is feeling happy', it appears as '*User is feeling happy*').\nExamples:\n  \"is preparing for a meeting.\"\n  \"updated the project status.\"\n  \"needs coffee.\""
+      },
+      "channel": {
+        "type": "string",
+        "description": "Specifies the target channel by its public ID (e.g., 'C1234567890'), private group ID, IM channel ID, or name (e.g., '#general', '@username').\nExamples:\n  \"C1234567890\"\n  \"#random\"\n  \"D012345678\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `ShareAMeMessageInAChannel`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

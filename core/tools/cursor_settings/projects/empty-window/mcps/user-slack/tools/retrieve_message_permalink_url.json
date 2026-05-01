@@ -1,0 +1,24 @@
+{
+  "name": "retrieve_message_permalink_url",
+  "description": "Retrieves a permalink url for a specific message in a slack channel or conversation; the permalink respects slack's privacy settings.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "channel": {
+        "type": "string",
+        "description": "The ID of the conversation or channel containing the message. This can be a public channel ID, a private channel ID, a direct message channel ID, or a multi-person direct message channel ID.\nExamples:\n  \"C012AB3CD\"\n  \"G123456\""
+      },
+      "message_ts": {
+        "type": "string",
+        "description": "A message's `ts` value (timestamp), uniquely identifying it within a channel. Example: '1610144875.000600'.\nExamples:\n  \"1610144875.000600\"\n  \"15712345.001500\""
+      }
+    },
+    "required": [
+      "channel",
+      "message_ts"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `RetrieveMessagePermalinkUrl`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

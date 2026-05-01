@@ -1,0 +1,42 @@
+{
+  "name": "generate_ids",
+  "description": "Generates a set of file ids which can be provided in create or copy requests. use when you need to pre-allocate ids for new files or copies.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "type": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The type of items for which the IDs can be used. For example, 'files' or 'shortcuts'.\nExample: \"files\""
+      },
+      "count": {
+        "anyOf": [
+          {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "The number of IDs to return. Value must be between 1 and 1000, inclusive.\nExample: 10"
+      },
+      "space": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The space in which the IDs can be used. Supported values are 'drive' and 'appDataFolder'.\nExample: \"drive\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "GenerateIdsRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

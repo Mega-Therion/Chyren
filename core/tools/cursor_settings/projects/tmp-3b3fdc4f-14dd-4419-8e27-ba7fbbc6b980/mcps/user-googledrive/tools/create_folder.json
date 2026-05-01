@@ -1,0 +1,27 @@
+{
+  "name": "create_folder",
+  "description": "Creates a new folder in google drive, optionally within a parent folder specified by its id or name; if a parent name is provided but not found, the action will fail.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "parent_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "ID or name of the parent folder. If a name is provided, the action attempts to find it. If an ID is provided, it must be a valid Google Drive folder ID. If omitted, the folder is created in the Drive root.\nExamples:\n  \"0AGr3s6kL3rIuUk9PVA\"\n  \"Existing Parent Folder Name\"\n  \"1A2b3C4d5E6fG7h8I9j0KlMNOPqRstUVW\""
+      },
+      "folder_name": {
+        "type": "string",
+        "description": "Name for the new folder.\nExamples:\n  \"Project Files\"\n  \"Documents\"\n  \"Reports\""
+      }
+    },
+    "required": [
+      "folder_name"
+    ],
+    "additionalProperties": false,
+    "description": "CreateFolderRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

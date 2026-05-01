@@ -1,58 +1,47 @@
 #!/usr/bin/env bash
 # Chyren — single front door to the Sovereign Intelligence Orchestrator.
 #
-# This launcher sources the sovereign env, ensures the TUI binary is built,
-# then hands you over to the unified TUI. Everything (chat, dream cycles,
-# server boot, sovereign workspace, telemetry, mesh) lives inside.
-#
-# Legacy brain stem preserved at ./chyren.legacy for reference.
+# ENTERPRISE EDITION
+# This launcher handles path resolution for the standardized monorepo.
 
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MEDULLA_DIR="$REPO_DIR/core/chyren-os/kernel"
+MEDULLA_DIR="$REPO_DIR/src/medulla/kernel"
 TUI_RELEASE="$MEDULLA_DIR/target/release/chyren-tui"
 TUI_DEBUG="$MEDULLA_DIR/target/debug/chyren-tui"
 
-# Source sovereign vault if present (best effort, never fatal)
+# Source sovereign vault if present
 for env_file in \
-  "$HOME/.chyren/one-true.env" \
-  "$HOME/.chyren_keys.env" \
-  "$HOME/CHYREN_WORKSPACE/VAULT/one-true.env"
+  "$REPO_DIR/vault/secrets/sovereign.env" \
+  "$REPO_DIR/vault/secrets/env.local" \
+  "$REPO_DIR/.env"
 do
   if [[ -f "$env_file" ]]; then
     set -a
-    # shellcheck disable=SC1090
     source "$env_file"
     set +a
     break
   fi
 done
 
-# Locate the TUI binary; auto-build only if explicitly missing
+# Locate the TUI binary
 if [[ -x "$TUI_RELEASE" ]]; then
   TUI_BIN="$TUI_RELEASE"
 elif [[ -x "$TUI_DEBUG" ]]; then
   TUI_BIN="$TUI_DEBUG"
 else
-  echo "[chyren] TUI binary not found — building (this may take a minute)..."
+  echo "[chyren] TUI binary not found — building..."
   (cd "$MEDULLA_DIR" && cargo build --release -p chyren-tui)
   TUI_BIN="$TUI_RELEASE"
 fi
 
-# Pass repo + bin paths so the TUI knows where to spawn things from.
 export CHYREN_REPO_DIR="$REPO_DIR"
 export CHYREN_BIN="$REPO_DIR/chyren"
-export CHYREN_API_HOST="${CHYREN_API_HOST:-127.0.0.1}"
-export CHYREN_API_PORT="${CHYREN_API_PORT:-8080}"
-export CHYREN_TELEMETRY_HOST="${CHYREN_TELEMETRY_HOST:-127.0.0.1}"
-export CHYREN_TELEMETRY_PORT="${CHYREN_TELEMETRY_PORT:-9090}"
 
-# Headless escape hatch: if any args are passed, forward to the legacy
-# brain stem so anything still scripting `./chyren <cmd>` keeps working
-# during the transition. Run with no args for the TUI.
+# Headless escape hatch
 if [[ $# -gt 0 ]]; then
-  exec "$REPO_DIR/chyren.legacy" "$@"
+  exec "$REPO_DIR/tools/chyren-legacy" "$@"
 fi
 
 exec "$TUI_BIN"

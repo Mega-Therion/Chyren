@@ -1,0 +1,16 @@
+{
+  "name": "analyze_deployment_performance",
+  "description": "Analyze deployment performance metrics and provide optimization recommendations. Use this to identify bottlenecks, slow builds, and opportunities to speed up your deployment pipeline. Perfect for CI/CD optimization and cost reduction.",
+  "arguments": [
+    {
+      "name": "deploymentId",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "includeMetrics",
+      "description": "",
+      "required": false
+    }
+  ]
+}

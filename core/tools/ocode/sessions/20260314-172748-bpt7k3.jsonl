@@ -1,0 +1,2 @@
+{"event": "session_start", "ts": "2026-03-14T22:27:48.695143Z", "session_id": "20260314-172748-bpt7k3", "task": "what is 2+2? answer briefly", "config": {"model": "qwen2.5-coder:1.5b", "provider": "ollama", "mode": "safe", "workspace": "/home/mega"}}
+{"event": "agent_turn", "ts": "2026-03-14T22:27:48.828636Z", "session_id": "20260314-172748-bpt7k3", "turn": 0, "role": "user", "content_preview": "what is 2+2? answer briefly", "content_len": 27}

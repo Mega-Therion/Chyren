@@ -1,0 +1,45 @@
+{
+  "name": "hubspot_get_line_item",
+  "description": "Gets a Line_item.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Line_item ID"
+      },
+      "properties_to_retrieve": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Additional properties to retrieve"
+        }
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

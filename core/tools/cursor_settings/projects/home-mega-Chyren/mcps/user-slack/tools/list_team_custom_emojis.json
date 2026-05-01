@@ -1,0 +1,11 @@
+{
+  "name": "list_team_custom_emojis",
+  "description": "Retrieves all custom emojis for the slack workspace (image urls or aliases), not standard unicode emojis; does not include usage statistics or creation dates.",
+  "arguments": {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": false,
+    "description": "Request model for the `ListTeamCustomEmojis` action. This action does not require any request parameters.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

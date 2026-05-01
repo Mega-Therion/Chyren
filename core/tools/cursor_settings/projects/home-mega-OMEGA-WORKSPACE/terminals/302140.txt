@@ -1,0 +1,46 @@
+---
+pid: 103704
+cwd: "/home/mega/OMEGA_WORKSPACE"
+command: "cd /home/mega/OMEGA_WORKSPACE/CANON/OmegA-Architecture/runtime && cargo run -p omega-cli -- forward \"forward test\""
+started_at: 2026-03-31T07:55:43.032Z
+running_for_ms: 160026   
+---
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on artifact directory
+warning: method `chat` is never used
+  --> crates/omega-cli/src/client.rs:65:18
+   |
+44 | impl GatewayClient {
+   | ------------------ method in this implementation
+...
+65 |     pub async fn chat(&self, prompt: &str, mode: &str) -> anyhow::Result<String> {
+   |                  ^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `omega-cli` (bin "omega-cli") generated 1 warning
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.28s
+     Running `target/debug/omega-cli forward 'forward test'`
+[1m[95mΩ OmegA[39m[0m
+[93mSovereign. Persistent. Self-Knowing.[39m
+┌─────────┬─────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ OmegA   ┆ Sovereign. Persistent. Self-Knowing.                                                            │
+╞═════════╪═════════════════════════════════════════════════════════════════════════════════════════════════╡
+│ Gateway ┆ http://localhost:8787                                                                           │
+├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ Mode    ┆ codex                                                                                           │
+├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ Auth    ┆ linked                                                                                          │
+├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ Surface ┆ ask · briefing · inspect · pulse · providers · history · chat · forward · gains · warp · config │
+└─────────┴─────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+[1m[95mForward[39m[0m
+
+---
+exit_code: unknown
+elapsed_ms: 161900
+ended_at: 2026-03-31T07:58:24.932Z
+---

@@ -1,0 +1,23 @@
+Checking MCP server health…
+
+claude.ai Hugging Face: https://huggingface.co/mcp?login&gradio=none - ! Needs authentication
+claude.ai Mermaid Chart: https://chatgpt.mermaid.ai/anthropic/mcp - ✓ Connected
+claude.ai Context7: https://mcp.context7.com/mcp - ✓ Connected
+claude.ai Google Drive: https://drivemcp.googleapis.com/mcp/v1 - ✓ Connected
+claude.ai Zapier: https://mcp.zapier.com/api/v1/connect - ✓ Connected
+claude.ai Three.js 3D Viewer: https://example-server.modelcontextprotocol.io/threejs/mcp - ✓ Connected
+claude.ai Jam: https://mcp.jam.dev/mcp - ✓ Connected
+claude.ai Airtable: https://mcp.airtable.com/mcp - ✓ Connected
+claude.ai Supabase: https://mcp.supabase.com/mcp - ✓ Connected
+claude.ai Google Calendar: https://calendarmcp.googleapis.com/mcp/v1 - ✓ Connected
+claude.ai Gmail: https://gmailmcp.googleapis.com/mcp/v1 - ✓ Connected
+claude.ai HubSpot: https://mcp.hubspot.com/anthropic - ✓ Connected
+claude.ai Slack: https://mcp.slack.com/mcp - ✓ Connected
+claude.ai Crypto.com: https://mcp.crypto.com/market-data/mcp - ✓ Connected
+claude.ai Vercel: https://mcp.vercel.com - ✓ Connected
+claude.ai Cloudflare Developer Platform: https://bindings.mcp.cloudflare.com/mcp - ✓ Connected
+claude.ai ClickUp: https://mcp.clickup.com/mcp - ✓ Connected
+claude.ai Linear: https://mcp.linear.app/mcp - ✓ Connected
+claude.ai Fireflies: https://api.fireflies.ai/mcp - ✓ Connected
+claude.ai Notion: https://mcp.notion.com/mcp - ✓ Connected
+claude.ai Figma: https://mcp.figma.com/mcp - ✓ Connected

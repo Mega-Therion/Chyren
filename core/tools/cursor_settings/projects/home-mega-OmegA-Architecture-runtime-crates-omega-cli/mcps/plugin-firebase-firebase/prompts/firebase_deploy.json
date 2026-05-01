@@ -1,0 +1,11 @@
+{
+  "name": "firebase:deploy",
+  "description": "Use this command to deploy resources to Firebase.",
+  "arguments": [
+    {
+      "name": "prompt",
+      "description": "any specific instructions you wish to provide about deploying",
+      "required": false
+    }
+  ]
+}

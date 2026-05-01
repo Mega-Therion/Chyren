@@ -1,0 +1,16 @@
+{
+  "name": "archive_a_slack_conversation",
+  "description": "Archives a slack conversation by its id, rendering it read-only and hidden while retaining history, ideal for cleaning up inactive channels; be aware that some channels (like #general or certain dms) cannot be archived and this may impact connected integrations.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "channel": {
+        "type": "string",
+        "description": "ID of the Slack conversation to archive. This ID uniquely identifies a channel (e.g., public, private).\nExample: \"C1234567890\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `ArchiveASlackConversation`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

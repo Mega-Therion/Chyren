@@ -1,0 +1,21 @@
+{
+  "name": "fix_recent_build",
+  "description": "Analyze and fix issues with the most recent deployment by fetching deployment details and build logs. Use this when your build fails, deployment is stuck, or you need to understand what went wrong. This tool will automatically fetch the latest deployment, analyze its status, retrieve build logs, and provide specific fixes.",
+  "arguments": [
+    {
+      "name": "projectId",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "includeLogs",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "logLimit",
+      "description": "",
+      "required": false
+    }
+  ]
+}

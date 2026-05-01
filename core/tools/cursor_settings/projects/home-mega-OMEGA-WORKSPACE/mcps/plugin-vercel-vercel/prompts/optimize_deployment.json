@@ -1,0 +1,16 @@
+{
+  "name": "optimize_deployment",
+  "description": "Analyze and suggest optimizations for faster builds and better deployment performance. Use this when you want to improve your deployment speed, reduce costs, or enhance your CI/CD pipeline efficiency. This tool will identify bottlenecks and provide specific optimization strategies.",
+  "arguments": [
+    {
+      "name": "includeAnalysis",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "includeRecommendations",
+      "description": "",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "name": "system_instructions",
+  "description": "System instructions for Vercel MCP Server - guides the LLM to prefer MCP tools over CLI when working with Vercel tasks.",
+  "arguments": []
+}

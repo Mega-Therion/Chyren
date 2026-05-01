@@ -1,0 +1,59 @@
+[workspace]
+resolver = "2"
+members = [
+    "chyren-core",
+    "chyren-aegis",
+    "chyren-aeon",
+    "chyren-adccl",
+    "chyren-myelin",
+    "chyren-dream",
+    "chyren-metacog",
+    "chyren-symbolic",
+    "chyren-rsil",
+    "chyren-worldmodel",
+    "chyren-integration",
+    "chyren-spokes",
+    "chyren-telemetry",
+    "chyren-conductor",
+    "chyren-eval",
+    "chyren-cli",
+    "chyren-cim",
+    "chyren-ternary",
+    "chyren-phylactery",
+    "chyren-telegram-gateway",
+    "chyren-neocortex", "chyren-vision",
+    "chyren-mega",
+    "chyren-tui",
+    "chyren-tee-driver",
+    "chyren-adaptive",
+    "chyren-repl",
+]
+
+[workspace.dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+regex = "1.0"
+tokio = { version = "1", features = ["full"] }
+sha2 = "0.10"
+hex = "0.4"
+hmac = "0.12"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "postgres", "macros", "chrono", "uuid"] }
+rumqttd = "0.20"
+rumqttc = "0.25"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.0", features = ["v4", "serde"] }
+reqwest = { version = "0.12", features = ["json", "multipart"] }
+futures = "0.3"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["Chyren Collective"]
+license = "PROPRIETARY"
+
+[profile.release]
+opt-level = 3
+lto = true

@@ -1,0 +1,24 @@
+{
+  "name": "create_document",
+  "description": "Creates a new google docs document using the provided title as filename and inserts the initial text at the beginning if non-empty, returning the document's id and metadata (excluding body content).",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "text": {
+        "type": "string",
+        "description": "Initial text content to insert at the beginning of the new document.\nExamples:\n  \"This document outlines the key findings...\"\n  \"## Agenda\\n1. Welcome\\n2. Presentation\\n3. Q&A\"\n  \"Start of the report.\""
+      },
+      "title": {
+        "type": "string",
+        "description": "Title for the new document, used as its filename in Google Drive.\nExamples:\n  \"Quarterly Business Review\"\n  \"Project Alpha - Brainstorming Notes\"\n  \"My Vacation Itinerary\""
+      }
+    },
+    "required": [
+      "text",
+      "title"
+    ],
+    "additionalProperties": false,
+    "description": "CreateDocumentRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

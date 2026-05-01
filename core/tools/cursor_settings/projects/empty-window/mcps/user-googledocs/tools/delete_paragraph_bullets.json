@@ -1,0 +1,75 @@
+{
+  "name": "delete_paragraph_bullets",
+  "description": "Tool to remove bullets from paragraphs within a specified range in a google document. use when you need to clear bullet formatting from a section of a document.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "range": {
+        "type": "object",
+        "properties": {
+          "tabId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The ID of the tab the range is in. If omitted, it applies to the first tab or the singular tab in a single-tab document."
+          },
+          "endIndex": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The zero-based end index of the range, in UTF-16 code units, relative to the start of the segment."
+          },
+          "segmentId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The ID of the header, footer, or footnote the range is in. An empty segment ID signifies the document's body."
+          },
+          "startIndex": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The zero-based start index of the range, in UTF-16 code units, relative to the start of the segment."
+          }
+        },
+        "additionalProperties": false,
+        "description": "The range of the document from which to delete paragraph bullets. The range is applied to the document body by default. To specify a different segment (e.g. header, footer), include segment_id in the range object.\nExample: {\"tabId\":null,\"endIndex\":100,\"segmentId\":null,\"startIndex\":1}"
+      },
+      "tab_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The ID of the tab the range is in. If omitted, it applies to the first tab or the singular tab in a single-tab document.\nExample: \"0\""
+      },
+      "document_id": {
+        "type": "string",
+        "description": "The ID of the document to update.\nExample: \"195j9eDD34FqNGOnnU_S-321gW1WkStiF72rIosvBM4E\""
+      }
+    },
+    "required": [
+      "range",
+      "document_id"
+    ],
+    "additionalProperties": false,
+    "description": "DeleteParagraphBulletsActionRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

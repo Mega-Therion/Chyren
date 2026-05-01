@@ -1,0 +1,169 @@
+{
+  "name": "gmail_reply_to_email",
+  "description": "Send a reply to an email message.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "cc": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Cc"
+        }
+      },
+      "to": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "To"
+        }
+      },
+      "bcc": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Bcc"
+        }
+      },
+      "body": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Body"
+      },
+      "file": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Attachments"
+        }
+      },
+      "from": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "From"
+      },
+      "subject": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Subject"
+      },
+      "reply_to": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Reply To"
+      },
+      "body_type": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Body type"
+      },
+      "from_name": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "From Name"
+      },
+      "label_ids": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Label or mailbox"
+        }
+      },
+      "signature": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Add signature default"
+      },
+      "thread_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Thread"
+      },
+      "signature_delimiter": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Signature delimiter"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

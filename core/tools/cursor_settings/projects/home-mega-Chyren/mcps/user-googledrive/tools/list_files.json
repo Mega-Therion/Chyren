@@ -1,0 +1,122 @@
+{
+  "name": "list_files",
+  "description": "Tool to list a user's files and folders in google drive. use this to search or browse for files and folders based on various criteria.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "q": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A query string for filtering the file results. Supports operators like 'and', 'or', 'not', and can filter on fields like 'name', 'mimeType', 'modifiedTime', 'starred', 'trashed'. Example: \"name contains 'important' and mimeType = 'application/vnd.google-apps.folder'\".\nExample: \"name contains 'report' and starred = true\""
+      },
+      "fields": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Selector specifying which fields to include in a partial response. This can be used to retrieve only specific file metadata, improving performance. Example: 'nextPageToken, files(id, name, mimeType, modifiedTime)'\nExample: \"files(id,name,mimeType)\""
+      },
+      "spaces": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A comma-separated list of spaces to query within the corpora. Supported values are 'drive' and 'appDataFolder'. 'drive' represents files in My Drive and shared drives, while 'appDataFolder' represents the application's private data folder.\nExample: \"drive,appDataFolder\""
+      },
+      "corpora": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Specifies the bodies of items (files/documents) to which the query applies. Supported values are 'user', 'domain', 'drive', and 'allDrives'. It's generally more efficient to use 'user' or 'drive' instead of 'allDrives'. Defaults to 'user'.\nExamples:\n  \"user\"\n  \"drive\""
+      },
+      "driveId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The ID of the shared drive to search. This is used when `corpora` is set to 'drive'.\nExample: \"0ABCA123456789\""
+      },
+      "orderBy": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A comma-separated list of sort keys. Valid keys include 'createdTime', 'folder', 'modifiedByMeTime', 'modifiedTime', 'name', 'name_natural', 'quotaBytesUsed', 'recency', 'sharedWithMeTime', 'starred', 'viewedByMeTime'. Each key sorts in ascending order by default, but can be reversed with the 'desc' modifier (e.g., 'modifiedTime desc').\nExample: \"modifiedTime desc,name\""
+      },
+      "folderId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "ID of a specific folder to list files from. This is a convenience parameter that automatically adds \"'folder_id' in parents\" to the query. Cannot be used together with a custom 'q' parameter.\nExample: \"1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms\""
+      },
+      "pageSize": {
+        "anyOf": [
+          {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "The maximum number of files to return per page. The value must be between 1 and 1000, inclusive. Defaults to 100.\nExample: 50",
+        "default": 100
+      },
+      "pageToken": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The token for continuing a previous list request on the next page. This should be set to the value of 'nextPageToken' from the previous response.\nExample: \" nextPageTokenValue\""
+      },
+      "includeLabels": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A comma-separated list of label IDs to include in the `labelInfo` part of the response for each file.\nExample: \"labelId1,labelId2\""
+      },
+      "supportsAllDrives": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether the requesting application supports both My Drives and shared drives. Defaults to false. If true, then `includeItemsFromAllDrives` can be used to extend the search to all drives.\nExample: true"
+      },
+      "includeItemsFromAllDrives": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether to include items from both My Drive and shared drives. This is relevant when `corpora` is 'user' or 'domain'. Defaults to false.\nExample: true"
+      },
+      "includePermissionsForView": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Specifies which additional view's permissions to include in the response. Currently, only 'published' is supported, which includes permissions for files with published content.\nExample: \"published\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "ListFilesRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

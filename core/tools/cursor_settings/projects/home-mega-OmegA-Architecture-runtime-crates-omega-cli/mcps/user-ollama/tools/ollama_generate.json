@@ -1,0 +1,33 @@
+{
+  "name": "ollama_generate",
+  "description": "Generate completion from a prompt. Simpler than chat, useful for single-turn completions.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "model": {
+        "type": "string",
+        "description": "Name of the model to use"
+      },
+      "prompt": {
+        "type": "string",
+        "description": "The prompt to generate from"
+      },
+      "options": {
+        "type": "string",
+        "description": "Generation options (optional). Provide as JSON object with settings like temperature, top_p, etc."
+      },
+      "format": {
+        "type": "string",
+        "enum": [
+          "json",
+          "markdown"
+        ],
+        "default": "json"
+      }
+    },
+    "required": [
+      "model",
+      "prompt"
+    ]
+  }
+}

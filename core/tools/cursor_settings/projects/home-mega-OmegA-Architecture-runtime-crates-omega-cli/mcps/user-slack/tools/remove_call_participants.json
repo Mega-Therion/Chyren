@@ -1,0 +1,24 @@
+{
+  "name": "remove_call_participants",
+  "description": "Registers participants removed from a slack call.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "ID of the call returned by the add method.\nExample: \"R0123456789\""
+      },
+      "users": {
+        "type": "string",
+        "description": "The list of users to remove as participants in the call. users is a JSON array with each user having a `slack_id` or `external_id`.\nExamples:\n  \"[{\\\"slack_id\\\": \\\"U1H77\\\", \\\"external_id\\\": \\\"ext-id\\\"}]\"\n  \"[{\\\"slack_id\\\": \\\"U2ABC123\\\"}]\""
+      }
+    },
+    "required": [
+      "id",
+      "users"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `RemoveCallParticipants`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

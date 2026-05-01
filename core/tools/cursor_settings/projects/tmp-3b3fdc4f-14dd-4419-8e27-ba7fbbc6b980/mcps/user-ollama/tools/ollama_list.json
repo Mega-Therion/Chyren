@@ -1,0 +1,18 @@
+{
+  "name": "ollama_list",
+  "description": "List all available Ollama models installed locally. Returns model names, sizes, and modification dates.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "format": {
+        "type": "string",
+        "enum": [
+          "json",
+          "markdown"
+        ],
+        "description": "Output format (default: json)",
+        "default": "json"
+      }
+    }
+  }
+}

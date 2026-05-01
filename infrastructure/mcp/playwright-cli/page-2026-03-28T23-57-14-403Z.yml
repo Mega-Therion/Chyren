@@ -1,0 +1,20 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - button "Initialize Neural Presence" [ref=e3] [cursor=pointer]:
+      - generic [ref=e4]: Initialize Neural Presence
+    - link "Dashboard" [ref=e6] [cursor=pointer]:
+      - /url: /dashboard
+    - generic:
+      - generic: Neural Presence Initializing
+      - button "Toggle OmegA listening state" [ref=e7] [cursor=pointer]:
+        - generic [ref=e9]: Ω
+      - generic:
+        - generic:
+          - generic: I
+          - generic: am
+          - generic: listening.
+      - generic [ref=e10]:
+        - button "Awaken" [ref=e11]
+        - button "Resonance" [disabled] [ref=e12]
+        - button "Preserve" [disabled] [ref=e13]
+  - alert [ref=e14]

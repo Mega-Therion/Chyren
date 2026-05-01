@@ -1,0 +1,19 @@
+{
+  "name": "archive_a_public_or_private_channel",
+  "description": "Archives a slack public or private channel, making it read-only; the primary 'general' channel cannot be archived.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "channel_id": {
+        "type": "string",
+        "description": "ID of the public or private Slack channel to archive.\nExample: \"C1234567890\""
+      }
+    },
+    "required": [
+      "channel_id"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `ArchiveAPublicOrPrivateChannel`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

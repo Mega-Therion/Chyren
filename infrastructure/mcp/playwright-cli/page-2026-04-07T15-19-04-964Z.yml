@@ -1,0 +1,350 @@
+- generic [ref=e2]:
+  - region
+  - generic [ref=e3]:
+    - link "Skip to content" [ref=e4] [cursor=pointer]:
+      - /url: "#start-of-content"
+    - banner "Global Navigation Menu" [ref=e8]:
+      - generic [ref=e9]:
+        - generic [ref=e10]:
+          - button "Open menu" [ref=e12] [cursor=pointer]:
+            - img [ref=e13]
+          - link "Homepage (g then d)" [ref=e15] [cursor=pointer]:
+            - /url: /
+            - img [ref=e16]
+        - generic [ref=e18]:
+          - navigation "Breadcrumbs" [ref=e19]:
+            - list [ref=e20]:
+              - listitem [ref=e21]:
+                - link "Settings" [ref=e22] [cursor=pointer]:
+                  - /url: /settings/profile
+                  - generic [ref=e23]: Settings
+              - listitem [ref=e24]:
+                - link "Developer Settings" [ref=e25] [cursor=pointer]:
+                  - /url: /settings/apps
+                  - generic [ref=e26]: Developer Settings
+          - button "Search or jump to… (forward slash)" [ref=e27] [cursor=pointer]:
+            - img [ref=e28]
+        - generic [ref=e30]:
+          - generic [ref=e31]:
+            - generic [ref=e33]:
+              - link "Chat with Copilot" [ref=e35] [cursor=pointer]:
+                - /url: /copilot
+                - img [ref=e36]
+              - button "Open Copilot…" [ref=e40] [cursor=pointer]:
+                - generic:
+                  - img
+            - button "Create new..." [ref=e42] [cursor=pointer]:
+              - generic [ref=e43]:
+                - generic:
+                  - img
+              - generic:
+                - img
+            - link "Issues (g then i)" [ref=e44] [cursor=pointer]:
+              - /url: /issues
+              - img [ref=e45]
+            - link "Pull requests (g then p)" [ref=e48] [cursor=pointer]:
+              - /url: /pulls
+              - img [ref=e49]
+            - link "Repositories" [ref=e51] [cursor=pointer]:
+              - /url: /repos
+              - img [ref=e52]
+          - link "You have unread notifications (g then n)" [ref=e54] [cursor=pointer]:
+            - /url: /notifications
+            - img [ref=e55]
+          - button "Open user navigation menu" [ref=e58] [cursor=pointer]:
+            - img "Mega Therion" [ref=e59]
+  - generic [ref=e63]:
+    - button "Dismiss this message" [active] [ref=e64] [cursor=pointer]:
+      - img [ref=e65]
+    - alert [ref=e67]: Got it. Your GitHub App has been updated.
+  - group:
+    - button "Command palette trigger"
+  - main [ref=e70]:
+    - generic [ref=e72]:
+      - navigation "GitHub App settings" [ref=e74]:
+        - list [ref=e76]:
+          - listitem [ref=e77]:
+            - link "General" [ref=e78] [cursor=pointer]:
+              - /url: /settings/apps/omega-hud
+              - generic:
+                - img
+              - generic [ref=e79]: General
+          - listitem [ref=e80]:
+            - link "Permissions & events" [ref=e81] [cursor=pointer]:
+              - /url: /settings/apps/omega-hud/permissions
+              - generic:
+                - img
+              - generic [ref=e82]: Permissions & events
+          - listitem [ref=e83]:
+            - link "Optional features" [ref=e84] [cursor=pointer]:
+              - /url: /settings/apps/omega-hud/beta
+              - generic:
+                - img
+              - generic [ref=e85]: Optional features
+          - listitem [ref=e86]:
+            - link "Advanced" [ref=e87] [cursor=pointer]:
+              - /url: /settings/apps/omega-hud/advanced
+              - generic:
+                - img
+              - generic [ref=e88]: Advanced
+          - listitem [ref=e89]:
+            - link "Install App" [ref=e90] [cursor=pointer]:
+              - /url: /settings/apps/omega-hud/installations
+              - generic:
+                - img
+              - generic [ref=e91]: Install App
+          - listitem [ref=e92]
+          - listitem [ref=e93]:
+            - link "Public page" [ref=e94] [cursor=pointer]:
+              - /url: https://github.com/apps/omega-hud
+              - generic [ref=e95]: Public page
+              - generic:
+                - img
+      - generic [ref=e96]:
+        - navigation "Breadcrumb" [ref=e99]:
+          - list [ref=e100]:
+            - listitem [ref=e101]:
+              - link "Settings" [ref=e102] [cursor=pointer]:
+                - /url: /settings/profile
+            - listitem [ref=e103]:
+              - link "Developer settings" [ref=e104] [cursor=pointer]:
+                - /url: /settings/developers
+            - listitem [ref=e105]:
+              - link "GitHub Apps" [ref=e106] [cursor=pointer]:
+                - /url: /settings/apps
+            - listitem [ref=e107]:
+              - link "OmegA HUD" [ref=e108]:
+                - /url: /settings/apps/omega-hud
+        - generic [ref=e109]:
+          - heading "About" [level=2] [ref=e111]
+          - paragraph [ref=e112]:
+            - strong [ref=e113]: "Owned by:"
+            - link "@Mega-Therion" [ref=e114] [cursor=pointer]:
+              - /url: /Mega-Therion
+          - paragraph [ref=e115]:
+            - strong [ref=e116]: "App ID:"
+            - text: "2597644"
+          - paragraph [ref=e117]:
+            - text: Using your App ID to get installation tokens? You can now
+            - link "use your Client ID instead" [ref=e118] [cursor=pointer]:
+              - /url: https://docs.github.com/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app
+            - text: .
+          - paragraph [ref=e119]:
+            - strong [ref=e120]: "Client ID:"
+            - text: Iv23liyy5Q1xjEQEDUxy
+          - group [ref=e121]:
+            - button "Revoke all user tokens" [ref=e122] [cursor=pointer]
+          - paragraph [ref=e123]:
+            - text: GitHub Apps can use OAuth credentials to identify users. Learn more about identifying users by reading our
+            - link "integration developer documentation" [ref=e124] [cursor=pointer]:
+              - /url: https://docs.github.com/apps/building-integrations/setting-up-and-registering-github-apps/identifying-users-for-github-apps/
+            - text: .
+        - generic [ref=e125]:
+          - generic [ref=e126]:
+            - heading "Client secrets" [level=2] [ref=e127]
+            - button "Generate a new client secret" [ref=e130] [cursor=pointer]
+          - paragraph [ref=e132]: You need a client secret to authenticate as the application to the API.
+        - heading "Basic information" [level=2] [ref=e135]
+        - form "GitHub App" [ref=e136]:
+          - generic [ref=e137]:
+            - term [ref=e138]: GitHub App name*
+            - definition [ref=e139]:
+              - textbox "GitHub App name*" [ref=e140]: OmegA HUD
+              - paragraph [ref=e141]: The name of your GitHub App.
+          - generic [ref=e144]:
+            - generic [ref=e145]:
+              - link "Markdown supported" [ref=e147] [cursor=pointer]:
+                - /url: https://docs.github.com/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax
+                - img [ref=e148]
+                - text: Markdown supported
+              - navigation "A sovereign AI orchestration layer that coordinates agents over a Supabase-backed memory system for peak autonomous operation across devices and time." [ref=e150]:
+                - generic [ref=e151]: Write
+                - generic [ref=e152]: Preview
+            - textbox "This is displayed to users of your GitHub App" [ref=e154]: A sovereign AI orchestration layer that coordinates agents over a Supabase-backed memory system for peak autonomous operation across devices and time.
+          - generic [ref=e155]:
+            - term [ref=e156]: Homepage URL*
+            - definition [ref=e157]:
+              - textbox "Homepage URL*" [ref=e158]: https://chyren.vercel.app
+              - paragraph [ref=e159]: The full URL to your GitHub App’s website.
+          - generic [ref=e160]:
+            - heading "Identifying and authorizing users" [level=2] [ref=e161]
+            - generic [ref=e162]:
+              - text: The full URL to redirect to after a user authorizes an installation.
+              - paragraph [ref=e163]:
+                - text: Read our
+                - link "Callback URL documentation" [ref=e164] [cursor=pointer]:
+                  - /url: https://docs.github.com/apps/creating-github-apps/registering-a-github-app/about-the-user-authorization-callback-url/
+                - text: for more information.
+            - button "Add Callback URL" [ref=e166] [cursor=pointer]
+          - generic [ref=e169]:
+            - term [ref=e170]: Callback URL
+            - definition [ref=e171]:
+              - textbox "Callback URL" [ref=e172]:
+                - /placeholder: e.g. https://example.com/auth
+              - button "Delete" [ref=e174] [cursor=pointer]
+          - generic [ref=e175]:
+            - term [ref=e176]:
+              - generic [ref=e177]:
+                - checkbox "Request user authorization (OAuth) during installation" [ref=e178]
+                - text: Request user authorization (OAuth) during installation
+            - definition [ref=e179]:
+              - paragraph [ref=e180]: Requests that the installing user grants access to their identity during installation of your App
+              - paragraph [ref=e181]:
+                - text: Read our
+                - link "Identifying and authorizing users for GitHub Apps documentation" [ref=e182] [cursor=pointer]:
+                  - /url: https://docs.github.com/apps/building-github-apps/identifying-and-authorizing-users-for-github-apps/
+                - text: for more information.
+          - generic [ref=e183]:
+            - term [ref=e184]:
+              - generic [ref=e185]:
+                - checkbox [ref=e186]
+                - text: Enable Device Flow
+            - definition [ref=e187]:
+              - paragraph [ref=e188]: Allow this GitHub App to authorize users via the Device Flow.
+              - paragraph [ref=e189]:
+                - text: Read the
+                - link "Device Flow documentation" [ref=e190] [cursor=pointer]:
+                  - /url: https://docs.github.com/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app#using-the-device-flow-to-generate-a-user-access-token
+                - text: for more information.
+          - heading "Post installation" [level=2] [ref=e192]
+          - generic [ref=e193]:
+            - term [ref=e194]: Setup URL (optional)
+            - definition [ref=e195]:
+              - textbox "Setup URL (optional)" [ref=e196]:
+                - /placeholder: ""
+              - paragraph [ref=e197]: Users will be redirected to this URL after installing your GitHub App to complete additional setup.
+          - generic [ref=e198]:
+            - term [ref=e199]:
+              - generic [ref=e200]:
+                - checkbox "Redirect on update" [ref=e201]
+                - text: Redirect on update
+            - definition [ref=e202]:
+              - paragraph [ref=e203]: Redirect users to the 'Setup URL' after installations are updated (E.g. repositories added/removed).
+          - heading "Webhook" [level=2] [ref=e205]
+          - generic [ref=e207]:
+            - checkbox "Active" [checked] [ref=e208] [cursor=pointer]
+            - generic [ref=e209]:
+              - generic [ref=e210] [cursor=pointer]: Active
+              - generic [ref=e211]: We will deliver event details when this hook is triggered.
+          - generic [ref=e212]:
+            - term [ref=e213]: Webhook URL*
+            - definition [ref=e214]:
+              - textbox "Webhook URL*" [ref=e215]: https://example.com/github/webhook
+              - paragraph [ref=e216]:
+                - text: Events will POST to this URL. Read our
+                - link "webhook documentation" [ref=e217] [cursor=pointer]:
+                  - /url: https://docs.github.com/webhooks/
+                - text: for more information.
+          - generic [ref=e218]:
+            - generic [ref=e221]:
+              - img [ref=e223]
+              - generic [ref=e225]:
+                - paragraph
+                - paragraph [ref=e226]: There is currently a secret configured for this webhook. If you've lost or forgotten this secret, you can change it, but be aware that any integrations using this secret will need to be updated.
+                - button "Change secret" [ref=e227] [cursor=pointer]:
+                  - generic [ref=e229]: Change secret
+                - paragraph
+            - paragraph [ref=e230]:
+              - text: Read our
+              - link "webhook secret documentation" [ref=e231] [cursor=pointer]:
+                - /url: https://docs.github.com/webhooks/securing/
+              - text: for more information.
+          - separator [ref=e232]
+          - generic [ref=e233]:
+            - generic [ref=e234]:
+              - heading "SSL verification" [level=3] [ref=e235]
+              - paragraph [ref=e236]:
+                - img [ref=e237]
+                - text: By default, we verify SSL certificates when delivering payloads.
+              - generic [ref=e239]:
+                - generic [ref=e240]:
+                  - radio "SSL verification Enable SSL verification" [checked] [ref=e241]
+                  - text: Enable SSL verification
+                - generic [ref=e242]:
+                  - radio "SSL verification Disable (not recommended)" [ref=e243]
+                  - text: Disable (not recommended)
+            - separator [ref=e244]
+          - generic [ref=e245]:
+            - button "Save changes" [ref=e246] [cursor=pointer]
+            - link "Cancel" [ref=e247] [cursor=pointer]:
+              - /url: /settings/apps
+        - heading "Display information" [level=2] [ref=e249]
+        - generic [ref=e252]:
+          - generic [ref=e255]:
+            - img [ref=e256]
+            - paragraph [ref=e259]: Drag & drop
+          - generic [ref=e260]:
+            - generic [ref=e262] [cursor=pointer]:
+              - text: Upload a logo...
+              - button "Upload a logo..." [ref=e263]
+            - paragraph [ref=e265]: You can also drag and drop a picture from your computer.
+            - paragraph
+        - generic [ref=e268]:
+          - heading "Private keys" [level=2] [ref=e270]
+          - generic [ref=e271]:
+            - heading "Generate a private key" [level=3] [ref=e272]
+            - paragraph [ref=e273]: You need a private key to sign access token requests.
+            - button "Generate a private key" [ref=e275] [cursor=pointer]
+            - paragraph [ref=e276]:
+              - link "Learn more about private keys" [ref=e277] [cursor=pointer]:
+                - /url: https://docs.github.com/apps/building-github-apps/authentication-options-for-github-apps/#generating-a-private-key
+              - text: .
+        - heading "IP allow list" [level=2] [ref=e279]
+        - paragraph [ref=e280]:
+          - text: Enter the IP addresses of your GitHub App to allow organizations with
+          - link "IP allow lists" [ref=e281] [cursor=pointer]:
+            - /url: https://docs.github.com/github/setting-up-and-managing-organizations-and-teams/managing-allowed-ip-addresses-for-your-organization
+          - text: to selectively inherit the App's IP allow list when installed.
+          - link "Learn more about App IP allow lists" [ref=e282] [cursor=pointer]:
+            - /url: https://docs.github.com/developers/apps/building-github-apps/managing-allowed-ip-addresses-for-a-github-app
+          - text: .
+        - generic [ref=e283]:
+          - generic [ref=e284]: There are no IP addresses on the allow list yet.
+          - generic [ref=e286]:
+            - textbox "IP address or range in CIDR notation" [ref=e288]
+            - textbox "Short description of IP address or range" [ref=e290]
+            - button "Add" [ref=e292] [cursor=pointer]:
+              - generic [ref=e294]:
+                - img [ref=e295]
+                - text: Add
+        - generic [ref=e298]:
+          - generic [ref=e299]: Check IP address
+          - generic [ref=e300]:
+            - paragraph [ref=e301]: Enter an IP address to check whether it is permitted by enabled entries on the IP allow list.
+            - textbox "Check IP address" [ref=e304]
+  - contentinfo [ref=e305]:
+    - heading "Footer" [level=2] [ref=e306]
+    - generic [ref=e307]:
+      - generic [ref=e308]:
+        - link "GitHub Homepage" [ref=e309] [cursor=pointer]:
+          - /url: https://github.com
+          - img [ref=e310]
+        - generic [ref=e312]: © 2026 GitHub, Inc.
+      - navigation "Footer" [ref=e313]:
+        - heading "Footer navigation" [level=3] [ref=e314]
+        - list "Footer navigation" [ref=e315]:
+          - listitem [ref=e316]:
+            - link "Terms" [ref=e317] [cursor=pointer]:
+              - /url: https://docs.github.com/site-policy/github-terms/github-terms-of-service
+          - listitem [ref=e318]:
+            - link "Privacy" [ref=e319] [cursor=pointer]:
+              - /url: https://docs.github.com/site-policy/privacy-policies/github-privacy-statement
+          - listitem [ref=e320]:
+            - link "Security" [ref=e321] [cursor=pointer]:
+              - /url: https://github.com/security
+          - listitem [ref=e322]:
+            - link "Status" [ref=e323] [cursor=pointer]:
+              - /url: https://www.githubstatus.com/
+          - listitem [ref=e324]:
+            - link "Community" [ref=e325] [cursor=pointer]:
+              - /url: https://github.community/
+          - listitem [ref=e326]:
+            - link "Docs" [ref=e327] [cursor=pointer]:
+              - /url: https://docs.github.com/
+          - listitem [ref=e328]:
+            - link "Contact" [ref=e329] [cursor=pointer]:
+              - /url: https://support.github.com?tags=dotcom-footer
+          - listitem [ref=e330]:
+            - button "Manage cookies" [ref=e332] [cursor=pointer]
+          - listitem [ref=e333]:
+            - button "Do not share my personal information" [ref=e335] [cursor=pointer]

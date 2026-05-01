@@ -1,0 +1,27 @@
+{
+  "name": "copy_file",
+  "description": "Duplicates an existing file in google drive, identified by its `file id`.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file_id": {
+        "type": "string",
+        "description": "The unique identifier for the file on Google Drive that you want to copy. This ID can be retrieved from the file's shareable link or via other Google Drive API calls.\nExamples:\n  \"1A2b3C4d5E6fG7h8I9j0KlMNOPqRstUVW\"\n  \"0X1a2B3c4D5e6F7g8H9i0JkLmNoPqRsTu\""
+      },
+      "new_title": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The title to assign to the new copy of the file. If not provided, the copied file will have the same title as the original, prefixed with 'Copy of '.\nExamples:\n  \"Copy of Quarterly Report\"\n  \"Duplicate of Project Plan\""
+      }
+    },
+    "required": [
+      "file_id"
+    ],
+    "additionalProperties": false,
+    "description": "CopyFileRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

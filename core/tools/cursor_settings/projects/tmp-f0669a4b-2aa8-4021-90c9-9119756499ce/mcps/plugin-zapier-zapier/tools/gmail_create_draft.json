@@ -1,0 +1,155 @@
+{
+  "name": "gmail_create_draft",
+  "description": "Create a draft email message.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "cc": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Can be comma separated. The user must provide a valid email address, do not guess or use fake email addresses like @example.com. Perhaps look it up in a CRM or contact book first?"
+        }
+      },
+      "to": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Can be comma separated. The user must provide a valid email address, do not guess or use fake email addresses like @example.com. Perhaps look it up in a CRM or contact book first?"
+        }
+      },
+      "bcc": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Can be comma separated. The user must provide a valid email address, do not guess or use fake email addresses like @example.com. Perhaps look it up in a CRM or contact book first?"
+        }
+      },
+      "body": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Specify content of the email to draft. It should be in the HTML format unless specified otherwise."
+      },
+      "file": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Attachments"
+        }
+      },
+      "from": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "From"
+      },
+      "subject": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Subject"
+      },
+      "body_type": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Specify content's type of the email to draft. It should default to 'html' unless specified otherwise."
+      },
+      "from_name": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "From Name"
+      },
+      "label_ids": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Label or mailbox"
+        }
+      },
+      "signature": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Add signature default"
+      },
+      "signature_delimiter": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Signature delimiter"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

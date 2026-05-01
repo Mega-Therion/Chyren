@@ -1,0 +1,59 @@
+{
+  "name": "hubspot_find_product",
+  "description": "Finds a product by searching.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "properties_to_retrieve": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Additional properties to retrieve"
+        }
+      },
+      "first_search_property_name": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "First search property name"
+      },
+      "third_search_property_name": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Third search property name"
+      },
+      "second_search_property_name": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Second search property name"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "name": "create_shortcut_to_file",
+  "description": "Tool to create a shortcut to a file or folder in google drive. use when you need to link to an existing drive item from another location without duplicating it.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "The name of the shortcut.\nExample: \"My Shortcut to Important Document\""
+      },
+      "target_id": {
+        "type": "string",
+        "description": "The ID of the file or folder that this shortcut points to.\nExample: \"1_DRbC10_AYSg3tNA2c2P9H2a26n9_2VA\""
+      },
+      "includeLabels": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A comma-separated list of IDs of labels to include in the labelInfo part of the response.\nExample: \"labelId1,labelId2\""
+      },
+      "target_mime_type": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The MIME type of the target file or folder. While optional, providing it can be helpful.\nExample: \"application/vnd.google-apps.document\""
+      },
+      "supportsAllDrives": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether the requesting application supports both My Drives and shared drives. Recommended to set to true if interacting with shared drives.\nExample: true"
+      },
+      "keepRevisionForever": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether to set the 'keepForever' field in the new head revision.\nExample: false"
+      },
+      "ignoreDefaultVisibility": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether to ignore the domain's default visibility settings for the created file.\nExample: false"
+      },
+      "includePermissionsForView": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Specifies which additional view's permissions to include in the response. Only 'published' is supported.\nExample: \"published\""
+      }
+    },
+    "required": [
+      "name",
+      "target_id"
+    ],
+    "additionalProperties": false,
+    "description": "CreateShortcutToFileRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

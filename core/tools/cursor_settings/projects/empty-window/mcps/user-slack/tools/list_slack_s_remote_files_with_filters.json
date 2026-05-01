@@ -1,0 +1,32 @@
+{
+  "name": "list_slack_s_remote_files_with_filters",
+  "description": "Deprecated: retrieve information about a team's remote files. use `list remote files` instead.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "limit": {
+        "type": "integer",
+        "description": "The maximum number of items to return.\nExample: 20"
+      },
+      "ts_to": {
+        "type": "number",
+        "description": "Filter files created before this timestamp (inclusive).\nExample: 123456789.012345"
+      },
+      "cursor": {
+        "type": "string",
+        "description": "Paginate through collections of data by setting the cursor parameter to a next_cursor attribute returned by a previous request's response_metadata. Default value fetches the first 'page' of the collection. See pagination for more detail.\nExample: \"dXNlcjpVMDYxTkZUVDI=\""
+      },
+      "channel": {
+        "type": "string",
+        "description": "Filter files appearing in a specific channel, indicated by its ID.\nExample: \"C1234567890\""
+      },
+      "ts_from": {
+        "type": "number",
+        "description": "Filter files created after this timestamp (inclusive).\nExample: 123456789.012345"
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `ListRemoteFiles`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

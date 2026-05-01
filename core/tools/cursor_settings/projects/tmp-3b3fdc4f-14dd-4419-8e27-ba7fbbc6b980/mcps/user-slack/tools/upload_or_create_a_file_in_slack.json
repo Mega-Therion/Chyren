@@ -1,0 +1,48 @@
+{
+  "name": "upload_or_create_a_file_in_slack",
+  "description": "Uploads a file to slack, requiring either `content` (for text) or `file` (for binary data), optionally sharing it in specified `channels` or as a reply via `thread ts`.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file": {
+        "type": "string",
+        "description": "Binary file content as multipart/form-data; use for non-text files. Omit if `content` is used. Provide actual file content, not a path."
+      },
+      "title": {
+        "type": "string",
+        "description": "Title of the file, displayed in Slack.\nExamples:\n  \"My Document\"\n  \"Team Meeting Notes Q3\""
+      },
+      "token": {
+        "type": "string",
+        "description": "Authentication token; requires `files:write` scope."
+      },
+      "content": {
+        "type": "string",
+        "description": "Text content of the file; use for text-based files. Omit if `file` is used.\nExample: \"This is the content of my text file.\""
+      },
+      "channels": {
+        "type": "string",
+        "description": "Comma-separated channel names or IDs for sharing; if omitted, file is private to the uploader.\nExamples:\n  \"C1234567890,marketing-updates\"\n  \"general\""
+      },
+      "filename": {
+        "type": "string",
+        "description": "Filename to be displayed in Slack.\nExamples:\n  \"report.pdf\"\n  \"image.png\""
+      },
+      "filetype": {
+        "type": "string",
+        "description": "Slack file type (e.g., 'text', 'pdf'); Slack auto-detects if omitted. Refer to Slack API for full list.\nExamples:\n  \"text\"\n  \"pdf\"\n  \"auto\"\n  \"python\""
+      },
+      "thread_ts": {
+        "type": "integer",
+        "description": "Timestamp of a parent message to upload this file as a reply; use the original message's `ts`.\nExample: 1678886400"
+      },
+      "initial_comment": {
+        "type": "string",
+        "description": "Optional message to introduce the file in specified `channels`.\nExamples:\n  \"Here is the Q3 financial report.\"\n  \"Check out this design mockup.\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `UploadOrCreateAFileInSlack`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

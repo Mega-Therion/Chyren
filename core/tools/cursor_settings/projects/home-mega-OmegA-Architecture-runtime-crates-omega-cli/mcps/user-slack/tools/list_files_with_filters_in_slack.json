@@ -1,0 +1,44 @@
+{
+  "name": "list_files_with_filters_in_slack",
+  "description": "Lists files and their metadata within a slack workspace, filterable by user, channel, timestamp, or type; this action returns metadata only, not file content.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "page": {
+        "type": "string",
+        "description": "Specifies the page number of the results to retrieve when paginating. Default is 1.\nExamples:\n  \"1\"\n  \"2\""
+      },
+      "user": {
+        "type": "string",
+        "description": "Filter files created by a single user. Provide the Slack User ID.\nExamples:\n  \"W1234567890\"\n  \"U0abcdef0\""
+      },
+      "count": {
+        "type": "string",
+        "description": "Specifies the number of files to return per page. Default is 100, maximum is 1000.\nExamples:\n  \"100\"\n  \"50\"\n  \"1000\""
+      },
+      "ts_to": {
+        "type": "integer",
+        "description": "Filter files created before this Unix timestamp (inclusive).\nExample: \"1678972800\""
+      },
+      "types": {
+        "type": "string",
+        "description": "Filter files by types (comma-separated: 'images,pdfs'). Default 'all' for all types. Common: `all`, `spaces` (posts), `snippets`, `images`, `gdocs`, `zips`, `pdfs`.\nExamples:\n  \"images\"\n  \"pdfs\"\n  \"images,pdfs\"\n  \"all\"\n  \"spaces,snippets\""
+      },
+      "channel": {
+        "type": "string",
+        "description": "Filter files appearing in a specific channel, indicated by its Slack Channel ID.\nExamples:\n  \"C1234567890\"\n  \"G0abcdef0\""
+      },
+      "ts_from": {
+        "type": "integer",
+        "description": "Filter files created after this Unix timestamp (inclusive).\nExample: \"1678886400\""
+      },
+      "show_files_hidden_by_limit": {
+        "type": "boolean",
+        "description": "Show truncated file info for files hidden due to being too old or if the team owning the file is over the storage limit.\nExamples:\n  \"True\"\n  \"False\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `ListFilesWithFiltersInSlack`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

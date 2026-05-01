@@ -1,0 +1,22 @@
+{
+  "name": "dsql_recommend",
+  "description": "Get recommendations for DSQL best practices",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "url": {
+        "description": "URL of the documentation page to get recommendations for",
+        "title": "Url",
+        "type": "string"
+      }
+    },
+    "required": [
+      "url"
+    ],
+    "title": "dsql_recommendArguments"
+  },
+  "plugin": "databases-on-aws",
+  "marketplace": "cursor-public",
+  "pluginId": "6198",
+  "marketplaceId": "34"
+}

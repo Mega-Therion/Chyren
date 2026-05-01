@@ -1,0 +1,32 @@
+{
+  "name": "get_revision",
+  "description": "Tool to get a specific revision's metadata by revision id. use when you need to retrieve information about a particular version of a file.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file_id": {
+        "type": "string",
+        "description": "The ID of the file.\nExample: \"1ZdR3L3Kek7szY1G1-2VUX8cW6CnU0c4a\""
+      },
+      "revision_id": {
+        "type": "string",
+        "description": "The ID of the revision.\nExample: \"0B9B5CLMDv-N4Z2FhY0E5RUQzNVE\""
+      },
+      "acknowledge_abuse": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether the user is acknowledging the risk of downloading known malware or other abusive files. This is only applicable when the alt parameter is set to media and the user is the owner of the file or an organizer of the shared drive in which the file resides."
+      }
+    },
+    "required": [
+      "file_id",
+      "revision_id"
+    ],
+    "additionalProperties": false,
+    "description": "GetRevisionRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

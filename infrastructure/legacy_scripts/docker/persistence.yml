@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: chyren-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=chyren
+      - POSTGRES_USER=chyren
+      - POSTGRES_PASSWORD=chyren_password
+    volumes:
+      - chyren-postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chyren"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: chyren-qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - chyren-qdrant-data:/qdrant/storage
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: chyren-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+volumes:
+  chyren-postgres-data:
+  chyren-qdrant-data:

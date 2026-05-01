@@ -1,0 +1,51 @@
+{
+  "name": "get_file_metadata",
+  "description": "Tool to get a file's metadata by id. use when you need to retrieve the metadata for a specific file in google drive.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "fileId": {
+        "type": "string",
+        "description": "The ID of the file.\nExample: \"1a2b3c4d5e6f7g8h9i0j\""
+      },
+      "includeLabels": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A comma-separated list of IDs of labels to include in the labelInfo part of the response."
+      },
+      "acknowledgeAbuse": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether the user is acknowledging the risk of downloading known malware or other abusive files. This is only applicable when the alt parameter is set to media and the user is the owner of the file or an organizer of the shared drive in which the file resides."
+      },
+      "supportsAllDrives": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether the requesting application supports both My Drives and shared drives. This parameter will default to false."
+      },
+      "includePermissionsForView": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Specifies which additional view's permissions to include in the response. Only 'published' is supported."
+      }
+    },
+    "required": [
+      "fileId"
+    ],
+    "additionalProperties": false,
+    "description": "GetFileMetadataRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

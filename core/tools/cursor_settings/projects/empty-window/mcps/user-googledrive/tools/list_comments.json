@@ -1,0 +1,65 @@
+{
+  "name": "list_comments",
+  "description": "Tool to list all comments for a file in google drive. use when you need to retrieve comments associated with a specific file.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "fields": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "A comma-separated list of fields to include in the response. Use `*` to include all fields.\nExamples:\n  \"*\"\n  \"comments(id,content,author)\"",
+        "default": "*"
+      },
+      "fileId": {
+        "type": "string",
+        "description": "The ID of the file.\nExample: \"1234567890abcdefghijklmnopqrstuvwxyz\""
+      },
+      "pageSize": {
+        "anyOf": [
+          {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "The maximum number of comments to return per page.",
+        "default": 20
+      },
+      "pageToken": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The token for continuing a previous list request on the next page. This should be set to the value of 'nextPageToken' from the previous response."
+      },
+      "includeDeleted": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "description": "Whether to include deleted comments. Deleted comments will not include their original content.",
+        "default": false
+      },
+      "startModifiedTime": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The minimum value of 'modifiedTime' for the result comments (RFC 3339 date-time)."
+      }
+    },
+    "required": [
+      "fileId"
+    ],
+    "additionalProperties": false,
+    "description": "ListCommentsRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

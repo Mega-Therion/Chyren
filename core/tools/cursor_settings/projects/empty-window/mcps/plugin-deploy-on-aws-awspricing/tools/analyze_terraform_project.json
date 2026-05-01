@@ -1,0 +1,39 @@
+{
+  "name": "analyze_terraform_project",
+  "description": "Analyze a Terraform project to identify AWS services used. This tool dynamically extracts service information from Terraform resource declarations.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "project_path": {
+        "description": "Path to the project directory",
+        "title": "Project Path",
+        "type": "string"
+      }
+    },
+    "required": [
+      "project_path"
+    ],
+    "title": "analyze_terraform_project_wrapperArguments"
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "anyOf": [
+          {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Result"
+      }
+    },
+    "required": [
+      "result"
+    ],
+    "title": "analyze_terraform_project_wrapperOutput"
+  }
+}

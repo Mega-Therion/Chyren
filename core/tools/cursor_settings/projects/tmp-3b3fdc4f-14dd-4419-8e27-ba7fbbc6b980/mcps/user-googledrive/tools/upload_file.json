@@ -1,0 +1,47 @@
+{
+  "name": "upload_file",
+  "description": "Uploads a file (max 5mb) to google drive, moving it to a specified folder if a valid folder id is provided, otherwise uploads to root.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file_to_upload": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name"
+          },
+          "s3key": {
+            "type": "string",
+            "description": "S3Key"
+          },
+          "mimetype": {
+            "type": "string",
+            "description": "Mimetype"
+          }
+        },
+        "required": [
+          "name",
+          "s3key",
+          "mimetype"
+        ],
+        "additionalProperties": false,
+        "description": "File to upload to Google Drive (max 5MB), identified by its name or path.\nExamples:\n  \"picture.jpg\"\n  \"sample.csv\"\n  \"test.pdf\""
+      },
+      "folder_to_upload_to": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Optional ID of the target Google Drive folder; can be obtained using 'Find Folder' or similar actions.\nExample: \"1duXYCvYC5tIp5B_B1HWLq8LyDYXfMhPU\""
+      }
+    },
+    "required": [
+      "file_to_upload"
+    ],
+    "additionalProperties": false,
+    "description": "UploadFileRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

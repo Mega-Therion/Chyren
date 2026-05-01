@@ -1,0 +1,24 @@
+{
+  "name": "open_dm",
+  "description": "Opens or resumes a slack direct message (dm) or multi-person direct message (mpim) by providing either user ids or an existing channel id.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "users": {
+        "type": "string",
+        "description": "Comma-separated list of user IDs (1 for a DM, or 2-8 for an MPIM) to open/resume a conversation. Order is preserved for MPIMs. Do not use if `channel` is provided.\nExamples:\n  \"U0123456789\"\n  \"U0123456789,U9876543210\""
+      },
+      "channel": {
+        "type": "string",
+        "description": "ID or name of an existing DM or MPIM channel to open/resume. Do not use if `users` is provided.\nExamples:\n  \"D0123456789\"\n  \"general\""
+      },
+      "return_im": {
+        "type": "boolean",
+        "description": "If `true`, returns the full DM channel object. Applies only when opening a DM via a single user ID in `users` (not with `channel`)."
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `OpenOrResumeDirectOrMultiPersonMessages`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

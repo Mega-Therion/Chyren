@@ -1,0 +1,29 @@
+{
+  "name": "delete_reply",
+  "description": "Tool to delete a specific reply by reply id. use when you need to remove a reply from a comment on a file.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file_id": {
+        "type": "string",
+        "description": "The ID of the file.\nExample: \"1ZdR3L3Kek7szY1j11SQZ9A_00up1j2xG\""
+      },
+      "reply_id": {
+        "type": "string",
+        "description": "The ID of the reply.\nExample: \"AAAA_example_reply_id\""
+      },
+      "comment_id": {
+        "type": "string",
+        "description": "The ID of the comment.\nExample: \"AAAA_example_comment_id\""
+      }
+    },
+    "required": [
+      "file_id",
+      "reply_id",
+      "comment_id"
+    ],
+    "additionalProperties": false,
+    "description": "DeleteReplyRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

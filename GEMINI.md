@@ -20,7 +20,7 @@ Chyren is a high-integrity **Sovereign Intelligence (SI) Orchestrator**. It util
 ### Build & Run
 - **Standard Runtime:** All requests are routed through the Medulla API server (port 8080).
 - **Maintenance Mode:** Use `./chyren dream` to run Python Cortex scripts for identity synthesis and system maintenance.
-- **Deployment:** The cognitive shell is a Next.js 15 application deployed to Vercel, connecting to the Medulla API.
+- **Deployment:** The cognitive shell is a Next.js 15 application designed for sovereign cloud-neutral deployment, connecting to the Medulla API.
 
 ### Configuration
 - **Secrets:** All environment variables must be sourced from `~/.chyren/one-true.env` before execution.

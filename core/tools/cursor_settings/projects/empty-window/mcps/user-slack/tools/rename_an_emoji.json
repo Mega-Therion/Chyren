@@ -1,0 +1,29 @@
+{
+  "name": "rename_an_emoji",
+  "description": "Renames an existing custom emoji in a slack workspace, updating all its instances.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "Current name of the custom emoji to be renamed. Colons (e.g., `:current_emoji:`) are optional.\nExamples:\n  \"current_emoji_name\"\n  \"old_face\""
+      },
+      "token": {
+        "type": "string",
+        "description": "Authentication token."
+      },
+      "new_name": {
+        "type": "string",
+        "description": "Desired new name for the custom emoji. Must be unique within the workspace and adhere to Slack's emoji naming conventions.\nExamples:\n  \"new_emoji_name\"\n  \"updated_icon\""
+      }
+    },
+    "required": [
+      "name",
+      "token",
+      "new_name"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `RenameAnEmoji`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

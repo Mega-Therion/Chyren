@@ -47,12 +47,6 @@ Use Discussions for:
 - Asking how something works
 - Showcasing your use case
 
-### 3. Live Demo
-
-Test Chyren live before filing an issue:
-
-🌐 [chyren-web.vercel.app](https://chyren-web.vercel.app/)
-
 ---
 
 ## ⏱️ Response Time

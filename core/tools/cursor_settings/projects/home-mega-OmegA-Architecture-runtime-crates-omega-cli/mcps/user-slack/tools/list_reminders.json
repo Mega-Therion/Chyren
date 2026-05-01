@@ -1,0 +1,8 @@
+{
+  "name": "list_reminders",
+  "description": "Lists all reminders with their details for the authenticated slack user; returns an empty list if no reminders exist.",
+  "arguments": {
+    "type": "object",
+    "properties": {}
+  }
+}

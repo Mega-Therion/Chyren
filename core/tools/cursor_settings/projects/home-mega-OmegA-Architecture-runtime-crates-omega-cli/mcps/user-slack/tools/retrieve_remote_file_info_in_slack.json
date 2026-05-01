@@ -1,0 +1,20 @@
+{
+  "name": "retrieve_remote_file_info_in_slack",
+  "description": "Deprecated: retrieve information about a remote file added to slack. use `get remote file` instead.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file": {
+        "type": "string",
+        "description": "Specify a file by providing its ID.\nExample: \"F2147483862\""
+      },
+      "external_id": {
+        "type": "string",
+        "description": "Creator defined GUID for the file.\nExample: \"123456\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `GetRemoteFile`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

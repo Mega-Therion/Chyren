@@ -1,0 +1,147 @@
+{
+  "name": "insert_inline_image",
+  "description": "Tool to insert an image from a given uri at a specified location in a google document as an inline image. use when you need to add an image to a document programmatically.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "uri": {
+        "type": "string",
+        "description": "The URI of the image. Images must be less than 50MB, not exceed 25 megapixels, and be in PNG, JPEG, or GIF format. The URI can be at most 2 kB.\nExample: \"https://www.example.com/image.png\""
+      },
+      "location": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The zero-based index within the segment where the image will be inserted. If not provided, the image is inserted at the end of the segment.\nExample: 10"
+          },
+          "segmentId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The ID of the segment where the image will be inserted. If not provided, the image is inserted in the document body.\nExample: \"my-segment-id\""
+          }
+        },
+        "additionalProperties": false,
+        "description": "The location in the document to insert the image."
+      },
+      "documentId": {
+        "type": "string",
+        "description": "The ID of the document to update.\nExample: \"195j9eDD34F5f92P1i-P7Hj1S_t8h0hE4k2g1g2g\""
+      },
+      "objectSize": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "width": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "unit": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "enum": [
+                              "EMU",
+                              "PT",
+                              "PX"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": null,
+                        "description": "The units for magnitude. Supported units: EMU, PT, PX."
+                      },
+                      "magnitude": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "default": null,
+                        "description": "The magnitude of the size."
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "The width of the image."
+              },
+              "height": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "unit": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "enum": [
+                              "EMU",
+                              "PT",
+                              "PX"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": null,
+                        "description": "The units for magnitude. Supported units: EMU, PT, PX."
+                      },
+                      "magnitude": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "default": null,
+                        "description": "The magnitude of the size."
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "The height of the image."
+              }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "The size of the image. If not specified, the image is rendered at its intrinsic size."
+      }
+    },
+    "required": [
+      "uri",
+      "location",
+      "documentId"
+    ],
+    "additionalProperties": false,
+    "description": "InsertInlineImageRequestModel",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

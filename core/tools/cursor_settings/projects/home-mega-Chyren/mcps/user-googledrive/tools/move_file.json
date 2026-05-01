@@ -1,0 +1,83 @@
+{
+  "name": "move_file",
+  "description": "Tool to move a file from one folder to another in google drive. use when you need to reorganize files by changing their parent folder(s).",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file_id": {
+        "type": "string",
+        "description": "The ID of the file to move.\nExample: \"1XyZ...\""
+      },
+      "add_parents": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A comma-separated list of parent folder IDs to add the file to. Use this to specify the destination folder.\nExample: \"folder_id_1,folder_id_2\""
+      },
+      "ocr_language": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A language hint for OCR processing during image import (ISO 639-1 code)."
+      },
+      "include_labels": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A comma-separated list of IDs of labels to include in the `labelInfo` part of the response."
+      },
+      "remove_parents": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A comma-separated list of parent folder IDs to remove the file from. Use this to specify the source folder.\nExample: \"folder_id_3,folder_id_4\""
+      },
+      "supports_all_drives": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether the requesting application supports both My Drives and shared drives. Set to true if moving files to or from a shared drive."
+      },
+      "keep_revision_forever": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether to set the 'keepForever' field in the new head revision. This is only applicable to files with binary content in Google Drive."
+      },
+      "include_permissions_for_view": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Specifies which additional view's permissions to include in the response. Only 'published' is supported."
+      },
+      "use_content_as_indexable_text": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether to use the uploaded content as indexable text."
+      }
+    },
+    "required": [
+      "file_id"
+    ],
+    "additionalProperties": false,
+    "description": "MoveFileRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

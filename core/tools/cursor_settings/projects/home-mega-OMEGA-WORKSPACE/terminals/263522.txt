@@ -1,0 +1,16 @@
+---
+pid: 73774
+cwd: "/home/mega/OMEGA_WORKSPACE"
+command: "cd /home/mega/OMEGA_WORKSPACE/CANON/OmegA-Architecture/runtime && cargo run -p omega-cli -- ask \"hello omega cli\" --mode omega"
+started_at: 2026-03-31T07:33:12.397Z
+running_for_ms: 120006   
+---
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.68s
+     Running `target/debug/omega-cli ask 'hello omega cli' --mode omega`
+Error: HTTP status server error (503 Service Unavailable) for url (http://localhost:8787/api/v1/chat/stream)
+
+---
+exit_code: 1
+elapsed_ms: 122205
+ended_at: 2026-03-31T07:35:14.602Z
+---

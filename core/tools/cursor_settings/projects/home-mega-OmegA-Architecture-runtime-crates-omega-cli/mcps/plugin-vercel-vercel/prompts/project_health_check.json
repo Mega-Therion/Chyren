@@ -1,0 +1,21 @@
+{
+  "name": "project_health_check",
+  "description": "Perform a comprehensive health check of the project including deployments, configuration, and potential issues. Use this for regular project maintenance, before major deployments, or when you suspect there might be underlying issues. This tool will provide a detailed health assessment with specific recommendations.",
+  "arguments": [
+    {
+      "name": "projectId",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "includeRecommendations",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "checkEnvironment",
+      "description": "",
+      "required": false
+    }
+  ]
+}

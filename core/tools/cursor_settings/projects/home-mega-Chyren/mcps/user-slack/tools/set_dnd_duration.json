@@ -1,0 +1,19 @@
+{
+  "name": "set_dnd_duration",
+  "description": "Turns on do not disturb mode for the current user, or changes its duration.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "num_minutes": {
+        "type": "string",
+        "description": "Number of minutes, from now, to snooze until.\nExample: \"60\""
+      }
+    },
+    "required": [
+      "num_minutes"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `SetDndDuration`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

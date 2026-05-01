@@ -1,0 +1,112 @@
+{
+  "name": "graphql",
+  "description": "Execute GraphQL queries and mutations with support for variables and custom headers",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "action": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "execute"
+              },
+              "endpoint": {
+                "type": "string",
+                "description": "The GraphQL endpoint URL"
+              },
+              "query": {
+                "type": "string",
+                "description": "The GraphQL query or mutation string"
+              },
+              "variables": {
+                "type": "object",
+                "additionalProperties": {},
+                "description": "Variables to pass to the GraphQL query/mutation"
+              },
+              "headers": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "HTTP headers to include in the request (e.g., authorization tokens)"
+              },
+              "operationName": {
+                "type": "string",
+                "description": "Name of the operation to execute (useful when query contains multiple operations)"
+              },
+              "timeout": {
+                "type": "number",
+                "default": 30000,
+                "description": "Request timeout in milliseconds. Defaults to 30 seconds"
+              }
+            },
+            "required": [
+              "type",
+              "endpoint",
+              "query"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "introspect"
+              },
+              "endpoint": {
+                "type": "string",
+                "description": "The GraphQL endpoint URL to introspect"
+              },
+              "headers": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "HTTP headers to include in the request (e.g., authorization tokens)"
+              },
+              "action": {
+                "type": "string",
+                "enum": [
+                  "full-schema",
+                  "list-operations",
+                  "get-type"
+                ],
+                "description": "What to fetch: full-schema gets the complete schema, list-operations lists available queries/mutations, get-type gets a specific type definition"
+              },
+              "typeName": {
+                "type": "string",
+                "description": "The name of the type to fetch (required when action is 'get-type')"
+              },
+              "useCache": {
+                "type": "boolean",
+                "default": true,
+                "description": "Whether to use cached schema if available"
+              },
+              "cacheTTL": {
+                "type": "number",
+                "default": 300000,
+                "description": "Cache time-to-live in milliseconds. Defaults to 5 minutes"
+              }
+            },
+            "required": [
+              "type",
+              "endpoint",
+              "action"
+            ],
+            "additionalProperties": false
+          }
+        ],
+        "description": "The action to perform with GraphQL"
+      }
+    },
+    "required": [
+      "action"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

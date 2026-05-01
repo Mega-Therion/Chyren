@@ -1,0 +1,115 @@
+{
+  "name": "update_file_put",
+  "description": "Updates file metadata. uses patch semantics (partial update) as per google drive api v3. use this tool to modify attributes of an existing file like its name, description, or parent folders. note: this action currently supports metadata updates only. file content updates require multipart/related upload and are not yet implemented.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The name of the file.\nExample: \"My Updated Document\""
+      },
+      "file_id": {
+        "type": "string",
+        "description": "The ID of the file to update.\nExample: \"1XyZ_6AbCdEfGhIjKlMnOpQrStUvWxYz0\""
+      },
+      "starred": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether the user has starred the file."
+      },
+      "mime_type": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The MIME type of the file. Google Drive will attempt to automatically detect an appropriate value from uploaded content if no value is provided. The value cannot be changed unless a new revision is uploaded.\nExample: \"application/vnd.google-apps.document\""
+      },
+      "add_parents": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A comma-separated list of parent IDs to add.\nExample: \"1A2B3C_parent_folder_id,4D5E6F_another_parent_id\""
+      },
+      "description": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A short description of the file.\nExample: \"Updated version of the project proposal.\""
+      },
+      "ocr_language": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A language hint for OCR processing during image import (ISO 639-1 code).\nExample: \"en\""
+      },
+      "remove_parents": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A comma-separated list of parent IDs to remove.\nExample: \"7G8H9I_old_parent_id\""
+      },
+      "writers_can_share": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether writers can share the document with other users."
+      },
+      "supports_all_drives": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether the requesting application supports both My Drives and shared drives. This parameter will always be true by default if the application is configured to support shared drives."
+      },
+      "keep_revision_forever": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether to set this revision of the file to be kept forever. This is only applicable to files with binary content in Google Drive. Only 200 revisions for the file can be kept forever. If the limit is reached, try deleting pinned revisions."
+      },
+      "use_domain_admin_access": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether the requesting application is using domain-wide delegation to access content belonging to a user in a different domain. This is only applicable to files with binary content in Google Drive."
+      },
+      "viewers_can_copy_content": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether viewers are prevented from copying content of the file."
+      }
+    },
+    "required": [
+      "file_id"
+    ],
+    "additionalProperties": false,
+    "description": "UpdateFilePutRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

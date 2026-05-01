@@ -1,0 +1,21 @@
+{
+  "name": "firebase_get_security_rules",
+  "description": "Use this to retrieve the security rules for a specified Firebase service. If there are multiple instances of that service in the product, the rules for the default instance are returned.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "type": {
+        "type": "string",
+        "enum": [
+          "firestore",
+          "rtdb",
+          "storage"
+        ],
+        "description": "The service to get rules for."
+      }
+    },
+    "required": [
+      "type"
+    ]
+  }
+}

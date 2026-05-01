@@ -1,0 +1,24 @@
+{
+  "name": "invite_user_to_channel",
+  "description": "Invites users to a specified slack channel; this action is restricted to enterprise grid workspaces and requires the authenticated user to be a member of the target channel.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "user_ids": {
+        "type": "string",
+        "description": "A comma-separated string of Slack User IDs to invite to the channel. Up to 1000 users can be specified.\nExamples:\n  \"U012A3CDE,U023B4DEF\"\n  \"W12345678,W87654321\""
+      },
+      "channel_id": {
+        "type": "string",
+        "description": "The ID of the public or private Slack channel to which users will be invited.\nExamples:\n  \"C1234567890\"\n  \"C061X2Z7W9S\""
+      }
+    },
+    "required": [
+      "user_ids",
+      "channel_id"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `InviteUserToChannel`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

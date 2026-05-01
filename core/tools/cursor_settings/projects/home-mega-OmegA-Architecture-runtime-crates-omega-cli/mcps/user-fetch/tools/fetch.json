@@ -1,0 +1,113 @@
+{
+  "name": "fetch",
+  "description": "Perform HTTP requests with full control over method, headers, body, and other fetch options",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "url": {
+        "type": "string",
+        "description": "The URL to fetch from"
+      },
+      "method": {
+        "type": "string",
+        "enum": [
+          "GET",
+          "POST",
+          "PUT",
+          "DELETE",
+          "PATCH",
+          "HEAD",
+          "OPTIONS"
+        ],
+        "default": "GET",
+        "description": "The HTTP method to use. Defaults to GET"
+      },
+      "headers": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        },
+        "description": "HTTP headers to include in the request as key-value pairs"
+      },
+      "body": {
+        "type": "string",
+        "description": "The request body. Can be a string, JSON, or form data"
+      },
+      "mode": {
+        "type": "string",
+        "enum": [
+          "cors",
+          "no-cors",
+          "same-origin"
+        ],
+        "description": "The mode for the request (cors, no-cors, or same-origin)"
+      },
+      "credentials": {
+        "type": "string",
+        "enum": [
+          "omit",
+          "same-origin",
+          "include"
+        ],
+        "description": "Whether to include credentials with the request"
+      },
+      "cache": {
+        "type": "string",
+        "enum": [
+          "default",
+          "no-store",
+          "reload",
+          "no-cache",
+          "force-cache",
+          "only-if-cached"
+        ],
+        "description": "The cache mode for the request"
+      },
+      "redirect": {
+        "type": "string",
+        "enum": [
+          "follow",
+          "error",
+          "manual"
+        ],
+        "default": "follow",
+        "description": "How to handle redirects. Defaults to follow"
+      },
+      "referrer": {
+        "type": "string",
+        "description": "The referrer to send with the request"
+      },
+      "referrerPolicy": {
+        "type": "string",
+        "enum": [
+          "no-referrer",
+          "no-referrer-when-downgrade",
+          "origin",
+          "origin-when-cross-origin",
+          "same-origin",
+          "strict-origin",
+          "strict-origin-when-cross-origin",
+          "unsafe-url"
+        ],
+        "description": "The referrer policy for the request"
+      },
+      "signal": {
+        "description": "An AbortSignal to abort the request"
+      },
+      "timeout": {
+        "type": "number",
+        "description": "Request timeout in milliseconds"
+      },
+      "followRedirects": {
+        "type": "boolean",
+        "default": true,
+        "description": "Whether to follow redirects. Defaults to true"
+      }
+    },
+    "required": [
+      "url"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

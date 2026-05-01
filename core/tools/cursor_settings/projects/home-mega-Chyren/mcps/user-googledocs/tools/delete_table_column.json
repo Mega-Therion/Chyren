@@ -1,0 +1,99 @@
+{
+  "name": "delete_table_column",
+  "description": "Tool to delete a column from a table in a google document. use this tool when you need to remove a specific column from an existing table within a document.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "requests": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "deleteTableColumn": {
+              "type": "object",
+              "properties": {
+                "tableCellLocation": {
+                  "type": "object",
+                  "properties": {
+                    "rowIndex": {
+                      "type": "integer",
+                      "description": "The zero-based row index. For example, the second row in the table has a row index of 1."
+                    },
+                    "columnIndex": {
+                      "type": "integer",
+                      "description": "The zero-based column index. For example, the second column in the table has a column index of 1."
+                    },
+                    "tableStartLocation": {
+                      "type": "object",
+                      "properties": {
+                        "index": {
+                          "anyOf": [
+                            {
+                              "type": "integer"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ],
+                          "default": null,
+                          "description": "The zero-based index, in UTF-16 code units."
+                        },
+                        "tabId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "default": null,
+                          "description": "The tab that the location is in. When omitted, the request is applied to the first tab."
+                        },
+                        "segmentId": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "default": null,
+                          "description": "The ID of the header, footer or footnote the location is in. An empty segment ID signifies the document's body."
+                        }
+                      },
+                      "additionalProperties": false,
+                      "description": "The location where the table starts in the document."
+                    }
+                  },
+                  "required": [
+                    "rowIndex",
+                    "columnIndex",
+                    "tableStartLocation"
+                  ],
+                  "additionalProperties": false,
+                  "description": "The reference table cell location from which the column will be deleted."
+                }
+              },
+              "required": [
+                "tableCellLocation"
+              ],
+              "additionalProperties": false,
+              "description": "Delete Table Column"
+            }
+          },
+          "required": [
+            "deleteTableColumn"
+          ],
+          "additionalProperties": false,
+          "description": "DeleteTableColumnRequestRequest"
+        },
+        "description": "A list of requests to be applied to the document."
+      },
+      "document_id": {
+        "type": "string",
+        "description": "The ID of the document to delete the table column from.\nExample: \"12345abcdef\""
+      }
+    },
+    "required": [
+      "requests",
+      "document_id"
+    ],
+    "additionalProperties": false,
+    "description": "DeleteTableColumnRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

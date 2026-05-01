@@ -1,0 +1,6 @@
+{
+  "uri": "notion://docs/view-dsl-spec",
+  "name": "View Configuration DSL",
+  "description": "Full specification for the view configuration DSL used by create_view and update_view tools.",
+  "mimeType": "text/plain"
+}

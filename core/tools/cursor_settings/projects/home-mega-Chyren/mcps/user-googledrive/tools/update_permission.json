@@ -1,0 +1,93 @@
+{
+  "name": "update_permission",
+  "description": "Tool to update a permission with patch semantics. use when you need to modify an existing permission for a file or shared drive.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "fileId": {
+        "type": "string",
+        "description": "The ID of the file or shared drive.\nExample: \"1234567890abcdefghijklmnopqrstuvwxyz\""
+      },
+      "permission": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The role granted by this permission.\nExamples:\n  \"owner\"\n  \"organizer\"\n  \"fileOrganizer\"\n  \"writer\"\n  \"commenter\"\n  \"reader\""
+          },
+          "expirationTime": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The time at which this permission will expire (RFC 3339 date-time)."
+          }
+        },
+        "additionalProperties": false,
+        "description": "The permission resource to update. Only 'role' and 'expirationTime' can be updated."
+      },
+      "permissionId": {
+        "type": "string",
+        "description": "The ID of the permission.\nExample: \"01234567890123456789\""
+      },
+      "removeExpiration": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "description": "Whether to remove the expiration date.",
+        "default": false
+      },
+      "supportsAllDrives": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "description": "Whether the requesting application supports both My Drives and shared drives.",
+        "default": false
+      },
+      "transferOwnership": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "description": "Whether to transfer ownership to the specified user and downgrade the current owner to a writer. This parameter is required as an acknowledgement of the side effect when set to true.",
+        "default": false
+      },
+      "useDomainAdminAccess": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "description": "Issue the request as a domain administrator; if set to true, then the requester will be granted access if the file ID parameter refers to a shared drive and the requester is an administrator of the domain to which the shared drive belongs.",
+        "default": false
+      },
+      "enforceExpansiveAccess": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "description": "Whether the request should enforce expansive access rules. This field is deprecated, it is recommended to use `permissionDetails` instead.",
+        "default": false
+      }
+    },
+    "required": [
+      "fileId",
+      "permission",
+      "permissionId"
+    ],
+    "additionalProperties": false,
+    "description": "UpdatePermissionRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

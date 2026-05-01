@@ -1,0 +1,36 @@
+{
+  "name": "create_channel_based_conversation",
+  "description": "Creates a new public or private slack channel with a unique name; the channel can be org-wide, or team-specific if `team id` is given (required if `org wide` is false or not provided).",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "Name for the new channel. Must be unique, 80 characters or fewer, lowercase, without spaces or periods, and may contain letters, numbers, and hyphens.\nExamples:\n  \"project-alpha\"\n  \"marketing-campaign-q3\"\n  \"team-devs-internal\""
+      },
+      "team_id": {
+        "type": "string",
+        "description": "Workspace (team) ID for channel creation (e.g., T123ABCDEFG). Required if `org_wide` is `false` or not set.\nExample: \"T123ABCDEFG\""
+      },
+      "org_wide": {
+        "type": "boolean",
+        "description": "Set to `true` to make the channel available org-wide. If `false` or not set, `team_id` is required."
+      },
+      "is_private": {
+        "type": "boolean",
+        "description": "Set to `true` to make the channel private, or `false` for public."
+      },
+      "description": {
+        "type": "string",
+        "description": "Optional description for the channel (e.g., 'Discussion about Q4 marketing strategies')."
+      }
+    },
+    "required": [
+      "name",
+      "is_private"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `CreateChannelBasedConversation`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

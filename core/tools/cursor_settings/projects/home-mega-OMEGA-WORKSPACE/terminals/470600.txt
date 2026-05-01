@@ -1,0 +1,192 @@
+---
+pid: 407279
+cwd: "/home/mega/OmegA-Architecture/runtime"
+command: "cargo run -p omega-cli -- chat"
+started_at: 2026-03-30T15:19:52.884Z
+running_for_ms: 150098   
+---
+   Compiling cfg-if v1.0.4
+   Compiling smallvec v1.15.1
+   Compiling scopeguard v1.2.0
+   Compiling log v0.4.29
+   Compiling libc v0.2.183
+   Compiling memchr v2.8.0
+   Compiling pin-project-lite v0.2.17
+   Compiling once_cell v1.21.3
+   Compiling lock_api v0.4.14
+   Compiling zerofrom v0.1.6
+   Compiling stable_deref_trait v1.2.1
+   Compiling futures-core v0.3.32
+   Compiling yoke v0.8.1
+   Compiling serde_core v1.0.228
+   Compiling bytes v1.11.1
+   Compiling futures-sink v0.3.32
+   Compiling serde v1.0.228
+   Compiling itoa v1.0.17
+   Compiling bitflags v2.11.0
+   Compiling futures-channel v0.3.32
+   Compiling zerovec v0.11.5
+   Compiling unicode-segmentation v1.12.0
+   Compiling slab v0.4.12
+   Compiling litemap v0.8.1
+   Compiling regex-syntax v0.8.10
+   Compiling futures-task v0.3.32
+   Compiling writeable v0.6.2
+   Compiling futures-io v0.3.32
+   Compiling http v1.4.0
+   Compiling tinystr v0.8.2
+   Compiling errno v0.3.14
+   Compiling parking_lot_core v0.9.12
+   Compiling signal-hook-registry v1.4.8
+   Compiling mio v1.1.1
+   Compiling socket2 v0.6.3
+   Compiling convert_case v0.10.0
+   Compiling parking_lot v0.12.5
+   Compiling signal-hook v0.3.18
+   Compiling derive_more-impl v2.1.1
+   Compiling tokio v1.50.0
+   Compiling icu_locale_core v2.1.1
+   Compiling futures-util v0.3.32
+   Compiling potential_utf v0.1.4
+   Compiling zerotrie v0.2.3
+   Compiling zeroize v1.8.2
+   Compiling linux-raw-sys v0.12.1
+   Compiling derive_more v2.1.1
+   Compiling rustls-pki-types v1.14.0
+   Compiling icu_collections v2.1.1
+   Compiling rustix v1.1.4
+   Compiling icu_provider v2.1.1
+   Compiling http-body v1.0.1
+   Compiling getrandom v0.2.17
+   Compiling tracing-core v0.1.36
+   Compiling percent-encoding v2.3.2
+   Compiling untrusted v0.9.0
+   Compiling ring v0.17.14
+   Compiling crossbeam-utils v0.8.21
+   Compiling icu_normalizer_data v2.1.1
+   Compiling icu_properties_data v2.1.2
+   Compiling aho-corasick v1.1.4
+   Compiling tower-service v0.3.3
+   Compiling try-lock v0.2.5
+   Compiling want v0.3.1
+   Compiling icu_properties v2.1.2
+   Compiling tracing v0.1.44
+   Compiling icu_normalizer v2.1.1
+   Compiling rustls-webpki v0.103.10
+   Compiling regex-automata v0.4.14
+   Compiling httparse v1.10.1
+   Compiling signal-hook-mio v0.2.5
+   Compiling utf8parse v0.2.2
+   Compiling atomic-waker v1.1.2
+   Compiling pin-utils v0.1.0
+   Compiling subtle v2.6.1
+   Compiling anstyle-parse v0.2.7
+   Compiling rustls v0.23.37
+   Compiling crossterm v0.29.0
+   Compiling idna_adapter v1.2.1
+   Compiling hyper v1.8.1
+   Compiling form_urlencoded v1.2.2
+   Compiling sync_wrapper v1.0.2
+   Compiling colorchoice v1.0.4
+   Compiling equivalent v1.0.2
+   Compiling yansi v1.0.1
+   Compiling ipnet v2.12.0
+   Compiling base64 v0.22.1
+   Compiling tower-layer v0.3.3
+   Compiling anstyle-query v1.1.5
+   Compiling anstyle v1.0.13
+   Compiling hashbrown v0.16.1
+   Compiling utf8_iter v1.0.4
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling idna v1.1.0
+   Compiling anstream v0.6.21
+   Compiling tower v0.5.3
+   Compiling indexmap v2.13.0
+   Compiling hyper-util v0.1.20
+   Compiling regex v1.12.3
+   Compiling proc-macro2-diagnostics v0.10.1
+   Compiling zmij v1.0.21
+   Compiling crossbeam-epoch v0.9.18
+   Compiling serde_spanned v0.6.9
+   Compiling toml_datetime v0.6.11
+   Compiling tokio-rustls v0.26.4
+   Compiling webpki-roots v1.0.6
+   Compiling unicode-width v0.2.2
+   Compiling strsim v0.11.1
+   Compiling iri-string v0.7.10
+   Compiling clap_lex v1.0.0
+   Compiling ryu v1.0.23
+   Compiling strict v0.2.0
+   Compiling toml_write v0.1.2
+   Compiling winnow v0.7.15
+   Compiling serde_urlencoded v0.7.1
+   Compiling clap_builder v4.5.60
+   Compiling crokey-proc_macros v1.4.0
+   Compiling lazy-regex-proc_macros v3.6.0
+   Compiling hyper-rustls v0.27.7
+   Compiling crossbeam-deque v0.8.6
+   Compiling serde_json v1.0.149
+   Compiling pear_codegen v0.2.9
+   Compiling url v2.5.8
+   Compiling tower-http v0.6.8
+   Compiling tokio-util v0.7.18
+   Compiling toml_edit v0.22.27
+   Compiling futures-executor v0.3.32
+   Compiling crossbeam-queue v0.3.12
+   Compiling crossbeam-channel v0.5.15
+   Compiling http-body-util v0.1.3
+   Compiling inlinable_string v0.1.15
+   Compiling lazy_static v1.5.0
+   Compiling sharded-slab v0.1.7
+   Compiling reqwest v0.12.28
+   Compiling thiserror v2.0.18
+   Compiling crossbeam v0.8.4
+   Compiling pear v0.2.9
+   Compiling thiserror v1.0.69
+   Compiling futures v0.3.32
+   Compiling clap v4.5.60
+   Compiling lazy-regex v3.6.0
+   Compiling uncased v0.9.10
+   Compiling crokey v1.4.0
+   Compiling portable-atomic v1.13.1
+   Compiling console v0.16.2
+   Compiling matchers v0.2.0
+   Compiling coolor v1.1.0
+   Compiling tracing-log v0.2.0
+   Compiling minimad v0.14.0
+   Compiling thread_local v1.1.9
+   Compiling nu-ansi-term v0.50.3
+   Compiling unicode-width v0.1.14
+   Compiling unit-prefix v0.5.2
+   Compiling termimad v0.34.1
+   Compiling indicatif v0.18.4
+   Compiling omega-core v0.1.0 (/home/mega/OmegA-Architecture/runtime/crates/omega-core)
+   Compiling tracing-subscriber v0.3.22
+   Compiling clap_complete v4.5.66
+   Compiling toml v0.8.23
+   Compiling anyhow v1.0.102
+   Compiling owo-colors v4.3.0
+   Compiling figment v0.10.19
+   Compiling comfy-table v7.2.2
+   Compiling omega-cli v0.1.0 (/home/mega/OmegA-Architecture/runtime/crates/omega-cli)
+warning: method `health` is never used
+   --> crates/omega-cli/src/client.rs:130:18
+    |
+ 11 | impl GatewayClient {
+    | ------------------ method in this implementation
+...
+130 |     pub async fn health(&self) -> anyhow::Result<()> {
+    |                  ^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `omega-cli` (bin "omega-cli") generated 1 warning
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2m 30s
+     Running `target/debug/omega-cli chat`
+Interactive chat — not yet implemented (Phase 2).
+
+---
+exit_code: 0
+elapsed_ms: 151136
+ended_at: 2026-03-30T15:22:24.020Z
+---

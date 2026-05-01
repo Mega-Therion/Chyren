@@ -1,0 +1,24 @@
+{
+  "name": "ollama_web_fetch",
+  "description": "Fetch a web page by URL using Ollama's web fetch API. Returns the page title, content, and links. Requires OLLAMA_API_KEY environment variable.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "url": {
+        "type": "string",
+        "description": "The URL to fetch"
+      },
+      "format": {
+        "type": "string",
+        "enum": [
+          "json",
+          "markdown"
+        ],
+        "default": "json"
+      }
+    },
+    "required": [
+      "url"
+    ]
+  }
+}

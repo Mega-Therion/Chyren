@@ -1,0 +1,80 @@
+{
+  "name": "create_paragraph_bullets",
+  "description": "Tool to add bullets to paragraphs within a specified range in a google document. use when you need to format a list or a set of paragraphs as bullet points.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "document_id": {
+        "type": "string",
+        "description": "The ID of the document to update.\nExample: \"12345abcdef\""
+      },
+      "createParagraphBullets": {
+        "type": "object",
+        "properties": {
+          "range": {
+            "type": "object",
+            "properties": {
+              "endIndex": {
+                "type": "integer",
+                "description": "The zero-based end index of the range, exclusive.\nExample: 200"
+              },
+              "segmentId": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "default": null,
+                "description": "The ID of the header, footer, or footnote that this range is contained in. An empty segment ID signifies the document's body.\nExample: \"header_id\""
+              },
+              "startIndex": {
+                "type": "integer",
+                "description": "The zero-based start index of the range, inclusive.\nExample: 100"
+              }
+            },
+            "required": [
+              "endIndex",
+              "startIndex"
+            ],
+            "additionalProperties": false,
+            "description": "The range to apply the bullet preset to."
+          },
+          "bulletPreset": {
+            "type": "string",
+            "enum": [
+              "BULLET_GLYPH_PRESET_UNSPECIFIED",
+              "BULLET_DISC_CIRCLE_SQUARE",
+              "BULLET_DIAMONDX_ARROW3D_SQUARE",
+              "BULLET_CHECKBOX",
+              "BULLET_ARROW_DIAMOND_DISC",
+              "BULLET_STAR_CIRCLE_SQUARE",
+              "BULLET_ARROW3D_CIRCLE_SQUARE",
+              "BULLET_LEFTTRIANGLE_DIAMOND_DISC",
+              "BULLET_DIAMONDX_HOLLOWDIAMOND_SQUARE",
+              "BULLET_DIAMOND_CIRCLE_SQUARE",
+              "NUMBERED_DECIMAL_ALPHA_ROMAN",
+              "NUMBERED_DECIMAL_ALPHA_ROMAN_PARENS",
+              "NUMBERED_DECIMAL_NESTED",
+              "NUMBERED_UPPERALPHA_ALPHA_ROMAN",
+              "NUMBERED_UPPERROMAN_UPPERALPHA_DECIMAL",
+              "NUMBERED_ZERODECIMAL_ALPHA_ROMAN"
+            ],
+            "description": "The kinds of bullet glyphs to be used.\nExample: \"BULLET_DISC_CIRCLE_SQUARE\""
+          }
+        },
+        "required": [
+          "range",
+          "bulletPreset"
+        ],
+        "additionalProperties": false,
+        "description": "Create Paragraph Bullets"
+      }
+    },
+    "required": [
+      "document_id",
+      "createParagraphBullets"
+    ],
+    "additionalProperties": false,
+    "description": "CreateParagraphBulletsRequestModel",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,331 @@
+{
+  "name": "hubspot_create_line_item",
+  "description": "Creates a Line_item in HubSpot.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "tax": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Price: Tax"
+      },
+      "name": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Line item information: Name"
+      },
+      "price": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Price: Unit price"
+      },
+      "hs_sku": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Line item information: SKU"
+      },
+      "hs_url": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Line item information: URL"
+      },
+      "discount": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Price: Unit discount"
+      },
+      "quantity": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Price: Quantity"
+      },
+      "hs_images": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Line item information: Image URL"
+      },
+      "createdate": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Line item information: Create date"
+      },
+      "description": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Line item information: Description"
+      },
+      "hs_ramp_key": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Line item information: Ramp key"
+      },
+      "hs_bundle_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Bundle information: Bundle"
+      },
+      "hs_group_key": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Line item information: Group key"
+      },
+      "hs_origin_key": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Line item information: Origin key"
+      },
+      "hs_product_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Line Item Information: Product ID"
+      },
+      "hs_tier_prices": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Price: Tier prices"
+      },
+      "hs_tier_ranges": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Price: Tier ranges"
+      },
+      "hs_owning_teams": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Line item information: Owning Teams"
+        }
+      },
+      "hs_product_type": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Line item information: Product type"
+      },
+      "hs_tax_category": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Line item information: Tax category"
+      },
+      "hs_pricing_model": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Price: Pricing model"
+      },
+      "hubspot_owner_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Line item information: Owner"
+      },
+      "hs_position_on_quote": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Line item information: Position on quote"
+      },
+      "hs_tax_rate_group_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Price: Tax rate"
+      },
+      "hs_cost_of_goods_sold": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Price: Unit cost"
+      },
+      "hs_discount_percentage": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Price: Discount percentage"
+      },
+      "properties_to_retrieve": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Additional properties to retrieve"
+        }
+      },
+      "hs_pinned_engagement_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Line item information: Pinned engagement ID"
+      },
+      "hs_rich_text_description": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Line item information: Rich text description"
+      },
+      "recurringbillingfrequency": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Price: Billing frequency"
+      },
+      "hs_line_item_currency_code": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Line item information: Currency"
+      },
+      "hs_billing_start_delay_days": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Billing: Delayed billing start by days"
+      },
+      "hs_recurring_billing_period": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Billing: Term"
+      },
+      "hs_billing_start_delay_months": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Billing: Delayed billing start by months"
+      },
+      "hs_prorating_leading_end_date": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Billing: prorating leading end date"
+      },
+      "hs_prorating_trailing_end_date": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Billing: prorating trailing end date"
+      },
+      "hs_prorating_leading_start_date": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Billing: prorating leading start date"
+      },
+      "hs_recurring_billing_start_date": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Billing: Billing start date"
+      },
+      "hs_prorating_trailing_start_date": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Billing: prorating trailing start date"
+      },
+      "hs_all_assigned_business_unit_ids": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Line item information: Business units"
+        }
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

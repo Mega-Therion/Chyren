@@ -1,0 +1,21 @@
+{
+  "name": "get_project_status",
+  "description": "Get a comprehensive overview of the current project including status, latest deployment, and key metrics. Use this to quickly understand your project's current state, recent activity, and any issues that need attention. Perfect for daily standups, status reports, or when onboarding to a project.",
+  "arguments": [
+    {
+      "name": "projectId",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "includeDeployments",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "includeDomains",
+      "description": "",
+      "required": false
+    }
+  ]
+}

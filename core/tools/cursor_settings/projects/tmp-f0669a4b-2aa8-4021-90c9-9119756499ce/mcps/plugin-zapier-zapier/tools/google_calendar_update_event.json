@@ -1,0 +1,167 @@
+{
+  "name": "google_calendar_update_event",
+  "description": "Updates an event. Only filled fields are updated.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "all_day": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "All day"
+      },
+      "colorId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Color"
+      },
+      "eventid": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Event"
+      },
+      "summary": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Summary"
+      },
+      "location": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Location"
+      },
+      "attendees": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Attendees"
+        }
+      },
+      "calendarid": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Calendar"
+      },
+      "visibility": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Visibility"
+      },
+      "description": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Description"
+      },
+      "transparency": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Show me as Free or Busy"
+      },
+      "end__dateTime": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "End Date & Time"
+      },
+      "start__dateTime": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Start Date & Time"
+      },
+      "recurrence_count": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Repeat How Many Times?"
+      },
+      "recurrence_until": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Repeat Until"
+      },
+      "reminders_methods": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Reminders"
+        }
+      },
+      "reminders_minutes": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Minutes Before Reminders"
+      },
+      "recurrence_frequency": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Repeat Frequency"
+      },
+      "reminders__useDefault": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Use Default Reminders?"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

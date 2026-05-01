@@ -1,0 +1,23 @@
+{
+  "name": "pins_an_item_to_a_channel",
+  "description": "Pins a message to a specified slack channel; the message must not already be pinned.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "channel": {
+        "type": "string",
+        "description": "The ID of the channel where the message will be pinned.\nExample: \"C1234567890\""
+      },
+      "timestamp": {
+        "type": "string",
+        "description": "Timestamp of the message to pin, in 'epoch_time.microseconds' format (e.g., '1624464000.000200'). If not provided, the most recent message in the channel will be pinned.\nExample: \"1624464000.000200\""
+      }
+    },
+    "required": [
+      "channel"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `PinsAnItemToAChannel`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "retrieve_current_user_dnd_status",
+  "description": "Retrieves a slack user's current do not disturb (dnd) status to determine their availability before interaction; any specified user id must be a valid slack user id.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "user": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "User ID to fetch DND status for. If not provided, fetches the DND status for the authenticated user.\nExamples:\n  \"U012ABCDEF\"\n  \"W12345678\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for retrieving the current Do Not Disturb (DND) status of a user.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

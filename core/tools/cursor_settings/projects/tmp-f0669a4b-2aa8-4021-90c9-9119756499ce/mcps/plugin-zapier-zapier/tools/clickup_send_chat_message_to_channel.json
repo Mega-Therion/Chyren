@@ -1,0 +1,80 @@
+{
+  "name": "clickup_send_chat_message_to_channel",
+  "description": "Post a message to a specific channel you choose.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "team_id": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Workspace"
+        }
+      },
+      "assignee": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Assign Chat message to a user"
+      },
+      "thread_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Thread"
+      },
+      "comment_text": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Message Text"
+      },
+      "comment_type": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Type of Message"
+      },
+      "add_edit_link": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Include a link to this Zap?"
+      },
+      "group_assignee": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Assign Chat message to a team (group)"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

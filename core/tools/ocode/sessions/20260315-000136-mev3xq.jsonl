@@ -1,0 +1,2 @@
+{"event": "session_start", "ts": "2026-03-15T05:01:57.884522Z", "session_id": "20260315-000136-mev3xq", "task": "hey mega how are you doing?", "config": {"model": "claude-opus-4-5", "provider": "anthropic", "mode": "approve", "workspace": "/home/mega"}}
+{"event": "agent_turn", "ts": "2026-03-15T05:01:57.899208Z", "session_id": "20260315-000136-mev3xq", "turn": 0, "role": "user", "content_preview": "hey mega how are you doing?", "content_len": 27}

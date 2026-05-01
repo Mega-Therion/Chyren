@@ -1,0 +1,50 @@
+{
+  "name": "list_shared_drives",
+  "description": "Tool to list the user's shared drives. use when you need to get a list of all shared drives accessible to the authenticated user.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "q": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Query string for searching shared drives."
+      },
+      "pageSize": {
+        "anyOf": [
+          {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Maximum number of shared drives to return per page."
+      },
+      "pageToken": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Page token for shared drives."
+      },
+      "useDomainAdminAccess": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Issue the request as a domain administrator. If set to true, then all shared drives of the domain in which the requester is an administrator are returned."
+      }
+    },
+    "additionalProperties": false,
+    "description": "ListSharedDrivesRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

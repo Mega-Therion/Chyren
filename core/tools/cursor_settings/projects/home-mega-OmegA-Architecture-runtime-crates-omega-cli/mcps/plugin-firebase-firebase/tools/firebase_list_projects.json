@@ -1,0 +1,19 @@
+{
+  "name": "firebase_list_projects",
+  "description": "Use this to retrieve a list of Firebase Projects that the signed-in user has access to.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "page_size": {
+        "type": "number",
+        "minimum": 1,
+        "default": 20,
+        "description": "the number of projects to list per page (defaults to 1000)"
+      },
+      "page_token": {
+        "type": "string",
+        "description": "the page token to start listing from"
+      }
+    }
+  }
+}

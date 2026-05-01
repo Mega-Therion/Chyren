@@ -1,0 +1,63 @@
+{
+  "name": "google_drive_upload_file",
+  "description": "Copies an existing file from another service to Google Drive.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "file": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "File"
+      },
+      "drive": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Drive"
+      },
+      "folder": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Folder"
+      },
+      "convert": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Convert to Document?"
+      },
+      "new_name": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "File Name"
+      },
+      "new_extension": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "File Extension"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "name": "find_channels",
+  "description": "Find channels in a slack workspace by any criteria - name, topic, purpose, or description.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "limit": {
+        "type": "integer",
+        "description": "Maximum number of channels to return (1 to 200). Defaults to 50.\nExamples:\n  10\n  25\n  100",
+        "default": 50
+      },
+      "types": {
+        "type": "string",
+        "description": "Comma-separated list of channel types to include: `public_channel`, `private_channel`, `mpim` (multi-person direct message), `im` (direct message). Defaults to public and private channels.\nExamples:\n  \"public_channel\"\n  \"private_channel\"\n  \"public_channel,private_channel\"",
+        "default": "public_channel,private_channel"
+      },
+      "exact_match": {
+        "type": "boolean",
+        "description": "Use exact matching instead of partial matching. Defaults to false.\nExamples:\n  true\n  false",
+        "default": false
+      },
+      "member_only": {
+        "type": "boolean",
+        "description": "Only return channels the user is a member of. Defaults to false.\nExamples:\n  true\n  false",
+        "default": false
+      },
+      "search_query": {
+        "type": "string",
+        "description": "Search query to find channels. Searches across channel name, topic, purpose, and description (case-insensitive partial matching).\nExamples:\n  \"general\"\n  \"marketing\"\n  \"dev\"\n  \"announcements\"\n  \"project\""
+      },
+      "exclude_archived": {
+        "type": "boolean",
+        "description": "Exclude archived channels from search results. Defaults to true.\nExamples:\n  true\n  false",
+        "default": true
+      }
+    },
+    "required": [
+      "search_query"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for finding Slack channels by any criteria (name, topic, purpose, etc.).",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

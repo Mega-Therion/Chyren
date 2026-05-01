@@ -1,0 +1,48 @@
+{
+  "name": "update_comment",
+  "description": "Tool to update an existing comment on a google drive file. use when you need to change the content or status (e.g., resolve) of a comment.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "fields": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Selector specifying which fields to include in a partial response. The API documentation states this is required. If not specified by the user, this action defaults to '*' to retrieve all fields, ensuring the API requirement is met. Example: 'id,content,resolved'.\nExample: \"id,content,resolved\""
+      },
+      "content": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The plain text content of the comment. This field is used to update the comment's text. If not provided, the existing content will be retained unless 'resolved' is being updated.\nExample: \"This is the updated comment content.\""
+      },
+      "file_id": {
+        "type": "string",
+        "description": "The ID of the file.\nExample: \"1a2b3c4d5e6f7g8h9i0j\""
+      },
+      "resolved": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether the comment has been resolved. This can be used to mark a comment as resolved or reopen it.\nExample: true"
+      },
+      "comment_id": {
+        "type": "string",
+        "description": "The ID of the comment to update.\nExample: \"11a22b33c44d55e66f77g88h99i00j\""
+      }
+    },
+    "required": [
+      "file_id",
+      "comment_id"
+    ],
+    "additionalProperties": false,
+    "description": "UpdateCommentRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

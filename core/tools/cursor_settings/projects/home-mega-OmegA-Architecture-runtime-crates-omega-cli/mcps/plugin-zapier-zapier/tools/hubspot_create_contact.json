@@ -1,0 +1,847 @@
+{
+  "name": "hubspot_create_contact",
+  "description": "Creates a Contact in HubSpot.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "fax": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Fax Number"
+      },
+      "zip": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Postal Code"
+      },
+      "city": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: City"
+      },
+      "email": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Email"
+      },
+      "phone": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Phone Number"
+      },
+      "photo": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Social media information: Photo"
+      },
+      "state": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: State/Region"
+      },
+      "degree": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Facebook Ads properties: Degree"
+      },
+      "gender": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Facebook Ads properties: Gender"
+      },
+      "school": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Facebook Ads properties: School"
+      },
+      "address": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Street Address"
+      },
+      "company": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Company Name"
+      },
+      "country": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Country/Region"
+      },
+      "hs_role": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Employment Role"
+      },
+      "message": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact activity: Message"
+      },
+      "website": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Website URL"
+      },
+      "industry": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Industry"
+      },
+      "jobtitle": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Job Title"
+      },
+      "lastname": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Last Name"
+      },
+      "closedate": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal information: Close Date"
+      },
+      "firstname": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: First Name"
+      },
+      "ownername": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Sales properties: HubSpot Owner Name (legacy)"
+      },
+      "seniority": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Facebook Ads properties: Seniority"
+      },
+      "owneremail": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Sales properties: HubSpot Owner Email (legacy)"
+      },
+      "salutation": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Salutation"
+      },
+      "start_date": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Facebook Ads properties: Start date"
+      },
+      "twitterbio": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Social media information: Twitter Bio"
+      },
+      "work_email": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Facebook Ads properties: Work email"
+      },
+      "hs_language": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Preferred language"
+      },
+      "hs_pipeline": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Pipeline"
+      },
+      "hs_sub_role": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Employment Sub Role"
+      },
+      "hs_timezone": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Time Zone"
+      },
+      "linkedinbio": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Social media information: LinkedIn Bio"
+      },
+      "mobilephone": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Mobile Phone Number"
+      },
+      "company_size": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Facebook Ads properties: Company size"
+      },
+      "hs_seniority": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Employment Seniority"
+      },
+      "hs_twitterid": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Social media information: Twitter ID"
+      },
+      "job_function": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Facebook Ads properties: Job function"
+      },
+      "numemployees": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Number of Employees"
+      },
+      "annualrevenue": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Annual Revenue"
+      },
+      "date_of_birth": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Facebook Ads properties: Date of birth"
+      },
+      "followercount": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Social media information: Follower Count"
+      },
+      "hs_facebookid": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Social media information: Facebook ID"
+      },
+      "hs_linkedinid": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Social media information: Linkedin ID"
+      },
+      "hs_state_code": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: State/Region Code"
+      },
+      "twitterhandle": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Twitter Username"
+      },
+      "field_of_study": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Facebook Ads properties: Field of study"
+      },
+      "hs_buying_role": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Deal information: Buying Role"
+        }
+      },
+      "hs_lead_status": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Sales properties: Lead Status"
+      },
+      "hs_legal_basis": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Email information: Legal basis for processing contact's data"
+        }
+      },
+      "lifecyclestage": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Lifecycle Stage"
+      },
+      "marital_status": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Facebook Ads properties: Marital Status"
+      },
+      "graduation_date": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Facebook Ads properties: Graduation date"
+      },
+      "hs_googleplusid": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Social media information: googleplus ID"
+      },
+      "hs_gps_latitude": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Latitudes"
+      },
+      "hs_linkedin_url": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Social media information: LinkedIn URL"
+      },
+      "hs_owning_teams": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Contact information: Owning Teams"
+        }
+      },
+      "military_status": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Facebook Ads properties: Military status"
+      },
+      "hs_bing_click_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Conversion information: Bing click id"
+      },
+      "hs_gps_longitude": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Longitudes"
+      },
+      "hs_journey_stage": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Journey Stage"
+      },
+      "hs_latest_source": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Web analytics history: Latest Traffic Source"
+      },
+      "hubspot_owner_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Sales properties: Contact owner"
+      },
+      "kloutscoregeneral": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Social media information: Klout Score"
+      },
+      "hs_bing_ad_clicked": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Conversion information: Bing ad clicked"
+      },
+      "hs_google_click_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Conversion information: Google ad click id"
+      },
+      "hs_shared_team_ids": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Contact information: Shared teams"
+        }
+      },
+      "hs_shared_user_ids": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Contact information: Shared users"
+        }
+      },
+      "hs_tiktok_click_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Conversion information: TikTok click id"
+      },
+      "associatedcompanyid": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Primary Associated Company ID"
+      },
+      "hs_analytics_source": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Web analytics history: Original Traffic Source"
+      },
+      "linkedinconnections": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Social media information: LinkedIn Connections"
+      },
+      "relationship_status": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Facebook Ads properties: Relationship Status"
+      },
+      "twitterprofilephoto": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Social media information: Twitter Profile Photo"
+      },
+      "hs_facebook_click_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Conversion information: Facebook click id"
+      },
+      "hs_tiktok_ad_clicked": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Conversion information: TikTok ad clicked"
+      },
+      "hs_clicked_linkedin_ad": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Conversion information: Clicked on a LinkedIn Ad"
+      },
+      "hs_country_region_code": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Country/Region Code"
+      },
+      "hs_facebook_ad_clicked": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Conversion information: Clicked Facebook ad"
+      },
+      "hs_linkedin_ad_clicked": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Conversion information: Clicked LinkedIn Ad"
+      },
+      "properties_to_retrieve": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Additional properties to retrieve"
+        }
+      },
+      "hs_pinned_engagement_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Pinned engagement ID"
+      },
+      "hs_whatsapp_phone_number": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: WhatsApp Phone Number"
+      },
+      "hs_cross_sell_opportunity": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Multi Account Management: Cross-sell Opportunity"
+      },
+      "hs_inferred_language_codes": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Inferred Language Codes"
+      },
+      "hs_latest_source_timestamp": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Web analytics history: Latest Traffic Source Date"
+      },
+      "hs_content_membership_email": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Member email"
+      },
+      "hs_content_membership_notes": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact activity: Membership Notes"
+      },
+      "hs_job_change_detected_date": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Email information: Job change detected date"
+      },
+      "hs_live_enrichment_deadline": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Live enrichment deadline"
+      },
+      "hs_content_membership_status": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact activity: Status"
+      },
+      "hs_customer_agent_lead_status": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Customer Agent Lead Status"
+      },
+      "hs_feedback_show_nps_web_survey": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Should be shown an NPS web survey"
+      },
+      "hs_all_assigned_business_unit_ids": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Contact information: Brands"
+        }
+      },
+      "hs_enriched_email_bounce_detected": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Email information: Enriched Email Bounce Detected (Deprecated)"
+      },
+      "hs_employment_change_detected_date": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Email information: Employment change detected date"
+      },
+      "hs_prospecting_agent_last_enrolled": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Prospecting Agent Last Enrolled"
+      },
+      "hs_email_customer_quarantined_reason": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Email information: Email address quarantine reason"
+      },
+      "hs_last_metered_enrichment_timestamp": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Last Metered Enrichment Timestamp"
+      },
+      "hs_returning_to_office_detected_date": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Email information: Returning to office detected date"
+      },
+      "hs_time_to_move_from_lead_to_customer": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Time to move from lead to customer"
+      },
+      "hs_prospecting_agent_total_enrolled_count": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Prospecting Agent Total Enrolled Count"
+      },
+      "hs_time_to_move_from_subscriber_to_customer": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Time to move from subscriber to customer"
+      },
+      "hs_time_to_move_from_opportunity_to_customer": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Time to move from opportunity to customer"
+      },
+      "hs_time_between_contact_creation_and_deal_close": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Time between contact creation and deal close"
+      },
+      "hs_time_between_contact_creation_and_deal_creation": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Time between contact creation and deal creation"
+      },
+      "hs_time_to_move_from_salesqualifiedlead_to_customer": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Time to move from sales qualified lead to customer"
+      },
+      "hs_time_to_move_from_marketingqualifiedlead_to_customer": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact information: Time to move from marketing qualified lead to customer"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

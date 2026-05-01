@@ -1,0 +1,21 @@
+{
+  "name": "list_team_projects",
+  "description": "List all projects in the current team with their status and latest deployments. Use this to get an overview of all projects your team is working on, identify projects that need attention, or when managing multiple projects. Perfect for team leads, project managers, or when switching between projects.",
+  "arguments": [
+    {
+      "name": "teamId",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "includeArchived",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "limit",
+      "description": "",
+      "required": false
+    }
+  ]
+}

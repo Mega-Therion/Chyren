@@ -1,0 +1,6 @@
+{
+  "uri": "notion://docs/enhanced-markdown-spec",
+  "name": "Enhanced Markdown Specification",
+  "description": "Complete specification for Notion's enhanced Markdown format, including all block types, rich text formatting, and XML elements. This specification is subject to change as Notion's capabilities evolve.",
+  "mimeType": "text/plain"
+}

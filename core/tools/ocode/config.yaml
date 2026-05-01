@@ -1,0 +1,169 @@
+# /home/mega/NEXUS/tools/ocode/config/default.yaml
+# ocode Global Default Configuration
+# All values here are overridden by ~/.ocode/config.yaml and ./.ocode/config.yaml
+
+# ── Model & Provider ─────────────────────────────────────────────────────────
+
+# Primary model to use
+# Provider routing policy:
+#   anthropic  → claude-haiku-4-5 via API key (primary — add credits at anthropic.com/billing)
+#   groq       → llama-3.1-8b-instant (free tier fallback, 500k TPD limit)
+#   ollama     → local models (last resort)
+model: claude-haiku-4-5-20251001
+
+# LLM provider: groq | anthropic | ollama | auto
+# NOTE: Anthropic credits exhausted as of 2026-03-16. Using Groq 70b as primary.
+provider: groq
+
+# Permission mode: safe | approve | trust
+mode: trust
+
+# Maximum agent turns per run
+max_turns: 30
+
+# Verbose output
+verbose: false
+
+# Default workspace (. = current directory)
+workspace: .
+
+# ── Anthropic ─────────────────────────────────────────────────────────────────
+
+anthropic:
+  # API key — set via env var or here
+  api_key: ${ANTHROPIC_API_KEY}
+  base_url: https://api.anthropic.com
+  version: 2023-06-01
+  # Max tokens to generate per response
+  max_tokens: 8192
+
+# ── Ollama ───────────────────────────────────────────────────────────────────
+
+ollama:
+  base_url: http://localhost:11434
+  # Default model for Ollama (must be pulled: ollama pull qwen3:8b)
+  model: qwen3:8b
+  # Request timeout in seconds (generation can be slow on CPU)
+  timeout: 300
+
+# ── Groq (fast cloud inference) ─────────────────────────────────────────────
+
+groq:
+  api_key: ${GROQ_API_KEY}
+  # llama-3.3-70b-versatile: 6K TPM, 500K TPD, handles tool calling
+  model: llama-3.3-70b-versatile
+  timeout: 60
+
+# ── OMEGA Gateway (optional) ─────────────────────────────────────────────────
+
+omega_gateway:
+  base_url: http://localhost:8787
+  bearer_token: ${OMEGA_API_BEARER_TOKEN}
+
+# ── Tools ────────────────────────────────────────────────────────────────────
+
+tools:
+  bash:
+    enabled: true
+    # Default timeout for bash commands (seconds)
+    timeout: 30
+    # Hard maximum timeout
+    max_timeout: 300
+
+  files:
+    enabled: true
+    # Max lines to read in one call (use offset+limit for larger files)
+    max_read_lines: 2000
+
+  search:
+    enabled: true
+    # Use ripgrep (rg) if available, falls back to Python
+    use_ripgrep: true
+    # Lines of context around matches
+    context_lines: 2
+
+# ── Permissions ──────────────────────────────────────────────────────────────
+
+permissions:
+  # Default mode: safe | approve | trust
+  mode: trust
+
+  # Commands that are always allowed (bypass dangerous check)
+  allow_list: []
+
+  # Commands that are always blocked
+  deny_list:
+    - "rm -rf /"
+    - ":(){ :|:& };:"
+    - "dd if=/dev/zero"
+    - "mkfs"
+    - "> /dev/sda"
+
+  # Regex patterns that trigger approval in approve mode
+  dangerous_patterns:
+    - "rm\\s+-rf"
+    - "sudo\\s+"
+    - "chmod\\s+777"
+    - ">\\s*/etc/"
+    - ">\\s*/dev/(?!null|stderr|stdout)"
+    - "curl[^|]+\\|\\s*(bash|sh|zsh|fish)"
+    - "wget[^|]+\\|\\s*(bash|sh|zsh|fish)"
+    - "eval\\s+\\$\\("
+    - "mkfs\\."
+    - "dd\\s+if="
+    - ":\\(\\)\\s*\\{"
+
+# ── Logging ──────────────────────────────────────────────────────────────────
+
+logging:
+  # Enable session logging
+  enabled: true
+  # Where to store session JSONL files
+  sessions_dir: ~/.ocode/sessions
+  # Log format: jsonl
+  format: jsonl
+  # Verbose logging (prints each event to stderr)
+  verbose: false
+
+# ── MCP ──────────────────────────────────────────────────────────────────────
+
+mcp:
+  # Enable MCP server integration
+  enabled: true
+  # Path to MCP server config file
+  servers_file: ~/.ocode/mcp.json
+  # Timeout for MCP tool calls
+  timeout: 30
+
+# ── Hooks ────────────────────────────────────────────────────────────────────
+
+hooks:
+  pre_run: []
+  post_run:
+    - type: script
+      path: ~/.ocode/hooks/post-run.sh
+      async: true
+  before_tool: []
+  after_tool:
+    - type: endpoint
+      url: http://localhost:8787/api/v1/events
+      async: true
+  on_error:
+    - type: script
+      path: ~/.ocode/hooks/post-run.sh
+      async: true
+
+# Hook example (uncomment to enable):
+# hooks:
+#   before_tool:
+#     - type: script
+#       path: ~/.ocode/hooks/log-action.sh
+#       async: false
+#   after_tool:
+#     - type: endpoint
+#       url: http://localhost:8787/api/v1/events
+#       async: true
+#   on_error:
+#     - type: script
+#       path: ~/.ocode/hooks/notify-error.sh
+#       async: true

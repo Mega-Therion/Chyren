@@ -1,0 +1,105 @@
+{
+  "name": "list_changes",
+  "description": "Tool to list the changes for a user or shared drive. use when you need to track modifications to files and folders, such as creations, deletions, or permission changes. this action requires a `pagetoken` which can be initially obtained using the `get changes start page token` action or from a previous `list changes` response.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "spaces": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "A comma-separated list of spaces to query within the corpora. Supported values are 'drive' and 'appDataFolder'.\nExample: \"drive,appDataFolder\"",
+        "default": "drive"
+      },
+      "driveId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The shared drive from which changes will be returned. If specified the change IDs will be reflective of the shared drive; use the combined drive ID and change ID as an identifier.\nExample: \"0AB1CDEfghijklmNOP\""
+      },
+      "pageSize": {
+        "anyOf": [
+          {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "The maximum number of changes to return per page.\nExample: 100",
+        "default": 100
+      },
+      "pageToken": {
+        "type": "string",
+        "description": "The token for continuing a previous list request on the next page. This should be set to the value of 'nextPageToken' from the previous response or to the response from the getStartPageToken method.\nExample: \"12345\""
+      },
+      "includeLabels": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A comma-separated list of IDs of labels to include in the `labelInfo` part of the response.\nExample: \"labelId1,labelId2\""
+      },
+      "includeRemoved": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "description": "Whether to include changes indicating that items have been removed from the list of changes, for example by deletion or loss of access.",
+        "default": true
+      },
+      "restrictToMyDrive": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether to restrict the results to changes inside the My Drive hierarchy. This omits changes to files such as those in the Application Data folder or shared files which have not been added to My Drive."
+      },
+      "supportsAllDrives": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether the requesting application supports both My Drives and shared drives."
+      },
+      "includeCorpusRemovals": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether changes should include the file resource if the file is still accessible by the user at the time of the request, even when a file was removed from the list of changes and there will be no further change entries for this file."
+      },
+      "includeItemsFromAllDrives": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether both My Drive and shared drive items should be included in results."
+      },
+      "includePermissionsForView": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Specifies which additional view's permissions to include in the response. Only 'published' is supported.\nExample: \"published\""
+      }
+    },
+    "required": [
+      "pageToken"
+    ],
+    "additionalProperties": false,
+    "description": "ListChangesRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

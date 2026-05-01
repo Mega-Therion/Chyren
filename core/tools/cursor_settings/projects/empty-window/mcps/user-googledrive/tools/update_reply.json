@@ -1,0 +1,42 @@
+{
+  "name": "update_reply",
+  "description": "Tool to update a reply to a comment on a google drive file. use when you need to modify the content of an existing reply.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "fields": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Selector specifying which fields to include in a partial response.\nExample: \"id,content\""
+      },
+      "content": {
+        "type": "string",
+        "description": "The new plain text content of the reply.\nExample: \"This is an updated reply.\""
+      },
+      "file_id": {
+        "type": "string",
+        "description": "The ID of the file.\nExample: \"1ZdR3L3Kek7szY1j11SQZ9A_00up1j3aA\""
+      },
+      "reply_id": {
+        "type": "string",
+        "description": "The ID of the reply.\nExample: \"ANmBhkFXXXXX\""
+      },
+      "comment_id": {
+        "type": "string",
+        "description": "The ID of the comment.\nExample: \"AAAAAAMAAAAA\""
+      }
+    },
+    "required": [
+      "fields",
+      "content",
+      "file_id",
+      "reply_id",
+      "comment_id"
+    ],
+    "additionalProperties": false,
+    "description": "UpdateReplyRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

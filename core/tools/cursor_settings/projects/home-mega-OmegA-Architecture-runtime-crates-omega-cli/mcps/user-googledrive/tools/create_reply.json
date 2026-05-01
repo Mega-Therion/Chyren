@@ -1,0 +1,45 @@
+{
+  "name": "create_reply",
+  "description": "Tool to create a reply to a comment in google drive. use when you need to respond to an existing comment on a file.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "action": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The action the reply performed to the parent comment. Valid values are: resolve, reopen.\nExample: \"resolve\""
+      },
+      "fields": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Selector specifying which fields to include in a partial response.\nExample: \"id,content\""
+      },
+      "content": {
+        "type": "string",
+        "description": "The plain text content of the reply. HTML content is not supported.\nExample: \"Thanks for the feedback!\""
+      },
+      "file_id": {
+        "type": "string",
+        "description": "The ID of the file.\nExample: \"1234567890abcdefghijklmnopqrstuvwxyz\""
+      },
+      "comment_id": {
+        "type": "string",
+        "description": "The ID of the comment.\nExample: \"0987654321zyxwutsrqponmlkjihgfedcba\""
+      }
+    },
+    "required": [
+      "content",
+      "file_id",
+      "comment_id"
+    ],
+    "additionalProperties": false,
+    "description": "CreateReplyRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "end_user_do_not_disturb_session",
+  "description": "Ends the authenticated user's current do not disturb (dnd) session in slack, affecting only dnd status and making them available; if dnd is not active, slack acknowledges the request without changing status.",
+  "arguments": {
+    "type": "object",
+    "properties": {}
+  }
+}

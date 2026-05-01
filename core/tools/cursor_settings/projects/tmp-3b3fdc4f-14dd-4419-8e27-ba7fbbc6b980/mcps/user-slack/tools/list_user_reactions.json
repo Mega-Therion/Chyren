@@ -1,0 +1,36 @@
+{
+  "name": "list_user_reactions",
+  "description": "Lists all reactions added by a specific user to messages, files, or file comments in slack, useful for engagement analysis when the item content itself is not required.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "full": {
+        "type": "boolean",
+        "description": "If true, return the complete reaction list, which may include reactions to deleted items."
+      },
+      "page": {
+        "type": "integer",
+        "description": "Page number of results to return.\nExample: \"1\""
+      },
+      "user": {
+        "type": "string",
+        "description": "Reactions made by this user. Defaults to the authed user.\nExample: \"U012A3CDEFG\""
+      },
+      "count": {
+        "type": "integer",
+        "description": "Number of items to return per page.\nExample: \"20\""
+      },
+      "limit": {
+        "type": "integer",
+        "description": "Maximum number of items to return; fewer items may be returned. Use with cursor-based pagination.\nExample: \"100\""
+      },
+      "cursor": {
+        "type": "string",
+        "description": "Pagination cursor. Set to `next_cursor` from a previous response's `response_metadata`. See Slack API pagination documentation for details.\nExample: \"dXNlcjpVMDYxTkZ0NUI=\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `ListUserReactions`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,16 @@
+[Unit]
+Description=Chyren Sovereign Telegram Gateway
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/mega/Chyren
+EnvironmentFile=-/home/mega/Chyren/state/vault/one-true.env
+ExecStart=/usr/bin/python3 /home/mega/Chyren/tools/chyren_sovereign_telegram.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

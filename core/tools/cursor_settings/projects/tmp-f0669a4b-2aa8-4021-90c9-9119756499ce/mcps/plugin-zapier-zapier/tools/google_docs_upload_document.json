@@ -1,0 +1,49 @@
+{
+  "name": "google_docs_upload_document",
+  "description": "Copy an already-existing file from another service to Docs. Will convert the file to Google Doc format if possible.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "file": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "File"
+      },
+      "drive": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Drive"
+      },
+      "title": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Specify Document Name"
+      },
+      "folder": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Folder"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

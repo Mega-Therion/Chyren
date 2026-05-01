@@ -1,0 +1,20 @@
+{
+  "name": "set_read_cursor_in_a_conversation",
+  "description": "Marks a message, specified by its timestamp (`ts`), as the most recently read for the authenticated user in the given `channel`, provided the user is a member of the channel and the message exists within it.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "ts": {
+        "type": "integer",
+        "description": "The timestamp of the message to mark as the most recently read. This is typically a Unix timestamp with microsecond precision (e.g., '1625800000.000200').\nExamples:\n  \"1678886400.000100\"\n  \"1702982400.123456\""
+      },
+      "channel": {
+        "type": "string",
+        "description": "The ID of the public channel, private channel, or direct message to set the read cursor for.\nExamples:\n  \"C012QRSTUW9\"\n  \"G012ABCDEFG\"\n  \"D012HIJKLMN\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `SetReadCursorInAConversation`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

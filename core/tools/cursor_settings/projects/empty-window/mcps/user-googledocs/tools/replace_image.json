@@ -1,0 +1,63 @@
+{
+  "name": "replace_image",
+  "description": "Tool to replace a specific image in a document with a new image from a uri. use when you need to update an existing image within a google doc.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "document_id": {
+        "type": "string",
+        "description": "The ID of the document containing the image to replace.\nExample: \"1a2B3c4D5e6F7g8H9i0J\""
+      },
+      "replace_image": {
+        "type": "object",
+        "properties": {
+          "uri": {
+            "type": "string",
+            "description": "The URI of the new image. The image is fetched once at insertion time and a copy is stored for display inside the document. Images must be less than 50MB in size, cannot exceed 25 megapixels, and must be in one of PNG, JPEG, or GIF format. The provided URI must be publicly accessible and at most 2 kB in length. The URI itself is saved with the image, and exposed via the ImageProperties.content_uri field.\nExample: \"https://www.example.com/new_image.png\""
+          },
+          "tab_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The tab that the image to be replaced is in. When omitted, the request is applied to the first tab.\nExample: \"0\""
+          },
+          "image_object_id": {
+            "type": "string",
+            "description": "The ID of the existing image that will be replaced. The ID can be retrieved from the response of a get request.\nExample: \"gc.0123456789abcdef\""
+          },
+          "image_replace_method": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "CENTER_CROP",
+                  "IMAGE_REPLACE_METHOD_UNSPECIFIED"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The replacement method. Defaults to CENTER_CROP if not specified.\nExample: \"CENTER_CROP\"",
+            "default": "CENTER_CROP"
+          }
+        },
+        "required": [
+          "uri",
+          "image_object_id"
+        ],
+        "additionalProperties": false,
+        "description": "The details of the image replacement request."
+      }
+    },
+    "required": [
+      "document_id",
+      "replace_image"
+    ],
+    "additionalProperties": false,
+    "description": "ReplaceImageRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -26,8 +26,7 @@
 - **Capabilities**: Chiral Masking, Censorship Bypass, Decentralized Identity.
 
 ---
-### 🚀 Live Demonstrations
-- **Sovereign Command Center (Vercel)**: [https://chyren.vercel.app](https://chyren.vercel.app)
+### 🚀 System Status
 - **Medulla Kernel**: `stable-v1.0.0` (Local/Cloud Bridge)
 
 ### 🏛️ Immutable Records

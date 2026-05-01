@@ -1,0 +1,7 @@
+{"event": "session_start", "ts": "2026-03-15T00:20:47.104231Z", "session_id": "20260314-192047-e4dp8h", "task": "run bash: date", "config": {"model": "claude-opus-4-5", "provider": "ollama", "mode": "trust", "workspace": "/home/mega"}}
+{"event": "agent_turn", "ts": "2026-03-15T00:20:47.104413Z", "session_id": "20260314-192047-e4dp8h", "turn": 0, "role": "user", "content_preview": "run bash: date", "content_len": 14}
+{"event": "agent_turn", "ts": "2026-03-15T00:23:17.544058Z", "session_id": "20260314-192047-e4dp8h", "turn": 1, "role": "assistant", "content_preview": "", "content_len": 0}
+{"event": "tool_call", "ts": "2026-03-15T00:23:17.545408Z", "session_id": "20260314-192047-e4dp8h", "call_id": 0, "tool": "bash", "inputs": {"cmd": "date", "timeout": 30, "cwd": "/home/mega"}}
+{"event": "tool_result", "ts": "2026-03-15T00:23:17.549680Z", "session_id": "20260314-192047-e4dp8h", "call_id": 0, "tool": "bash", "output_preview": "Sat Mar 14 07:23:17 PM CDT 2026\n", "output_len": 32, "error": null, "exit_code": 0, "duration_ms": 4}
+{"event": "agent_turn", "ts": "2026-03-15T00:24:33.898303Z", "session_id": "20260314-192047-e4dp8h", "turn": 2, "role": "assistant", "content_preview": "The current date and time is: Sat Mar 14 07:23:17 PM CDT 2026", "content_len": 61}
+{"event": "session_end", "ts": "2026-03-15T00:24:33.898820Z", "session_id": "20260314-192047-e4dp8h", "turns": 2, "files_changed": [], "tool_calls_count": 1, "errors_count": 0, "tokens_used": 1043, "duration_s": 226.79, "summary": "The current date and time is: Sat Mar 14 07:23:17 PM CDT 2026"}

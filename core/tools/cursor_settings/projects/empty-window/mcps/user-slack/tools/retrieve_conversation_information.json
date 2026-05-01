@@ -1,0 +1,24 @@
+{
+  "name": "retrieve_conversation_information",
+  "description": "Retrieves metadata for a slack conversation by id (e.g., name, purpose, creation date, with options for member count/locale), excluding message content; requires a valid channel id.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "channel": {
+        "type": "string",
+        "description": "The ID of the conversation (channel, direct message, or multi-person direct message) to retrieve information for.\nExamples:\n  \"C1234567890\"\n  \"D0G9QPYHR\"\n  \"G01234567\""
+      },
+      "include_locale": {
+        "type": "boolean",
+        "description": "If true, the response will include the locale setting for the conversation. Defaults to false."
+      },
+      "include_num_members": {
+        "type": "boolean",
+        "description": "If true, the response will include the number of members in the conversation. Defaults to false."
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `RetrieveConversationInformation`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

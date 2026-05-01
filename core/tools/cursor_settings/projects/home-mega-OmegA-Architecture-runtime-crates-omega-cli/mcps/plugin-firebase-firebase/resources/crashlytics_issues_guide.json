@@ -1,0 +1,5 @@
+{
+  "uri": "firebase://guides/crashlytics/issues",
+  "name": "crashlytics_issues_guide",
+  "description": "Guides the coding agent when working with Crashlytics issues, including prioritization rules and procedures for diagnosing and fixing crashes. "
+}

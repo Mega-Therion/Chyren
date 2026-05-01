@@ -1,0 +1,20 @@
+{
+  "name": "get_remote_file",
+  "description": "Retrieve information about a remote file added to slack.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file": {
+        "type": "string",
+        "description": "Specify a file by providing its ID.\nExample: \"F2147483862\""
+      },
+      "external_id": {
+        "type": "string",
+        "description": "Creator defined GUID for the file.\nExample: \"123456\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `GetRemoteFile`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

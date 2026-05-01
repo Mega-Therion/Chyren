@@ -1,0 +1,22 @@
+{
+  "name": "firebase_get_sdk_config",
+  "description": "Use this to retrieve the Firebase configuration information for a Firebase App. You must specify EITHER a platform OR the Firebase App ID for a Firebase App registered in the currently active Firebase Project.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "platform": {
+        "type": "string",
+        "enum": [
+          "ios",
+          "android",
+          "web"
+        ],
+        "description": "The platform for which you want config. One of 'platform' or 'app_id' must be provided."
+      },
+      "app_id": {
+        "type": "string",
+        "description": "The specific app ID to fetch. One of 'platform' or 'app_id' must be provided."
+      }
+    }
+  }
+}

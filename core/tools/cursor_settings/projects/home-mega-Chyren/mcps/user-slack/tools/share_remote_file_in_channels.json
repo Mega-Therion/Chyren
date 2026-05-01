@@ -1,0 +1,24 @@
+{
+  "name": "share_remote_file_in_channels",
+  "description": "Shares a remote file, which must already be registered with slack, into specified slack channels or direct message conversations.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file": {
+        "type": "string",
+        "description": "The unique ID of the remote file registered with Slack. Either this `file` field or the `external_id` field (or both) is required to identify the file.\nExample: \"F0123456789\""
+      },
+      "channels": {
+        "type": "string",
+        "description": "A comma-separated list of channel IDs where the remote file will be shared. These can include public channel IDs, private channel IDs, or direct message channel IDs.\nExamples:\n  \"C0123456789,D0987654321\"\n  \"C061MP4F097\""
+      },
+      "external_id": {
+        "type": "string",
+        "description": "The globally unique identifier (GUID) for the remote file, as provided by the app that registered it with Slack. Either this `external_id` field or the `file` field (or both) is required to identify the file.\nExamples:\n  \"myapp-unique-file-id-007\"\n  \"external-doc-id-54321\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `ShareRemoteFileInChannels`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

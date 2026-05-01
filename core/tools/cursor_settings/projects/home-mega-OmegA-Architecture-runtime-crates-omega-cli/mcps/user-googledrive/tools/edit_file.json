@@ -1,0 +1,29 @@
+{
+  "name": "edit_file",
+  "description": "Updates an existing google drive file by overwriting its entire content with new text (max 10mb).",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "content": {
+        "type": "string",
+        "description": "New textual content to overwrite the existing file; will be UTF-8 encoded for upload."
+      },
+      "file_id": {
+        "type": "string",
+        "description": "Identifier of the Google Drive file to update."
+      },
+      "mime_type": {
+        "type": "string",
+        "description": "MIME type of the 'content' being uploaded; must accurately represent its format.\nExamples:\n  \"text/plain\"\n  \"text/html\"\n  \"text/csv\"\n  \"application/json\"\n  \"application/xml\"\n  \"application/javascript\"",
+        "default": "text/plain"
+      }
+    },
+    "required": [
+      "content",
+      "file_id"
+    ],
+    "additionalProperties": false,
+    "description": "EditFileRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

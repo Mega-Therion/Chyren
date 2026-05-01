@@ -1,0 +1,39 @@
+{
+  "name": "update_an_existing_slack_user_group",
+  "description": "Updates an existing slack user group, which must be specified by an existing `usergroup` id, with new optional details such as its name, description, handle, or default channels.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "New name for the User Group. Must be unique among User Groups.\nExample: \"Q4 Marketing\""
+      },
+      "handle": {
+        "type": "string",
+        "description": "New mention handle. Must be unique among channels, users, and User Groups.\nExample: \"marketing-team-alpha\""
+      },
+      "channels": {
+        "type": "string",
+        "description": "Comma-separated encoded channel IDs to set as default channels.\nExample: \"C1234567890,C2345678901\""
+      },
+      "usergroup": {
+        "type": "string",
+        "description": "Encoded ID of the existing User Group to update.\nExample: \"S0615G0KT\""
+      },
+      "description": {
+        "type": "string",
+        "description": "New short description for the User Group.\nExample: \"Team responsible for Q4 marketing campaigns.\""
+      },
+      "include_count": {
+        "type": "boolean",
+        "description": "If true, include the number of users in the User Group in the response.\nExamples:\n  true\n  false"
+      }
+    },
+    "required": [
+      "usergroup"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `UpdateAnExistingSlackUserGroup`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

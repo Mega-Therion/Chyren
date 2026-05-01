@@ -1,0 +1,32 @@
+{
+  "name": "delete_footer",
+  "description": "Tool to delete a footer from a google document. use when you need to remove a footer from a specific section or the default footer.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "tab_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The tab that contains the footer to delete. When omitted, the request is applied to the first tab.\nExample: \"tab_abc\""
+      },
+      "footer_id": {
+        "type": "string",
+        "description": "The ID of the footer to delete. If this footer is defined on DocumentStyle, the reference to this footer is removed, resulting in no footer of that type for the first section of the document. If this footer is defined on a SectionStyle, the reference to this footer is removed and the footer of that type is now continued from the previous section.\nExample: \"footer_123\""
+      },
+      "document_id": {
+        "type": "string",
+        "description": "The ID of the document to delete the footer from.\nExample: \"12345abcdef\""
+      }
+    },
+    "required": [
+      "footer_id",
+      "document_id"
+    ],
+    "additionalProperties": false,
+    "description": "DeleteFooterRequestModel",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

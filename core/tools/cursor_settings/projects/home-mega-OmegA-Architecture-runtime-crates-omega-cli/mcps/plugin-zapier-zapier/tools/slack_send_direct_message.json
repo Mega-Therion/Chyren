@@ -1,0 +1,84 @@
+{
+  "name": "slack_send_direct_message",
+  "description": "Sends a direct message to a user or yourself from the Slackbot. Can also schedule a message for later.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "text": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Message Text"
+      },
+      "as_bot": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Send as a bot?"
+      },
+      "unfurl": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Auto-Expand Links?"
+      },
+      "channel": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "To Username"
+      },
+      "post_at": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Schedule At"
+      },
+      "image_url": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Attach Image by URL"
+      },
+      "link_names": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Link Usernames and Channel Names?"
+      },
+      "send_multi": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Send Multi Message"
+      },
+      "add_edit_link": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Include a link to this Zap?"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

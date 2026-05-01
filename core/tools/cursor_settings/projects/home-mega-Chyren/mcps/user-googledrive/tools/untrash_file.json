@@ -1,0 +1,27 @@
+{
+  "name": "untrash_file",
+  "description": "Tool to restore a file from the trash. use when you need to recover a deleted file. this action updates the file's metadata to set the 'trashed' property to false.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file_id": {
+        "type": "string",
+        "description": "The ID of the file to untrash.\nExample: \"1aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789\""
+      },
+      "supportsAllDrives": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether the requesting application supports both My Drives and shared drives.\nExample: true"
+      }
+    },
+    "required": [
+      "file_id"
+    ],
+    "additionalProperties": false,
+    "description": "UntrashFileRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

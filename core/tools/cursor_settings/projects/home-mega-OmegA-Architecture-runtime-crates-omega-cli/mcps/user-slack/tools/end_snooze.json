@@ -1,0 +1,8 @@
+{
+  "name": "end_snooze",
+  "description": "Ends the current user's snooze mode immediately.",
+  "arguments": {
+    "type": "object",
+    "properties": {}
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "name": "notion_update_data_source_item",
+  "description": "Updates a data source item.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "page": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Item"
+      },
+      "content": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Content"
+      },
+      "datasource": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Data Source"
+      },
+      "content_format": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Content Format"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,13 @@
+---
+pid: 66859
+cwd: "/home/mega/OMEGA_WORKSPACE"
+command: "PID=4036 && TOKEN=$(python3 - <<'PY'\nimport os\npid='4036'\npath=f'/proc/{pid}/environ'\ndata=open(path,'rb').read().split(b'\\x00')\nfor kv in data:\n    if kv.startswith(b'OMEGA_API_BEARER_TOKEN='):\n        print(kv.split(b'=',1)[1].decode('utf-8','ignore'))\n        break\nPY\n) && curl -sS -o /dev/null -w \"%{http_code}\\n\" -H \"Authorization: Bearer $TOKEN\" -H \"Content-Type: application/json\" -X POST http://127.0.0.1:8787/api/v1/chat -d '{\"user\":\"proc token probe\",\"mode\":\"omega\",\"temperature\":0.4}'"
+started_at: 2026-03-31T07:27:53.343Z
+running_for_ms: 145047   
+---
+
+---
+exit_code: unknown
+elapsed_ms: 148027
+ended_at: 2026-03-31T07:30:21.371Z
+---

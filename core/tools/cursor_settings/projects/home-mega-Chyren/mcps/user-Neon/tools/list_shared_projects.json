@@ -1,0 +1,24 @@
+{
+  "name": "list_shared_projects",
+  "description": "Lists projects that have been shared with the current user. These are projects that the user has been granted access to collaborate on. Optionally filter by project name or ID using the `search` parameter.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "cursor": {
+        "type": "string",
+        "description": "Specify the cursor value from the previous response to retrieve the next batch of shared projects."
+      },
+      "limit": {
+        "type": "number",
+        "default": 10,
+        "description": "Specify a value from 1 to 400 to limit number of shared projects in the response."
+      },
+      "search": {
+        "type": "string",
+        "description": "Search by project name or id. You can specify partial name or id values to filter results."
+      }
+    },
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

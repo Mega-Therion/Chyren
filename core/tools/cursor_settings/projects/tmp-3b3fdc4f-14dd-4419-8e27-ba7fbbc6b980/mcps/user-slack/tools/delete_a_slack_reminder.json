@@ -1,0 +1,16 @@
+{
+  "name": "delete_a_slack_reminder",
+  "description": "Deletes an existing slack reminder, typically when it is no longer relevant or a task is completed; this operation is irreversible.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "reminder": {
+        "type": "string",
+        "description": "The unique identifier of the reminder to be deleted. This ID is obtained when a reminder is created or listed.\nExample: \"Rm1234567890\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for deleting a Slack reminder.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

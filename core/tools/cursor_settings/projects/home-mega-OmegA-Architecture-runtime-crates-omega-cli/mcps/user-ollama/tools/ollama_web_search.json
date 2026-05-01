@@ -1,0 +1,29 @@
+{
+  "name": "ollama_web_search",
+  "description": "Perform a web search using Ollama's web search API. Augments models with latest information to reduce hallucinations. Requires OLLAMA_API_KEY environment variable.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "query": {
+        "type": "string",
+        "description": "The search query string"
+      },
+      "max_results": {
+        "type": "number",
+        "description": "Maximum number of results to return (1-10, default 5)",
+        "default": 5
+      },
+      "format": {
+        "type": "string",
+        "enum": [
+          "json",
+          "markdown"
+        ],
+        "default": "json"
+      }
+    },
+    "required": [
+      "query"
+    ]
+  }
+}

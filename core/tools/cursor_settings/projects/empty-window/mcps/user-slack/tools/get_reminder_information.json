@@ -1,0 +1,16 @@
+{
+  "name": "get_reminder_information",
+  "description": "Retrieves detailed information for an existing slack reminder specified by its id; this is a read-only operation.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "reminder": {
+        "type": "string",
+        "description": "The unique identifier of the reminder to retrieve information for. This ID typically starts with 'Rm'.\nExample: \"Rm12345678\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `GetReminderInformation` action. Specifies the reminder to be retrieved.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

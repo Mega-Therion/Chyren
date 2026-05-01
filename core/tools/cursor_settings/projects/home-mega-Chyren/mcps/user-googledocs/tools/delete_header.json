@@ -1,0 +1,32 @@
+{
+  "name": "delete_header",
+  "description": "Deletes the header from the specified section or the default header if no section is specified. use this tool to remove a header from a google document.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "tab_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The tab containing the header to delete. When omitted, the request is applied to the first tab.\nExample: \"tab_abc\""
+      },
+      "header_id": {
+        "type": "string",
+        "description": "The ID of the header to delete. If this header is defined on `DocumentStyle`, the reference to this header is removed, resulting in no header of that type for the first section of the document. If this header is defined on a `SectionStyle`, the reference to this header is removed and the header of that type is now continued from the previous section.\nExample: \"header_123\""
+      },
+      "document_id": {
+        "type": "string",
+        "description": "The ID of the document from which to delete the header.\nExample: \"12345abcdef\""
+      }
+    },
+    "required": [
+      "header_id",
+      "document_id"
+    ],
+    "additionalProperties": false,
+    "description": "DeleteHeaderRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

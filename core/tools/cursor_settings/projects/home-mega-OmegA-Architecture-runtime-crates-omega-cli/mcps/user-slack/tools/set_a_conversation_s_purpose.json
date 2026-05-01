@@ -1,0 +1,20 @@
+{
+  "name": "set_a_conversation_s_purpose",
+  "description": "Sets the purpose (a short description of its topic/goal, displayed in the header) for a slack conversation; the calling user must be a member.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "channel": {
+        "type": "string",
+        "description": "The ID of the conversation (channel, direct message, or group message) to set the purpose for.\nExamples:\n  \"C012AB3CD4E\"\n  \"D0G9ALE3P\"\n  \"G12345678\""
+      },
+      "purpose": {
+        "type": "string",
+        "description": "The new purpose for the conversation. This text will be displayed as the channel description. The maximum length is 250 characters.\nExamples:\n  \"Discuss project milestones and deadlines.\"\n  \"Team updates and daily stand-ups.\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `SetAConversationSPurpose`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

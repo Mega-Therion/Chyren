@@ -1,0 +1,8 @@
+{
+  "name": "list_user_reminders_with_details",
+  "description": "Deprecated: lists all reminders with their details for the authenticated slack user. use `list reminders` instead.",
+  "arguments": {
+    "type": "object",
+    "properties": {}
+  }
+}

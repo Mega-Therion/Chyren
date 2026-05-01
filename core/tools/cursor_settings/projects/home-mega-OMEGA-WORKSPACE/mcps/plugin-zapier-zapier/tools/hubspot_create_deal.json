@@ -1,0 +1,371 @@
+{
+  "name": "hubspot_create_deal",
+  "description": "Creates a Deal in HubSpot.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "amount": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal revenue: Amount"
+      },
+      "dealname": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Name"
+      },
+      "dealtype": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal information: Deal Type"
+      },
+      "pipeline": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal Pipeline"
+      },
+      "closedate": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal information: Close Date"
+      },
+      "dealstage": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal Stage"
+      },
+      "createdate": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal information: Create Date"
+      },
+      "description": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal information: Deal Description"
+      },
+      "hs_campaign": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal information: HubSpot Campaign"
+      },
+      "hs_priority": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal information: Priority"
+      },
+      "hs_next_step": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal information: Next step"
+      },
+      "hs_owning_teams": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Deal information: Owning Teams"
+        }
+      },
+      "hs_exchange_rate": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal revenue: Exchange rate"
+      },
+      "hubspot_owner_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal information: Deal owner"
+      },
+      "closed_won_reason": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal activity: Closed Won Reason"
+      },
+      "closed_lost_reason": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal activity: Closed Lost Reason"
+      },
+      "deal_currency_code": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal revenue: Currency"
+      },
+      "hs_shared_team_ids": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Deal information: Shared teams"
+        }
+      },
+      "hs_shared_user_ids": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Deal information: Shared users"
+        }
+      },
+      "hs_analytics_source": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Analytics history: Original Traffic Source"
+      },
+      "hs_attributed_team_ids": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Deal information: Attributed reporting team"
+        }
+      },
+      "hs_net_pipeline_impact": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal activity: Net Pipeline Impact"
+      },
+      "properties_to_retrieve": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Additional properties to retrieve"
+        }
+      },
+      "hs_forecast_probability": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal information: Forecast probability"
+      },
+      "hs_pinned_engagement_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal information: Pinned Engagement ID"
+      },
+      "hs_is_active_shared_deal": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal activity: Is Active Shared Deal"
+      },
+      "hs_cross_sell_opportunity": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Multi Account Management: Cross-sell Opportunity"
+      },
+      "hs_deal_stage_probability": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal information: Deal probability"
+      },
+      "hs_manual_forecast_category": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal information: Forecast category"
+      },
+      "hs_all_collaborator_owner_ids": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Deal information: Deal Collaborator"
+        }
+      },
+      "hs_all_assigned_business_unit_ids": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Deal information: Brands"
+        }
+      },
+      "hs_deal_amount_calculation_preference": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal information: Deal amount calculation preference"
+      },
+      "hs_line_item_global_term_hs_discount_percentage": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal information: Global Term Line Item Discount Percentage"
+      },
+      "hs_line_item_global_term_recurringbillingfrequency": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal information: Global Term Line Item Recurring Billing Frequency"
+      },
+      "hs_line_item_global_term_hs_recurring_billing_period": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal information: Global Term Line Item Recurring Billing Period"
+      },
+      "hs_line_item_global_term_hs_discount_percentage_enabled": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal information: Global Term Line Item Discount Percentage Enabled"
+      },
+      "hs_line_item_global_term_hs_recurring_billing_start_date": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal information: Global Term Line Item Recurring Billing Start Date"
+      },
+      "hs_line_item_global_term_recurringbillingfrequency_enabled": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal information: Global Term Line Item Recurring Billing Frequency Enabled"
+      },
+      "hs_line_item_global_term_hs_recurring_billing_period_enabled": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal information: Global Term Line Item Recurring Billing Period Enabled"
+      },
+      "hs_line_item_global_term_hs_recurring_billing_start_date_enabled": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deal information: Global Term Line Item Recurring Billing Start Date Enabled"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

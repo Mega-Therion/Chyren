@@ -1,0 +1,23 @@
+{
+  "name": "delete_branch",
+  "description": "Delete a branch from a Neon project",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "projectId": {
+        "type": "string",
+        "description": "The ID of the project containing the branch"
+      },
+      "branchId": {
+        "type": "string",
+        "description": "The ID of the branch to delete"
+      }
+    },
+    "required": [
+      "projectId",
+      "branchId"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

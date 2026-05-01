@@ -1,0 +1,40 @@
+{
+  "name": "search_for_messages_with_query",
+  "description": "Deprecated: searches messages in a slack workspace using a query with optional modifiers. use `search messages` instead.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "page": {
+        "type": "integer",
+        "description": "Page number of results to return.\nExamples:\n  1\n  2\n  3"
+      },
+      "sort": {
+        "type": "string",
+        "description": "Sort results by `score` (relevance) or `timestamp` (chronological).\nExamples:\n  \"score\"\n  \"timestamp\""
+      },
+      "count": {
+        "type": "integer",
+        "description": "Number of messages to return per page. Maximum value is 100.\nExamples:\n  20\n  50\n  100",
+        "default": 1
+      },
+      "query": {
+        "type": "string",
+        "description": "Search query, supporting modifiers like `in:#channel-name`, `from:@user-name`, `has::star:`, or `before:YYYY-MM-DD`.\nExamples:\n  \"product launch plan\"\n  \"weekly update in:#project-alpha\"\n  \"bug report from:@jane has::bug:\"\n  \"meeting notes before:2024-07-20\""
+      },
+      "sort_dir": {
+        "type": "string",
+        "description": "Sort direction: `asc` (ascending) or `desc` (descending).\nExamples:\n  \"asc\"\n  \"desc\""
+      },
+      "highlight": {
+        "type": "boolean",
+        "description": "Enable highlighting of search terms in results.\nExamples:\n  true\n  false"
+      }
+    },
+    "required": [
+      "query"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `SearchMessages`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

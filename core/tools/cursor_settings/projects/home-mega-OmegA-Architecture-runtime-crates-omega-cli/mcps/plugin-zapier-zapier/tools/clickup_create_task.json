@@ -1,0 +1,111 @@
+{
+  "name": "clickup_create_task",
+  "description": "Creates a new task.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "name": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Task Name"
+      },
+      "content": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Task Description"
+      },
+      "team_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Workspace"
+      },
+      "due_date": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Due Date"
+      },
+      "markdown": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Markdown Content"
+      },
+      "priority": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Priority"
+      },
+      "assignees": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Assignee Emails"
+        }
+      },
+      "start_date": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Start Date"
+      },
+      "make_private": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Make task private?"
+        }
+      },
+      "custom_task_type": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Custom task type"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

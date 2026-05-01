@@ -1,0 +1,200 @@
+{
+  "name": "update_document_style",
+  "description": "Tool to update the overall document style, such as page size, margins, and default text direction. use when you need to modify the global style settings of a google document.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "fields": {
+        "type": "string",
+        "description": "A comma-separated list of fields to update. Use '*' to update all fields in document_style. For example: \"pageSize,marginTop,marginBottom\"."
+      },
+      "tab_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The ID of the tab to update the style for. If not provided, the first tab is used."
+      },
+      "document_id": {
+        "type": "string",
+        "description": "The ID of the document to update."
+      },
+      "document_style": {
+        "type": "object",
+        "properties": {
+          "pageSize": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The size of a page in the document."
+          },
+          "marginTop": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The top margin of the page."
+          },
+          "background": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The background of the document. The background fill must be specified as a solid fill."
+          },
+          "marginLeft": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The left margin of the page."
+          },
+          "marginRight": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The right margin of the page."
+          },
+          "marginBottom": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The bottom margin of the page."
+          },
+          "defaultFooterId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The ID of the default footer. If unset, the document inherits the default footer from the parent document. This property is read-only."
+          },
+          "defaultHeaderId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The ID of the default header. If unset, the document inherits the default header from the parent document. This property is read-only."
+          },
+          "oddPageFooterId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The ID of the footer for odd pages. If unset, the document inherits the odd page footer from the parent document. This property is read-only."
+          },
+          "oddPageHeaderId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The ID of the header for odd pages. If unset, the document inherits the odd page header from the parent document. This property is read-only."
+          },
+          "pageNumberStart": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The page number from which to start counting the number of pages."
+          },
+          "evenPageFooterId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The ID of the footer for even pages. If unset, the document inherits the even page footer from the parent document. This property is read-only."
+          },
+          "evenPageHeaderId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The ID of the header for even pages. If unset, the document inherits the even page header from the parent document. This property is read-only."
+          },
+          "useEvenPageHeaderFooter": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "default": null,
+            "description": "Indicates whether to use the even page header / footer, used in conjunction with use_first_page_header_footer."
+          },
+          "useFirstPageHeaderFooter": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "default": null,
+            "description": "Indicates whether to use the first page header / footer."
+          }
+        },
+        "additionalProperties": false,
+        "description": "The DocumentStyle object with the new style settings."
+      }
+    },
+    "required": [
+      "fields",
+      "document_id",
+      "document_style"
+    ],
+    "additionalProperties": false,
+    "description": "UpdateDocumentStyleRequestModel",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "invite_users_to_a_slack_channel",
+  "description": "Invites users to an existing slack channel using their valid slack user ids.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "users": {
+        "type": "string",
+        "description": "Comma-separated string of valid Slack User IDs to invite. Up to 1000 user IDs can be included.\nExample: \"U1234567890,U2345678901,U3456789012\""
+      },
+      "channel": {
+        "type": "string",
+        "description": "ID of the public or private Slack channel to invite users to; must be an existing channel. Typically starts with 'C' (public) or 'G' (private/group).\nExamples:\n  \"C1234567890\"\n  \"G0987654321\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `InviteUsersToASlackChannel`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

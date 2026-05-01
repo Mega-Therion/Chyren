@@ -1,0 +1,395 @@
+{
+  "name": "hubspot_create_ticket",
+  "description": "Creates a Ticket in HubSpot.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "content": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: Ticket description"
+      },
+      "subject": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket Name"
+      },
+      "nps_score": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: Conversation NPS score"
+      },
+      "created_by": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: Created by"
+      },
+      "createdate": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket activity: Create date"
+      },
+      "source_ref": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: Reference to source-specific object"
+      },
+      "closed_date": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket activity: Close date"
+      },
+      "hs_pipeline": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket Pipeline"
+      },
+      "source_type": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: Source"
+      },
+      "hs_resolution": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: Resolution"
+      },
+      "hs_file_upload": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: File upload"
+      },
+      "hs_in_helpdesk": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: In Help Desk"
+      },
+      "hs_custom_inbox": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: Custom inbox ID"
+      },
+      "hs_owning_teams": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Ticket information: Owning Teams"
+        }
+      },
+      "hubspot_owner_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: Ticket owner"
+      },
+      "source_thread_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: Reference to email thread"
+      },
+      "hs_pipeline_stage": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket Stage"
+      },
+      "hs_shared_team_ids": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Ticket information: Shared teams"
+        }
+      },
+      "hs_shared_user_ids": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Ticket information: Shared users"
+        }
+      },
+      "hs_ticket_category": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Ticket information: Category"
+        }
+      },
+      "hs_ticket_priority": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: Priority"
+      },
+      "hs_last_closed_date": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket activity: Last Closed Date"
+      },
+      "hs_assigned_team_ids": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Ticket information: Assigned Teams"
+        }
+      },
+      "hs_assignment_method": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Ticket activity: Assignment Method"
+        }
+      },
+      "nps_follow_up_answer": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: NPS follow up"
+      },
+      "hs_external_object_ids": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: External object ids"
+      },
+      "hs_sla_operating_hours": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: SLA operating hours"
+      },
+      "properties_to_retrieve": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Additional properties to retrieve"
+        }
+      },
+      "hs_pinned_engagement_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: Pinned Engagement ID"
+      },
+      "hs_most_relevant_sla_type": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: Most Relevant SLA Type"
+      },
+      "hs_ticket_language_ai_tag": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket AI Enrichment: Language"
+      },
+      "hs_most_relevant_sla_status": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: Most relevant SLA status"
+      },
+      "hs_applied_sla_rule_config_at": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: Applied SLA Rule Config Date"
+      },
+      "hs_applied_sla_rule_config_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: Applied SLA Rule Config ID"
+      },
+      "hs_help_desk_onboarding_ticket": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: Help Desk onboarding ticket"
+      },
+      "nps_follow_up_question_version": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: NPS follow up question"
+      },
+      "hs_customer_agent_ticket_status": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: Customer Agent ticket status"
+      },
+      "hs_all_assigned_business_unit_ids": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Ticket information: Brands"
+        }
+      },
+      "hs_time_to_close_in_operating_hours": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: Time to close in SLA hours"
+      },
+      "hs_conversations_originating_thread_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: Conversations originating thread id"
+      },
+      "hs_conversations_originating_message_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: Originating Conversations Message Id"
+      },
+      "hs_time_to_first_response_in_operating_hours": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Ticket information: Time to first response in SLA hours"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

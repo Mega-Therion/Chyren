@@ -1,0 +1,55 @@
+{
+  "name": "firebase_create_app",
+  "description": "Use this to create a new Firebase App in the currently active Firebase Project. Firebase Apps can be iOS, Android, or Web.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "display_name": {
+        "type": "string",
+        "description": "The user-friendly display name for your app. If not provided, a default name may be generated."
+      },
+      "platform": {
+        "type": "string",
+        "enum": [
+          "web",
+          "ios",
+          "android"
+        ],
+        "description": "The platform for which to create an app."
+      },
+      "android_config": {
+        "type": "object",
+        "properties": {
+          "package_name": {
+            "type": "string",
+            "description": "The package name for your Android app (e.g., com.example.myapp)."
+          }
+        },
+        "required": [
+          "package_name"
+        ],
+        "description": "Configuration for Android apps. Required if platform is 'android'."
+      },
+      "ios_config": {
+        "type": "object",
+        "properties": {
+          "bundle_id": {
+            "type": "string",
+            "description": "The bundle ID for your iOS app (e.g., com.example.myapp)."
+          },
+          "app_store_id": {
+            "type": "string",
+            "description": "The App Store ID for your iOS app."
+          }
+        },
+        "required": [
+          "bundle_id"
+        ],
+        "description": "Configuration for iOS apps. Required if platform is 'ios'."
+      }
+    },
+    "required": [
+      "platform"
+    ]
+  }
+}

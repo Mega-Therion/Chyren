@@ -6,17 +6,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Chyren** is a Sovereign Intelligence Orchestrator — a stateful, high-integrity AI task execution platform.
 
-- **Medulla** (`medulla/`) — Rust Workspace: canonical runtime — 17 crates covering security, memory, scheduling, CLI, and API server. All live requests route here.
-- **Cortex** (`cortex/`) — Python layer: identity synthesis (`chyren_py/`), data ops scripts (`ops/scripts/`). No longer invoked for runtime requests.
-- **Web** (`chyren-os/interface/`) — Next.js 15 cognitive shell frontend (actively deployed to Vercel; `web_old/` is a stale snapshot)
-- **Gateway** (`gateway/`) — Vite + React 19 external spoke gateway
-- **Brain Stem** (`./chyren`) — Python router script dispatching all commands to Medulla; Python cortex only runs during `dream` maintenance mode
+- **Medulla** (`src/medulla/kernel/`) — Rust Workspace: canonical runtime — ~33 crates covering security, memory, scheduling, CLI, and API server. All live requests route here.
+- **Cortex** (`src/cortex/`) — Python layer: identity synthesis (`chyren_py/`), data ops scripts (`ops/scripts/`). No longer invoked for runtime requests.
+- **Web** (`src/medulla/interface/`) — Next.js 15 cognitive shell frontend (sovereign deployment)
+- **Gateway** (`src/gateways/`) — Vite + React 19 external spoke gateway
+- **Brain Stem** (`./chyren`) — Bash router script dispatching all commands to Medulla; Python cortex only runs during `dream` maintenance mode
 
 ## Build, Test, Lint
 
 ### Rust Workspace (Medulla)
 ```bash
-cd medulla
+cd src/medulla/kernel
 
 cargo build                                  # Debug build
 cargo build --release                        # Release (opt-level=3, LTO)
@@ -30,7 +30,7 @@ cargo check --workspace                      # Compile check only
 
 ### Python Hub (Cortex)
 ```bash
-cd cortex
+cd src/cortex
 
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
@@ -38,27 +38,26 @@ pip install -r requirements.txt
 python main.py "Your task" --provider anthropic    # Run with a task
 python chyren_py/identity_synthesis.py             # Refresh phylactery kernel
 
-# Run tests (pytest.ini at repo root sets pythonpath=cortex, testpaths=tests)
+# Run tests (pytest.ini at repo root sets pythonpath=src/cortex, testpaths=src/cortex/tests)
 pytest                                             # All Python tests
-pytest tests/test_adccl_hub.py                     # Single test file
+pytest tests/test_smoke.py                         # Single test file
 pytest -k test_name                                # Single test by name
 ```
 
 ### Web Frontend (`chyren-os/interface/`)
 ```bash
-cd chyren-os/interface
+cd src/medulla/interface
 npm run dev          # Dev server on localhost:3000
-npm run build        # Production build (runs scripts/generate-context.mjs first)
+npm run build        # Production build
 npm run lint         # ESLint
 npm run typecheck    # tsc --noEmit
 npm run test         # Vitest unit tests
 ```
-Deployed to Vercel. Sync env vars with `scripts/sync-vercel-env-from-one-true.sh`.
 Key libs: `lib/adccl.ts` (TypeScript ADCCL port, threshold 0.7), `lib/hardening.ts` (rate limiting + prompt injection), `lib/phylactery.ts` (identity context), `lib/neon-context.ts` (live ledger fetch).
 
 ### Gateway
 ```bash
-cd gateway
+cd src/gateways
 pnpm install         # Gateway uses pnpm, not npm
 pnpm dev             # Vite dev server
 pnpm build           # tsc -b && vite build
@@ -68,14 +67,14 @@ pnpm lint            # ESLint
 ### Makefile shortcuts (from repo root)
 ```bash
 make ci              # Rust fmt + clippy + test (local CI equivalent)
-make cortex-test     # Python tests (PYTHONPATH=cortex pytest tests/)
-make web-ci          # Next.js: typecheck + lint + build (runs in chyren-os/interface/)
-make gateway-ci      # Gateway: tsc + lint + build
+make cortex-test     # Python tests (PYTHONPATH=src/cortex pytest src/cortex/tests/)
+make web-ci          # Next.js: typecheck + lint + build (runs in src/medulla/interface/)
+make gateway-ci      # Gateway: tsc + lint + build (runs in src/gateways/)
 ```
 
 ### Full Stack (Docker)
 ```bash
-cd medulla
+cd src/medulla/kernel
 docker-compose up    # Starts chyren-api (8080), chyren-web (3000), postgres, qdrant
 ```
 
@@ -123,7 +122,7 @@ docker-compose up    # Starts chyren-api (8080), chyren-web (3000), postgres, qd
 ### Data Layer
 - **Master Ledger**: PostgreSQL (Neon) — append-only, cryptographically signed; `CHYREN_DB_URL` env var
 - **Myelin**: Qdrant vector store for semantic memory; `QDRANT_URL` env var
-- **Phylactery Kernel**: `cortex/chyren_py/phylactery_kernel.json` — ~58k identity entries, loaded at startup
+- **Phylactery Kernel**: `src/cortex/chyren_py/phylactery_kernel.json` — ~58k identity entries, loaded at startup
 
 ### ADCCL Verification Gate
 Every provider response is scored before ledger commit:
@@ -214,16 +213,16 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `f
 
 | Subdirectory | Status | Description |
 |---|---|---|
-| `chyren-os/interface/` | **Active — deployed to Vercel** | The live Next.js 15 frontend. This IS `web/`. See Build section above. |
+| `chyren-os/interface/` | **Active — sovereign deployment** | The live Next.js 15 frontend. This IS `web/`. See Build section above. |
 | `chyren-os/kernel/` | Historical reference | Older Rust workspace (same chyren-* crates) that `medulla/` evolved from. Missing `chyren-cim`, `chyren-ternary`, `chyren-vision`, `chyren-mega`, `openrouter_spoke`, `vision_spoke`. Do not actively develop here. |
 | `chyren-os/supervisor/` | Historical reference | Predecessor to `cortex/chyren_py/` — older `identity_synthesis.py` and phylactery loader. `cortex/chyren_py/` is canonical. |
 | `chyren-os/state/` | Runtime state | Phylactery kernel snapshot and runtime state files — do not delete. |
 | `chyren-os/boot/init.rs` | Stub | OS entry point stub — not wired into any build system. |
 
 **Phylactery kernel copies** — five exist, only one is canonical:
-- `cortex/chyren_py/phylactery_kernel.json` — **canonical** (3031 bytes, newest)
-- `chyren-os/interface/lib/phylactery-kernel.json` — browser-accessible, kept small intentionally; update when identity changes
-- All others (`chyren-os/kernel/data/`, `chyren-os/state/`, `chyren-os/supervisor/`) — stale snapshots, not loaded at runtime
+- `src/cortex/chyren_py/phylactery_kernel.json` — **canonical**
+- `src/medulla/interface/lib/phylactery-kernel.json` — browser-accessible
+- All others — stale snapshots, not loaded at runtime
 
 ## Other Root-Level Directories
 

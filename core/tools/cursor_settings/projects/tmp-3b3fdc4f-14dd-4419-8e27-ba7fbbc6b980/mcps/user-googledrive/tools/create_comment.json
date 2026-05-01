@@ -1,0 +1,48 @@
+{
+  "name": "create_comment",
+  "description": "Tool to create a comment on a file. use when you need to add a new comment to a specific file in google drive.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "anchor": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A JSON string representing the region of the document to which the comment is anchored (e.g., {'type': 'line', 'line': 12}).\nExample: \"{\\\"type\\\": \\\"line\\\", \\\"line\\\": 12}\""
+      },
+      "content": {
+        "type": "string",
+        "description": "The plain text content of the comment.\nExample: \"This is a great document!\""
+      },
+      "file_id": {
+        "type": "string",
+        "description": "The ID of the file.\nExample: \"1a2b3c4d5e6f7g8h9i0j\""
+      },
+      "quoted_file_content_value": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The quoted content itself.\nExample: \"This is the text to quote.\""
+      },
+      "quoted_file_content_mime_type": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The MIME type of the quoted content.\nExample: \"text/plain\""
+      }
+    },
+    "required": [
+      "content",
+      "file_id"
+    ],
+    "additionalProperties": false,
+    "description": "CreateCommentRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

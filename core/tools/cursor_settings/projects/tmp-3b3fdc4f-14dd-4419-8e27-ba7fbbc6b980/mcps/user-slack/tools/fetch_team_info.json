@@ -1,0 +1,20 @@
+{
+  "name": "fetch_team_info",
+  "description": "Fetches comprehensive metadata about the current slack team, or a specified team if the provided id is accessible.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "team": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The ID of the team to retrieve information for. If omitted, information for the current team (associated with the authentication token) is returned. The token must have permissions to view the specified team, especially for teams accessible via external shared channels.\nExamples:\n  \"T12345678\"\n  \"E87654321\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `FetchTeamInfo`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

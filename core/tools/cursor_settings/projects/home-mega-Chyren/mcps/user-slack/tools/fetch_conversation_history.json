@@ -1,0 +1,47 @@
+{
+  "name": "fetch_conversation_history",
+  "description": "Fetches a chronological list of messages and events from a specified slack conversation, accessible by the authenticated user/bot, with options for pagination and time range filtering.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "limit": {
+        "type": "integer",
+        "description": "Maximum number of messages to return per page (1-1000). Fewer may be returned if at the end of history or channel has fewer messages.\nExamples:\n  \"100\"\n  \"200\""
+      },
+      "cursor": {
+        "type": "string",
+        "description": "Pagination cursor from `next_cursor` of a previous response to fetch subsequent pages. See Slack's pagination documentation for details.\nExample: \"dXNlcjpVMDYxTkZUVDA=\""
+      },
+      "latest": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "End of the time range of messages to include in results. Accepts a Unix timestamp or a Slack timestamp (e.g., '1234567890.000000').\nExample: \"1609459200.000000\""
+      },
+      "oldest": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Start of the time range of messages to include in results. Accepts a Unix timestamp or a Slack timestamp (e.g., '1234567890.000000').\nExample: \"1609372800.000000\""
+      },
+      "channel": {
+        "type": "string",
+        "description": "The ID of the public channel, private channel, direct message, or multi-person direct message to fetch history from.\nExamples:\n  \"C1234567890\"\n  \"G0123456789\"\n  \"D0123456789\""
+      },
+      "inclusive": {
+        "type": "boolean",
+        "description": "Include messages with `latest` or `oldest` timestamps in the results; applies only when `latest` or `oldest` is specified.\nExamples:\n  \"true\"\n  \"false\""
+      }
+    },
+    "required": [
+      "channel"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for fetching conversation history from Slack.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

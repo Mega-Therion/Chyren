@@ -1,0 +1,42 @@
+{
+  "name": "hubspot_remove_contact_from_list",
+  "description": "Remove a contact from a specific static list.  _(Marketing Hub Starter plans and above)_",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "emails": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Contact Email"
+      },
+      "list_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "List Name"
+      },
+      "haltTaskIfNoChanges": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Halt my task if contact wasn't a member of the list"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

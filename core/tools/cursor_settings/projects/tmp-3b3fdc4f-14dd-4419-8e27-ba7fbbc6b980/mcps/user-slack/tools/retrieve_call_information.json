@@ -1,0 +1,19 @@
+{
+  "name": "retrieve_call_information",
+  "description": "Retrieves a point-in-time snapshot of a specific slack call's information.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "Unique identifier of the Slack call for which to retrieve information. This ID is typically returned when a call is initiated (e.g., by the `calls.add` method).\nExample: \"R1234567890\""
+      }
+    },
+    "required": [
+      "id"
+    ],
+    "additionalProperties": false,
+    "description": "Request model for retrieving information about a specific Slack call.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

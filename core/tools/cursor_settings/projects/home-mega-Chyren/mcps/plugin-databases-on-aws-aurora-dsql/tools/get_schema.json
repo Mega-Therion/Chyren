@@ -1,0 +1,39 @@
+{
+  "name": "get_schema",
+  "description": "Get the schema of the given table",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "table_name": {
+        "description": "name of the table",
+        "title": "Table Name",
+        "type": "string"
+      }
+    },
+    "required": [
+      "table_name"
+    ],
+    "title": "get_schemaArguments"
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "result": {
+        "items": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "title": "Result",
+        "type": "array"
+      }
+    },
+    "required": [
+      "result"
+    ],
+    "title": "get_schemaOutput"
+  },
+  "plugin": "databases-on-aws",
+  "marketplace": "cursor-public",
+  "pluginId": "6198",
+  "marketplaceId": "34"
+}

@@ -1,0 +1,17 @@
+{
+  "name": "get_about",
+  "description": "Tool to retrieve information about the user, the user's drive, and system capabilities. use when you need to check storage quotas, user details, or supported import/export formats.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "fields": {
+        "type": "string",
+        "description": "A comma-separated list of fields to include in the response. Use `*` to include all fields.\nExamples:\n  \"*\"\n  \"user,storageQuota\"",
+        "default": "*"
+      }
+    },
+    "additionalProperties": false,
+    "description": "GetAboutRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

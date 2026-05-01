@@ -1,0 +1,19 @@
+{
+  "name": "firebase_list_apps",
+  "description": "Use this to retrieve a list of the Firebase Apps registered in the currently active Firebase project. Firebase Apps can be iOS, Android, or Web.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "platform": {
+        "type": "string",
+        "enum": [
+          "ios",
+          "android",
+          "web",
+          "all"
+        ],
+        "description": "the specific platform to list (omit to list all platforms)"
+      }
+    }
+  }
+}

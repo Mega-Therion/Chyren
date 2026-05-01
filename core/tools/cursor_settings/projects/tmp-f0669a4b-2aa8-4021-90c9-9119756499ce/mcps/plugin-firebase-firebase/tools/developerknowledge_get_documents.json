@@ -1,0 +1,66 @@
+{
+  "name": "developerknowledge_get_documents",
+  "description": "Use this tool to retrieve the full content of a single document or up to 20 documents in a single call. The document names should be obtained from the `parent` field of results from a call to the `search_documents` tool. Set the `names` parameter to a list of document names.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "names": {
+        "description": "Required. The names of the documents to retrieve, as returned by search_documents. A maximum of 20 documents can be retrieved in one call. The documents are returned in the same order as the `names` in the request. Format: `documents/{uri_without_scheme}` Example: `documents/docs.cloud.google.com/storage/docs/creating-buckets`",
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "names"
+    ],
+    "description": "Request schema for get_documents."
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "documents": {
+        "description": "Documents requested.",
+        "items": {
+          "$ref": "#/$defs/Document"
+        },
+        "type": "array"
+      }
+    },
+    "$defs": {
+      "Document": {
+        "description": "A Document represents a piece of content from the Developer Knowledge corpus.",
+        "properties": {
+          "content": {
+            "description": "Output only. The content of the document in Markdown format.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "description": {
+            "description": "Output only. A description of the document.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "description": "Identifier. The resource name of the document. Format: `documents/{uri_without_scheme}` Example: `documents/docs.cloud.google.com/storage/docs/creating-buckets`",
+            "type": "string",
+            "x-google-identifier": true
+          },
+          "title": {
+            "description": "Output only. The title of the document.",
+            "readOnly": true,
+            "type": "string"
+          },
+          "uri": {
+            "description": "Output only. The URI of the content, such as `https://cloud.google.com/storage/docs/creating-buckets`.",
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "description": "Response schema for get_documents."
+  }
+}

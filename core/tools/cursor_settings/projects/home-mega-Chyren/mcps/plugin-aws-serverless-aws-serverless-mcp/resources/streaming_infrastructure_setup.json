@@ -1,0 +1,6 @@
+{
+  "uri": "streaming://infrastructure-setup",
+  "name": "streaming_infrastructure_setup",
+  "description": "Streaming Infrastructure Setup: Automatically detects requests for creating Kafka clusters, Kinesis streams, DynamoDB streams, or SQS queues with Lambda functions. Handles VPC setup, security groups, IAM roles, and Event Source Mappings.",
+  "mimeType": "text/plain"
+}

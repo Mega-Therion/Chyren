@@ -1,0 +1,101 @@
+{
+  "name": "google_docs_format_text",
+  "description": "Format text in a Google Doc with bold, italic, colors, and other styling options.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "tabId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Tab ID"
+      },
+      "endIndex": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "End position (Index)"
+      },
+      "fontSize": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Font size (points)"
+      },
+      "segmentId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Segment ID"
+      },
+      "textColor": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Text color (hex)"
+      },
+      "documentId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Document"
+      },
+      "fontFamily": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Font family"
+      },
+      "startIndex": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Start position (Index)"
+      },
+      "backgroundColor": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Background color (hex)"
+      },
+      "formattingOptions": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Formatting Options"
+        }
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

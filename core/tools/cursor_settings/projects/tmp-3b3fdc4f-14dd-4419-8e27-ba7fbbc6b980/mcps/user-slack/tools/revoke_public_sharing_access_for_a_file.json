@@ -1,0 +1,16 @@
+{
+  "name": "revoke_public_sharing_access_for_a_file",
+  "description": "Revokes a slack file's public url, making it private; this is a no-op if not already public and is irreversible.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file": {
+        "type": "string",
+        "description": "The ID of the file for which to revoke the public URL. This unique identifier typically starts with 'F'.\nExample: \"F123ABC456\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `RevokePublicSharingAccessForAFile`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

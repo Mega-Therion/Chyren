@@ -1,0 +1,24 @@
+{
+  "name": "deletes_a_message_from_a_chat",
+  "description": "Deletes a message, identified by its channel id and timestamp, from a slack channel, private group, or direct message conversation; the authenticated user or bot must be the original poster.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "ts": {
+        "type": "string",
+        "description": "Timestamp of the message to be deleted. Must be the exact Slack message timestamp string with fractional precision, e.g., '1234567890.123456'.\nExamples:\n  \"1234567890.123456\"\n  \"1609459200.000000\""
+      },
+      "as_user": {
+        "type": "boolean",
+        "description": "If `True`, deletes the message as the authenticated user using the `chat:write:user` scope. Bot users are considered authenticated users. If `False` or omitted, the message is deleted using the `chat:write:bot` scope."
+      },
+      "channel": {
+        "type": "string",
+        "description": "The ID of the channel, private group, or direct message conversation containing the message to be deleted.\nExamples:\n  \"C1234567890\"\n  \"G0987654321\"\n  \"D060123ABC\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `DeletesAMessageFromAChat`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

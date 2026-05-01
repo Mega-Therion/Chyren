@@ -1,0 +1,16 @@
+{
+  "name": "delete_a_file_by_id",
+  "description": "Permanently deletes an existing file from a slack workspace using its unique file id; this action is irreversible and also removes any associated comments or shares.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file": {
+        "type": "string",
+        "description": "ID of the file to delete. Typically obtained when a file is uploaded or listed.\nExamples:\n  \"F2147483002\"\n  \"F012345AB67\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `DeleteAFileById`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

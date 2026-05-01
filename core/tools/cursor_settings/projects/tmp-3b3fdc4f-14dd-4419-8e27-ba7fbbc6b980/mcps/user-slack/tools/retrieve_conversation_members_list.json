@@ -1,0 +1,24 @@
+{
+  "name": "retrieve_conversation_members_list",
+  "description": "Retrieves a paginated list of active member ids for a specified slack public channel, private channel, direct message (dm), or multi-person direct message (mpim).",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "limit": {
+        "type": "integer",
+        "description": "The maximum number of members to return per page. Fewer items may be returned than the requested limit, even if more members exist and the end of the list hasn't been reached.\nExamples:\n  \"100\"\n  \"200\""
+      },
+      "cursor": {
+        "type": "string",
+        "description": "Pagination cursor value for fetching specific pages of results. To retrieve the next page, provide the `next_cursor` value obtained from the `response_metadata` of the previous API call. If omitted or empty, the first page of members is fetched. For more details on pagination, refer to Slack API documentation.\nExamples:\n  \"dXNlcj1VMEc5V0ZYTlo=\"\n  \"bmV4dF90czoxNTEyMDg1ODYxMDAwNTZa\""
+      },
+      "channel": {
+        "type": "string",
+        "description": "ID of the conversation (public channel, private channel, direct message, or multi-person direct message) for which to retrieve the member list. Public channel IDs typically start with 'C', private channels or multi-person direct messages (MPIMs) with 'G', and direct messages (DMs) with 'D'.\nExamples:\n  \"C1234567890\"\n  \"G0987654321\"\n  \"D12345ABCDE\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `RetrieveConversationMembersList`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "name": "send_ephemeral_message",
+  "description": "Sends an ephemeral message to a user in a channel.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "text": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "How this field works and whether it is required depends on other fields you use in your API call. See below for more detail.\nExample: \"Hello world\""
+      },
+      "user": {
+        "type": "string",
+        "description": "User ID of the user to send the ephemeral message to.\nExample: \"U0BPQUNTA\""
+      },
+      "parse": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Change how messages are treated. Defaults to none. See below.\nExample: \"full\""
+      },
+      "blocks": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A JSON-based array of structured blocks, presented as a URL-encoded string.\nExample: \"[{\\\"type\\\": \\\"section\\\", \\\"text\\\": {\\\"type\\\": \\\"plain_text\\\", \\\"text\\\": \\\"Hello world\\\"}}]\""
+      },
+      "as_user": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Pass true to post the message as the authed user, instead of as a bot. Defaults to false. See authorship below.\nExample: true"
+      },
+      "channel": {
+        "type": "string",
+        "description": "Channel, private group, or DM channel to send message to. Can be an encoded ID, or a name.\nExample: \"C1234567890\""
+      },
+      "icon_url": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "URL to an image to use as the icon for this message. Must be used in conjunction with as_user set to false, otherwise ignored. See authorship below.\nExample: \"http://lorempixel.com/48/48\""
+      },
+      "username": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Set your bot's user name. Must be used in conjunction with as_user set to false, otherwise ignored. See authorship below.\nExample: \"My Bot\""
+      },
+      "thread_ts": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Provide another message's ts value to make this message a reply. Avoid using a reply's ts value; use its parent instead.\nExample: \"1234567890.123456\""
+      },
+      "icon_emoji": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Emoji to use as the icon for this message. Overrides icon_url. Must be used in conjunction with as_user set to false, otherwise ignored. See authorship below.\nExample: \":chart_with_upwards_trend:\""
+      },
+      "link_names": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Find and link channel names and usernames.\nExample: true"
+      },
+      "attachments": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "A JSON-based array of structured attachments, presented as a URL-encoded string.\nExample: \"[{\\\"pretext\\\": \\\"pre-hello\\\", \\\"text\\\": \\\"text-world\\\"}]\""
+      }
+    },
+    "required": [
+      "user",
+      "channel"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `SendEphemeralMessage`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

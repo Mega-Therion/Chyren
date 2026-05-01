@@ -1,0 +1,35 @@
+{
+  "name": "delete_drive",
+  "description": "Tool to permanently delete a shared drive. use when you need to remove a shared drive and its contents (if specified).",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "driveId": {
+        "type": "string",
+        "description": "The ID of the shared drive.\nExample: \"0AEMyflX29xHjUk9PVA\""
+      },
+      "allowItemDeletion": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether any items inside the shared drive should also be deleted. This option is only supported when `useDomainAdminAccess` is also set to `true`.\nExample: true"
+      },
+      "useDomainAdminAccess": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Issue the request as a domain administrator; if set to true, then the requester will be granted access if they are an administrator of the domain to which the shared drive belongs.\nExample: true"
+      }
+    },
+    "required": [
+      "driveId"
+    ],
+    "additionalProperties": false,
+    "description": "DeleteDriveRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

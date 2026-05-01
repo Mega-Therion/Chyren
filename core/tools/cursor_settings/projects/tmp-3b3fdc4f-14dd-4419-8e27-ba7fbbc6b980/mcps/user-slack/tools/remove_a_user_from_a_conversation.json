@@ -1,0 +1,20 @@
+{
+  "name": "remove_a_user_from_a_conversation",
+  "description": "Removes a specified user from a slack conversation (channel); the caller must have permissions to remove users and cannot remove themselves using this action.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "user": {
+        "type": "string",
+        "description": "The ID of the user to be removed from the conversation.\nExamples:\n  \"U012A3BCD4E\"\n  \"W1234567890\""
+      },
+      "channel": {
+        "type": "string",
+        "description": "ID of the conversation (channel) to remove the user from.\nExamples:\n  \"C012AB3CD4E\"\n  \"G1234567890\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `RemoveAUserFromAConversation`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

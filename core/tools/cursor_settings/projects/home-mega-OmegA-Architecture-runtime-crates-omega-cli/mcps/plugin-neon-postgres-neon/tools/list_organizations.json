@@ -1,0 +1,15 @@
+{
+  "name": "list_organizations",
+  "description": "Lists all organizations that the current user has access to. Optionally filter by organization name or ID using the `search` parameter.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "search": {
+        "type": "string",
+        "description": "Search organizations by name or ID. You can specify partial name or ID values to filter results."
+      }
+    },
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

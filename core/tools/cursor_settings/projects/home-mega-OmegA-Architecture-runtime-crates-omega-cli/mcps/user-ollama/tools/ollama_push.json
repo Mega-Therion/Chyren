@@ -1,0 +1,29 @@
+{
+  "name": "ollama_push",
+  "description": "Push a model to the Ollama registry. Uploads a local model to make it available remotely.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "model": {
+        "type": "string",
+        "description": "Name of the model to push"
+      },
+      "insecure": {
+        "type": "boolean",
+        "description": "Allow insecure connections",
+        "default": false
+      },
+      "format": {
+        "type": "string",
+        "enum": [
+          "json",
+          "markdown"
+        ],
+        "default": "json"
+      }
+    },
+    "required": [
+      "model"
+    ]
+  }
+}

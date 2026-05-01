@@ -1,0 +1,75 @@
+{
+  "name": "delete_table_row",
+  "description": "Tool to delete a row from a table in a google document. use when you need to remove a specific row from an existing table.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "documentId": {
+        "type": "string",
+        "description": "The ID of the document.\nExample: \"195j9eDD34F53d2g2HMJ-N0kKc_P8tq3/edit\""
+      },
+      "tableCellLocation": {
+        "type": "object",
+        "properties": {
+          "rowIndex": {
+            "type": "integer",
+            "description": "The zero-based row index. For example, the second row in the table has a row index of 1.\nExample: 1"
+          },
+          "columnIndex": {
+            "type": "integer",
+            "description": "The zero-based column index. For example, the second column in the table has a column index of 1.\nExample: 1"
+          },
+          "tableStartLocation": {
+            "type": "object",
+            "properties": {
+              "index": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "The zero-based index, in UTF-16 code units. The index is relative to the beginning of the segment specified by segment_id.\nExample: 100"
+              },
+              "tabId": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "default": null,
+                "description": "The tab that the location is in. When omitted, the request is applied to the first tab.\nExample: \"tab_id1\""
+              },
+              "segmentId": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "default": null,
+                "description": "The ID of the header, footer or footnote the location is in. An empty segment ID signifies the document's body.\nExample: \"header_id1\""
+              }
+            },
+            "additionalProperties": false,
+            "description": "The location where the table starts in the document."
+          }
+        },
+        "required": [
+          "rowIndex",
+          "columnIndex",
+          "tableStartLocation"
+        ],
+        "additionalProperties": false,
+        "description": "The reference table cell location from which the row will be deleted."
+      }
+    },
+    "required": [
+      "documentId",
+      "tableCellLocation"
+    ],
+    "additionalProperties": false,
+    "description": "DeleteTableRowRequestModel",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

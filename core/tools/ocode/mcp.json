@@ -1,0 +1,62 @@
+{
+  "servers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "."]
+    },
+    "git": {
+      "command": "uvx",
+      "args": ["mcp-server-git"],
+      "env": {
+        "GIT_PYTHON_REFRESH": "quiet"
+      }
+    },
+    "github-local": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "env": {
+        "MEMORY_FILE_PATH": "/home/mega/.omega/mcp-memory/omega-memory.jsonl"
+      }
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "fetch": {
+      "command": "mcp-fetch"
+    },
+    "postgres-local": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://omega:omega@localhost:5432/omega"]
+    },
+    "ollama": {
+      "command": "ollama-mcp",
+      "env": {
+        "OLLAMA_HOST": "http://localhost:11434"
+      }
+    },
+    "omega-sovereign-supabase": {
+      "command": "/usr/bin/python3",
+      "args": ["/home/mega/NEXUS/tools/supabase_mcp.py"],
+      "env": {
+        "SUPABASE_URL": "https://tssfdlodjgtedsssfpfc.supabase.co",
+        "SUPABASE_SERVICE_ROLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzc2ZkbG9kamd0ZWRzc3NmcGZjIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NzgyNDMxMywiZXhwIjoyMDgzNDAwMzEzfQ.1AqRgRff30GAdF0KUOXvxWeyqRow0hCIEK5_cOzdzxs"
+      }
+    },
+    "omega-gaing-supabase": {
+      "command": "/usr/bin/python3",
+      "args": ["/home/mega/NEXUS/tools/supabase_mcp.py"],
+      "env": {
+        "SUPABASE_URL": "https://sgvitxezqrjgjmduoool.supabase.co",
+        "SUPABASE_SERVICE_ROLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNndml0eGV6cXJqZ2ptZHVvb29sIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2ODE2MzQ4MCwiZXhwIjoyMDgzNzM5NDgwfQ.o5GjnHg5fivo8MOCfNEv3PJkC0rQhxs2c8dXG7rSoOc"
+      }
+    }
+  }
+}

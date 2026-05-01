@@ -1,0 +1,49 @@
+{
+  "name": "google_sheets_clear_spreadsheet_row_s",
+  "description": "Clears the contents of the selected row(s) while keeping the row(s) intact in the spreadsheet.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "row": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Row(s)"
+      },
+      "drive": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Drive"
+      },
+      "worksheet": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Worksheet"
+      },
+      "spreadsheet": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Spreadsheet"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

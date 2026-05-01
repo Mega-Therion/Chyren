@@ -1,0 +1,162 @@
+{
+  "name": "update_drive",
+  "description": "Tool to update the metadata for a shared drive. use when you need to modify properties like the name, theme, background image, or restrictions of a shared drive.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The new name for the shared drive."
+      },
+      "hidden": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether the shared drive is hidden from the default view."
+      },
+      "driveId": {
+        "type": "string",
+        "description": "The ID of the shared drive to update."
+      },
+      "themeId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The ID of a theme to apply to the shared drive. Cannot be set if colorRgb or backgroundImageFile are set."
+      },
+      "colorRgb": {
+        "anyOf": [
+          {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{6}$"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "The color of this shared drive as an RGB hex string (e.g., \"#FF0000\"). Cannot be set if themeId is set."
+      },
+      "restrictions": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "domainUsersOnly": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "default": null,
+                "description": "If true, restricts access to users of the domain to which the shared drive belongs."
+              },
+              "driveMembersOnly": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "default": null,
+                "description": "If true, restricts access to items inside the shared drive to its members."
+              },
+              "adminManagedRestrictions": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "default": null,
+                "description": "If true, requires administrative privileges to modify restrictions."
+              },
+              "copyRequiresWriterPermission": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "default": null,
+                "description": "If true, disables copy, print, or download options for readers and commenters."
+              },
+              "sharingFoldersRequiresOrganizerPermission": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "default": null,
+                "description": "If true, only users with the organizer role can share folders. If false, users with either the organizer or file organizer role can share folders."
+              }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "A set of restrictions to apply to the shared drive."
+      },
+      "backgroundImageFile": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "The ID of an image file in Google Drive to use for the background image."
+              },
+              "width": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "The width of the cropped image (0.0 to 1.0). The height is computed (aspect ratio 80:9)."
+              },
+              "xCoordinate": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "The X coordinate of the upper left corner of the cropping area in the background image (0.0 to 1.0)."
+              },
+              "yCoordinate": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "The Y coordinate of the upper left corner of the cropping area in the background image (0.0 to 1.0)."
+              }
+            },
+            "required": [
+              "id",
+              "width",
+              "xCoordinate",
+              "yCoordinate"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "An image file and cropping parameters for the shared drive's background. Cannot be set if themeId is set."
+      },
+      "useDomainAdminAccess": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "If set to true, the request is issued as a domain administrator."
+      }
+    },
+    "required": [
+      "driveId"
+    ],
+    "additionalProperties": false,
+    "description": "UpdateDriveRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "name": "unmerge_table_cells",
+  "description": "Tool to unmerge previously merged cells in a table. use this when you need to revert merged cells in a google document table back to their individual cell states.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "tableRange": {
+        "type": "object",
+        "properties": {
+          "rowSpan": {
+            "type": "integer",
+            "description": "The row span of the table range."
+          },
+          "columnSpan": {
+            "type": "integer",
+            "description": "The column span of the table range."
+          },
+          "tableCellLocation": {
+            "type": "object",
+            "properties": {
+              "rowIndex": {
+                "type": "integer",
+                "description": "The zero-based row index. For example, the second row in the table has a row index of 1."
+              },
+              "columnIndex": {
+                "type": "integer",
+                "description": "The zero-based column index. For example, the second column in the table has a column index of 1."
+              },
+              "tableStartLocation": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "index": {
+                        "anyOf": [
+                          {
+                            "type": "integer"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": null,
+                        "description": "The zero-based index, in UTF-16 code units."
+                      },
+                      "tabId": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "default": null,
+                        "description": "The tab that the location is in. When omitted, the request is applied to the first tab."
+                      },
+                      "segmentId": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "default": null,
+                        "description": "The ID of the header, footer or footnote the table is in. An empty segment ID signifies the document's body."
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "The location where the table starts in the document."
+              }
+            },
+            "required": [
+              "rowIndex",
+              "columnIndex"
+            ],
+            "additionalProperties": false,
+            "description": "The cell location where the table range starts."
+          }
+        },
+        "required": [
+          "rowSpan",
+          "columnSpan",
+          "tableCellLocation"
+        ],
+        "additionalProperties": false,
+        "description": "The table range specifying which cells of the table to unmerge."
+      },
+      "document_id": {
+        "type": "string",
+        "description": "The ID of the document to unmerge table cells in.\nExample: \"195j9eDD34F53d2g2HMJ-N0kKc_PzA3qdr3c31234567\""
+      }
+    },
+    "required": [
+      "tableRange",
+      "document_id"
+    ],
+    "additionalProperties": false,
+    "description": "UnmergeTableCellsRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

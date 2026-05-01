@@ -1,0 +1,84 @@
+{
+  "name": "google_sheets_update_spreadsheet_row",
+  "description": "Update a row in a specific spreadsheet with optional formatting.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "row": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Row"
+      },
+      "drive": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Drive"
+      },
+      "worksheet": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Worksheet"
+      },
+      "text_color": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Text Color"
+      },
+      "spreadsheet": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Spreadsheet"
+      },
+      "background_color": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Background Color"
+      },
+      "text_format_bold": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Bold"
+      },
+      "text_format_italic": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Italic"
+      },
+      "text_format_strikethrough": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Strikethrough"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

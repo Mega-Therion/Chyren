@@ -1,0 +1,16 @@
+{
+  "name": "close_dm_or_multi_person_dm",
+  "description": "Closes a slack direct message (dm) or multi-person direct message (mpdm) channel, removing it from the user's sidebar without deleting history; this action affects only the calling user's view.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "channel": {
+        "type": "string",
+        "description": "The ID of the direct message or multi-person direct message channel to close. Example: D1234567890 or G0123456789.\nExamples:\n  \"D1234567890\"\n  \"G0123456789\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `CloseDmOrMultiPersonDm`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

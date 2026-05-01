@@ -1,0 +1,10 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e4] [cursor=pointer]: Initialize Neural Link
+    - generic [ref=e6]: "VOICE: CHARON"
+    - link "TRANQUILITY" [ref=e7] [cursor=pointer]:
+      - /url: /tranquility
+    - generic [ref=e8]:
+      - generic [ref=e10]: System Offline
+      - generic [ref=e14]: Awaiting voice command...
+  - alert [ref=e15]

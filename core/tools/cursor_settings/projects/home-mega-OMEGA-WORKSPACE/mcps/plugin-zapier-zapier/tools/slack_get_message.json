@@ -1,0 +1,35 @@
+{
+  "name": "slack_get_message",
+  "description": "Gets a particular Slack message using its IDs.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "latest": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Message ID (ts)"
+      },
+      "channel": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Conversation ID"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

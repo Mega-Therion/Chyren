@@ -1,0 +1,63 @@
+{
+  "name": "slack_edit_message",
+  "description": "Edits a message.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "ts": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Message TS (ID)"
+      },
+      "channel": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Conversation ID"
+      },
+      "content": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Message Content"
+      },
+      "posted_by": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Posted By"
+      },
+      "content_type": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Content Type"
+      },
+      "reply_broadcast": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Reply Broadcast"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

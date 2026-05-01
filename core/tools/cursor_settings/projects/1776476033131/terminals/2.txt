@@ -1,0 +1,17 @@
+---
+pid: 6044
+cwd: /home/mega
+---
+
+    ██████╗     ██╗    ██╗    ███████╗    ██╗   ██╗
+    ██╔══██╗    ██║    ██║    ██╔════╝    ╚██╗ ██╔╝
+    ██████╔╝    ██║ █╗ ██║    █████╗       ╚████╔╝ 
+    ██╔══██╗    ██║███╗██║    ██╔══╝        ╚██╔╝  
+    ██║  ██║    ╚███╔███╔╝    ██║            ██║   
+    ╚═╝  ╚═╝     ╚══╝╚══╝     ╚═╝            ╚═╝   
+
+      THE OMEGA SOVEREIGN MONOGRAM
+           (YETTRAGRAMMATON)
+
+[1]   Done                    OMEGA_DB_URL=postgresql://neondb_owner:npg_w8Duvsr1alpj@ep-ancient-river-ae2p6xqp-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require
+mega@mega:~$

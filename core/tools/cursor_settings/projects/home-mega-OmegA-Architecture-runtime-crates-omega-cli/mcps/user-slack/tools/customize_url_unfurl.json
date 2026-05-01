@@ -1,0 +1,40 @@
+{
+  "name": "customize_url_unfurl",
+  "description": "Customizes url previews (unfurling) in a specific slack message using a url-encoded json in `unfurls` to define custom content or remove existing previews.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "ts": {
+        "type": "string",
+        "description": "Timestamp of the message to customize URL unfurling for.\nExample: \"1234567890.123456\""
+      },
+      "channel": {
+        "type": "string",
+        "description": "Channel, private group, or DM channel to send message to. Can be an encoded ID, or a name.\nExamples:\n  \"C1234567890\"\n  \"general\""
+      },
+      "unfurls": {
+        "type": "string",
+        "description": "URL-encoded JSON mapping message URLs to custom unfurl content (Slack attachment format or unfurl blocks). To remove an existing unfurl, provide an empty unfurl block for its URL.\nExample: \"%7B%22https%3A%2F%2Fexample.com%2Farticle%22%3A%7B%22text%22%3A%22Article%20Preview%22%7D%7D\""
+      },
+      "user_auth_url": {
+        "type": "string",
+        "description": "URL-encoded custom URL for user authentication with your app to enable unfurling. Used when `user_auth_required` is true.\nExample: \"https://yourapp.com/slack/auth?user_id=U123&channel_id=C123\""
+      },
+      "user_auth_message": {
+        "type": "string",
+        "description": "Ephemeral message text prompting user authentication with your app for domain-specific unfurling. Used when `user_auth_required` is true and authorization is pending.\nExample: \"Please authenticate with MyApp to see rich previews for example.com.\""
+      },
+      "user_auth_required": {
+        "type": "boolean",
+        "description": "Set to `true` if user authentication is required to unfurl links for a domain, enabling an authentication flow using `user_auth_url` and `user_auth_message`.\nExamples:\n  true\n  false"
+      }
+    },
+    "required": [
+      "ts",
+      "channel"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `CustomizeUrlUnfurl`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

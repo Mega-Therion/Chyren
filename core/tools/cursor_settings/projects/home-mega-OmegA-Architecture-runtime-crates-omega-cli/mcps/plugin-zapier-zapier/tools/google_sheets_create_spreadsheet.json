@@ -1,0 +1,59 @@
+{
+  "name": "google_sheets_create_spreadsheet",
+  "description": "Creates a new spreadsheet. Choose from a blank spreadsheet, a copy of an existing one, or one with headers.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "drive": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Drive"
+      },
+      "title": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Title"
+      },
+      "headers": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Enter column headers for your new spreadsheet. These will be ignored if \"Spreadsheet to Copy\" is selected. Headers are REQUIRED for spreadsheets that will be used with add_row or update_row operations. Without headers in the first row, these operations will fail, unless you call Create Column later."
+        }
+      },
+      "spreadsheet_to_copy": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Spreadsheet to Copy"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

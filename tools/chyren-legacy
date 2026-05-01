@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+"""
+Chyren — Sovereign Intelligence Orchestrator (brain stem CLI).
+ENTERPRISE EDITION - Standardized Monorepo Paths.
+"""
+
+from __future__ import annotations
+
+import argparse
+import errno
+import json
+import logging
+import os
+import shutil
+import signal
+import subprocess
+import sys
+import time
+import uuid
+from contextlib import contextmanager
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Iterator, Optional, Sequence
+
+VERSION = "1.0.0"
+
+REPO_DIR = Path(__file__).resolve().parent.parent
+SRC_DIR = REPO_DIR / "src"
+CORTEX_DIR = SRC_DIR / "cortex"
+MEDULLA_DIR = SRC_DIR / "medulla" / "kernel"
+DATA_DIR = REPO_DIR / "data"
+STATE_DIR = DATA_DIR / "ledger"
+EVENTS_LOG = STATE_DIR / "cli_events.jsonl"
+DREAM_LOCK = STATE_DIR / ".dream.lock"
+
+LOG = logging.getLogger("chyren")
+
+MEDULLA_REASONING_CMDS = {"thought", "sense", "verify", "identity", "insights", "ask"}
+MEDULLA_EXECUTION_CMDS = {"action", "flex", "shard", "ingest", "memory", "solve", "discipline"}
+MEDULLA_PASSTHROUGH = MEDULLA_REASONING_CMDS | MEDULLA_EXECUTION_CMDS
+
+SESSION_ID = uuid.uuid4().hex[:12]
+
+def load_env() -> None:
+    candidates = [
+        Path("~/.chyren_keys.env").expanduser(),
+        Path("~/.chyren/one-true.env").expanduser(),
+        DATA_DIR / "vault" / "one-true.env",
+    ]
+    for path in candidates:
+        if not path.is_file(): continue
+        try:
+            with path.open() as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#") or "=" not in line: continue
+                    key, _, val = line.partition("=")
+                    os.environ[key.strip()] = val.strip().strip('"').strip("'")
+        except OSError: pass
+
+def get_python_exe() -> str:
+    venv_py = CORTEX_DIR / "venv" / "bin" / "python3"
+    return str(venv_py) if venv_py.is_file() else sys.executable
+
+def medulla_bin(name: str = "chyren") -> Path:
+    default = MEDULLA_DIR / "target" / "release" / name
+    if not default.exists():
+        # Fallback to building
+        subprocess.run(["cargo", "build", "--release", "-p", f"chyren-{name.split('-')[-1]}", "--bin", name], cwd=MEDULLA_DIR)
+    return default
+
+def run_medulla(args: Sequence[str], bin_name: str = "chyren") -> subprocess.CompletedProcess:
+    binary = medulla_bin(bin_name)
+    return subprocess.run([str(binary), *args])
+
+def cmd_status(args: argparse.Namespace, remainder: list[str]) -> int:
+    # Minimal status for CLI
+    print(f"Chyren Enterprise Standard v{VERSION}")
+    print(f"Medulla: {MEDULLA_DIR}")
+    print(f"Cortex:  {CORTEX_DIR}")
+    print(f"State:   {STATE_DIR}")
+    return run_medulla(["status", *remainder]).returncode
+
+def main() -> int:
+    load_env()
+    raw_argv = sys.argv[1:]
+    if not raw_argv:
+        print("Chyren CLI - Enterprise")
+        return 0
+    
+    cmd = raw_argv[0]
+    if cmd in MEDULLA_PASSTHROUGH:
+        return run_medulla(raw_argv).returncode
+    elif cmd == "status":
+        return run_medulla(["status"]).returncode
+    else:
+        # Assume it's a thought if not a known command
+        return run_medulla(["thought", *raw_argv]).returncode
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,6 @@
+{
+  "uri": "deployment://list",
+  "name": "deployment_list",
+  "description": "Lists CloudFormation deployments managed by this MCP server.",
+  "mimeType": "text/plain"
+}

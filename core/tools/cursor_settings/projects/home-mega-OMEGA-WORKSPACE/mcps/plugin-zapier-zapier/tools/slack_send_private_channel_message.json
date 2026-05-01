@@ -1,0 +1,119 @@
+{
+  "name": "slack_send_private_channel_message",
+  "description": "Post a new message to a private channel you choose. Can also schedule a message for later.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "file": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "File"
+      },
+      "icon": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Bot Icon"
+      },
+      "text": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Message Text"
+      },
+      "as_bot": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Send as a bot?"
+      },
+      "unfurl": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Auto-Expand Links?"
+      },
+      "channel": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Channel"
+      },
+      "post_at": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Schedule At"
+      },
+      "username": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Bot Name"
+      },
+      "image_url": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Attach Image by URL"
+      },
+      "thread_ts": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Thread"
+      },
+      "link_names": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Link Usernames and Channel Names?"
+      },
+      "add_edit_link": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Include a link to this Zap?"
+      },
+      "reply_broadcast": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Send Channel Message?"
+      },
+      "add_app_to_channel": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Add Zapier app to channel automatically?"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

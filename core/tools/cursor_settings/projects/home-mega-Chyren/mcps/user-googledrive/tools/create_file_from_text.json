@@ -1,0 +1,37 @@
+{
+  "name": "create_file_from_text",
+  "description": "Creates a new file in google drive from provided text content (up to 10mb), supporting various formats including automatic conversion to google workspace types.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file_name": {
+        "type": "string",
+        "description": "Desired name for the new file on Google Drive.\nExamples:\n  \"meeting_notes.txt\"\n  \"My New Document\""
+      },
+      "mime_type": {
+        "type": "string",
+        "description": "MIME type for the new file, determining how Google Drive interprets its content.\nExamples:\n  \"text/plain\"\n  \"application/vnd.google-apps.document\"\n  \"application/vnd.google-apps.spreadsheet\"\n  \"application/vnd.google-apps.presentation\"",
+        "default": "text/plain"
+      },
+      "parent_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "ID of the parent folder in Google Drive; if omitted, the file is created in the root of 'My Drive'.\nExample: \"1KMXpS5g9N04W44_1T7_IDN18V8x00AKE\""
+      },
+      "text_content": {
+        "type": "string",
+        "description": "Plain text content to be written into the new file."
+      }
+    },
+    "required": [
+      "file_name",
+      "text_content"
+    ],
+    "additionalProperties": false,
+    "description": "CreateFileFromTextRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,4 @@
+{"event": "session_start", "ts": "2026-03-15T05:35:58.764828Z", "session_id": "20260315-003551-s5hcpb", "task": "hey are you awake", "config": {"model": "claude-opus-4-5", "provider": "groq", "mode": "approve", "workspace": "/home/mega"}}
+{"event": "agent_turn", "ts": "2026-03-15T05:35:58.834100Z", "session_id": "20260315-003551-s5hcpb", "turn": 0, "role": "user", "content_preview": "hey are you awake", "content_len": 17}
+{"event": "error", "ts": "2026-03-15T05:35:59.494411Z", "session_id": "20260315-003551-s5hcpb", "error": "Groq API error: tool call validation failed: attempted to call tool 'bash{\"cmd\": \"echo 'I am awake and ready to assist you.'\"}' which was not in request.tools", "context": "backend.chat"}
+{"event": "session_end", "ts": "2026-03-15T05:35:59.494613Z", "session_id": "20260315-003551-s5hcpb", "turns": 1, "files_changed": [], "tool_calls_count": 0, "errors_count": 1, "tokens_used": 0, "duration_s": 0.73, "summary": ""}

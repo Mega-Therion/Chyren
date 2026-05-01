@@ -1,0 +1,8 @@
+{
+  "name": "end_user_snooze_mode_immediately",
+  "description": "Deprecated: ends the current user's snooze mode immediately. use `end snooze` instead.",
+  "arguments": {
+    "type": "object",
+    "properties": {}
+  }
+}

@@ -1,0 +1,148 @@
+{
+  "name": "update_table_row_style",
+  "description": "Tool to update the style of a table row in a google document. use when you need to modify the appearance of specific rows within a table, such as setting minimum row height or marking rows as headers.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "documentId": {
+        "type": "string",
+        "description": "The ID of the document to update."
+      },
+      "updateTableRowStyle": {
+        "type": "object",
+        "properties": {
+          "fields": {
+            "type": "string",
+            "description": "The fields that should be updated. At least one field must be specified. The root tableRowStyle is implied and should not be specified. A single \"*\" can be used as short-hand for listing every field. For example to update the minimum row height, set fields to \"minRowHeight\"."
+          },
+          "rowIndices": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The list of zero-based row indices whose style should be updated. If no indices are specified, all rows will be updated."
+          },
+          "tableRowStyle": {
+            "type": "object",
+            "properties": {
+              "tableHeader": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "default": null,
+                "description": "Whether the row is a table header."
+              },
+              "minRowHeight": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "unit": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "enum": [
+                              "PT",
+                              "UNIT_UNSPECIFIED"
+                            ]
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": null,
+                        "description": "The units for magnitude."
+                      },
+                      "magnitude": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "default": null,
+                        "description": "The magnitude."
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "The minimum height of the row. The row will be rendered in the Docs editor at a height equal to or greater than this value in order to show all the content in the row's cells."
+              },
+              "preventOverflow": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "default": null,
+                "description": "Whether the row cannot overflow across page or column boundaries."
+              }
+            },
+            "additionalProperties": false,
+            "description": "The styles to be set on the rows."
+          },
+          "tableStartLocation": {
+            "type": "object",
+            "properties": {
+              "index": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "The zero-based index, in UTF-16 code units."
+              },
+              "tabId": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "default": null,
+                "description": "The tab that the location is in. When omitted, the request is applied to the first tab."
+              },
+              "segmentId": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "default": null,
+                "description": "The ID of the header, footer or footnote the location is in. An empty segment ID signifies the document's body."
+              }
+            },
+            "additionalProperties": false,
+            "description": "The location where the table starts in the document."
+          }
+        },
+        "required": [
+          "fields",
+          "tableRowStyle",
+          "tableStartLocation"
+        ],
+        "additionalProperties": false,
+        "description": "Update Table Row Style"
+      }
+    },
+    "required": [
+      "documentId",
+      "updateTableRowStyle"
+    ],
+    "additionalProperties": false,
+    "description": "UpdateTableRowStyleRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "name": "list_permissions",
+  "description": "Tool to list a file's permissions. use when you need to retrieve all permissions associated with a specific file or shared drive.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "fileId": {
+        "type": "string",
+        "description": "The ID of the file or shared drive.\nExample: \"1234567890abcdefghijklmnopqrstuvwxyz\""
+      },
+      "pageSize": {
+        "anyOf": [
+          {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "The maximum number of permissions to return per page. When not set for files in a shared drive, at most 100 results will be returned. When not set for files that are not in a shared drive, the entire list will be returned."
+      },
+      "pageToken": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The token for continuing a previous list request on the next page. This should be set to the value of 'nextPageToken' from the previous response."
+      },
+      "supportsAllDrives": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether the requesting application supports both My Drives and shared drives. Default: false"
+      },
+      "useDomainAdminAccess": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Issue the request as a domain administrator; if set to true, then the requester will be granted access if the file ID parameter refers to a shared drive and the requester is an administrator of the domain to which the shared drive belongs."
+      },
+      "includePermissionsForView": {
+        "anyOf": [
+          {
+            "type": "string",
+            "pattern": "^published$"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Specifies which additional view's permissions to include in the response. Only 'published' is supported."
+      }
+    },
+    "required": [
+      "fileId"
+    ],
+    "additionalProperties": false,
+    "description": "ListPermissionsRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

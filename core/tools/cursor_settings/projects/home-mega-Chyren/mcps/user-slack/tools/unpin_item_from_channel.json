@@ -1,0 +1,23 @@
+{
+  "name": "unpin_item_from_channel",
+  "description": "Unpins a message, identified by its timestamp, from a specified channel if the message is currently pinned there; this operation is destructive.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "channel": {
+        "type": "string",
+        "description": "The ID of the channel where the message is pinned (e.g., a public channel, private channel, or direct message).\nExamples:\n  \"C1234567890\"\n  \"G0987654321\""
+      },
+      "timestamp": {
+        "type": "string",
+        "description": "Timestamp of the message to unpin. This is required to identify the specific message to be removed from the channel's pinned items.\nExamples:\n  \"1625640000.000100\"\n  \"1700000000.123456\""
+      }
+    },
+    "required": [
+      "channel"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `UnpinItemFromChannel`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

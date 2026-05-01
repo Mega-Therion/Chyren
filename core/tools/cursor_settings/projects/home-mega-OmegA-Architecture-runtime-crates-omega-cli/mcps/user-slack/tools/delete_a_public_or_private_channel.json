@@ -1,0 +1,19 @@
+{
+  "name": "delete_a_public_or_private_channel",
+  "description": "Permanently and irreversibly deletes a specified public or private channel, including all its messages and files, within a slack enterprise grid organization.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "channel_id": {
+        "type": "string",
+        "description": "ID of the channel to be permanently deleted. This channel can be public or private.\nExample: \"C0123456789\""
+      }
+    },
+    "required": [
+      "channel_id"
+    ],
+    "additionalProperties": false,
+    "description": "Request to delete a public or private channel.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

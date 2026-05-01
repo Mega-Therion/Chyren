@@ -1,0 +1,48 @@
+{
+  "name": "start_call",
+  "description": "Registers a new call in slack using `calls.add` for third-party call integration; `created by` is required if not using a user-specific token.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "title": {
+        "type": "string",
+        "description": "The name or title for the call. This will be displayed in Slack to identify the call.\nExamples:\n  \"Project Alpha Sync\"\n  \"Q3 Planning Session\""
+      },
+      "users": {
+        "type": "string",
+        "description": "A JSON string representing an array of user objects to be registered as participants in the call. Each user object in the array should define a participant using their `slack_id` (Slack User ID) and/or an `external_id` (an identifier from the third-party application, unique to that user within that application). For instance: `'''[{\"slack_id\": \"U012A3BCD4E\"}, {\"external_id\": \"user-xyz@example.com\", \"slack_id\": \"U012A3BCD4F\"}]'''`.\nExamples:\n  \"'''[{\\\"slack_id\\\": \\\"U012A3BCD4E\\\"}, {\\\"external_id\\\": \\\"participant1@example.com\\\", \\\"slack_id\\\": \\\"U012A3BCD4F\\\"}]'''\"\n  \"'''[{\\\"slack_id\\\": \\\"W012A3CDE\\\"}]'''\"\n  \"'''[{\\\"external_id\\\": \\\"meeting-user-789\\\"}]'''\""
+      },
+      "join_url": {
+        "type": "string",
+        "description": "The URL required for a client to join the call (e.g., a web join link). This field is mandatory.\nExamples:\n  \"https://thirdparty.call/join/meeting123\"\n  \"https://example.com/s/abc-123-def\""
+      },
+      "created_by": {
+        "type": "string",
+        "description": "Slack user ID of the creator; optional (defaults to authenticated user) if using a user token, otherwise required.\nExamples:\n  \"U012A3BCD4E\"\n  \"U061F7AUR\""
+      },
+      "date_start": {
+        "type": "integer",
+        "description": "The start time of the call, specified as a UTC UNIX timestamp in seconds. For example, `1678886400` corresponds to March 15, 2023, at 12:00 PM UTC.\nExamples:\n  \"1678886400\"\n  \"1700000000\""
+      },
+      "external_unique_id": {
+        "type": "string",
+        "description": "A unique identifier for the call, supplied by the third-party call provider. This ID must be unique across all calls from that specific service. This field is required.\nExamples:\n  \"v=abcdef123456\"\n  \"call-ext-98765uuid-from-provider\""
+      },
+      "external_display_id": {
+        "type": "string",
+        "description": "An optional, human-readable identifier for the call, supplied by the third-party call provider. If provided, this ID will be displayed in the Slack call object interface.\nExamples:\n  \"Meeting H.323\"\n  \"CONF-7890\""
+      },
+      "desktop_app_join_url": {
+        "type": "string",
+        "description": "An optional URL that, when provided, allows Slack clients to attempt to directly launch the third-party call application. This is typically a deep link URI for the specific application.\nExamples:\n  \"your-app-protocol://call/12345\"\n  \"zoomus://zoom.us/join?confno=1234567890\""
+      }
+    },
+    "required": [
+      "join_url",
+      "external_unique_id"
+    ],
+    "additionalProperties": false,
+    "description": "Request payload for registering a new call with participants in Slack.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

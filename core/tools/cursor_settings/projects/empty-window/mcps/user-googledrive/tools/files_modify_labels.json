@@ -1,0 +1,179 @@
+{
+  "name": "files_modify_labels",
+  "description": "Modifies the set of labels applied to a file. returns a list of the labels that were added or modified. use when you need to programmatically change labels on a google drive file, such as adding, updating, or removing them.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "kind": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "This is always drive#modifyLabelsRequest.",
+        "default": "drive#modifyLabelsRequest"
+      },
+      "file_id": {
+        "type": "string",
+        "description": "The ID of the file."
+      },
+      "label_modifications": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "This is always drive#labelModification.",
+              "default": "drive#labelModification"
+            },
+            "label_id": {
+              "type": "string",
+              "description": "The ID of the label to modify."
+            },
+            "remove_label": {
+              "type": [
+                "boolean",
+                "null"
+              ],
+              "default": null,
+              "description": "If true, the label will be removed from the file."
+            },
+            "field_modifications": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "This is always drive#labelFieldModification.",
+                        "default": "drive#labelFieldModification"
+                      },
+                      "field_id": {
+                        "type": "string",
+                        "description": "The ID of the field to be modified."
+                      },
+                      "unset_values": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "default": null,
+                        "description": "Unsets the values for this field."
+                      },
+                      "set_date_values": {
+                        "anyOf": [
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": null,
+                        "description": "Replaces the value of a `date` field with these new values. The string must be in the RFC 3339 full-date format: YYYY-MM-DD.\nExample: \"2023-10-26\""
+                      },
+                      "set_text_values": {
+                        "anyOf": [
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": null,
+                        "description": "Sets the value of a `text` field."
+                      },
+                      "set_user_values": {
+                        "anyOf": [
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": null,
+                        "description": "Replaces a `user` field with these new values. The values must be valid email addresses."
+                      },
+                      "set_integer_values": {
+                        "anyOf": [
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": null,
+                        "description": "Replaces the value of an `integer` field with these new values."
+                      },
+                      "set_selection_values": {
+                        "anyOf": [
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "default": null,
+                        "description": "Replaces a `selection` field with these new values."
+                      }
+                    },
+                    "required": [
+                      "field_id"
+                    ],
+                    "additionalProperties": false,
+                    "description": "FieldModification"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "The list of modifications to this label's fields."
+            }
+          },
+          "required": [
+            "label_id"
+          ],
+          "additionalProperties": false,
+          "description": "LabelModification"
+        },
+        "description": "The list of modifications to apply to the labels on the file."
+      }
+    },
+    "required": [
+      "file_id",
+      "label_modifications"
+    ],
+    "additionalProperties": false,
+    "description": "FilesModifyLabelsRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "fetch_workspace_settings_information",
+  "description": "Retrieves detailed settings for a specific slack workspace, primarily for administrators in an enterprise grid organization to view or audit workspace configurations.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "team_id": {
+        "type": "string",
+        "description": "The unique identifier of the Slack team (workspace) for which to fetch settings. This ID typically starts with 'T'.\nExample: \"T12345ABCDE\""
+      }
+    },
+    "required": [
+      "team_id"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `FetchWorkspaceSettingsInformation`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

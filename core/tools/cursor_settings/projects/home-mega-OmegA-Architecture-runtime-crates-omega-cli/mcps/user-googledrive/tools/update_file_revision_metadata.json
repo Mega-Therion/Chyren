@@ -1,0 +1,56 @@
+{
+  "name": "update_file_revision_metadata",
+  "description": "Updates metadata of a file revision (e.g., keepforever, publish). use this tool to modify the metadata of a specific revision of a file in google drive.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file_id": {
+        "type": "string",
+        "description": "The ID of the file.\nExample: \"1aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789\""
+      },
+      "published": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether this revision is published. This is only applicable to Docs Editors files."
+      },
+      "publishAuto": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether subsequent revisions will be automatically republished. This is only applicable to Docs Editors files."
+      },
+      "revision_id": {
+        "type": "string",
+        "description": "The ID of the revision.\nExample: \"1\""
+      },
+      "keep_forever": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether to keep this revision forever, even if it is no longer the head revision. If not set, the revision will be automatically purged 30 days after newer content is uploaded. This can be set on a maximum of 200 revisions for a file. This field is only applicable to files with binary content in Drive."
+      },
+      "publishedOutsideDomain": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether this revision is published outside the domain. This is only applicable to Docs Editors files."
+      }
+    },
+    "required": [
+      "file_id",
+      "revision_id"
+    ],
+    "additionalProperties": false,
+    "description": "UpdateFileRevisionMetadataRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

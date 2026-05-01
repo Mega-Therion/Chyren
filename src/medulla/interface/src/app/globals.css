@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #030303;
+  --color-surface: #0a0a0b;
+  --color-surface-light: #161618;
+  --color-accent-primary: #10b981;
+  --color-accent-secondary: #22d3ee;
+  --color-border-faint: rgba(255, 255, 255, 0.05);
+  
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-zinc-100 antialiased;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-surface/80 backdrop-blur-xl border border-border-faint;
+  }
+  .neon-glow {
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.1);
+  }
+}

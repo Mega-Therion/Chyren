@@ -1,0 +1,49 @@
+{
+  "name": "clickup_find_user_by_name_or_email",
+  "description": "Find an existing user by their name or their email.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "field": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Field"
+      },
+      "value": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Value"
+      },
+      "team_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Workspace"
+      },
+      "include_shared": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Include all shared items?"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

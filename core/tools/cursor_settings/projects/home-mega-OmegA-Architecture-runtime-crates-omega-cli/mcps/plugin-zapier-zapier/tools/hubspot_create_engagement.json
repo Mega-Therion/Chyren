@@ -1,0 +1,178 @@
+{
+  "name": "hubspot_create_engagement",
+  "description": "Creates a new Engagement for a contact, in HubSpot.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "type": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Engagement Type"
+      },
+      "dealIds": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Id's of the deal objects that should be associated with engagement"
+        }
+      },
+      "ownerId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Assigned To"
+      },
+      "contacts": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Emails of the contact objects that should be associated with engagement"
+        }
+      },
+      "ownerIds": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Id's of the owner objects that should be associated with engagement"
+        }
+      },
+      "ticketIds": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Id's of the ticket objects that should be associated with engagement"
+        }
+      },
+      "companyIds": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Id's of the company objects that should be associated with engagement"
+        }
+      },
+      "contactIds": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Id's of the contact objects that should be associated with engagement"
+        }
+      },
+      "productIds": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Id's of the product objects that should be associated with engagement"
+        }
+      },
+      "line_itemIds": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Id's of the line_item objects that should be associated with engagement"
+        }
+      },
+      "haltIfAssociationsErrors": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Halt task if any associations error occurred"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

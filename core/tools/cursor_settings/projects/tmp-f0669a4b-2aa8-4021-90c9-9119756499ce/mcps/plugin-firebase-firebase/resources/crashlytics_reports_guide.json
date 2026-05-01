@@ -1,0 +1,5 @@
+{
+  "uri": "firebase://guides/crashlytics/reports",
+  "name": "crashlytics_reports_guide",
+  "description": "Guides the coding agent through requesting Crashlytics reports, including setting appropriate filters and how to understand the metrics. The agent should read this guide before requesting any report."
+}

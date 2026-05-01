@@ -1,0 +1,5 @@
+{
+  "name": "firebase:init",
+  "description": "Use this command to set up Firebase services, like backend and AI features.",
+  "arguments": []
+}

@@ -1,0 +1,21 @@
+{
+  "name": "vercel_help",
+  "description": "Get help and guidance on Vercel features, best practices, and configuration options. Use this when you need to learn about Vercel features, understand best practices, or get guidance on implementation. This tool will provide comprehensive help with examples and documentation references.",
+  "arguments": [
+    {
+      "name": "topic",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "includeExamples",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "includeDocumentation",
+      "description": "",
+      "required": false
+    }
+  ]
+}

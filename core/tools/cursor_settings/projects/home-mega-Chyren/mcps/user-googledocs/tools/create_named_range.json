@@ -1,0 +1,46 @@
+{
+  "name": "create_named_range",
+  "description": "Tool to create a new named range in a google document. use this to assign a name to a specific part of the document for easier reference or programmatic manipulation.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256,
+        "description": "The name for the new named range. Must be 1-256 characters.\nExamples:\n  \"Chapter1Intro\"\n  \"ImportantSection\""
+      },
+      "documentId": {
+        "type": "string",
+        "description": "The ID of the document where the named range will be created.\nExample: \"1aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789_AbCdEf\""
+      },
+      "rangeEndIndex": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "The zero-based end index of the range.\nExample: 200"
+      },
+      "rangeSegmentId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Optional. The ID of the header, footer, or footnote. Empty for document body.\nExamples:\n  \"h.1a2b3c4d5e6f\"\n  \"\""
+      },
+      "rangeStartIndex": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "The zero-based start index of the range.\nExample: 100"
+      }
+    },
+    "required": [
+      "name",
+      "documentId",
+      "rangeEndIndex",
+      "rangeStartIndex"
+    ],
+    "additionalProperties": false,
+    "description": "CreateNamedRangeRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,185 @@
+{
+  "name": "socket",
+  "description": "Manage WebSocket connections - connect, send, receive messages, list connections, and close",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "action": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "list"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "connect"
+              },
+              "url": {
+                "type": "string",
+                "description": "The WebSocket URL to connect to (ws:// or wss://)"
+              },
+              "protocols": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "WebSocket subprotocols to use"
+              },
+              "headers": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "HTTP headers to include in the connection request"
+              },
+              "autoReconnect": {
+                "type": "boolean",
+                "default": false,
+                "description": "Whether to automatically reconnect on disconnection"
+              },
+              "maxReconnectAttempts": {
+                "type": "number",
+                "default": 5,
+                "description": "Maximum number of reconnection attempts"
+              },
+              "reconnectInterval": {
+                "type": "number",
+                "default": 1000,
+                "description": "Base interval between reconnection attempts in milliseconds"
+              },
+              "messageHistoryLimit": {
+                "type": "number",
+                "default": 100,
+                "description": "Maximum number of messages to keep in history"
+              }
+            },
+            "required": [
+              "type",
+              "url"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "send"
+              },
+              "socketId": {
+                "type": "string",
+                "description": "The ID of the WebSocket connection to send to"
+              },
+              "message": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ],
+                "description": "The message to send (string or object that will be JSON stringified)"
+              },
+              "binary": {
+                "type": "boolean",
+                "default": false,
+                "description": "Whether to send the message as binary data"
+              }
+            },
+            "required": [
+              "type",
+              "socketId",
+              "message"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "receive"
+              },
+              "socketId": {
+                "type": "string",
+                "description": "The ID of the WebSocket connection to receive messages from"
+              },
+              "action": {
+                "type": "string",
+                "enum": [
+                  "get-latest",
+                  "get-all",
+                  "get-since"
+                ],
+                "description": "What messages to retrieve: get-latest (last 10), get-all (entire queue), or get-since (after timestamp)"
+              },
+              "since": {
+                "type": "string",
+                "description": "ISO timestamp or message ID to get messages after (required for get-since action)"
+              },
+              "clearAfterRead": {
+                "type": "boolean",
+                "default": false,
+                "description": "Whether to clear the message queue after reading (only applies to get-all action)"
+              }
+            },
+            "required": [
+              "type",
+              "socketId",
+              "action"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "close"
+              },
+              "socketId": {
+                "type": "string",
+                "description": "The ID of the WebSocket connection to close"
+              },
+              "code": {
+                "type": "number",
+                "default": 1000,
+                "description": "WebSocket close code (1000 = normal closure)"
+              },
+              "reason": {
+                "type": "string",
+                "default": "Normal closure",
+                "description": "Reason for closing the connection"
+              }
+            },
+            "required": [
+              "type",
+              "socketId"
+            ],
+            "additionalProperties": false
+          }
+        ],
+        "description": "The action to perform on WebSocket connections"
+      }
+    },
+    "required": [
+      "action"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

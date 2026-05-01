@@ -1,0 +1,22 @@
+{
+  "name": "create_branch",
+  "description": "Create a branch in a Neon project",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "projectId": {
+        "type": "string",
+        "description": "The ID of the project to create the branch in"
+      },
+      "branchName": {
+        "type": "string",
+        "description": "An optional name for the branch"
+      }
+    },
+    "required": [
+      "projectId"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "name": "google_calendar_find_events",
+  "description": "Finds events in your calendar. Returns up to 25 matching events.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "end_time": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "This field sets the EARLIEST timestamp (lower boundary) to find events. So the events' start_time will be greater than this timestamp: e.g. To find events scheduled for today, the end_time should be set to the earliest of today e.g. To find events scheduled for this week, the end_time should be set to earliest of this week e.g. To find events scheduled for yesterday, the end_time should be set to earliest of yesterday e.g. To find events scheduled for tomorrow, the end_time should be set to earliest of tomorrow"
+      },
+      "ordering": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Sort Order"
+      },
+      "calendarid": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Select the specified calendar or default to the user's personal calendar which will likely be their name or email address. i.e. reid.robinson@zapier.com OR Reid Robinson. Never use a calendar name with \"Birthdays\" in it."
+      },
+      "eventTypes": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Event Type"
+        }
+      },
+      "start_time": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "This field sets the LATEST timestamp (upper boundary) to find events. So the events' end_time will be less than this timestamp: e.g. To find events scheduled for today, the start_time should be set to 'today at 11:59pm' e.g. To find events scheduled for this week, the start_time should be set to 'this week last day at 11:59pm' e.g. To find events scheduled for yesterday, the start_time should be set to 'yesterday 11:59pm' e.g. To find events scheduled for tomorrow, the start_time should be set to 'tomorrow  11:59pm'"
+      },
+      "search_term": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "ONLY generate a value for this field if explicitly asked to filter events. Will search across the event name and description. Does not include canceled events. **Note**: Search operators such as `AND` or `OR` do not work here. If you search for more than one word (e.g. `apple banana`) we will only find events with both `apple` *AND* `banana` in them, rather than events that contains `apple` *OR* `banana`. You can also use a negative modifier to exclude terms (example: \"-apple\")"
+      },
+      "attendee_email": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Attendee email"
+      },
+      "expand_recurring": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Expand Recurring Events"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "uri": "streaming://natural-language-detection",
+  "name": "natural_language_detection",
+  "description": "Natural Language Detection: Automatically recognizes requests like 'create a Kafka cluster with Lambda', 'set up real-time data processing', 'build event-driven architecture'. Triggers appropriate streaming infrastructure tools without requiring technical keywords.",
+  "mimeType": "text/plain"
+}

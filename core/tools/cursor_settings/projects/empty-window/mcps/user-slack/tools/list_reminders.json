@@ -1,0 +1,11 @@
+{
+  "name": "list_reminders",
+  "description": "Lists all reminders with their details for the authenticated slack user; returns an empty list if no reminders exist.",
+  "arguments": {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": false,
+    "description": "Request schema for `ListReminders`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

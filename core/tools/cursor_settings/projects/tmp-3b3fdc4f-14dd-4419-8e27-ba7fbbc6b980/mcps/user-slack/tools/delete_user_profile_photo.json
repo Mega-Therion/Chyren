@@ -1,0 +1,19 @@
+{
+  "name": "delete_user_profile_photo",
+  "description": "Deletes the slack profile photo for the user identified by the token, reverting them to the default avatar; this action is irreversible and succeeds even if no custom photo was set.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "token": {
+        "type": "string",
+        "description": "Authentication token identifying the user whose profile photo will be deleted.\nExample: \"xoxp-YOUR_SLACK_LEGACY_TOKEN\""
+      }
+    },
+    "required": [
+      "token"
+    ],
+    "additionalProperties": false,
+    "description": "Input for deleting a user's profile photo.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

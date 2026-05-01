@@ -1,0 +1,24 @@
+{
+  "name": "create_document_markdown",
+  "description": "Creates a new google docs document, optionally initializing it with a title and content provided as markdown text.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "title": {
+        "type": "string",
+        "description": "The title for the new Google Docs document.\nExamples:\n  \"Meeting Notes Q3\"\n  \"Project Alpha Proposal\"\n  \"My New Story Draft\""
+      },
+      "markdown_text": {
+        "type": "string",
+        "description": "The initial content for the document, formatted as Markdown. Supports various Markdown elements including headings, lists (nested lists are not supported), tables, images (via publicly accessible URLs), blockquotes, code blocks, and text formatting (bold, italic, etc.). If an empty string is provided, the document will be created with only the title."
+      }
+    },
+    "required": [
+      "title",
+      "markdown_text"
+    ],
+    "additionalProperties": false,
+    "description": "CreateDocumentMarkdownRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

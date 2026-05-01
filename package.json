@@ -9,8 +9,29 @@
     "deploy": "npx --yes vercel --prod"
   },
   "dependencies": {
+    "@21st-sdk/agent": "^0.0.18",
     "@vercel/analytics": "^2.0.1",
     "ask-sdk-core": "^2.14.0",
-    "ask-sdk-model": "^1.85.0"
+    "ask-sdk-model": "^1.85.0",
+    "zod": "^4.4.1"
+  },
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mega-Therion/Chyren.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Mega-Therion/Chyren/issues"
+  },
+  "homepage": "https://github.com/Mega-Therion/Chyren#readme",
+  "devDependencies": {
+    "vercel": "^52.2.1"
   }
 }

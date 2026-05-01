@@ -1,0 +1,247 @@
+{
+  "name": "hubspot_create_product",
+  "description": "Creates a Product in HubSpot.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "tax": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Price: Tax"
+      },
+      "name": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Product information: Name"
+      },
+      "price": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Price: Unit price"
+      },
+      "hs_sku": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Product information: SKU"
+      },
+      "hs_url": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Product information: URL"
+      },
+      "discount": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Price: Unit discount"
+      },
+      "hs_folder": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Product information: Folder"
+      },
+      "hs_images": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Product information: Image Url"
+      },
+      "hs_status": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Product information: Status"
+      },
+      "createdate": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Product information: Create Date"
+      },
+      "description": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Product information: Product description"
+      },
+      "hs_folder_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Product information: Folder Id"
+      },
+      "hs_tier_prices": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Price: Tier Prices"
+      },
+      "hs_tier_ranges": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Price: Tier Ranges"
+      },
+      "hs_owning_teams": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Product information: Owning Teams"
+        }
+      },
+      "hs_product_type": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Product information: Product type"
+      },
+      "hs_tax_category": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Product information: Tax Category"
+      },
+      "hs_pricing_model": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Price: Pricing model"
+      },
+      "hubspot_owner_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Product information: Owner"
+      },
+      "hs_cost_of_goods_sold": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Price: Unit cost"
+      },
+      "hs_discount_percentage": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Price: Discount Percentage"
+      },
+      "properties_to_retrieve": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Additional properties to retrieve"
+        }
+      },
+      "hs_pinned_engagement_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Product information: Pinned engagement ID"
+      },
+      "hs_rich_text_description": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Product information: Rich Text Description"
+      },
+      "recurringbillingfrequency": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Price: Billing frequency"
+      },
+      "hs_recurring_billing_period": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Billing: Term"
+      },
+      "hs_recurring_billing_start_date": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Billing: Start Date"
+      },
+      "hs_all_assigned_business_unit_ids": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Product information: Business units"
+        }
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

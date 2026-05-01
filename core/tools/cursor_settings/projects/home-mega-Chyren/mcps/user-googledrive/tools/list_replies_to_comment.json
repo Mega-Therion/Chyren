@@ -1,0 +1,62 @@
+{
+  "name": "list_replies_to_comment",
+  "description": "Tool to list replies to a comment in google drive. use this when you need to retrieve all replies associated with a specific comment on a file.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "fields": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Selector specifying which fields to include in a partial response. Use '*' for all fields or e.g. 'replies(id,content),nextPageToken'",
+        "default": "*"
+      },
+      "file_id": {
+        "type": "string",
+        "description": "The ID of the file.\nExample: \"12345abcdef\""
+      },
+      "page_size": {
+        "anyOf": [
+          {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "The maximum number of replies to return per page."
+      },
+      "comment_id": {
+        "type": "string",
+        "description": "The ID of the comment.\nExample: \"67890ghijkl\""
+      },
+      "page_token": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The token for continuing a previous list request on the next page. This should be set to the value of 'nextPageToken' from the previous response."
+      },
+      "include_deleted": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "description": "Whether to include deleted replies. Deleted replies will not include their original content.",
+        "default": false
+      }
+    },
+    "required": [
+      "file_id",
+      "comment_id"
+    ],
+    "additionalProperties": false,
+    "description": "ListRepliesToCommentRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

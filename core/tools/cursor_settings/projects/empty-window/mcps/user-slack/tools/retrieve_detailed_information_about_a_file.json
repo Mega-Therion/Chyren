@@ -1,0 +1,56 @@
+{
+  "name": "retrieve_detailed_information_about_a_file",
+  "description": "Retrieves detailed metadata and paginated comments for a specific slack file id; does not download file content.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "ID of the file to retrieve information for. This is a required field.\nExample: \"F123ABCDEF0\""
+      },
+      "page": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Page number of comment results to retrieve. Expects a string representing an integer (e.g., '2'). Used for comment pagination. Slack's default is 1 if not provided. `cursor`-based pagination is generally preferred.\nExamples:\n  \"1\"\n  \"3\""
+      },
+      "count": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Number of comments to retrieve per page. Expects a string representing an integer (e.g., '20'). Used for comment pagination. Slack's default is 100 if not provided.\nExamples:\n  \"20\"\n  \"100\""
+      },
+      "limit": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "The maximum number of comments to retrieve. This is an upper limit, not a guarantee of how many will be returned. Primarily used for comment pagination.\nExamples:\n  \"10\"\n  \"50\""
+      },
+      "cursor": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Pagination cursor for retrieving comments. Set to `next_cursor` from a previous response's `response_metadata` to fetch the next page of comments. Essential for navigating through large sets of comments. See [pagination](https://slack.dev) for more details.\nExamples:\n  \"dXNlcjpVMDYxRkExNDIK\"\n  \"bmV4dF90czoxNTEyMDg2NDE1MDAwOTc2\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request model for retrieving detailed information about a specific file, including parameters for comment pagination.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

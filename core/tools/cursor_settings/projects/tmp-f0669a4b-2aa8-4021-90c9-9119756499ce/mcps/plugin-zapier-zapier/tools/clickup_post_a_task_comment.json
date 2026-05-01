@@ -1,0 +1,42 @@
+{
+  "name": "clickup_post_a_task_comment",
+  "description": "Post a comment to a task",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "comment": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Comment"
+      },
+      "team_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Workspace"
+      },
+      "add_edit_link": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Include a link to this Zap?"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

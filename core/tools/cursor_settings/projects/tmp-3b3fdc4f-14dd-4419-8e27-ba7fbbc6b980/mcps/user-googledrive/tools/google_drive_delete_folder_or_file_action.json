@@ -1,0 +1,27 @@
+{
+  "name": "google_drive_delete_folder_or_file_action",
+  "description": "Tool to delete a file or folder in google drive. use when you need to permanently remove a specific file or folder using its id. note: this action is irreversible.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "fileId": {
+        "type": "string",
+        "description": "The ID of the file or folder to delete. This is a required field.\nExample: \"1XyZAbcDefGhiJklMnoPqRsTuVwXyZAbcDef\""
+      },
+      "supportsAllDrives": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Whether the application supports both My Drives and shared drives. If false or unspecified, the file is attempted to be deleted from the user's My Drive. If true, the item will be deleted from shared drives as well if necessary."
+      }
+    },
+    "required": [
+      "fileId"
+    ],
+    "additionalProperties": false,
+    "description": "GoogleDriveDeleteFolderOrFileRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

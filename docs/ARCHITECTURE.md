@@ -14,29 +14,30 @@ Chyren is a **Sovereign Intelligence Orchestrator** — a stateful, high-integri
 
 ## System Layers
 
-### Medulla — `medulla/` (Rust Workspace, Canonical Runtime)
+### Medulla — `src/medulla/kernel` (Rust Workspace, Canonical Runtime)
 
-The production runtime. All `./chyren thought`, `./chyren action`, and API requests execute here. Medulla is a 16-crate Rust workspace exposing a Clap CLI and an Actix-web API server on port 8080.
+The production runtime. All `./chyren thought`, `./chyren action`, and API requests execute here. Medulla is a ~33-crate Rust workspace exposing a Clap CLI and an Actix-web API server on port 8080.
 
-### Cortex — `cortex/` (Python, Data Tooling Only)
+### Cortex — `src/cortex/` (Python, Data Tooling Only)
 
 Not invoked for live requests. Contains:
-- `cortex/chyren_py/identity_synthesis.py` — regenerates `phylactery_kernel.json`; run via `./chyren dream`
-- `cortex/chyren_py/phylactery_kernel.json` — ~58k identity entries, loaded by Medulla at startup
-- `cortex/ops/scripts/` — catalog and ingestion pipeline utilities run during maintenance
-- `cortex/core/`, `cortex/providers/`, `cortex/main.py` — legacy Python runtime, retained as reference only
+- `src/cortex/chyren_py/identity_synthesis.py` — regenerates `phylactery_kernel.json`; run via `./chyren dream`
+- `src/cortex/chyren_py/phylactery_kernel.json` — ~58k identity entries, loaded by Medulla at startup
+- `src/cortex/ops/scripts/` — catalog and ingestion pipeline utilities run during maintenance
+- `src/cortex/core/`, `src/cortex/providers/`, `src/cortex/main.py` — legacy Python runtime, retained as reference only
 
-### Web — `web/` (Next.js 15 Frontend)
+### Web — `src/medulla/interface` (Next.js 15 Frontend)
 
 Cognitive shell frontend. Connects to the Medulla API server at port 8080.
 
-### Gateway — `gateway/` (Vite + React 19)
+### Gateway — `src/gateways/` (Vite + React 19)
 
 External spoke gateway surface. Separate from the main web frontend.
 
 ### Brain Stem — `./chyren` (Python Router Script)
 
 Thin dispatch layer. Routes all CLI commands to Medulla. Invokes Python Cortex scripts only during `dream` maintenance mode.
+
 
 ---
 
@@ -114,9 +115,9 @@ User / API / Tooling
 - Env var: `QDRANT_URL`
 
 ### Phylactery Kernel
-- File: `cortex/chyren_py/phylactery_kernel.json`
+- File: `src/cortex/chyren_py/phylactery_kernel.json`
 - ~58k synthesized identity entries loaded by Medulla at startup
-- Refresh by running: `python cortex/chyren_py/identity_synthesis.py`
+- Refresh by running: `python src/cortex/chyren_py/identity_synthesis.py`
 
 ---
 
@@ -183,5 +184,5 @@ The following are **implemented and active** in the current codebase:
 - Provider spokes: Anthropic, OpenAI, DeepSeek, Gemini
 
 The following are **legacy / reference only** (not invoked at runtime):
-- `cortex/core/`, `cortex/providers/`, `cortex/main.py` — original Python orchestration runtime
+- `src/cortex/core/`, `src/cortex/providers/`, `src/cortex/main.py` — original Python orchestration runtime
 - `docs/CLAUDE.md` — pre-restructure documentation (see deprecation notice)

@@ -1,0 +1,28 @@
+{
+  "name": "remove_a_star_from_an_item",
+  "description": "Removes a star from a previously starred slack item (message, file, file comment, channel, group, or dm), requiring identification via `file`, `file comment`, `channel` (for channel/group/dm), or both `channel` and `timestamp` (for a message).",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file": {
+        "type": "string",
+        "description": "ID of the file to unstar.\nExample: \"F1234567890\""
+      },
+      "channel": {
+        "type": "string",
+        "description": "ID of the item (channel, private group, DM) or the message's channel (if `timestamp` is also provided).\nExamples:\n  \"C1234567890\"\n  \"G0987654321\""
+      },
+      "timestamp": {
+        "type": "string",
+        "description": "Timestamp of the message to unstar; requires `channel`.\nExamples:\n  \"1629883200.000100\"\n  \"1503435956.000247\""
+      },
+      "file_comment": {
+        "type": "string",
+        "description": "ID of the file comment to unstar.\nExample: \"Fc1234567890\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for removing a star from an item in Slack.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

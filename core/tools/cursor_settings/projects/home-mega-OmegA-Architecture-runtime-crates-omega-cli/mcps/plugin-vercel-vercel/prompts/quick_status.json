@@ -1,0 +1,16 @@
+{
+  "name": "quick_status",
+  "description": "Get a quick overview of the current project status, latest deployment, and any immediate issues. Use this for daily check-ins, quick status updates, or when you need a fast overview without deep analysis. Perfect for busy developers who need instant project insights.",
+  "arguments": [
+    {
+      "name": "includeAlerts",
+      "description": "",
+      "required": false
+    },
+    {
+      "name": "includeMetrics",
+      "description": "",
+      "required": false
+    }
+  ]
+}

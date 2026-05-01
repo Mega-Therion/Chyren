@@ -1,0 +1,56 @@
+{
+  "name": "lists_user_s_starred_items_with_pagination",
+  "description": "Deprecated: lists items starred by a user. use `list starred items` instead.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "page": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Page number of results to return.\nExample: 2"
+      },
+      "count": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Number of items to return per page.\nExample: 20"
+      },
+      "limit": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "The maximum number of items to return. Fewer than the requested number of items may be returned, even if the end of the list hasn't been reached.\nExample: 20"
+      },
+      "cursor": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Parameter for pagination. Set cursor to the next_cursor attribute returned by the previous request's response_metadata.\nExample: \"dXNlcjpVMDYxTkZUVDI=\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `ListStarredItems`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "name": "browser_network_requests",
+  "description": "Returns all network requests since loading the page",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "static": {
+        "default": false,
+        "description": "Whether to include successful static resources like images, fonts, scripts, etc. Defaults to false.",
+        "type": "boolean"
+      },
+      "requestBody": {
+        "default": false,
+        "description": "Whether to include request body. Defaults to false.",
+        "type": "boolean"
+      },
+      "requestHeaders": {
+        "default": false,
+        "description": "Whether to include request headers. Defaults to false.",
+        "type": "boolean"
+      },
+      "filter": {
+        "description": "Only return requests whose URL matches this regexp (e.g. \"/api/.*user\").",
+        "type": "string"
+      },
+      "filename": {
+        "description": "Filename to save the network requests to. If not provided, requests are returned as text.",
+        "type": "string"
+      }
+    },
+    "required": [
+      "static",
+      "requestBody",
+      "requestHeaders"
+    ],
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "additionalProperties": false
+  }
+}

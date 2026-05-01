@@ -1,0 +1,35 @@
+{
+  "name": "slack_find_public_channel",
+  "description": "This action will find a public channel in Slack using either the channel's ID or name.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "channelId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Channel ID"
+      },
+      "channelName": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Channel Name"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

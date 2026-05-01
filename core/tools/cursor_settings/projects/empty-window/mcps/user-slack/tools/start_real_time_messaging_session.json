@@ -1,0 +1,28 @@
+{
+  "name": "start_real_time_messaging_session",
+  "description": "Initiates a slack rtm session providing a single-use websocket url (valid 30s) for event streaming; does not set initial presence status.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "presence_sub": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Delivers presence events only for explicitly subscribed users if `True`. See Slack's [presence subscriptions](https://slack.dev) documentation.\nExamples:\n  \"True\"\n  \"False\""
+      },
+      "batch_presence_aware": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Enables batching of presence status deliveries for subscribed users if `True`, altering `presence_change` event structure. See Slack's [batch presence](https://slack.dev) documentation.\nExamples:\n  \"True\"\n  \"False\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `StartRealTimeMessagingSession`.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

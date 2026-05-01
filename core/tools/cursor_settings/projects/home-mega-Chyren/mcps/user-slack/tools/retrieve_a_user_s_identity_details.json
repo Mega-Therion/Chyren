@@ -1,0 +1,11 @@
+{
+  "name": "retrieve_a_user_s_identity_details",
+  "description": "Retrieves the authenticated user's and their team's identity, with details varying based on oauth scopes (e.g., `identity.basic`, `identity.email`, `identity.avatar`).",
+  "arguments": {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": false,
+    "description": "User identification is based on the provided authentication token; no request body parameters are needed.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

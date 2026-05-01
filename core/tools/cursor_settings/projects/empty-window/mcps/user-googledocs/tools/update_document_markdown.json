@@ -1,0 +1,24 @@
+{
+  "name": "update_document_markdown",
+  "description": "Replaces the entire content of an existing google docs document with new markdown text; requires edit permissions for the document.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "document_id": {
+        "type": "string",
+        "description": "Identifier of the Google Docs document to update, found in the document's URL."
+      },
+      "new_markdown_text": {
+        "type": "string",
+        "description": "Markdown content that will replace the document's entire existing content. Supports standard Markdown features.\nExamples:\n  \"# Document Title\\n\\nThis is a paragraph with **bold** and *italic* text.\\n\\n- Unordered list item 1\\n- Unordered list item 2\\n\\n1. Ordered list item 1\\n2. Ordered list item 2\\n\\nAn image: ![Alt text for image](https://www.example.com/image.png)\"\n  \"## Advanced Markdown\\n\\n\\n# Example Python code\\ndef greet(name):\\n    print(f'Hello, {name}!')\\ngreet('World')\\n\\n\\n| Column A | Column B |\\n|----------|----------|\\n|   Data 1 |   Data 2 |\\n|   Data 3 |   Data 4 |\\n\\n> This is a blockquote.\""
+      }
+    },
+    "required": [
+      "document_id",
+      "new_markdown_text"
+    ],
+    "additionalProperties": false,
+    "description": "Defines the request schema for updating an existing Google Docs document by replacing its content with new text formatted in Markdown.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

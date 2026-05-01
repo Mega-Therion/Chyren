@@ -1,0 +1,49 @@
+{
+  "name": "google_drive_add_file_sharing_preference",
+  "description": "Adds a sharing scope to the sharing preference of a file. Does not remove existing sharing settings. Provides a sharing URL.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "drive": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Drive"
+      },
+      "domain": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Organization Domain"
+      },
+      "file_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "File Id"
+      },
+      "permission": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Sharing Preference"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

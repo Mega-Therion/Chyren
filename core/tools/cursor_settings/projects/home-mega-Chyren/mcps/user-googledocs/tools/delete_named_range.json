@@ -1,0 +1,68 @@
+{
+  "name": "delete_named_range",
+  "description": "Tool to delete a named range from a google document. use when you need to remove a previously defined named range by its id or name.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "document_id": {
+        "type": "string",
+        "description": "The ID of the document."
+      },
+      "deleteNamedRange": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The name of the range(s) to delete. All named ranges with the given name will be deleted."
+          },
+          "namedRangeId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The ID of the named range to delete."
+          },
+          "tabsCriteria": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "tabIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "The list of tab IDs in which the request executes."
+                  }
+                },
+                "required": [
+                  "tabIds"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional. The criteria used to specify which tab(s) the range deletion should occur in. When omitted, the range deletion is applied to all tabs."
+          }
+        },
+        "additionalProperties": false,
+        "description": "Specifies the named range to delete."
+      }
+    },
+    "required": [
+      "document_id",
+      "deleteNamedRange"
+    ],
+    "additionalProperties": false,
+    "description": "DeleteNamedRangeActionRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "name": "add_file_sharing_preference",
+  "description": "Modifies sharing permissions for an existing google drive file, granting a specified role to a user, group, domain, or 'anyone'.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "role": {
+        "type": "string",
+        "pattern": "^(owner|organizer|fileOrganizer|writer|commenter|reader)$",
+        "description": "Permission role to grant.\nExamples:\n  \"reader\"\n  \"writer\"\n  \"commenter\""
+      },
+      "type": {
+        "type": "string",
+        "pattern": "^(user|group|domain|anyone)$",
+        "description": "Type of grantee for the permission.\nExamples:\n  \"user\"\n  \"group\"\n  \"domain\"\n  \"anyone\""
+      },
+      "domain": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Domain to grant permission to (e.g., 'example.com'). Required if 'type' is 'domain'.\nExample: \"example.com\""
+      },
+      "file_id": {
+        "type": "string",
+        "description": "Unique identifier of the file to update sharing settings for.\nExample: \"zcfwrt543rgrey5h5jh4wgefbf\""
+      },
+      "email_address": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Email address of the user or group. Required if 'type' is 'user' or 'group'.\nExample: \"user@example.com\""
+      }
+    },
+    "required": [
+      "role",
+      "type",
+      "file_id"
+    ],
+    "additionalProperties": false,
+    "description": "AddFileSharingPreferenceRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

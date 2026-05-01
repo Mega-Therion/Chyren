@@ -1,28 +1,112 @@
-__pycache__/
-*.py[cod]
-*.pyo
-.env
-cortex/state/
-state/
-*.log
+# Enterprise Grade .gitignore for Chyren Monorepo
+
+# --- SYSTEM / OS ---
 .DS_Store
-target/
-target/
-venv/
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# --- IDEs / EDITORS ---
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+.project
+.classpath
+.settings/
+.factorypath
+
+# --- SECRETS / SENSITIVE ---
+.env
+.env.*
+*.env
+!*.env.example
+*.pem
+*.key
+*.pub
+auth.json
+secrets/
+vault/secrets/
+**/config/secrets.*
+**/config/local.*
+.claude/settings.local.json
+gha-creds-*.json
+**/oauth-keys.env
+**/credentials.json
+infrastructure/mcp/auth/
+core/tools/pm2/
+core/tools/cursor_settings/projects/
+
+# --- DEPENDENCIES ---
 node_modules/
+bower_components/
+vendor/
+venv/
+.venv/
+env/
+environment/
+package-lock.json.lock
+yarn-error.log
+
+# --- BUILD / OUTPUT ---
+dist/
+build/
+out/
 .next/
 .vercel/
-.vercel
-.env*.local
-.codex
-ops/.claude/
+target/
+*.exe
+*.dll
+*.so
+*.dylib
+*.bin
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Large Binaries / Multimedia
+core/tools/opencode/bin/opencode
+theory/multimedia/*.mp4
+theory/multimedia/*.m4a
+theory/multimedia/*.mp3
+
+# --- LANGUAGES ---
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+.cache/
+# Rust
+debug/
+# Node/TS
+.tsbuildinfo
+
+# --- DATA / LARGE FILES ---
+data/
+docs/research/
 archives/
 brain/
 config/
 .claude/worktrees/
-.claude/worktrees/
 .worktrees/
-.worktrees/
-
 .gemini/
-gha-creds-*.json
+vault/backups/
+core/tools/cursor_settings/plugins/cache/
+
+# --- PROJECT SPECIFIC ---
+ops/.claude/
+cortex/state/
+state/
+.codex
+*.legacy
+commit_msg.txt

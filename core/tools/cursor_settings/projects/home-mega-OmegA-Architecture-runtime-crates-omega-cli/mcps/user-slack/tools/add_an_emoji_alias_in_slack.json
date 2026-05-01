@@ -1,0 +1,29 @@
+{
+  "name": "add_an_emoji_alias_in_slack",
+  "description": "Adds an alias for an existing custom emoji in a slack enterprise grid organization.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "The new alias to be created for the emoji specified in `alias_for` (e.g., `new_emoji_alias`). Colons around the name (e.g., `:my_alias:`) are optional and will be automatically trimmed, along with any leading/trailing whitespace.\nExamples:\n  \"parrot_alias\"\n  \":approved_alias:\""
+      },
+      "token": {
+        "type": "string",
+        "description": "Authentication token. Requires the `admin.teams:write` scope."
+      },
+      "alias_for": {
+        "type": "string",
+        "description": "The canonical name of the existing custom emoji (e.g., `original_emoji`).\nExamples:\n  \"party_parrot\"\n  \"approved_stamp\""
+      }
+    },
+    "required": [
+      "name",
+      "token",
+      "alias_for"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `AddAnEmojiAliasInSlack`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

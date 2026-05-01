@@ -1,0 +1,19 @@
+{
+  "name": "reverse_a_conversation_s_archival_status",
+  "description": "Deprecated: reverses conversation archival. use `unarchive channel` instead.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "channel": {
+        "type": "string",
+        "description": "ID of conversation to unarchive\nExample: \"C1234567890\""
+      }
+    },
+    "required": [
+      "channel"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `UnarchiveChannel`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

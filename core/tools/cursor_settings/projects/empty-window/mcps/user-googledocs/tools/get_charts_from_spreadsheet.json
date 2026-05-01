@@ -1,0 +1,19 @@
+{
+  "name": "get_charts_from_spreadsheet",
+  "description": "Tool to retrieve a list of all charts from a specified google sheets spreadsheet. use when you need to get chart ids and their specifications for embedding or referencing elsewhere, such as in google docs.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "spreadsheet_id": {
+        "type": "string",
+        "description": "The ID of the Google Sheets spreadsheet from which to retrieve charts.\nExample: \"1aBcDeFgHiJkLmNoPqRsTuVwXyZ_1234567890abcdef\""
+      }
+    },
+    "required": [
+      "spreadsheet_id"
+    ],
+    "additionalProperties": false,
+    "description": "GetChartsFromSpreadsheetRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,3 +1,7 @@
+export RUSTUP_HOME := $(CURDIR)/environment/rustup
+export CARGO_HOME := $(CURDIR)/environment/cargo
+export PATH := $(CARGO_HOME)/bin:$(PATH)
+
 .PHONY: help fmt lint test ci medulla-fmt medulla-lint medulla-test cortex-test web-ci gateway-ci
 
 help:
@@ -7,6 +11,8 @@ help:
 	@echo "  make test       - run Rust tests"
 	@echo "  make ci         - run Rust fmt+clippy+test (local CI equivalent)"
 	@echo "  make cortex-test- run Python tests"
+	@echo "  make jwst-query - query MAST for JWST data"
+	@echo "  make jwst-ingest- parse and ingest JWST data"
 	@echo "  make web-ci     - run Next.js checks (lint/typecheck/build)"
 	@echo "  make gateway-ci - run gateway checks (tsc/lint/build)"
 
@@ -17,20 +23,27 @@ test: medulla-test
 ci: medulla-fmt medulla-lint medulla-test
 
 medulla-fmt:
-	cd core/chyren-os/kernel && cargo fmt --all
+	cd src/medulla/kernel && cargo fmt --all
 
 medulla-lint:
-	cd core/chyren-os/kernel && cargo clippy --workspace --all-targets --all-features -- -D warnings
+	cd src/medulla/kernel && cargo clippy --workspace --all-targets --all-features -- -D warnings
 
 medulla-test:
-	cd core/chyren-os/kernel && cargo test --workspace
+	cd src/medulla/kernel && cargo test --workspace
 
 cortex-test:
-	PYTHONPATH=core/cortex pytest core/tests/
+	./src/cortex/venv/bin/python -m pytest src/cortex/tests
+
+jwst-query:
+	cd src/research/jwst_pipeline && ./env/bin/python pipeline/query.py
+
+jwst-ingest:
+	cd src/research/jwst_pipeline && ./env/bin/python pipeline/ingest.py
 
 web-ci:
-	cd core/chyren-os/interface && npm ci && npm run typecheck && npm run lint && npm run build
+	cd src/medulla/interface && npm ci && npm run typecheck && npm run lint && npm run build
 
 gateway-ci:
-	cd core/gateway && pnpm install && npx tsc --noEmit && pnpm lint && pnpm build
+	cd src/gateways && pnpm install && npx tsc --noEmit && pnpm lint && pnpm build
+
 

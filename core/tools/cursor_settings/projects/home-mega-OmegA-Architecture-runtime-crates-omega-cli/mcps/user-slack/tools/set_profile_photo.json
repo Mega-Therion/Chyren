@@ -1,0 +1,55 @@
+{
+  "name": "set_profile_photo",
+  "description": "This method allows the user to set their profile image.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "image": {
+        "type": "string",
+        "description": "File contents via a POST var called image."
+      },
+      "crop_w": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Width/height of crop box (always square)"
+      },
+      "crop_x": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "X coordinate of top-left corner of crop box"
+      },
+      "crop_y": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Y coordinate of top-left corner of crop box"
+      }
+    },
+    "required": [
+      "image"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `SetProfilePhoto`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

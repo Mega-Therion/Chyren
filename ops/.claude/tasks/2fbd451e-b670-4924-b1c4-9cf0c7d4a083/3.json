@@ -1,9 +1,0 @@
-{
-  "id": "3",
-  "subject": "Build TypeScript AEON identity chain for web",
-  "description": "Port Phylactery hash chain to TypeScript backed by Neon, so identity persists across sessions",
-  "activeForm": "Building AEON identity chain",
-  "status": "pending",
-  "blocks": [],
-  "blockedBy": []
-}

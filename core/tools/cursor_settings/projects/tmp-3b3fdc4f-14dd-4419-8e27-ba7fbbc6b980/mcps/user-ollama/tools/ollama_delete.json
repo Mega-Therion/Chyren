@@ -1,0 +1,24 @@
+{
+  "name": "ollama_delete",
+  "description": "Delete a model from local storage. Removes the model and frees up disk space.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "model": {
+        "type": "string",
+        "description": "Name of the model to delete"
+      },
+      "format": {
+        "type": "string",
+        "enum": [
+          "json",
+          "markdown"
+        ],
+        "default": "json"
+      }
+    },
+    "required": [
+      "model"
+    ]
+  }
+}

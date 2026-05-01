@@ -1,0 +1,19 @@
+{
+  "name": "get_channel_conversation_preferences",
+  "description": "Retrieves conversation preferences (e.g., who can post, who can thread) for a specified channel, primarily for use within slack enterprise grid environments.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "channel_id": {
+        "type": "string",
+        "description": "Identifier of the channel for which to retrieve conversation preferences.\nExample: \"C0123456789\""
+      }
+    },
+    "required": [
+      "channel_id"
+    ],
+    "additionalProperties": false,
+    "description": "Request to retrieve conversation preferences for a Slack channel.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

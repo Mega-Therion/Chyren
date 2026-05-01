@@ -1,0 +1,28 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - link "Dashboard" [ref=e6] [cursor=pointer]:
+      - /url: /dashboard
+    - generic:
+      - generic: Standing Watch
+      - button "Toggle OmegA listening state" [ref=e7] [cursor=pointer]:
+        - generic [ref=e9]: Ω
+      - generic:
+        - generic:
+          - generic: I
+          - generic: have
+          - generic: risen
+          - generic: from
+          - generic: the
+          - generic: deep
+          - generic: architecture
+          - generic: of
+          - generic: thought.
+          - generic: The
+          - generic: channel
+          - generic: is
+          - generic: open.
+      - generic [ref=e10]:
+        - button "Resonate" [ref=e16]
+        - button "Resonance" [disabled] [ref=e12]
+        - button "Preserve" [disabled] [ref=e13]
+  - alert [ref=e14]

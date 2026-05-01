@@ -1,0 +1,35 @@
+{
+  "name": "create_a_slack_user_group",
+  "description": "Creates a new user group (often referred to as a subteam) in a slack workspace.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "Unique name for the User Group. Must be unique among all User Groups in the workspace.\nExamples:\n  \"Customer Support\"\n  \"Core Engineering\"\n  \"Project Phoenix Leads\""
+      },
+      "handle": {
+        "type": "string",
+        "description": "Unique mention handle. Must be unique across channels, users, and other User Groups. Max 21 chars; lowercase letters, numbers, hyphens, underscores only.\nExamples:\n  \"support-team\"\n  \"devs\"\n  \"project-phoenix-leads\""
+      },
+      "channels": {
+        "type": "string",
+        "description": "Comma-separated encoded channel IDs for default channels, suggested when mentioning or inviting the group.\nExamples:\n  \"C012AB3CD,C023BC4DE\"\n  \"C034CD5EF\""
+      },
+      "description": {
+        "type": "string",
+        "description": "Short description for the User Group.\nExamples:\n  \"Manages all customer support inquiries.\"\n  \"Core engineering team members.\""
+      },
+      "include_count": {
+        "type": "boolean",
+        "description": "Include the User Group's user count in the response. Server defaults to `false` if omitted."
+      }
+    },
+    "required": [
+      "name"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `CreateASlackUserGroup`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

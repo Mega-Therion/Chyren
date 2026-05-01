@@ -1,0 +1,20 @@
+{
+  "name": "delete_a_comment_on_a_file",
+  "description": "Deletes a specific comment from a file in slack; this action is irreversible.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "ID of the comment to delete. This can be obtained when the comment is created or by listing file comments.\nExample: \"Fc1234567890\""
+      },
+      "file": {
+        "type": "string",
+        "description": "ID of the file to delete a comment from. The file ID can be obtained using the `files.info` method or when a file is shared.\nExample: \"F1234567890\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `DeleteACommentOnAFile`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

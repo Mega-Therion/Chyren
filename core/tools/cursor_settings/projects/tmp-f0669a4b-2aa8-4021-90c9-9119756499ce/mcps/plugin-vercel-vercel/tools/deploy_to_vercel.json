@@ -1,0 +1,8 @@
+{
+  "name": "deploy_to_vercel",
+  "description": "Deploy the current project to Vercel",
+  "arguments": {
+    "type": "object",
+    "properties": {}
+  }
+}

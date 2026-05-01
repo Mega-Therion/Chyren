@@ -1,0 +1,24 @@
+{
+  "name": "delete_comment",
+  "description": "Deletes a comment from a file. use when you need to remove a specific comment from a google drive file.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file_id": {
+        "type": "string",
+        "description": "The ID of the file.\nExample: \"1a2b3c4d5e6f7g8h9i0j\""
+      },
+      "comment_id": {
+        "type": "string",
+        "description": "The ID of the comment.\nExample: \"1234567890\""
+      }
+    },
+    "required": [
+      "file_id",
+      "comment_id"
+    ],
+    "additionalProperties": false,
+    "description": "DeleteCommentRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

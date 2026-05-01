@@ -1,0 +1,33 @@
+{
+  "name": "list_all_slack_team_channels_with_various_filters",
+  "description": "Deprecated: lists conversations available to the user with various filters and search options. use `list channels` instead.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "limit": {
+        "type": "integer",
+        "description": "Maximum number of channels to return per page (1 to 1000). Fewer channels may be returned than requested. This schema defaults to 1 if omitted.\nExamples:\n  100\n  500\n  1000",
+        "default": 1
+      },
+      "types": {
+        "type": "string",
+        "description": "Comma-separated list of channel types to include: `public_channel`, `private_channel`, `mpim` (multi-person direct message), `im` (direct message). The API defaults to `public_channel` if this parameter is omitted.\nExamples:\n  \"public_channel,private_channel\"\n  \"im,mpim\""
+      },
+      "cursor": {
+        "type": "string",
+        "description": "Pagination cursor (from a previous response's `next_cursor`) for the next page of results. Omit for the first page.\nExamples:\n  \"dXNlcjpVMDYxTkZUVDI=\"\n  \"bmV4dF90czoxNTEyMDg1ODYxMDAwNTQ5\""
+      },
+      "channel_name": {
+        "type": "string",
+        "description": "Filter channels by name (case-insensitive substring match). This is a client-side filter applied after fetching from the API.\nExamples:\n  \"general\"\n  \"announcements\""
+      },
+      "exclude_archived": {
+        "type": "boolean",
+        "description": "Excludes archived channels if true. The API defaults to false (archived channels are included).\nExamples:\n  true\n  false"
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for listing Slack team channels with various filtering options.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

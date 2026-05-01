@@ -1,0 +1,16 @@
+{
+  "name": "leave_a_conversation",
+  "description": "Leaves a slack conversation given its channel id; fails if leaving as the last member of a private channel or if used on a slack connect channel.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "channel": {
+        "type": "string",
+        "description": "ID of the conversation to leave (e.g., C1234567890). Despite `default=None` in the schema, this ID is functionally required by the Slack API.\nExamples:\n  \"C1234567890\"\n  \"D9876543210\"\n  \"G12345ABCDE\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Specifies the channel to leave.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

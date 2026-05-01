@@ -1,0 +1,4 @@
+{"event": "session_start", "ts": "2026-03-14T22:29:50.350062Z", "session_id": "20260314-172950-4wvaxb", "task": "what is the current date", "config": {"model": "claude-opus-4-5", "provider": "anthropic", "mode": "trust", "workspace": "/home/mega"}}
+{"event": "agent_turn", "ts": "2026-03-14T22:29:50.374552Z", "session_id": "20260314-172950-4wvaxb", "turn": 0, "role": "user", "content_preview": "what is the current date", "content_len": 24}
+{"event": "error", "ts": "2026-03-14T22:29:50.759030Z", "session_id": "20260314-172950-4wvaxb", "error": "Anthropic API error (invalid_request_error): Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.", "context": "backend.chat"}
+{"event": "session_end", "ts": "2026-03-14T22:29:50.759303Z", "session_id": "20260314-172950-4wvaxb", "turns": 1, "files_changed": [], "tool_calls_count": 0, "errors_count": 1, "tokens_used": 0, "duration_s": 0.41, "summary": ""}

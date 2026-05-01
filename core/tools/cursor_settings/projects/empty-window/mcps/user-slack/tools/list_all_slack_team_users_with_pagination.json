@@ -1,0 +1,25 @@
+{
+  "name": "list_all_slack_team_users_with_pagination",
+  "description": "Deprecated: retrieves a paginated list of all users in a slack workspace. use `list all users` instead.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "limit": {
+        "type": "integer",
+        "description": "Maximum number of items to return per page; fewer may be returned if the end of the list is reached. Recommended to set a value (e.g., 100) as Slack may error for large workspaces if omitted.\nExamples:\n  \"20\"\n  \"100\"\n  \"200\"",
+        "default": 1
+      },
+      "cursor": {
+        "type": "string",
+        "description": "Pagination cursor for fetching subsequent pages. Set to `next_cursor` from a previous response's `response_metadata`. Omit for the first page.\nExamples:\n  \"dXNlcjpVMDYxREk0STM=\"\n  \"dXNlcjpVMDYxREk0STQ=\""
+      },
+      "include_locale": {
+        "type": "boolean",
+        "description": "Include the `locale` field for each user. Defaults to `false`.\nExamples:\n  \"true\"\n  \"false\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `ListAllUsers`.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

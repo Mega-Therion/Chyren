@@ -1,0 +1,5 @@
+{
+  "uri": "firebase://guides/init/firestore_rules",
+  "name": "firestore_rules_init_guide",
+  "description": "guides the coding agent through setting up Firestore security rules in the project"
+}

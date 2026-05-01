@@ -1,0 +1,67 @@
+{
+  "name": "delete_content_range",
+  "description": "Tool to delete a range of content from a google document. use when you need to remove a specific portion of text or other structural elements within a document.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "range": {
+        "type": "object",
+        "properties": {
+          "tabId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The ID of the tab the range is in. When omitted, the request is applied to the first tab. In a document with a single tab, if provided, it must match the singular tab's ID; if omitted, it applies to the singular tab. In a multi-tab document, if provided, it applies to the specified tab; if omitted, it applies to the first tab.\nExample: \"t.abcdef123456\""
+          },
+          "endIndex": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The zero-based end index of the range, in UTF-16 code units, relative to the beginning of the segment.\nExample: 200"
+          },
+          "segmentId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null,
+            "description": "The ID of the header, footer, or footnote the range is in. An empty segment ID or omitting this field signifies the document's body.\nExamples:\n  \"h.1a2b3c4d5e6f\"\n  \"\""
+          },
+          "startIndex": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "The zero-based start index of the range, in UTF-16 code units, relative to the beginning of the segment.\nExample: 100"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The range of content to delete. Deleting text across paragraph boundaries may merge paragraphs and affect styles. Certain deletions can invalidate document structure (e.g., part of a surrogate pair, last newline of critical elements, incomplete deletion of tables/equations)."
+      },
+      "document_id": {
+        "type": "string",
+        "description": "The ID of the document from which to delete content. This ID can be found in the URL of the Google Doc.\nExample: \"REDACTED\""
+      }
+    },
+    "required": [
+      "range",
+      "document_id"
+    ],
+    "additionalProperties": false,
+    "description": "DeleteContentRangeRequestModel",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "add_a_star_to_an_item",
+  "description": "Stars a channel, file, file comment, or a specific message in slack.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "file": {
+        "type": "string",
+        "description": "ID of the file to add a star to.\nExamples:\n  \"F1234567890\"\n  \"F0987654321\""
+      },
+      "channel": {
+        "type": "string",
+        "description": "ID of the channel to star. If starring a specific message, this is the ID of the channel containing the message, and `timestamp` must also be provided.\nExamples:\n  \"C1234567890\"\n  \"G0123456789\""
+      },
+      "timestamp": {
+        "type": "string",
+        "description": "Timestamp of the message to add a star to. This uniquely identifies the message within the specified `channel`. Requires `channel` to also be provided.\nExamples:\n  \"1234567890.123456\"\n  \"1678886400.000100\""
+      },
+      "file_comment": {
+        "type": "string",
+        "description": "ID of the file comment to add a star to.\nExamples:\n  \"Fc1234567890\"\n  \"Fc0987654321\""
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for the `stars.add` API method. Used to add a star to a channel, file, file comment, or a specific message. Exactly one type of item must be targeted per request.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

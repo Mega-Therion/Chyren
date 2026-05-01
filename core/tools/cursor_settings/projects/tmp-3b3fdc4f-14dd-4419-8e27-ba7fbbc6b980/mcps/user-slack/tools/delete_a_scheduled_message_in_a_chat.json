@@ -1,0 +1,28 @@
+{
+  "name": "delete_a_scheduled_message_in_a_chat",
+  "description": "Deletes a pending, unsent scheduled message from the specified slack channel, identified by its `scheduled message id`.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "as_user": {
+        "type": "boolean",
+        "description": "Pass `true` to delete the message as the authenticated user (bots are considered authed users here, uses `chat:write:user` scope); if `false` or omitted, deletes as a bot (uses `chat:write:bot` scope).\nExamples:\n  \"true\"\n  \"false\""
+      },
+      "channel": {
+        "type": "string",
+        "description": "ID of the channel, private group, or DM conversation where the message is scheduled.\nExamples:\n  \"C1234567890\"\n  \"G0123456789\"\n  \"D0123456789\""
+      },
+      "scheduled_message_id": {
+        "type": "string",
+        "description": "Unique ID (`scheduled_message_id`) of the message to be deleted; obtained from `chat.scheduleMessage` response.\nExamples:\n  \"Q123ABCDEF456\"\n  \"SM0123456789\""
+      }
+    },
+    "required": [
+      "channel",
+      "scheduled_message_id"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `DeleteAScheduledMessageInAChat`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

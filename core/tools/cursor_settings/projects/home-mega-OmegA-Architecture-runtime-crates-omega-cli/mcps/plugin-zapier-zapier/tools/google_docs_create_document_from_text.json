@@ -1,0 +1,94 @@
+{
+  "name": "google_docs_create_document_from_text",
+  "description": "Create a new document from text. Also supports limited HTML.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "file": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Document Content"
+      },
+      "drive": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Drive"
+      },
+      "image": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Insert Inline Image (Image URL)"
+      },
+      "title": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Document Name"
+      },
+      "folder": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Folder"
+      },
+      "image_index": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Image location (Index)"
+      },
+      "image_tabId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Image location (tabId)"
+      },
+      "export_formats": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "not": {}
+            },
+            {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          ],
+          "description": "Export Formats"
+        }
+      },
+      "image_segmentId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Image location (Segment ID)"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

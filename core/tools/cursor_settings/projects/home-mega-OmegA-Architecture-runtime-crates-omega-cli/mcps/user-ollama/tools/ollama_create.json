@@ -1,0 +1,41 @@
+{
+  "name": "ollama_create",
+  "description": "Create a new model with structured parameters. Allows customization of model behavior, system prompts, and templates.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "model": {
+        "type": "string",
+        "description": "Name for the new model"
+      },
+      "from": {
+        "type": "string",
+        "description": "Base model to derive from (e.g., llama2, llama3)"
+      },
+      "system": {
+        "type": "string",
+        "description": "System prompt for the model"
+      },
+      "template": {
+        "type": "string",
+        "description": "Prompt template to use"
+      },
+      "license": {
+        "type": "string",
+        "description": "License for the model"
+      },
+      "format": {
+        "type": "string",
+        "enum": [
+          "json",
+          "markdown"
+        ],
+        "default": "json"
+      }
+    },
+    "required": [
+      "model",
+      "from"
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "update_user_group_members",
+  "description": "Replaces all members of an existing slack user group with a new list of valid user ids.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "users": {
+        "type": "string",
+        "description": "Comma-separated string of encoded user IDs for the new, complete member list, replacing all existing members. User IDs typically start with 'U' or 'W'.\nExample: \"U012AB34CD,W567EF89GH,U01234567\""
+      },
+      "usergroup": {
+        "type": "string",
+        "description": "The encoded ID of the User Group whose members are to be updated. This ID typically starts with 'S'.\nExample: \"S012AB34CD\""
+      },
+      "include_count": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "If true, the response `usergroup` object includes `user_count` and potentially `channel_count` fields, reflecting counts after the update.\nExamples:\n  \"true\"\n  \"false\""
+      }
+    },
+    "required": [
+      "users",
+      "usergroup"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `UpdateUserGroupMembers`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "name": "invite_user_to_workspace_with_optional_channel_invites",
+  "description": "Deprecated: invites a user to a slack workspace and specified channels by email. use `invite user to workspace` instead.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "email": {
+        "type": "string",
+        "description": "The email address of the person to be invited to the workspace.\nExample: \"new.user@example.com\""
+      },
+      "resend": {
+        "type": "boolean",
+        "description": "If true, allows this invitation to be resent if the user hasn't signed up. Defaults to false.\nExamples:\n  \"false\"\n  \"true\""
+      },
+      "team_id": {
+        "type": "string",
+        "description": "The ID of the Slack workspace (e.g., T123ABCDEFG) where the user will be invited.\nExample: \"T123ABCDEFG\""
+      },
+      "real_name": {
+        "type": "string",
+        "description": "The full name of the user being invited.\nExample: \"Jane Doe\""
+      },
+      "channel_ids": {
+        "type": "string",
+        "description": "A comma-separated list of channel IDs (e.g., C1234567890,C0987654321) for the user to join. At least one channel ID must be provided.\nExamples:\n  \"C1234567890,C9876543210\"\n  \"C0123456789\""
+      },
+      "is_restricted": {
+        "type": "boolean",
+        "description": "Specifies if the invited user should be a multi-channel guest. Defaults to false. Multi-channel guests can access only the channels they are invited to, plus any public channels.\nExamples:\n  \"false\"\n  \"true\""
+      },
+      "custom_message": {
+        "type": "string",
+        "description": "Custom message to include in the invitation email.\nExample: \"Welcome to the team! Looking forward to working with you.\""
+      },
+      "guest_expiration_ts": {
+        "type": "string",
+        "description": "Unix timestamp for guest account expiration; provide only if inviting a guest user and an expiration date is desired.\nExample: \"1678886400\""
+      },
+      "is_ultra_restricted": {
+        "type": "boolean",
+        "description": "Specifies if the invited user should be a single-channel guest (also known as an ultra-restricted guest). Defaults to false. Single-channel guests can only access one channel (plus DMs and Huddles).\nExamples:\n  \"false\"\n  \"true\""
+      }
+    },
+    "required": [
+      "email",
+      "team_id",
+      "channel_ids"
+    ],
+    "additionalProperties": false,
+    "description": "Request model for inviting a user to a Slack workspace, with options to specify channels, user type, and custom messages.",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

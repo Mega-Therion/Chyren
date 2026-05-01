@@ -1,0 +1,44 @@
+{
+  "name": "get_changes_start_page_token",
+  "description": "Tool to get the starting pagetoken for listing future changes in google drive. use this when you need to track changes to files and folders.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "driveId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "The ID of the shared drive for which the starting pageToken for listing future changes from that shared drive will be returned.\nExample: \"0AB_CD1234EFG5HIJ6KLM7N8PQRST9UVWX\""
+      },
+      "teamDriveId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "Deprecated: Use driveId instead.\nExample: \"0AB_CD1234EFG5HIJ6KLM7N8PQRST9UVWX\""
+      },
+      "supportsAllDrives": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "description": "Whether the requesting application supports both My Drives and shared drives. Defaults to false.\nExample: true",
+        "default": false
+      },
+      "supportsTeamDrives": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Deprecated: Use supportsAllDrives instead.\nExample: true"
+      }
+    },
+    "additionalProperties": false,
+    "description": "GetChangesStartPageTokenRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

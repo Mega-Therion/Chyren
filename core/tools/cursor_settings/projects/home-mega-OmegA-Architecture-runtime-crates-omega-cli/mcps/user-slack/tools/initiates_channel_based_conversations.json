@@ -1,0 +1,35 @@
+{
+  "name": "initiates_channel_based_conversations",
+  "description": "Deprecated: initiates a public or private channel-based conversation. use `create channel` instead.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "Name of the public or private channel to create\nExample: \"mychannel\""
+      },
+      "team_id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null,
+        "description": "encoded team id to create the channel in, required if org token is used\nExample: \"T1234567890\""
+      },
+      "is_private": {
+        "type": [
+          "boolean",
+          "null"
+        ],
+        "default": null,
+        "description": "Create a private channel instead of a public one\nExample: true"
+      }
+    },
+    "required": [
+      "name"
+    ],
+    "additionalProperties": false,
+    "description": "Request schema for `CreateChannel`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

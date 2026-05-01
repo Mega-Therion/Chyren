@@ -1,0 +1,93 @@
+{
+  "name": "create_footnote",
+  "description": "Tool to create a new footnote in a google document. use this when you need to add a footnote at a specific location or at the end of the document body.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "location": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "index": {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "The zero-based index, in UTF-16 code units. The index is relative to the beginning of the segment specified by segment_id.\nExample: 100"
+              },
+              "tabId": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "default": null,
+                "description": "The tab that the location is in. When omitted, the request is applied to the first tab.\nExample: \"t.1a2b3c4d5e6f7g8h9i0j\""
+              },
+              "segmentId": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "default": null,
+                "description": "The ID of the header, footer or footnote the location is in. An empty segment ID signifies the document's body.\nExample: \"h.1a2b3c4d5e6f7g8h9i0j\""
+              }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Inserts the footnote reference at a specific index in the document. The segmentId within this Location object must be empty as footnotes can only be inserted in the document body."
+      },
+      "documentId": {
+        "type": "string",
+        "description": "The ID of the document to create the footnote in.\nExample: \"1a2b3c4d5e6f7g8h9i0j\""
+      },
+      "endOfSegmentLocation": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "tabId": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "default": null,
+                "description": "The tab that the location is in. When omitted, the request is applied to the first tab.\nExample: \"t.1a2b3c4d5e6f7g8h9i0j\""
+              },
+              "segmentId": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "default": null,
+                "description": "The ID of the header, footer or footnote the location is in. An empty segment ID signifies the document's body.\nExample: \"h.1a2b3c4d5e6f7g8h9i0j\""
+              }
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Inserts the footnote reference at the end of the document body. The segmentId within this EndOfSegmentLocation object must be empty."
+      }
+    },
+    "required": [
+      "documentId"
+    ],
+    "additionalProperties": false,
+    "description": "CreateFootnoteRequestModel",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

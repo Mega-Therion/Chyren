@@ -1,0 +1,98 @@
+{
+  "name": "google_docs_update_document_properties",
+  "description": "Update document properties like background color, margins, and page settings in a Google Doc.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "marginTop": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Top margin (points)"
+      },
+      "pageWidth": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Page width (points)"
+      },
+      "documentId": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Document"
+      },
+      "marginLeft": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Left margin (points)"
+      },
+      "pageHeight": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Page height (points)"
+      },
+      "marginRight": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Right margin (points)"
+      },
+      "marginBottom": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Bottom margin (points)"
+      },
+      "backgroundColor": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Background color (hex)"
+      },
+      "pageNumberStart": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Page number start"
+      },
+      "useEvenPageHeaderFooter": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Use different even page header and footer"
+      },
+      "useFirstPageHeaderFooter": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Use different first page header and footer"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

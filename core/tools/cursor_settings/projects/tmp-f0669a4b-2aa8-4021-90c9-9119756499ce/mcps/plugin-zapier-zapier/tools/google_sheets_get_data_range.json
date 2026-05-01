@@ -1,0 +1,49 @@
+{
+  "name": "google_sheets_get_data_range",
+  "description": "Get data from a specific range in a Google Spreadsheet using A1 notation (e.g., \"A1:D10\", \"B2:E5\").",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "instructions": {
+        "type": "string"
+      },
+      "output_hint": {
+        "type": "string",
+        "description": "REQUIRED. Natural language description of what data you want from the results. Example: 'just the title and created date' or 'only items with status active, showing id and name'. A filter will be automatically generated to extract this data."
+      },
+      "drive": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Drive"
+      },
+      "a1_range": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "A1 Range"
+      },
+      "worksheet": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Worksheet"
+      },
+      "spreadsheet": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Spreadsheet"
+      }
+    },
+    "required": [
+      "instructions"
+    ],
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}

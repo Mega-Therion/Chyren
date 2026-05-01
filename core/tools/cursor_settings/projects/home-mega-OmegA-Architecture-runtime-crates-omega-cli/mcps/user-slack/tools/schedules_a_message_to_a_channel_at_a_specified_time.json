@@ -1,0 +1,64 @@
+{
+  "name": "schedules_a_message_to_a_channel_at_a_specified_time",
+  "description": "Deprecated: schedules a message to a slack channel, dm, or private group for a future time. use `schedule message` instead.",
+  "arguments": {
+    "type": "object",
+    "properties": {
+      "text": {
+        "type": "string",
+        "description": "This sends raw text only, use markdown_text field for formatting. Primary text of the message; formatting with `mrkdwn` applies. Required if `blocks` and `attachments` are not provided.\nExample: \"Hello, world!\""
+      },
+      "parse": {
+        "type": "string",
+        "description": "Message text treatment: `full` for special formatting, `none` otherwise (default). See Slack's `chat.postMessage` docs for options.\nExamples:\n  \"none\"\n  \"full\""
+      },
+      "blocks": {
+        "type": "string",
+        "description": "**DEPRECATED**: Use `markdown_text` field instead. JSON array of structured blocks as a URL-encoded string for message layout and design. Required if `text` and `attachments` are not provided.\nExample: \"[{\\\"type\\\": \\\"section\\\", \\\"text\\\": {\\\"type\\\": \\\"mrkdwn\\\", \\\"text\\\": \\\"New Paid Time Off request from <example.com|Fred Enriquez>\\\"}}]\""
+      },
+      "as_user": {
+        "type": "boolean",
+        "description": "Post as the authenticated user, not a bot. Defaults to false. See Slack's `chat.postMessage` docs for authorship."
+      },
+      "channel": {
+        "type": "string",
+        "description": "Channel, private group, or DM channel ID (e.g., C1234567890) or name (e.g., #general) to send the message to.\nExamples:\n  \"C1234567890\"\n  \"#general\"\n  \"U1234567890\""
+      },
+      "post_at": {
+        "type": "string",
+        "description": "Unix EPOCH timestamp (integer seconds since 1970-01-01 00:00:00 UTC) for the future message send time.\nExample: \"1678886400\""
+      },
+      "thread_ts": {
+        "type": "string",
+        "description": "Timestamp of the parent message for the scheduled message to be a thread reply. Must be float seconds (e.g., `1234567890.123456`).\nExample: \"1405894322.002768\""
+      },
+      "link_names": {
+        "type": "boolean",
+        "description": "Pass true to automatically link channel names (e.g., #general) and usernames (e.g., @user)."
+      },
+      "attachments": {
+        "type": "string",
+        "description": "JSON array of structured attachments as a URL-encoded string for rich content. Required if `text` and `blocks` are not provided.\nExample: \"[{\\\"color\\\": \\\"good\\\", \\\"text\\\": \\\"Yay! You did it!\\\", \\\"fields\\\": [{\\\"title\\\": \\\"Priority\\\", \\\"value\\\": \\\"High\\\", \\\"short\\\": false}]}]\""
+      },
+      "unfurl_links": {
+        "type": "boolean",
+        "description": "Pass false to disable automatic link unfurling. Defaults to true."
+      },
+      "unfurl_media": {
+        "type": "boolean",
+        "description": "Pass false to disable automatic media unfurling. Defaults to true."
+      },
+      "markdown_text": {
+        "type": "string",
+        "description": "**PREFERRED**: Write your scheduled message in markdown for nicely formatted display. Supports headers (#), bold (**text**), italic (*text*), strikethrough (~~text~~), code (```), links ([text](url)), quotes (>), and dividers (---). Your message will be posted with beautiful formatting.\nExamples:\n  \"# Scheduled Reminder\\n\\nDon't forget about the **team meeting** tomorrow at *2 PM*!\\n\\n```\\nZoom: https://zoom.us/meeting-id\\n```\"\n  \"## Weekly Report\\n\\n- **Tasks completed**: 12\\n- *In progress*: 3\\n- ~~Blocked~~: **Resolved**\\n\\n---\\n\\n**Due**: End of week\""
+      },
+      "reply_broadcast": {
+        "type": "boolean",
+        "description": "With `thread_ts`, makes reply visible to all in channel, not just thread members. Defaults to `false`."
+      }
+    },
+    "additionalProperties": false,
+    "description": "Request schema for `ScheduleMessage`",
+    "$schema": "http://json-schema.org/draft-07/schema#"
+  }
+}
