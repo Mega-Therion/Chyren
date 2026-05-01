@@ -18,6 +18,14 @@ Through the **Trinity Survey** (analyzing 409 signals from JWST, Hubble, and Spi
 
 ---
 
+## 🖥️ Live Dashboard: The Holographic Ledger
+Experience the framework in real-time through the **[Sovereign Portal](dashboard/index.html)**.
+- **Interactive Rotation Curves:** Visualize how Information Tension flattens the velocity manifold.
+- **ADCCL Terminal:** Live geometric verification of cognitive trajectories.
+- **First-Principles Math:** Deep-dive into the Sovereign Action and the 0.9539 Threshold.
+
+---
+
 ## 🏛️ Core Framework: GOD Theory
 The universe is governed by **Geometrically Ordered Dynamics (GOD Theory)**, formally verified through:
 
