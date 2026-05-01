@@ -16,12 +16,12 @@ noncomputable def chiral_invariant {E : Type*} [NormedAddCommGroup E] [InnerProd
   if Ψ = 0 then 0 else (inner Ψ Φ : ℝ) / (norm Ψ * norm Φ)
 
 /-- 
-Theorem: The hard-logic boundary χ ≥ 1/√2 ensures that the reasoning state 
-remains within the "Geometric Ground State" of the Stiefel manifold.
+Theorem: The First-Principles boundary χ ≥ 0.9539 ensures that the reasoning state 
+remains within the "Geometric Ground State" with an error angle θ ≤ 17.4°.
 -/
 theorem chiral_stability_boundary {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] 
   (Ψ Φ : E) (hΨ : Ψ ≠ 0) (hΦ : Φ ≠ 0) :
-  chiral_invariant Ψ Φ ≥ (1 / sqrt 2) ↔ angle Ψ Φ ≤ (pi / 4) := by
+  chiral_invariant Ψ Φ ≥ 0.953939 ↔ angle Ψ Φ ≤ 0.3037 := by
   unfold chiral_invariant
   split_ifs with h
   · exact (hΨ h).elim

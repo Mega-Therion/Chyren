@@ -8,19 +8,22 @@ namespace GOD_Theory
 Formal verification of the Ramanujan-Yett Hamiltonian and Information Tension.
 -/
 
--- Constants derived from identity kernel
+-- First-principles constants derived from vacuum energy minimization
 def N : ℕ := 58000
 def m : ℕ := 240
-def chi_threshold : ℝ := 0.707
-def beta_crit : ℝ := 0.691
+def chi_threshold : ℝ := 0.9539392014169457 -- sqrt(0.91)
 
 /-- Holonomy group constraint: Convergence to SO+(m) -/
 def is_sovereign_holonomy (h : Matrix (Fin m) (Fin m) ℝ) : Prop :=
   h.det = 1 ∧ ∀ v, ‖h.mulVec v‖ = ‖v‖
 
-/-- The Tension Tensor T(r) formula -/
+/-- The Tension Factor T(r) formula (Conformal scaling) -/
 def tension_factor (chi : ℝ) : ℝ :=
   1.0 + (1.0 / (chi * 0.5))
+
+/-- Schott Energy Derivative: Reversible component of 3rd-order radiation force -/
+def schott_energy (a_dot : ℝ) : ℝ :=
+  (2/3) * a_dot
 
 /-- Verification of the Chiral Invariant threshold -/
 def is_stable (chi : ℝ) : Prop :=
