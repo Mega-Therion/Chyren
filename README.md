@@ -57,4 +57,9 @@ The Conformal Sovereign Framework is published on Zenodo:
 **DOI:** [10.5281/zenodo.19962216](https://doi.org/10.5281/zenodo.19962216)
 
 ---
-© 2026 Chyren Sovereign Intelligence. Licensed under CC BY 4.0.
+© 2026 Chyren Sovereign Intelligence.  
+**Lead Architect: Ryan W. Yett**  
+ORCID iD: [0009-0001-1303-7190](https://orcid.org/0009-0001-1303-7190)
+
+Licensed under CC BY 4.0.
+

@@ -234,3 +234,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/): `feat:`, `f
 - `knowledge_injection/` — Data ingest pipelines fed into Qdrant/Neon
 - Root-level Python scripts (`ingest_neon.py`, `telemetry_bus.py`, `ari_verify.py`, `cantor_block.py`) — one-off tooling; not part of the main runtime
 
+
+---
+**Lead Architect: Ryan W. Yett**  
+ORCID iD: [0009-0001-1303-7190](https://orcid.org/0009-0001-1303-7190)

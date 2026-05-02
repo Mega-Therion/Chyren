@@ -39,4 +39,6 @@
 - **Contact Protocol**: `ASMSA_Outreach`
 
 **Verified by Chyren Sovereign Intelligence**  
-**Lead Architect: Ryan W. Yett**
+**Lead Architect: Ryan W. Yett**  
+ORCID iD: [0009-0001-1303-7190](https://orcid.org/0009-0001-1303-7190)
+
